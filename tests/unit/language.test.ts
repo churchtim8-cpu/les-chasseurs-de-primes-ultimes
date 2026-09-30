@@ -180,6 +180,13 @@ describe('scanner instructions in real chases', () => {
     }
   });
 
+  it('uses "troisième" from Intermediate upwards only', () => {
+    const texts = (difficulty: Difficulty) =>
+      seeds(difficulty, 150, 'troisieme').flatMap((s) => listen(s).log.map((t) => t.text));
+    expect(texts('EASY').filter((t) => t.includes('troisième'))).toEqual([]);
+    expect(texts('INTERMEDIATE').some((t) => t.includes('troisième'))).toBe(true);
+  });
+
   it('is reproducible: the same seed gives the same transmissions', () => {
     for (const seed of seeds('INTERMEDIATE', 10, 'repro')) {
       expect(listen(seed).log.map((t) => t.text)).toEqual(listen(seed).log.map((t) => t.text));

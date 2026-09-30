@@ -23,6 +23,12 @@ export type RepeatRule =
   | { kind: 'COSTS_TIME'; secondsPerRepeat: number }
   | { kind: 'ONCE' };
 
+/** When the officer's repeat request sounds urgent or frantic, by signal strength (0..1). */
+export const REPEAT_URGENCY = {
+  urgentBelowSignal: 0.6,
+  franticBelowSignal: 0.3,
+} as const;
+
 export type TextDisplay = 'BRIEF' | 'BRIEF_THEN_REMOVED' | 'AUDIO_ONLY';
 
 export interface DifficultySettings {

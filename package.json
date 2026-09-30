@@ -10,7 +10,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "check": "npm run typecheck && npm test && npm run build"
+    "check": "npm run typecheck && npm test && npm run build",
+    "audio:script": "vite build --ssr scripts/export-audio-script.ts --outDir .scripts-build --emptyOutDir --logLevel warn && node .scripts-build/export-audio-script.js",
+    "audio:manifest": "node scripts/build-audio-manifest.mjs"
   },
   "repository": {
     "type": "git",

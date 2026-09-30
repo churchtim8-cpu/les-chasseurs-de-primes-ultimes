@@ -21,7 +21,7 @@ import type { MoverStart } from '../movement/mover';
 import type { Rng } from '../rng/prng';
 import { canTravel, type TownGraph, type TravelMode } from '../world/graph';
 import { followProblem, pathLength } from '../chase/route';
-import { actionIndices, finalInstruction, instructionFor, straightOn } from './generate';
+import { actionIndices, describable, finalInstruction, instructionFor, straightOn, type AudioCheck } from './generate';
 import { makeInstruction, type Instruction } from './instructions';
 
 export type TransmissionKind = 'DIRECTION' | 'FILLER' | 'RECOVERY' | 'FINAL';
@@ -61,6 +61,8 @@ export class Navigator {
     route: readonly string[],
     private readonly destination: string,
     mode: TravelMode = 'CAR',
+    /** Only sentences with a recording may be used (all, until audio is loaded). */
+    private readonly hasAudio: AudioCheck = () => true,
   ) {
     this.guide = [...route];
     this.actions = actionIndices(graph, this.guide, mode);
@@ -84,8 +86,10 @@ export class Navigator {
     }
     const before = this.progress;
     if (this.onGuide(player)) {
+      // After a U-turn the player is back on the guide: give the next direction straight away.
+      const turnedRound = this.awaiting !== null;
       this.awaiting = null;
-      if (this.progress !== before) this.schedule(player, out);
+      if (this.progress !== before || turnedRound) this.schedule(player, out);
       return out;
     }
     if (this.awaiting && this.awaiting.edgeId === player.edgeId && this.awaiting.towards === player.towards) return out;
@@ -123,7 +127,7 @@ export class Navigator {
     if (nextIndex === -1) {
       if (!this.finalDone) {
         this.finalDone = true;
-        const final = finalInstruction(this.graph, pos, this.guide, this.destination, this.difficulty, this.rng);
+        const final = finalInstruction(this.graph, pos, this.guide, this.destination, this.difficulty, this.rng, this.hasAudio);
         if (final) this.emit('FINAL', [final], out);
       }
       return;
@@ -138,6 +142,7 @@ export class Navigator {
       this.actions[nextIndex + 1],
       this.difficulty,
       this.rng,
+      this.hasAudio,
     );
     if (guided) {
       for (const c of guided.covers) this.covered.add(c);
@@ -146,7 +151,7 @@ export class Navigator {
     }
     if (this.fillerFor !== a) {
       this.fillerFor = a;
-      const filler = straightOn(this.graph, pos, this.guide, this.difficulty);
+      const filler = straightOn(this.graph, pos, this.guide, this.difficulty, this.hasAudio);
       if (filler) this.emit('FILLER', [filler], out);
     }
   }
@@ -211,6 +216,7 @@ export class Navigator {
         if (!path) continue;
         const guide = [option.first[0], ...path.nodes, ...suspectRoute.slice(k + 1)];
         if (new Set(guide).size !== guide.length || followProblem(this.graph, guide, mode)) continue;
+        if (!describable(this.graph, guide, mode, this.difficulty)) continue;
         const cost = option.lead + path.length - pathLength(this.graph, suspectRoute.slice(0, k + 1));
         if (!best || cost < best.cost) best = { guide, uTurn: option.uTurn, cost };
         break;

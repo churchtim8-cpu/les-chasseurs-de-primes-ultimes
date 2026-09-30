@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import { DIFFICULTY_SETTINGS, parseSeed, type ChaseSeed } from '../../engine';
+import type { AudioManifest } from '../../engine/audio/manifest';
+import { scannerAudio } from '../audio/ScannerAudio';
 import { debugState } from '../debug/debugState';
 import { FONT_FAMILY, PALETTE, toCss } from '../palette';
 import { newSeed } from '../seedSource';
@@ -26,7 +28,13 @@ export class TitleScene extends Phaser.Scene {
     this.autostart = data?.autostart === true;
   }
 
+  preload(): void {
+    // Which French recordings exist (public/audio/manifest.json). Missing is fine: text only.
+    if (!this.cache.json.exists('audio-manifest')) this.load.json('audio-manifest', `${import.meta.env.BASE_URL}audio/manifest.json`);
+  }
+
   create(): void {
+    scannerAudio.setManifest(this.cache.json.get('audio-manifest') as AudioManifest | undefined);
     if (this.autostart) {
       this.start();
       return;

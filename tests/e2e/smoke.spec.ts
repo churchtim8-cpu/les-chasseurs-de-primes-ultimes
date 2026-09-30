@@ -60,8 +60,14 @@ test('a seed in the address replays that exact chase, and debug capture ends it'
   expect(await info(page, 'difficulty')).toBe('INTERMEDIATE');
   const route = await info(page, 'route');
 
-  // Debug C puts the player on the suspect: the capture rules end the chase.
   await expect.poll(async () => Number(await info(page, 'speed')), SLOW).toBeGreaterThan(10);
+
+  // Intermediate allows three repeats per chase; a fourth is refused.
+  await expect.poll(() => info(page, 'scanner'), SLOW).toMatch(/^(DIRECTION|FILLER|FINAL): /);
+  for (let i = 0; i < 4; i++) await page.keyboard.press('r');
+  await expect.poll(() => info(page, 'repeats'), SLOW).toBe('3 used, 0 left');
+
+  // Debug C puts the player on the suspect: the capture rules end the chase.
   await page.keyboard.press('c');
   await expect.poll(() => info(page, 'phase'), SLOW).toBe('CAPTURED');
 

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { scannerAudio } from './game/audio/ScannerAudio';
 import { DebugOverlayScene } from './game/debug/DebugOverlayScene';
 import { debugState } from './game/debug/debugState';
 import { GAME_HEIGHT, GAME_WIDTH, TitleScene } from './game/scenes/TitleScene';
@@ -26,7 +27,7 @@ game.events.once(Phaser.Core.Events.READY, () => {
 // Small hook for browser tests and for poking at the game from the console.
 declare global {
   interface Window {
-    __bellevue?: { game: Phaser.Game; debug: typeof debugState };
+    __bellevue?: { game: Phaser.Game; debug: typeof debugState; audio: typeof scannerAudio };
   }
 }
-window.__bellevue = { game, debug: debugState };
+window.__bellevue = { game, debug: debugState, audio: scannerAudio };
