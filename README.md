@@ -42,7 +42,9 @@ Touch buttons appear on touch screens (or add `?touch=1` to the address).
 
 ## French audio
 
-The scanner plays pre-recorded ElevenLabs clips. `npm run audio:script` writes every line the game can say to `docs/audio/script.csv` for review. Recordings go in `public/audio/dispatcher/` and `public/audio/officer/`, named by audio ID (for example `dir.turn.left.mp3`); `npm run audio:manifest` then lists them in `public/audio/manifest.json`. Until a line is recorded it is shown as text, with the radio beep and static. Add `?radio=0` to hear the clips without the radio filter.
+The scanner plays pre-recorded ElevenLabs clips. `npm run audio:script` writes every line the game can say to `docs/audio/script.csv` for review. Recordings go in `public/audio/dispatcher/` and `public/audio/officer/`, named by audio ID (for example `dir.turn.left.mp3`); `npm run audio:manifest` then lists them in `public/audio/manifest.json`. Until a line is recorded it is shown as text, with the radio beep and static. Add `?radio=0` to hear the clips without the radio filter. `audio/review.html` on the site lists every recording with a play button, for checking pronunciation.
+
+The current library (334 lines) was recorded with ElevenLabs Eleven v4: Christophe for the dispatcher and Alain for the officer. New lines must use the same model and voices. The clips keep ElevenLabs' content-credential tag.
 
 ## Debug mode
 
