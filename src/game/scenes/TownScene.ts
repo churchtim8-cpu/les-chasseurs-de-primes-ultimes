@@ -1,131 +1,184 @@
 import Phaser from 'phaser';
 import { BELLEVUE } from '../../content/map/bellevue';
+import { Mover, type MoverStart } from '../../engine/movement/mover';
+import { BOARDING_DISTANCE } from '../../engine/movement/settings';
 import { TownGraph } from '../../engine/world/graph';
+import { CameraRig } from '../camera/cameraRig';
 import { debugState } from '../debug/debugState';
-import { drawTown, type TownLayers } from '../render/townRenderer';
+import { Controls, type ControlAction } from '../input/controls';
 import { FONT_FAMILY, PALETTE, toCss } from '../palette';
+import { createIntentBadge, createOfficer, createPoliceCar } from '../render/actors';
+import { drawTown, type TownLayers } from '../render/townRenderer';
 
-const MIN_ZOOM_FACTOR = 1; // relative to "whole town fits"
-const MAX_ZOOM = 2.5;
-const PAN_SPEED = 700; // screen pixels per second
+/** The player starts outside le commissariat de police, heading east. */
+const PLAYER_START: MoverStart = { edgeId: 'c4r1-c5r1', t: 0.4, towards: 'c5r1', mode: 'CAR' };
 
 /**
- * Explore Bellevue City (milestone M1). Drag or use the arrow keys to move,
- * mouse wheel, pinch or +/- to zoom. Debug mode shows the navigation graph.
- * From M2 the player's car and the chase replace free exploring.
+ * Free patrol around Bellevue City (milestone M2): drive and walk on the
+ * road graph with the car/foot cameras. The chase is added in M3.
  */
 export class TownScene extends Phaser.Scene {
   static readonly KEY = 'Town';
+  private graph!: TownGraph;
   private layers?: TownLayers;
-  private fitZoom = 1;
-  private keys?: Record<'up' | 'down' | 'left' | 'right' | 'w' | 'a' | 's' | 'd', Phaser.Input.Keyboard.Key>;
-  private pinchDistance?: number;
+  private mover!: Mover;
+  private controls!: Controls;
+  private rig!: CameraRig;
+  private car!: Phaser.GameObjects.Container;
+  private officer!: Phaser.GameObjects.Container;
+  private badge!: ReturnType<typeof createIntentBadge>;
+  private modeChip!: Phaser.GameObjects.Text;
+  private toast!: Phaser.GameObjects.Text;
+  /** Where the car was left when the player got out (null while driving). */
+  private parkedCar: MoverStart | null = null;
+  private displayHeading = 0;
 
   constructor() {
     super(TownScene.KEY);
   }
 
   create(): void {
-    const graph = new TownGraph(BELLEVUE);
-    this.layers = drawTown(this, graph);
+    this.graph = new TownGraph(BELLEVUE);
+    this.parkedCar = null;
+    this.layers = drawTown(this, this.graph);
+    this.mover = new Mover(this.graph, PLAYER_START);
+    this.car = createPoliceCar(this);
+    this.officer = createOfficer(this).setVisible(false);
+    this.badge = createIntentBadge(this);
+    this.displayHeading = this.mover.snapshot().heading;
 
-    const camera = this.cameras.main;
-    camera.setBounds(0, 0, BELLEVUE.width, BELLEVUE.height);
-    this.fitZoom = Math.max(camera.width / BELLEVUE.width, camera.height / BELLEVUE.height);
-    camera.setZoom(this.fitZoom);
-    camera.centerOn(BELLEVUE.width / 2, BELLEVUE.height / 2);
-    this.applyZoom();
+    const worldObjects = [...this.children.list];
 
-    this.setUpInput();
+    this.rig = new CameraRig(this, this.cameras.main, BELLEVUE, 'CAR');
+    this.controls = new Controls(this);
+    this.controls.onAction((action) => this.handleAction(action));
+    this.input.keyboard?.on('keydown-ESC', () => this.scene.start('Title'));
+
+    // Screen-space UI on its own camera so zooming the town does not scale it.
+    this.modeChip = this.add
+      .text(this.scale.width - 16, 16, '', {
+        fontFamily: FONT_FAMILY,
+        fontSize: '20px',
+        fontStyle: 'bold',
+        color: toCss(PALETTE.cream),
+        backgroundColor: 'rgba(22, 50, 61, 0.85)',
+        padding: { x: 12, y: 6 },
+      })
+      .setOrigin(1, 0);
+    this.toast = this.add
+      .text(this.scale.width / 2, 70, '', {
+        fontFamily: FONT_FAMILY,
+        fontSize: '22px',
+        color: toCss(PALETTE.ink),
+        backgroundColor: 'rgba(246, 236, 210, 0.95)',
+        padding: { x: 14, y: 8 },
+      })
+      .setOrigin(0.5, 0)
+      .setVisible(false);
+    const ui = this.cameras.add(0, 0, this.scale.width, this.scale.height);
+    ui.ignore(worldObjects);
+    this.cameras.main.ignore([this.modeChip, this.toast, ...this.controls.uiObjects]);
+
     this.syncDebug();
     const unsubscribe = debugState.onChange(() => this.syncDebug());
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, unsubscribe);
-
-    // Screen-space UI gets its own camera so zooming the town does not scale it.
-    const world = [...this.children.list];
-    const hint = this.addHint();
-    const ui = this.cameras.add(0, 0, this.scale.width, this.scale.height);
-    ui.ignore(world);
-    camera.ignore(hint);
+    this.refreshModeChip();
   }
 
   override update(_time: number, delta: number): void {
-    if (!this.keys) return;
-    const k = this.keys;
-    const step = (PAN_SPEED * delta) / 1000 / this.cameras.main.zoom;
-    const dx = (k.right.isDown || k.d.isDown ? 1 : 0) - (k.left.isDown || k.a.isDown ? 1 : 0);
-    const dy = (k.down.isDown || k.s.isDown ? 1 : 0) - (k.up.isDown || k.w.isDown ? 1 : 0);
-    if (dx || dy) {
-      this.cameras.main.scrollX += dx * step;
-      this.cameras.main.scrollY += dy * step;
+    const { accelerate, brake } = this.controls.state;
+    this.mover.setThrottle(brake ? 'BRAKE' : accelerate ? 'ACCELERATE' : 'CRUISE');
+    this.mover.update(Math.min(delta, 50) / 1000);
+
+    const me = this.mover.snapshot();
+    // Turn the sprite smoothly towards the new heading instead of snapping.
+    const diff = Phaser.Math.Angle.Wrap(me.heading - this.displayHeading);
+    this.displayHeading += diff * Math.min(1, delta / 90);
+
+    const avatar = me.mode === 'CAR' ? this.car : this.officer;
+    avatar.setPosition(me.x, me.y).setRotation(this.displayHeading);
+    this.badge.container.setPosition(me.x, me.y - (me.mode === 'CAR' ? 16 : 10));
+    this.badge.show(me.queued);
+
+    this.rig.update(me, delta);
+    this.applyZoom();
+
+    if (debugState.isEnabled) {
+      debugState.info.set('mode', me.mode);
+      debugState.info.set('edge', `${me.edgeId} → ${me.towards}`);
+      debugState.info.set('speed', me.speed.toFixed(0));
+      debugState.info.set('queued', me.queued ?? '-');
+      debugState.info.set('waiting', me.waiting ?? '-');
     }
   }
 
-  private setUpInput(): void {
-    const keyboard = this.input.keyboard;
-    if (keyboard) {
-      const k = keyboard.addKeys('UP,DOWN,LEFT,RIGHT,W,A,S,D', false) as Record<string, Phaser.Input.Keyboard.Key>;
-      this.keys = { up: k.UP!, down: k.DOWN!, left: k.LEFT!, right: k.RIGHT!, w: k.W!, a: k.A!, s: k.S!, d: k.D! };
-      keyboard.on('keydown-PLUS', () => this.zoomBy(1.25));
-      keyboard.on('keydown-NUMPAD_ADD', () => this.zoomBy(1.25));
-      keyboard.on('keydown-MINUS', () => this.zoomBy(0.8));
-      keyboard.on('keydown-NUMPAD_SUBTRACT', () => this.zoomBy(0.8));
-      keyboard.on('keydown-ESC', () => this.scene.start('Title'));
+  private handleAction(action: ControlAction): void {
+    switch (action) {
+      case 'LEFT':
+      case 'RIGHT':
+      case 'STRAIGHT':
+        this.mover.queue(action);
+        break;
+      case 'U_TURN':
+        if (!this.mover.uTurn()) this.showToast('Sens interdit !');
+        break;
+      case 'TOGGLE_MODE':
+        this.toggleMode();
+        break;
+      case 'OVERVIEW':
+        this.rig.toggleOverview();
+        break;
     }
+  }
 
-    this.input.addPointer(1); // second finger for pinch zoom
-    this.input.on('wheel', (_p: unknown, _o: unknown, _dx: number, dy: number) => this.zoomBy(dy > 0 ? 0.9 : 1.1));
-    this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
-      const p1 = this.input.pointer1;
-      const p2 = this.input.pointer2;
-      if (p1.isDown && p2.isDown) {
-        const d = Phaser.Math.Distance.Between(p1.x, p1.y, p2.x, p2.y);
-        if (this.pinchDistance) this.zoomBy(d / this.pinchDistance);
-        this.pinchDistance = d;
+  private toggleMode(): void {
+    if (this.mover.mode === 'CAR') {
+      this.parkedCar = this.mover.location();
+      this.mover.setMode('FOOT');
+      this.officer.setVisible(true);
+      this.rig.setMode('FOOT');
+      this.showToast('Vous êtes à pied.');
+    } else {
+      const parked = this.parkedCar;
+      const me = this.mover.snapshot();
+      if (!parked || Phaser.Math.Distance.Between(me.x, me.y, this.car.x, this.car.y) > BOARDING_DISTANCE) {
+        this.showToast('La voiture est trop loin.');
         return;
       }
-      this.pinchDistance = undefined;
-      if (!pointer.isDown) return;
-      const camera = this.cameras.main;
-      camera.scrollX -= (pointer.x - pointer.prevPosition.x) / camera.zoom;
-      camera.scrollY -= (pointer.y - pointer.prevPosition.y) / camera.zoom;
-    });
-    this.input.on('pointerup', () => (this.pinchDistance = undefined));
+      this.mover = new Mover(this.graph, { ...parked, mode: 'CAR' });
+      this.displayHeading = this.mover.snapshot().heading;
+      this.parkedCar = null;
+      this.officer.setVisible(false);
+      this.rig.setMode('CAR');
+      this.showToast('Vous êtes en voiture.');
+    }
+    this.refreshModeChip();
   }
 
-  private zoomBy(factor: number): void {
-    const camera = this.cameras.main;
-    const zoom = Phaser.Math.Clamp(camera.zoom * factor, this.fitZoom * MIN_ZOOM_FACTOR, MAX_ZOOM);
-    camera.setZoom(zoom);
-    this.applyZoom();
+  private refreshModeChip(): void {
+    this.modeChip.setText(this.mover.mode === 'CAR' ? 'EN VOITURE' : 'À PIED');
+  }
+
+  private showToast(message: string): void {
+    this.toast.setText(message).setVisible(true).setAlpha(1);
+    this.tweens.killTweensOf(this.toast);
+    this.tweens.add({ targets: this.toast, alpha: 0, delay: 1400, duration: 400 });
   }
 
   /** Keeps labels a readable size on screen whatever the zoom. */
   private applyZoom(): void {
     const zoom = this.cameras.main.zoom;
-    const scale = Phaser.Math.Clamp(0.8 / zoom, 0.5, 2);
+    const scale = Phaser.Math.Clamp(0.8 / zoom, 0.35, 2);
     for (const { text, width } of this.layers?.labels ?? []) {
+      if (text.scale === scale) continue;
       text.setScale(scale);
       // Wrap long names to roughly the building's width (never narrower than a short word).
       text.setWordWrapWidth(Math.max(width / scale, 70));
     }
-    debugState.info.set('zoom', zoom.toFixed(2));
+    if (debugState.isEnabled) debugState.info.set('zoom', zoom.toFixed(2));
   }
 
   private syncDebug(): void {
     this.layers?.debug.setVisible(debugState.isEnabled);
-  }
-
-  private addHint(): Phaser.GameObjects.Text {
-    return this.add
-      .text(this.scale.width / 2, this.scale.height - 14, 'Glissez ou flèches : se déplacer · molette ou +/- : zoom · Échap : menu', {
-        fontFamily: FONT_FAMILY,
-        fontSize: '16px',
-        color: toCss(PALETTE.cream),
-        backgroundColor: 'rgba(22, 50, 61, 0.8)',
-        padding: { x: 10, y: 4 },
-      })
-      .setOrigin(0.5, 1)
-      .setDepth(100);
   }
 }

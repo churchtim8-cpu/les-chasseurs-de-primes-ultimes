@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test('title screen opens Bellevue City, debug info works', async ({ page }) => {
+test('title screen opens Bellevue City; drive, get out and debug toggle work', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('console', (message) => {
@@ -20,11 +20,16 @@ test('title screen opens Bellevue City, debug info works', async ({ page }) => {
   const seed = await page.evaluate(() => window.__bellevue?.debug.info.get('seed'));
   expect(seed).toMatch(/^BV-E-[0-9A-Z]{4}-[0-9A-Z]{4}$/);
 
-  // Zooming in changes the camera zoom.
-  const zoom = () => page.evaluate(() => Number(window.__bellevue?.debug.info.get('zoom')));
-  const before = await zoom();
-  await page.keyboard.press('Equal');
-  await expect.poll(zoom).toBeGreaterThan(before);
+  // The police car drives off on its own along the road.
+  const info = (key: string) => page.evaluate((k) => window.__bellevue?.debug.info.get(k), key);
+  await expect.poll(async () => Number(await info('speed'))).toBeGreaterThan(10);
+  expect(await info('mode')).toBe('CAR');
+
+  // Getting out switches to foot mode, and the camera zooms in.
+  const carZoom = Number(await info('zoom'));
+  await page.keyboard.press('e');
+  await expect.poll(() => info('mode')).toBe('FOOT');
+  await expect.poll(async () => Number(await info('zoom'))).toBeGreaterThan(carZoom * 1.5);
 
   // Debug mode toggles off with the backtick key.
   await page.keyboard.press('Backquote');
