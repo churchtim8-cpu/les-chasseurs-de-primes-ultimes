@@ -125,6 +125,12 @@ export class Mover {
     this.planIndex = 0;
   }
 
+  /** The rest of the planned route, starting with the node the mover is heading to. */
+  remainingPlan(): string[] {
+    if (!this.plan) return [this.target];
+    return [this.target, ...this.plan.slice(this.planIndex + 1)];
+  }
+
   /** How many planned nodes have been reached (0 when not following a plan). */
   get planProgress(): number {
     return this.planIndex;

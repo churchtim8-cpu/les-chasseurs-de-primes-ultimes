@@ -1,0 +1,197 @@
+/**
+ * French instruction generation (pipeline steps "GENERATE FRENCH" and
+ * "VALIDATE FRENCH").
+ *
+ * The route comes first. For the next junction where the driver must act,
+ * this lists every approved sentence that could describe it, keeps only the
+ * ones the interpreter reads as exactly that junction and that turn (true AND
+ * unambiguous), and picks one for the difficulty. If none passes yet, the
+ * caller waits until the driver is closer and asks again.
+ */
+
+import type { Difficulty } from '../difficulty';
+import type { MoverStart } from '../movement/mover';
+import { exitsAt } from '../movement/turns';
+import type { Rng } from '../rng/prng';
+import type { TownGraph, TravelMode } from '../world/graph';
+import { isAt, opensOn, passPoint, scanAhead } from './analysis';
+import { interpret } from './interpret';
+import { makeInstruction, ordinalWord, templateFor, type Clause, type Instruction } from './instructions';
+import { LANGUAGE_SETTINGS } from './settings';
+
+export interface Guided {
+  instruction: Instruction;
+  /** Indices (into the guide) of the actions this instruction covers. */
+  covers: number[];
+}
+
+/** Position at the very start of the edge from `from` to `to`. */
+export function positionLeaving(graph: TownGraph, from: string, to: string, mode: TravelMode): MoverStart {
+  const edge = graph.edgeBetween(from, to);
+  if (!edge) throw new Error(`No edge ${from}-${to}`);
+  return { edgeId: edge.id, t: edge.from === from ? 0 : 1, towards: to, mode };
+}
+
+/**
+ * Indices of the guide's nodes where the driver must do something: every
+ * junction where the route does not simply carry straight on.
+ */
+export function actionIndices(graph: TownGraph, guide: readonly string[], mode: TravelMode): number[] {
+  const out: number[] = [];
+  for (let i = 1; i < guide.length - 1; i++) {
+    const arrived = graph.edgeBetween(guide[i - 1] as string, guide[i] as string);
+    if (!arrived) continue;
+    const exits = exitsAt(graph, arrived, guide[i] as string, mode);
+    if (exits.length <= 1) continue;
+    const exit = exits.find((e) => e.step.to === guide[i + 1]);
+    if (exit && exit.kind !== 'STRAIGHT') out.push(i);
+  }
+  return out;
+}
+
+/** True when the interpreter's only reading of the clause is this junction and this exit. */
+export function readsAs(graph: TownGraph, from: MoverStart, clause: Clause, node: string, to: string): boolean {
+  const reading = interpret(graph, from, clause, from.mode);
+  return reading !== null && reading.node === node && reading.to === to;
+}
+
+/** Every approved clause that could describe leaving `node` towards `to`, before validation. */
+function describe(
+  graph: TownGraph,
+  from: MoverStart,
+  node: string,
+  to: string,
+  difficulty: Difficulty,
+  rng: Rng,
+  simpleOnly: boolean,
+): Clause[] {
+  const settings = LANGUAGE_SETTINGS[difficulty];
+  const ahead = scanAhead(graph, from, from.mode);
+  const index = ahead.nodes.findIndex((n) => n.node === node);
+  const target = ahead.nodes[index];
+  if (!target) return [];
+
+  if (target.onRing) {
+    const firstRing = ahead.nodes.findIndex((n) => n.onRing);
+    const ordinal = ahead.nodes
+      .slice(firstRing, index + 1)
+      .filter((n) => n.onRing && n.exits.some((e) => e.kind === 'RIGHT')).length;
+    return ordinal >= 1 && ordinal <= 3 ? [{ action: 'ROUNDABOUT_EXIT', ordinal, word: ordinalWord(ordinal) }] : [];
+  }
+
+  const exit = target.exits.find((e) => e.step.to === to);
+  if (!exit || (exit.kind !== 'LEFT' && exit.kind !== 'RIGHT')) return [];
+  const side = exit.kind;
+  const clauses: Clause[] = [{ action: 'TURN', side }];
+
+  const ringAt = ahead.nodes.findIndex((n) => n.onRing);
+  const streets = ahead.nodes.slice(0, ringAt === -1 ? undefined : ringAt).filter((n) => opensOn(n, side));
+  const rank = streets.indexOf(target) + 1;
+  if (rank >= 1 && rank <= settings.maxStreetOrdinal) {
+    clauses.push({ action: 'TAKE_STREET', side, ordinal: rank, word: ordinalWord(rank, rank === 1 && rng.chance(0.5)) });
+  }
+  if (simpleOnly) return clauses;
+
+  for (const location of graph.map.locations) {
+    for (const relation of settings.relations) {
+      if (relation === 'DEVANT' ? isAt(graph, location, node) : passPoint(ahead, location) !== undefined) {
+        clauses.push({ action: 'TURN', side, landmark: location.id, relation });
+      }
+    }
+  }
+  return clauses;
+}
+
+/** Guide distance between two node indices. */
+function between(graph: TownGraph, guide: readonly string[], a: number, b: number): number {
+  let total = 0;
+  for (let i = a; i < b; i++) {
+    const edge = graph.edgeBetween(guide[i] as string, guide[i + 1] as string);
+    if (edge) total += graph.edgeLength(edge);
+  }
+  return total;
+}
+
+/**
+ * An instruction for the action at `guide[a]`, heard at position `from`, or
+ * null if no approved sentence is both true and unambiguous from here yet.
+ * `nextAction` (if any) is the action after it, for "…, puis …" pairs.
+ */
+export function instructionFor(
+  graph: TownGraph,
+  from: MoverStart,
+  guide: readonly string[],
+  a: number,
+  nextAction: number | undefined,
+  difficulty: Difficulty,
+  rng: Rng,
+): Guided | null {
+  const settings = LANGUAGE_SETTINGS[difficulty];
+  const node = guide[a] as string;
+  const to = guide[a + 1] as string;
+  const allowed = (clauses: Clause[]) => (settings.weights[templateFor(clauses, difficulty)] ?? 0) > 0;
+
+  const options: Guided[] = [];
+  const singles = describe(graph, from, node, to, difficulty, rng, false).filter((c) => readsAs(graph, from, c, node, to));
+  for (const clause of singles) {
+    if (allowed([clause])) options.push({ instruction: makeInstruction([clause], difficulty, [node]), covers: [a] });
+  }
+
+  // Two actions close together: one "…, puis …" sentence (I3), each clause checked from where it applies.
+  if (
+    nextAction !== undefined &&
+    (settings.weights.I3 ?? 0) > 0 &&
+    between(graph, guide, a, nextAction) <= settings.pairWithin
+  ) {
+    const node2 = guide[nextAction] as string;
+    const to2 = guide[nextAction + 1] as string;
+    const from2 = positionLeaving(graph, node, to, from.mode);
+    const firsts = describe(graph, from, node, to, difficulty, rng, true).filter((c) => readsAs(graph, from, c, node, to));
+    const seconds = describe(graph, from2, node2, to2, difficulty, rng, true).filter((c) =>
+      readsAs(graph, from2, c, node2, to2),
+    );
+    for (const c1 of firsts) {
+      for (const c2 of seconds) {
+        options.push({ instruction: makeInstruction([c1, c2], difficulty, [node, node2]), covers: [a, nextAction] });
+      }
+    }
+  }
+
+  if (options.length === 0) return null;
+  const weights = options.map((o) => settings.weights[o.instruction.template] ?? 0);
+  return rng.weighted(options, weights);
+}
+
+/** "Continuez tout droit." when it is true: the route carries straight on at the next junction. */
+export function straightOn(graph: TownGraph, from: MoverStart, guide: readonly string[], difficulty: Difficulty): Instruction | null {
+  const reading = interpret(graph, from, { action: 'STRAIGHT' }, from.mode);
+  if (!reading) return null;
+  const i = guide.indexOf(reading.node);
+  if (i === -1 || guide[i + 1] !== reading.to) return null;
+  return makeInstruction([{ action: 'STRAIGHT' }], difficulty, [reading.node]);
+}
+
+/**
+ * After the last turn: "Continuez jusqu'à la piscine." when the place is
+ * straight ahead where the route ends, otherwise "Continuez tout droit."
+ */
+export function finalInstruction(
+  graph: TownGraph,
+  from: MoverStart,
+  guide: readonly string[],
+  destination: string,
+  difficulty: Difficulty,
+  rng: Rng,
+): Instruction | null {
+  const end = guide[guide.length - 1] as string;
+  const ahead = scanAhead(graph, from, from.mode);
+  const endNode = ahead.nodes.find((n) => n.node === end);
+  if (endNode) {
+    const clause: Clause = { action: 'CONTINUE_UNTIL', landmark: destination, verb: rng.chance(0.5) ? 'ALLEZ' : 'CONTINUEZ' };
+    const reading = interpret(graph, from, clause, from.mode);
+    if (reading && Math.abs(reading.s - endNode.s) <= 80 && (LANGUAGE_SETTINGS[difficulty].weights.E2 ?? 0) > 0) {
+      return makeInstruction([clause], difficulty, [end]);
+    }
+  }
+  return straightOn(graph, from, guide, difficulty);
+}

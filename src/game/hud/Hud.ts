@@ -16,6 +16,7 @@ export class Hud {
   private readonly signalLabel: Phaser.GameObjects.Text;
   private readonly toast: Phaser.GameObjects.Text;
   private readonly banner: Phaser.GameObjects.Text;
+  private readonly scanner: Phaser.GameObjects.Text;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -66,6 +67,22 @@ export class Hud {
         .setOrigin(0.5, 0)
         .setVisible(false),
     );
+    // The police scanner: the French instruction, shown for a few seconds (audio arrives in M5).
+    this.scanner = this.add(
+      scene.add
+        .text(width / 2, scene.scale.height - 28, '', {
+          fontFamily: FONT_FAMILY,
+          fontSize: '28px',
+          fontStyle: 'bold',
+          color: toCss(PALETTE.cream),
+          backgroundColor: 'rgba(22, 50, 61, 0.92)',
+          padding: { x: 20, y: 12 },
+          align: 'center',
+          wordWrap: { width: width - 120 },
+        })
+        .setOrigin(0.5, 1)
+        .setVisible(false),
+    );
     this.banner = this.add(
       scene.add
         .text(width / 2, scene.scale.height / 2, '', {
@@ -98,6 +115,13 @@ export class Hud {
     this.toast.setText(message).setVisible(true).setAlpha(1);
     this.scene.tweens.killTweensOf(this.toast);
     this.scene.tweens.add({ targets: this.toast, alpha: 0, delay: ms, duration: 400 });
+  }
+
+  /** Show a scanner call ("SCANNER : Tournez à gauche.") for `seconds`. */
+  showScanner(text: string, seconds: number): void {
+    this.scanner.setText(`SCANNER : ${text}`).setVisible(true).setAlpha(1);
+    this.scene.tweens.killTweensOf(this.scanner);
+    this.scene.tweens.add({ targets: this.scanner, alpha: 0, delay: seconds * 1000, duration: 400 });
   }
 
   /** Big centred text, e.g. the 3-2-1-GO countdown. Empty string hides it. */
