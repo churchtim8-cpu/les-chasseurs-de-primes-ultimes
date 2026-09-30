@@ -23,6 +23,22 @@ npm run check      # typecheck, unit tests and production build
 npm run test:e2e   # browser smoke test (Playwright)
 ```
 
+## Controls
+
+The police car drives forward on its own; you choose where it goes. Choices are held until the next junction where they are possible.
+
+| Keyboard | Touch | Action |
+|---|---|---|
+| ← / A, → / D | ◀ ▶ | Turn left / right at the next junction |
+| ↑ / W | ▲ | Straight on at the next junction; hold to speed up |
+| ↓ / S (hold) | ▼ | Slow down and stop |
+| Space / U | ⟲ | Turn around (faire demi-tour) |
+| E | ⇄ | Get out of the car / back in (next to it) |
+| M | | Whole-town overview |
+| Esc | | Back to the title screen |
+
+Touch buttons appear on touch screens (or add `?touch=1` to the address).
+
 ## Debug mode
 
 Add `?debug=1` to the address, or press the backtick key (`` ` ``) or F2 in game. It shows the chase seed code and other developer information, and later the navigation graph, suspect route and instruction data.
