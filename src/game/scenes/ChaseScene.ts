@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import { BELLEVUE } from '../../content/map/bellevue';
 import { Chase, type ChaseEvent } from '../../engine/chase/chase';
 import { generateScenario } from '../../engine/chase/scenario';
+import type { Transmission } from '../../engine/language/navigator';
+import { LANGUAGE_SETTINGS } from '../../engine/language/settings';
 import { LOCATION_WORD_BY_ID, withArticle } from '../../engine/language/locations';
 import { Mover, type MoverStart } from '../../engine/movement/mover';
 import { BOARDING_DISTANCE } from '../../engine/movement/settings';
@@ -21,9 +23,9 @@ export interface ChaseSceneData {
 type Stage = 'COUNTDOWN' | 'PURSUIT' | 'RESULTS';
 
 /**
- * One chase (milestone M3): the suspect drives its generated route and the
- * player pursues. French scanner instructions arrive in M4 and M5; until
- * then debug mode shows the route.
+ * One chase: the suspect drives its generated route and the player pursues,
+ * guided by the police scanner's French instructions (shown as text until
+ * the recordings arrive in M5). R repeats the last call.
  *
  * Debug keys (debug mode only): C = jump onto the suspect (test capture),
  * X = force escape, N = next chase.
@@ -141,8 +143,17 @@ export class ChaseScene extends Phaser.Scene {
           break;
         case 'SUSPECT_ARRIVED':
           break;
+        case 'TRANSMISSION':
+          this.showTransmission(event.transmission);
+          break;
       }
     }
+  }
+
+  private showTransmission(transmission: Transmission): void {
+    this.hud.showScanner(transmission.text, LANGUAGE_SETTINGS[this.chase.scenario.difficulty].textSeconds);
+    const detail = transmission.instructions.map((i) => `${i.template} ${i.audioId}`).join(' + ');
+    debugState.info.set('scanner', `${transmission.kind}: ${detail}`);
   }
 
   private handleAction(action: ControlAction): void {
@@ -242,7 +253,10 @@ export class ChaseScene extends Phaser.Scene {
     if (!keyboard) return;
     keyboard.on('keydown-ESC', () => this.scene.start('Title'));
     keyboard.on('keydown-ENTER', () => this.stage === 'RESULTS' && this.nextChase());
-    keyboard.on('keydown-R', () => this.stage === 'RESULTS' && this.scene.restart({ seed: this.seed }));
+    keyboard.on('keydown-R', () => {
+      if (this.stage === 'RESULTS') this.scene.restart({ seed: this.seed });
+      else if (this.stage === 'PURSUIT' && this.chase.navigator.last) this.showTransmission(this.chase.navigator.last);
+    });
     keyboard.on('keydown-C', () => {
       if (debugState.isEnabled && this.stage === 'PURSUIT') this.chase.teleportPlayerToSuspect();
     });

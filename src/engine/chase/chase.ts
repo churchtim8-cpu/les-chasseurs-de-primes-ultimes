@@ -10,7 +10,9 @@
  */
 
 import { DIFFICULTY_SETTINGS } from '../difficulty';
+import { Navigator, type Transmission } from '../language/navigator';
 import { Mover } from '../movement/mover';
+import { Rng } from '../rng/prng';
 import type { TownGraph } from '../world/graph';
 import { roadDistance } from './distance';
 import type { ChaseScenario } from './scenario';
@@ -25,7 +27,9 @@ export type ChaseEvent =
   | { type: 'ESCAPED'; reason: EscapeReason }
   | { type: 'WARNING'; on: boolean }
   | { type: 'SIGHTED'; on: boolean }
-  | { type: 'SUSPECT_ARRIVED' };
+  | { type: 'SUSPECT_ARRIVED' }
+  /** The police scanner speaks (directions, corrections). */
+  | { type: 'TRANSMISSION'; transmission: Transmission };
 
 export interface ChaseStatus {
   phase: ChasePhase;
@@ -46,6 +50,7 @@ export interface ChaseStatus {
 export class Chase {
   player: Mover;
   readonly suspect: Mover;
+  readonly navigator: Navigator;
   private readonly settings: ChaseSettings;
   private phase: ChasePhase = 'PURSUIT';
   private elapsed = 0;
@@ -68,6 +73,13 @@ export class Chase {
     this.suspect = new Mover(graph, scenario.suspectStart);
     this.suspect.followPlan(scenario.suspectPlan);
     this.suspect.speedFactor = this.settings.suspectSpeed;
+    this.navigator = new Navigator(
+      graph,
+      scenario.difficulty,
+      Rng.fromSeed(scenario.seed).fork('language'),
+      scenario.route,
+      scenario.destination,
+    );
     this.distance = this.measure();
   }
 
@@ -88,6 +100,9 @@ export class Chase {
     }
 
     this.distance = this.measure();
+    for (const transmission of this.navigator.update(this.player.location(), this.suspect.remainingPlan())) {
+      events.push({ type: 'TRANSMISSION', transmission });
+    }
     const s = this.settings;
 
     const sighted = this.distance <= s.sightingDistance;
@@ -106,7 +121,10 @@ export class Chase {
     this.closeFor = this.distance <= s.captureDistance && canCapture ? this.closeFor + dt : 0;
     this.farFor = this.distance >= s.escapeDistance ? this.farFor + dt : 0;
 
-    if (this.closeFor >= s.captureHold) {
+    // A stopped suspect is caught as soon as the player reaches it: an auto-driving
+    // car would otherwise roll straight past before the hold time is up.
+    const hold = this.suspectArrived ? 0 : s.captureHold;
+    if (this.closeFor > 0 && this.closeFor >= hold) {
       this.phase = 'CAPTURED';
       events.push({ type: 'CAPTURED' });
     } else if (this.farFor >= s.escapeHold || this.timeLeft <= 0) {

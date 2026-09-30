@@ -33,6 +33,9 @@ test('title screen starts a chase; drive, get out and debug toggle work', async 
   expect(await info(page, 'mode')).toBe('CAR');
   expect(await info(page, 'phase')).toBe('PURSUIT');
 
+  // The scanner gives the first French instruction as the chase starts.
+  await expect.poll(() => info(page, 'scanner'), SLOW).toMatch(/^(DIRECTION|FILLER|FINAL): /);
+
   // Getting out switches to foot mode, and the camera zooms in.
   const carZoom = Number(await info(page, 'zoom'));
   await page.keyboard.press('e');

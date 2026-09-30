@@ -14,6 +14,8 @@ A French listening-comprehension chase game (web-first, TypeScript + Phaser). Th
 
 - Only vocabulary and templates approved in the blueprint (plus "la sortie" for roundabouts, approved). No conditional structures.
 - Never concatenate words. Audio is pre-generated ElevenLabs clips: full sentences for one- and two-step instructions, whole-clause clips for Expert three-step and longer instructions.
+- Instructions are structured clauses (`src/engine/language/instructions.ts`); the sentence and audio ID are derived from them. Every instruction must pass the interpreter (`interpret.ts`): its single reading must be the real junction and exit. Street counting counts only openings on that side the current mode can enter; roundabouts use "la sortie".
+- `tests/unit/listenerBot.ts` plays chases hearing only the French; it must keep capturing (≥95%) without ever being corrected.
 - Expert difficulty comes from length, memory, landmarks, corrections and less assistance, never faster speech.
 
 ## Checks before pushing

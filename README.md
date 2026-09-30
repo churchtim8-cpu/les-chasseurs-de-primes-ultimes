@@ -34,7 +34,8 @@ The police car drives forward on its own; you choose where it goes. Choices are 
 | ↓ / S (hold) | ▼ | Slow down and stop |
 | Space / U | ⟲ | Turn around (faire demi-tour) |
 | E | ⇄ | Get out of the car / back in (next to it) |
-| M | | Whole-town overview |
+| R | | Repeat the last scanner call (after a chase: replay the same chase) |
+| M | | Whole-town overview (debug mode) |
 | Esc | | Back to the title screen |
 
 Touch buttons appear on touch screens (or add `?touch=1` to the address).
