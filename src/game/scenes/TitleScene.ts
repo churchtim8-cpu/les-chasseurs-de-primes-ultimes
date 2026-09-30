@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { DIFFICULTY_SETTINGS, type ChaseSeed } from '../../engine';
+import { DIFFICULTY_SETTINGS, parseSeed, type ChaseSeed } from '../../engine';
 import { debugState } from '../debug/debugState';
 import { FONT_FAMILY, PALETTE, toCss } from '../palette';
 import { newSeed } from '../seedSource';
@@ -8,7 +8,8 @@ export const GAME_WIDTH = 1280;
 export const GAME_HEIGHT = 720;
 
 /**
- * Title screen. Starting creates a chase seed and opens the town; later
+ * Title screen. Starting creates a chase seed (or uses `?seed=` from the
+ * address, so a chase can be replayed exactly) and opens the chase; later
  * milestones go through difficulty selection and the mission briefing.
  */
 export class TitleScene extends Phaser.Scene {
@@ -19,7 +20,17 @@ export class TitleScene extends Phaser.Scene {
     super(TitleScene.KEY);
   }
 
+  private autostart = false;
+
+  init(data?: { autostart?: boolean }): void {
+    this.autostart = data?.autostart === true;
+  }
+
   create(): void {
+    if (this.autostart) {
+      this.start();
+      return;
+    }
     this.drawBackdrop();
 
     this.add
@@ -57,10 +68,22 @@ export class TitleScene extends Phaser.Scene {
   }
 
   private start(): void {
-    this.seed = newSeed('EASY');
+    this.seed = this.seedFromAddress() ?? newSeed('EASY');
     debugState.info.set('seed', this.seed.code);
     debugState.info.set('difficulty', DIFFICULTY_SETTINGS[this.seed.difficulty].label.en);
-    this.scene.start('Town');
+    this.scene.start('Chase', { seed: this.seed.code });
+  }
+
+  /** `?seed=BV-E-...` replays one chase; it is used once, then fresh seeds follow. */
+  private seedFromAddress(): ChaseSeed | undefined {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('seed');
+    if (!code) return undefined;
+    params.delete('seed');
+    const query = params.toString();
+    window.history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}`);
+    const parsed = parseSeed(code);
+    return parsed.ok ? parsed.seed : undefined;
   }
 
   /** A simple top-down coastline: town blocks, a promenade, sand and sea. */

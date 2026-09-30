@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { DebugOverlayScene } from './game/debug/DebugOverlayScene';
 import { debugState } from './game/debug/debugState';
 import { GAME_HEIGHT, GAME_WIDTH, TitleScene } from './game/scenes/TitleScene';
-import { TownScene } from './game/scenes/TownScene';
+import { ChaseScene } from './game/scenes/ChaseScene';
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
@@ -11,7 +11,10 @@ const game = new Phaser.Game({
   height: GAME_HEIGHT,
   backgroundColor: '#16323d',
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
-  scene: [TitleScene, TownScene, DebugOverlayScene],
+  // Phaser holds game time to 60 fps for `panicMax` frames after a start or tab switch;
+  // the default (120 frames) makes the chase crawl for seconds on slow school computers.
+  fps: { panicMax: 20 },
+  scene: [TitleScene, ChaseScene, DebugOverlayScene],
 });
 
 // The overlay runs on top of every other scene.
