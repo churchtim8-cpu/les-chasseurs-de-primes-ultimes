@@ -6,6 +6,7 @@
  */
 
 import type { Difficulty } from '../difficulty';
+import { describable } from '../language/generate';
 import type { MoverStart } from '../movement/mover';
 import { Rng } from '../rng/prng';
 import { parseSeed } from '../rng/seedCode';
@@ -40,7 +41,11 @@ export function generateScenario(graph: TownGraph, seedCode: string): ChaseScena
   const settings = CHASE_SETTINGS[difficulty];
   const rng = Rng.fromSeed(code);
 
-  const route = generateRoute(graph, rng.fork('route'), { length: settings.routeLength, mode: 'CAR' });
+  const route = generateRoute(graph, rng.fork('route'), {
+    length: settings.routeLength,
+    mode: 'CAR',
+    accept: (nodes) => describable(graph, nodes, 'CAR', difficulty),
+  });
   const player = placeOnRoute(graph, route.nodes, PLAYER_OFFSET, 'CAR');
   const suspect = placeOnRoute(graph, route.nodes, PLAYER_OFFSET + settings.headStart, 'CAR');
 
@@ -69,6 +74,7 @@ export function validateScenario(graph: TownGraph, s: ChaseScenario): string[] {
   const follow = followProblem(graph, s.route, 'CAR');
   if (follow) problems.push(follow);
   if (new Set(s.route).size !== s.route.length) problems.push('Route visits a node twice');
+  if (!describable(graph, s.route, 'CAR', s.difficulty)) problems.push('Route needs a roundabout exit this level cannot name');
 
   const length = pathLength(graph, s.route);
   if (Math.abs(length - s.routeLength) > 0.01) problems.push('Route length does not match');

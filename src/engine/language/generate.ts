@@ -49,20 +49,52 @@ export function actionIndices(graph: TownGraph, guide: readonly string[], mode: 
   return out;
 }
 
+/**
+ * For each roundabout on a node path, which exit it leaves by (1 = first exit
+ * after entering). Used to keep routes within the ordinals a level may use.
+ */
+export function roundaboutExits(graph: TownGraph, nodes: readonly string[], mode: TravelMode): number[] {
+  const out: number[] = [];
+  let count = 0;
+  for (let i = 1; i < nodes.length - 1; i++) {
+    const arrived = graph.edgeBetween(nodes[i - 1] as string, nodes[i] as string);
+    if (!arrived || mode !== 'CAR' || graph.node(nodes[i] as string).roundaboutId === undefined) continue;
+    if (arrived.kind !== 'ROUNDABOUT_RING') count = 0; // just entered
+    const exits = exitsAt(graph, arrived, nodes[i] as string, mode);
+    if (!exits.some((e) => e.kind === 'RIGHT')) continue;
+    count++;
+    const next = exits.find((e) => e.step.to === nodes[i + 1]);
+    if (next?.kind === 'RIGHT') out.push(count);
+  }
+  return out;
+}
+
+/** Can a player at this level be guided along this path (no roundabout exit beyond the level's ordinals)? */
+export function describable(graph: TownGraph, nodes: readonly string[], mode: TravelMode, difficulty: Difficulty): boolean {
+  const max = LANGUAGE_SETTINGS[difficulty].maxRoundaboutOrdinal;
+  return roundaboutExits(graph, nodes, mode).every((n) => n <= max);
+}
+
 /** True when the interpreter's only reading of the clause is this junction and this exit. */
 export function readsAs(graph: TownGraph, from: MoverStart, clause: Clause, node: string, to: string): boolean {
   const reading = interpret(graph, from, clause, from.mode);
   return reading !== null && reading.node === node && reading.to === to;
 }
 
-/** Every approved clause that could describe leaving `node` towards `to`, before validation. */
-function describe(
+/** Is there a recording for this audio ID? (Pipeline step "MATCH PRE-GENERATED AUDIO".) */
+export type AudioCheck = (audioId: string) => boolean;
+const ANY_AUDIO: AudioCheck = () => true;
+
+/**
+ * Every approved clause that could describe leaving `node` towards `to`,
+ * before validation. `simpleOnly` leaves out landmarks (for "…, puis …" pairs).
+ */
+export function describe(
   graph: TownGraph,
   from: MoverStart,
   node: string,
   to: string,
   difficulty: Difficulty,
-  rng: Rng,
   simpleOnly: boolean,
 ): Clause[] {
   const settings = LANGUAGE_SETTINGS[difficulty];
@@ -76,7 +108,7 @@ function describe(
     const ordinal = ahead.nodes
       .slice(firstRing, index + 1)
       .filter((n) => n.onRing && n.exits.some((e) => e.kind === 'RIGHT')).length;
-    return ordinal >= 1 && ordinal <= 3 ? [{ action: 'ROUNDABOUT_EXIT', ordinal, word: ordinalWord(ordinal) }] : [];
+    return ordinal >= 1 && ordinal <= settings.maxRoundaboutOrdinal ? [{ action: 'ROUNDABOUT_EXIT', ordinal, word: ordinalWord(ordinal) }] : [];
   }
 
   const exit = target.exits.find((e) => e.step.to === to);
@@ -88,7 +120,9 @@ function describe(
   const streets = ahead.nodes.slice(0, ringAt === -1 ? undefined : ringAt).filter((n) => opensOn(n, side));
   const rank = streets.indexOf(target) + 1;
   if (rank >= 1 && rank <= settings.maxStreetOrdinal) {
-    clauses.push({ action: 'TAKE_STREET', side, ordinal: rank, word: ordinalWord(rank, rank === 1 && rng.chance(0.5)) });
+    clauses.push({ action: 'TAKE_STREET', side, ordinal: rank, word: ordinalWord(rank) });
+    // "la prochaine rue" and "la première rue" mean the same street: both are offered.
+    if (rank === 1) clauses.push({ action: 'TAKE_STREET', side, ordinal: 1, word: 'PROCHAINE' });
   }
   if (simpleOnly) return clauses;
 
@@ -125,16 +159,20 @@ export function instructionFor(
   nextAction: number | undefined,
   difficulty: Difficulty,
   rng: Rng,
+  hasAudio: AudioCheck = ANY_AUDIO,
 ): Guided | null {
   const settings = LANGUAGE_SETTINGS[difficulty];
   const node = guide[a] as string;
   const to = guide[a + 1] as string;
   const allowed = (clauses: Clause[]) => (settings.weights[templateFor(clauses, difficulty)] ?? 0) > 0;
+  const add = (guided: Guided) => {
+    if (hasAudio(guided.instruction.audioId)) options.push(guided);
+  };
 
   const options: Guided[] = [];
-  const singles = describe(graph, from, node, to, difficulty, rng, false).filter((c) => readsAs(graph, from, c, node, to));
+  const singles = describe(graph, from, node, to, difficulty, false).filter((c) => readsAs(graph, from, c, node, to));
   for (const clause of singles) {
-    if (allowed([clause])) options.push({ instruction: makeInstruction([clause], difficulty, [node]), covers: [a] });
+    if (allowed([clause])) add({ instruction: makeInstruction([clause], difficulty, [node]), covers: [a] });
   }
 
   // Two actions close together: one "…, puis …" sentence (I3), each clause checked from where it applies.
@@ -146,13 +184,13 @@ export function instructionFor(
     const node2 = guide[nextAction] as string;
     const to2 = guide[nextAction + 1] as string;
     const from2 = positionLeaving(graph, node, to, from.mode);
-    const firsts = describe(graph, from, node, to, difficulty, rng, true).filter((c) => readsAs(graph, from, c, node, to));
-    const seconds = describe(graph, from2, node2, to2, difficulty, rng, true).filter((c) =>
+    const firsts = describe(graph, from, node, to, difficulty, true).filter((c) => readsAs(graph, from, c, node, to));
+    const seconds = describe(graph, from2, node2, to2, difficulty, true).filter((c) =>
       readsAs(graph, from2, c, node2, to2),
     );
     for (const c1 of firsts) {
       for (const c2 of seconds) {
-        options.push({ instruction: makeInstruction([c1, c2], difficulty, [node, node2]), covers: [a, nextAction] });
+        add({ instruction: makeInstruction([c1, c2], difficulty, [node, node2]), covers: [a, nextAction] });
       }
     }
   }
@@ -163,7 +201,14 @@ export function instructionFor(
 }
 
 /** "Continuez tout droit." when it is true: the route carries straight on at the next junction. */
-export function straightOn(graph: TownGraph, from: MoverStart, guide: readonly string[], difficulty: Difficulty): Instruction | null {
+export function straightOn(
+  graph: TownGraph,
+  from: MoverStart,
+  guide: readonly string[],
+  difficulty: Difficulty,
+  hasAudio: AudioCheck = ANY_AUDIO,
+): Instruction | null {
+  if (!hasAudio(makeInstruction([{ action: 'STRAIGHT' }], difficulty).audioId)) return null;
   const reading = interpret(graph, from, { action: 'STRAIGHT' }, from.mode);
   if (!reading) return null;
   const i = guide.indexOf(reading.node);
@@ -182,6 +227,7 @@ export function finalInstruction(
   destination: string,
   difficulty: Difficulty,
   rng: Rng,
+  hasAudio: AudioCheck = ANY_AUDIO,
 ): Instruction | null {
   const end = guide[guide.length - 1] as string;
   const ahead = scanAhead(graph, from, from.mode);
@@ -189,9 +235,15 @@ export function finalInstruction(
   if (endNode) {
     const clause: Clause = { action: 'CONTINUE_UNTIL', landmark: destination, verb: rng.chance(0.5) ? 'ALLEZ' : 'CONTINUEZ' };
     const reading = interpret(graph, from, clause, from.mode);
-    if (reading && Math.abs(reading.s - endNode.s) <= 80 && (LANGUAGE_SETTINGS[difficulty].weights.E2 ?? 0) > 0) {
-      return makeInstruction([clause], difficulty, [end]);
+    const instruction = makeInstruction([clause], difficulty, [end]);
+    if (
+      reading &&
+      Math.abs(reading.s - endNode.s) <= 80 &&
+      (LANGUAGE_SETTINGS[difficulty].weights.E2 ?? 0) > 0 &&
+      hasAudio(instruction.audioId)
+    ) {
+      return instruction;
     }
   }
-  return straightOn(graph, from, guide, difficulty);
+  return straightOn(graph, from, guide, difficulty, hasAudio);
 }

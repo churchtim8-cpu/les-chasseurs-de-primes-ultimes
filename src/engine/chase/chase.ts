@@ -10,6 +10,7 @@
  */
 
 import { DIFFICULTY_SETTINGS } from '../difficulty';
+import type { AudioCheck } from '../language/generate';
 import { Navigator, type Transmission } from '../language/navigator';
 import { Mover } from '../movement/mover';
 import { Rng } from '../rng/prng';
@@ -66,6 +67,7 @@ export class Chase {
   constructor(
     private readonly graph: TownGraph,
     readonly scenario: ChaseScenario,
+    options: { hasAudio?: AudioCheck } = {},
   ) {
     this.settings = CHASE_SETTINGS[scenario.difficulty];
     this.timeLeft = DIFFICULTY_SETTINGS[scenario.difficulty].timeLimitSeconds;
@@ -79,6 +81,8 @@ export class Chase {
       Rng.fromSeed(scenario.seed).fork('language'),
       scenario.route,
       scenario.destination,
+      'CAR',
+      options.hasAudio,
     );
     this.distance = this.measure();
   }

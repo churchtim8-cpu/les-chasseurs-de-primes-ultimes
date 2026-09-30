@@ -1,0 +1,4185 @@
+[
+  {
+    "audioId": "dir.allez_until.bus_stop",
+    "text": "Allez jusqu'à l'arrêt de bus.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.school",
+    "text": "Allez jusqu'à l'école.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.hospital",
+    "text": "Allez jusqu'à l'hôpital.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.hotel",
+    "text": "Allez jusqu'à l'hôtel.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.bank",
+    "text": "Allez jusqu'à la banque.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.library",
+    "text": "Allez jusqu'à la bibliothèque.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.bakery",
+    "text": "Allez jusqu'à la boulangerie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.bus_station",
+    "text": "Allez jusqu'à la gare routière.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.train_station",
+    "text": "Allez jusqu'à la gare.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.bookshop",
+    "text": "Allez jusqu'à la librairie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.town_hall",
+    "text": "Allez jusqu'à la mairie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.pharmacy",
+    "text": "Allez jusqu'à la pharmacie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.swimming_pool",
+    "text": "Allez jusqu'à la piscine.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.square",
+    "text": "Allez jusqu'à la place.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.beach",
+    "text": "Allez jusqu'à la plage.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.post_office",
+    "text": "Allez jusqu'à la poste.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.gas_station",
+    "text": "Allez jusqu'à la station-service.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.cafe",
+    "text": "Allez jusqu'au café.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.shopping_centre",
+    "text": "Allez jusqu'au centre commercial.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.cinema",
+    "text": "Allez jusqu'au cinéma.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.police_station",
+    "text": "Allez jusqu'au commissariat de police.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.shop",
+    "text": "Allez jusqu'au magasin.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.market",
+    "text": "Allez jusqu'au marché.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.museum",
+    "text": "Allez jusqu'au musée.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.park",
+    "text": "Allez jusqu'au parc.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.car_park",
+    "text": "Allez jusqu'au parking.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.restaurant",
+    "text": "Allez jusqu'au restaurant.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.stadium",
+    "text": "Allez jusqu'au stade.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.supermarket",
+    "text": "Allez jusqu'au supermarché.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.allez_until.theatre",
+    "text": "Allez jusqu'au théâtre.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.roundabout.deuxieme+puis+street.right.deuxieme",
+    "text": "Au rond-point, prenez la deuxième sortie, puis prenez la deuxième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.roundabout.deuxieme+puis+street.left.deuxieme",
+    "text": "Au rond-point, prenez la deuxième sortie, puis prenez la deuxième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.roundabout.deuxieme+puis+street.right.premiere",
+    "text": "Au rond-point, prenez la deuxième sortie, puis prenez la première rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.roundabout.deuxieme+puis+street.left.premiere",
+    "text": "Au rond-point, prenez la deuxième sortie, puis prenez la première rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.roundabout.deuxieme+puis+street.right.prochaine",
+    "text": "Au rond-point, prenez la deuxième sortie, puis prenez la prochaine rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.roundabout.deuxieme+puis+street.left.prochaine",
+    "text": "Au rond-point, prenez la deuxième sortie, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.roundabout.deuxieme+puis+turn.right",
+    "text": "Au rond-point, prenez la deuxième sortie, puis tournez à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.roundabout.deuxieme+puis+turn.left",
+    "text": "Au rond-point, prenez la deuxième sortie, puis tournez à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.roundabout.deuxieme",
+    "text": "Au rond-point, prenez la deuxième sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "RB",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.roundabout.premiere+puis+street.right.deuxieme",
+    "text": "Au rond-point, prenez la première sortie, puis prenez la deuxième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.roundabout.premiere+puis+street.left.deuxieme",
+    "text": "Au rond-point, prenez la première sortie, puis prenez la deuxième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.roundabout.premiere+puis+street.right.premiere",
+    "text": "Au rond-point, prenez la première sortie, puis prenez la première rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.roundabout.premiere+puis+street.left.premiere",
+    "text": "Au rond-point, prenez la première sortie, puis prenez la première rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.roundabout.premiere+puis+street.right.prochaine",
+    "text": "Au rond-point, prenez la première sortie, puis prenez la prochaine rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.roundabout.premiere+puis+street.left.prochaine",
+    "text": "Au rond-point, prenez la première sortie, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.roundabout.premiere+puis+turn.right",
+    "text": "Au rond-point, prenez la première sortie, puis tournez à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.roundabout.premiere+puis+turn.left",
+    "text": "Au rond-point, prenez la première sortie, puis tournez à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.roundabout.premiere",
+    "text": "Au rond-point, prenez la première sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "RB",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.roundabout.troisieme+puis+street.right.deuxieme",
+    "text": "Au rond-point, prenez la troisième sortie, puis prenez la deuxième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.roundabout.troisieme+puis+street.left.deuxieme",
+    "text": "Au rond-point, prenez la troisième sortie, puis prenez la deuxième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.roundabout.troisieme+puis+street.right.premiere",
+    "text": "Au rond-point, prenez la troisième sortie, puis prenez la première rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.roundabout.troisieme+puis+street.left.premiere",
+    "text": "Au rond-point, prenez la troisième sortie, puis prenez la première rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.roundabout.troisieme+puis+street.right.prochaine",
+    "text": "Au rond-point, prenez la troisième sortie, puis prenez la prochaine rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.roundabout.troisieme+puis+street.left.prochaine",
+    "text": "Au rond-point, prenez la troisième sortie, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.roundabout.troisieme+puis+turn.right",
+    "text": "Au rond-point, prenez la troisième sortie, puis tournez à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.roundabout.troisieme+puis+turn.left",
+    "text": "Au rond-point, prenez la troisième sortie, puis tournez à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.roundabout.troisieme",
+    "text": "Au rond-point, prenez la troisième sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "RB",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.bus_stop",
+    "text": "Continuez jusqu'à l'arrêt de bus.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.school",
+    "text": "Continuez jusqu'à l'école.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.hospital",
+    "text": "Continuez jusqu'à l'hôpital.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.hotel",
+    "text": "Continuez jusqu'à l'hôtel.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.bank",
+    "text": "Continuez jusqu'à la banque.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.library",
+    "text": "Continuez jusqu'à la bibliothèque.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.bakery",
+    "text": "Continuez jusqu'à la boulangerie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.bus_station",
+    "text": "Continuez jusqu'à la gare routière.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.train_station",
+    "text": "Continuez jusqu'à la gare.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.bookshop",
+    "text": "Continuez jusqu'à la librairie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.town_hall",
+    "text": "Continuez jusqu'à la mairie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.pharmacy",
+    "text": "Continuez jusqu'à la pharmacie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.swimming_pool",
+    "text": "Continuez jusqu'à la piscine.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.square",
+    "text": "Continuez jusqu'à la place.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.beach",
+    "text": "Continuez jusqu'à la plage.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.post_office",
+    "text": "Continuez jusqu'à la poste.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.gas_station",
+    "text": "Continuez jusqu'à la station-service.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.cafe",
+    "text": "Continuez jusqu'au café.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.shopping_centre",
+    "text": "Continuez jusqu'au centre commercial.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.cinema",
+    "text": "Continuez jusqu'au cinéma.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.police_station",
+    "text": "Continuez jusqu'au commissariat de police.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.shop",
+    "text": "Continuez jusqu'au magasin.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.market",
+    "text": "Continuez jusqu'au marché.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.museum",
+    "text": "Continuez jusqu'au musée.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.park",
+    "text": "Continuez jusqu'au parc.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.car_park",
+    "text": "Continuez jusqu'au parking.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.restaurant",
+    "text": "Continuez jusqu'au restaurant.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.stadium",
+    "text": "Continuez jusqu'au stade.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.supermarket",
+    "text": "Continuez jusqu'au supermarché.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.continuez_until.theatre",
+    "text": "Continuez jusqu'au théâtre.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E2",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.straight",
+    "text": "Continuez tout droit.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E1",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.deuxieme+puis+street.right.deuxieme",
+    "text": "Prenez la deuxième rue à droite, puis prenez la deuxième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.deuxieme+puis+street.left.deuxieme",
+    "text": "Prenez la deuxième rue à droite, puis prenez la deuxième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.deuxieme+puis+street.right.premiere",
+    "text": "Prenez la deuxième rue à droite, puis prenez la première rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.deuxieme+puis+street.left.premiere",
+    "text": "Prenez la deuxième rue à droite, puis prenez la première rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.deuxieme+puis+street.right.prochaine",
+    "text": "Prenez la deuxième rue à droite, puis prenez la prochaine rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.deuxieme+puis+street.left.prochaine",
+    "text": "Prenez la deuxième rue à droite, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.deuxieme+puis+turn.right",
+    "text": "Prenez la deuxième rue à droite, puis tournez à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.deuxieme+puis+turn.left",
+    "text": "Prenez la deuxième rue à droite, puis tournez à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.deuxieme+puis+roundabout.deuxieme",
+    "text": "Prenez la deuxième rue à droite, puis, au rond-point, prenez la deuxième sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.deuxieme+puis+roundabout.premiere",
+    "text": "Prenez la deuxième rue à droite, puis, au rond-point, prenez la première sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.deuxieme+puis+roundabout.troisieme",
+    "text": "Prenez la deuxième rue à droite, puis, au rond-point, prenez la troisième sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.street.right.deuxieme",
+    "text": "Prenez la deuxième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I2",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.deuxieme+puis+street.right.deuxieme",
+    "text": "Prenez la deuxième rue à gauche, puis prenez la deuxième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.deuxieme+puis+street.left.deuxieme",
+    "text": "Prenez la deuxième rue à gauche, puis prenez la deuxième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.deuxieme+puis+street.right.premiere",
+    "text": "Prenez la deuxième rue à gauche, puis prenez la première rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.deuxieme+puis+street.left.premiere",
+    "text": "Prenez la deuxième rue à gauche, puis prenez la première rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.deuxieme+puis+street.right.prochaine",
+    "text": "Prenez la deuxième rue à gauche, puis prenez la prochaine rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.deuxieme+puis+street.left.prochaine",
+    "text": "Prenez la deuxième rue à gauche, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.deuxieme+puis+turn.right",
+    "text": "Prenez la deuxième rue à gauche, puis tournez à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.deuxieme+puis+turn.left",
+    "text": "Prenez la deuxième rue à gauche, puis tournez à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.deuxieme+puis+roundabout.deuxieme",
+    "text": "Prenez la deuxième rue à gauche, puis, au rond-point, prenez la deuxième sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.deuxieme+puis+roundabout.premiere",
+    "text": "Prenez la deuxième rue à gauche, puis, au rond-point, prenez la première sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.deuxieme+puis+roundabout.troisieme",
+    "text": "Prenez la deuxième rue à gauche, puis, au rond-point, prenez la troisième sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.street.left.deuxieme",
+    "text": "Prenez la deuxième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I2",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.premiere+puis+street.right.deuxieme",
+    "text": "Prenez la première rue à droite, puis prenez la deuxième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.premiere+puis+street.left.deuxieme",
+    "text": "Prenez la première rue à droite, puis prenez la deuxième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.premiere+puis+street.right.premiere",
+    "text": "Prenez la première rue à droite, puis prenez la première rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.premiere+puis+street.left.premiere",
+    "text": "Prenez la première rue à droite, puis prenez la première rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.premiere+puis+street.right.prochaine",
+    "text": "Prenez la première rue à droite, puis prenez la prochaine rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.premiere+puis+street.left.prochaine",
+    "text": "Prenez la première rue à droite, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.premiere+puis+turn.right",
+    "text": "Prenez la première rue à droite, puis tournez à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.premiere+puis+turn.left",
+    "text": "Prenez la première rue à droite, puis tournez à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.premiere+puis+roundabout.deuxieme",
+    "text": "Prenez la première rue à droite, puis, au rond-point, prenez la deuxième sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.premiere+puis+roundabout.premiere",
+    "text": "Prenez la première rue à droite, puis, au rond-point, prenez la première sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.premiere+puis+roundabout.troisieme",
+    "text": "Prenez la première rue à droite, puis, au rond-point, prenez la troisième sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.street.right.premiere",
+    "text": "Prenez la première rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I2",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.premiere+puis+street.right.deuxieme",
+    "text": "Prenez la première rue à gauche, puis prenez la deuxième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.premiere+puis+street.left.deuxieme",
+    "text": "Prenez la première rue à gauche, puis prenez la deuxième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.premiere+puis+street.right.premiere",
+    "text": "Prenez la première rue à gauche, puis prenez la première rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.premiere+puis+street.left.premiere",
+    "text": "Prenez la première rue à gauche, puis prenez la première rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.premiere+puis+street.right.prochaine",
+    "text": "Prenez la première rue à gauche, puis prenez la prochaine rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.premiere+puis+street.left.prochaine",
+    "text": "Prenez la première rue à gauche, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.premiere+puis+turn.right",
+    "text": "Prenez la première rue à gauche, puis tournez à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.premiere+puis+turn.left",
+    "text": "Prenez la première rue à gauche, puis tournez à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.premiere+puis+roundabout.deuxieme",
+    "text": "Prenez la première rue à gauche, puis, au rond-point, prenez la deuxième sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.premiere+puis+roundabout.premiere",
+    "text": "Prenez la première rue à gauche, puis, au rond-point, prenez la première sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.premiere+puis+roundabout.troisieme",
+    "text": "Prenez la première rue à gauche, puis, au rond-point, prenez la troisième sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.street.left.premiere",
+    "text": "Prenez la première rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I2",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.prochaine+puis+street.right.deuxieme",
+    "text": "Prenez la prochaine rue à droite, puis prenez la deuxième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.prochaine+puis+street.left.deuxieme",
+    "text": "Prenez la prochaine rue à droite, puis prenez la deuxième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.prochaine+puis+street.right.premiere",
+    "text": "Prenez la prochaine rue à droite, puis prenez la première rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.prochaine+puis+street.left.premiere",
+    "text": "Prenez la prochaine rue à droite, puis prenez la première rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.prochaine+puis+street.right.prochaine",
+    "text": "Prenez la prochaine rue à droite, puis prenez la prochaine rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.prochaine+puis+street.left.prochaine",
+    "text": "Prenez la prochaine rue à droite, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.prochaine+puis+turn.right",
+    "text": "Prenez la prochaine rue à droite, puis tournez à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.prochaine+puis+turn.left",
+    "text": "Prenez la prochaine rue à droite, puis tournez à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.prochaine+puis+roundabout.deuxieme",
+    "text": "Prenez la prochaine rue à droite, puis, au rond-point, prenez la deuxième sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.prochaine+puis+roundabout.premiere",
+    "text": "Prenez la prochaine rue à droite, puis, au rond-point, prenez la première sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.prochaine+puis+roundabout.troisieme",
+    "text": "Prenez la prochaine rue à droite, puis, au rond-point, prenez la troisième sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.street.right.prochaine",
+    "text": "Prenez la prochaine rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I2",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.prochaine+puis+street.right.deuxieme",
+    "text": "Prenez la prochaine rue à gauche, puis prenez la deuxième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.prochaine+puis+street.left.deuxieme",
+    "text": "Prenez la prochaine rue à gauche, puis prenez la deuxième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.prochaine+puis+street.right.premiere",
+    "text": "Prenez la prochaine rue à gauche, puis prenez la première rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.prochaine+puis+street.left.premiere",
+    "text": "Prenez la prochaine rue à gauche, puis prenez la première rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.prochaine+puis+street.right.prochaine",
+    "text": "Prenez la prochaine rue à gauche, puis prenez la prochaine rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.prochaine+puis+street.left.prochaine",
+    "text": "Prenez la prochaine rue à gauche, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.prochaine+puis+turn.right",
+    "text": "Prenez la prochaine rue à gauche, puis tournez à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.prochaine+puis+turn.left",
+    "text": "Prenez la prochaine rue à gauche, puis tournez à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.prochaine+puis+roundabout.deuxieme",
+    "text": "Prenez la prochaine rue à gauche, puis, au rond-point, prenez la deuxième sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.prochaine+puis+roundabout.premiere",
+    "text": "Prenez la prochaine rue à gauche, puis, au rond-point, prenez la première sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.prochaine+puis+roundabout.troisieme",
+    "text": "Prenez la prochaine rue à gauche, puis, au rond-point, prenez la troisième sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.street.left.prochaine",
+    "text": "Prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I2",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.troisieme+puis+street.right.deuxieme",
+    "text": "Prenez la troisième rue à droite, puis prenez la deuxième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.troisieme+puis+street.left.deuxieme",
+    "text": "Prenez la troisième rue à droite, puis prenez la deuxième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.troisieme+puis+street.right.premiere",
+    "text": "Prenez la troisième rue à droite, puis prenez la première rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.troisieme+puis+street.left.premiere",
+    "text": "Prenez la troisième rue à droite, puis prenez la première rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.troisieme+puis+street.right.prochaine",
+    "text": "Prenez la troisième rue à droite, puis prenez la prochaine rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.troisieme+puis+street.left.prochaine",
+    "text": "Prenez la troisième rue à droite, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.troisieme+puis+turn.right",
+    "text": "Prenez la troisième rue à droite, puis tournez à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.troisieme+puis+turn.left",
+    "text": "Prenez la troisième rue à droite, puis tournez à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.troisieme+puis+roundabout.deuxieme",
+    "text": "Prenez la troisième rue à droite, puis, au rond-point, prenez la deuxième sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.troisieme+puis+roundabout.premiere",
+    "text": "Prenez la troisième rue à droite, puis, au rond-point, prenez la première sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.troisieme+puis+roundabout.troisieme",
+    "text": "Prenez la troisième rue à droite, puis, au rond-point, prenez la troisième sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.street.right.troisieme",
+    "text": "Prenez la troisième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I2",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.troisieme+puis+street.right.deuxieme",
+    "text": "Prenez la troisième rue à gauche, puis prenez la deuxième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.troisieme+puis+street.left.deuxieme",
+    "text": "Prenez la troisième rue à gauche, puis prenez la deuxième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.troisieme+puis+street.right.premiere",
+    "text": "Prenez la troisième rue à gauche, puis prenez la première rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.troisieme+puis+street.left.premiere",
+    "text": "Prenez la troisième rue à gauche, puis prenez la première rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.troisieme+puis+street.right.prochaine",
+    "text": "Prenez la troisième rue à gauche, puis prenez la prochaine rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.troisieme+puis+street.left.prochaine",
+    "text": "Prenez la troisième rue à gauche, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.troisieme+puis+turn.right",
+    "text": "Prenez la troisième rue à gauche, puis tournez à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.troisieme+puis+turn.left",
+    "text": "Prenez la troisième rue à gauche, puis tournez à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.troisieme+puis+roundabout.deuxieme",
+    "text": "Prenez la troisième rue à gauche, puis, au rond-point, prenez la deuxième sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.troisieme+puis+roundabout.premiere",
+    "text": "Prenez la troisième rue à gauche, puis, au rond-point, prenez la première sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.troisieme+puis+roundabout.troisieme",
+    "text": "Prenez la troisième rue à gauche, puis, au rond-point, prenez la troisième sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.street.left.troisieme",
+    "text": "Prenez la troisième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I2",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.apres.bus_stop",
+    "text": "Tournez à droite après l'arrêt de bus.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.apres.school",
+    "text": "Tournez à droite après l'école.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.apres.hospital",
+    "text": "Tournez à droite après l'hôpital.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.apres.bank",
+    "text": "Tournez à droite après la banque.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.apres.library",
+    "text": "Tournez à droite après la bibliothèque.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.apres.bakery",
+    "text": "Tournez à droite après la boulangerie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.apres.bus_station",
+    "text": "Tournez à droite après la gare routière.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.apres.bookshop",
+    "text": "Tournez à droite après la librairie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.apres.town_hall",
+    "text": "Tournez à droite après la mairie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.apres.pharmacy",
+    "text": "Tournez à droite après la pharmacie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.apres.post_office",
+    "text": "Tournez à droite après la poste.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.apres.gas_station",
+    "text": "Tournez à droite après la station-service.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.apres.cafe",
+    "text": "Tournez à droite après le café.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.apres.shopping_centre",
+    "text": "Tournez à droite après le centre commercial.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.apres.police_station",
+    "text": "Tournez à droite après le commissariat de police.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.apres.shop",
+    "text": "Tournez à droite après le magasin.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.apres.market",
+    "text": "Tournez à droite après le marché.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.apres.museum",
+    "text": "Tournez à droite après le musée.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.apres.car_park",
+    "text": "Tournez à droite après le parking.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.apres.restaurant",
+    "text": "Tournez à droite après le restaurant.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.apres.supermarket",
+    "text": "Tournez à droite après le supermarché.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.apres.theatre",
+    "text": "Tournez à droite après le théâtre.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.avant.bus_stop",
+    "text": "Tournez à droite avant l'arrêt de bus.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I1",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.avant.hotel",
+    "text": "Tournez à droite avant l'hôtel.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I1",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.avant.bus_station",
+    "text": "Tournez à droite avant la gare routière.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I1",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.avant.swimming_pool",
+    "text": "Tournez à droite avant la piscine.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I1",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.avant.cinema",
+    "text": "Tournez à droite avant le cinéma.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I1",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.avant.market",
+    "text": "Tournez à droite avant le marché.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I1",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.avant.car_park",
+    "text": "Tournez à droite avant le parking.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I1",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.avant.stadium",
+    "text": "Tournez à droite avant le stade.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I1",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.avant.supermarket",
+    "text": "Tournez à droite avant le supermarché.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I1",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.school",
+    "text": "Tournez à droite devant l'école.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.hospital",
+    "text": "Tournez à droite devant l'hôpital.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.hotel",
+    "text": "Tournez à droite devant l'hôtel.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.bank",
+    "text": "Tournez à droite devant la banque.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.library",
+    "text": "Tournez à droite devant la bibliothèque.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.bakery",
+    "text": "Tournez à droite devant la boulangerie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.bus_station",
+    "text": "Tournez à droite devant la gare routière.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.train_station",
+    "text": "Tournez à droite devant la gare.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.bookshop",
+    "text": "Tournez à droite devant la librairie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.town_hall",
+    "text": "Tournez à droite devant la mairie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.pharmacy",
+    "text": "Tournez à droite devant la pharmacie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.swimming_pool",
+    "text": "Tournez à droite devant la piscine.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.square",
+    "text": "Tournez à droite devant la place.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.post_office",
+    "text": "Tournez à droite devant la poste.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.gas_station",
+    "text": "Tournez à droite devant la station-service.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.cafe",
+    "text": "Tournez à droite devant le café.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.shopping_centre",
+    "text": "Tournez à droite devant le centre commercial.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.cinema",
+    "text": "Tournez à droite devant le cinéma.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.police_station",
+    "text": "Tournez à droite devant le commissariat de police.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.shop",
+    "text": "Tournez à droite devant le magasin.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.market",
+    "text": "Tournez à droite devant le marché.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.museum",
+    "text": "Tournez à droite devant le musée.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.park",
+    "text": "Tournez à droite devant le parc.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.car_park",
+    "text": "Tournez à droite devant le parking.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.restaurant",
+    "text": "Tournez à droite devant le restaurant.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.stadium",
+    "text": "Tournez à droite devant le stade.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.supermarket",
+    "text": "Tournez à droite devant le supermarché.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right.devant.theatre",
+    "text": "Tournez à droite devant le théâtre.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.right+puis+street.right.deuxieme",
+    "text": "Tournez à droite, puis prenez la deuxième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.right+puis+street.left.deuxieme",
+    "text": "Tournez à droite, puis prenez la deuxième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.right+puis+street.right.premiere",
+    "text": "Tournez à droite, puis prenez la première rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.right+puis+street.left.premiere",
+    "text": "Tournez à droite, puis prenez la première rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.right+puis+street.right.prochaine",
+    "text": "Tournez à droite, puis prenez la prochaine rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.right+puis+street.left.prochaine",
+    "text": "Tournez à droite, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.right+puis+turn.right",
+    "text": "Tournez à droite, puis tournez à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.right+puis+turn.left",
+    "text": "Tournez à droite, puis tournez à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.right+puis+roundabout.deuxieme",
+    "text": "Tournez à droite, puis, au rond-point, prenez la deuxième sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.right+puis+roundabout.premiere",
+    "text": "Tournez à droite, puis, au rond-point, prenez la première sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.right+puis+roundabout.troisieme",
+    "text": "Tournez à droite, puis, au rond-point, prenez la troisième sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.right",
+    "text": "Tournez à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E1",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.bus_stop",
+    "text": "Tournez à gauche après l'arrêt de bus.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.school",
+    "text": "Tournez à gauche après l'école.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.hotel",
+    "text": "Tournez à gauche après l'hôtel.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.bank",
+    "text": "Tournez à gauche après la banque.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.library",
+    "text": "Tournez à gauche après la bibliothèque.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.bakery",
+    "text": "Tournez à gauche après la boulangerie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.bus_station",
+    "text": "Tournez à gauche après la gare routière.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.bookshop",
+    "text": "Tournez à gauche après la librairie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.town_hall",
+    "text": "Tournez à gauche après la mairie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.pharmacy",
+    "text": "Tournez à gauche après la pharmacie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.swimming_pool",
+    "text": "Tournez à gauche après la piscine.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.post_office",
+    "text": "Tournez à gauche après la poste.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.gas_station",
+    "text": "Tournez à gauche après la station-service.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.cafe",
+    "text": "Tournez à gauche après le café.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.shopping_centre",
+    "text": "Tournez à gauche après le centre commercial.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.cinema",
+    "text": "Tournez à gauche après le cinéma.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.police_station",
+    "text": "Tournez à gauche après le commissariat de police.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.shop",
+    "text": "Tournez à gauche après le magasin.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.market",
+    "text": "Tournez à gauche après le marché.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.car_park",
+    "text": "Tournez à gauche après le parking.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.restaurant",
+    "text": "Tournez à gauche après le restaurant.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.stadium",
+    "text": "Tournez à gauche après le stade.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.supermarket",
+    "text": "Tournez à gauche après le supermarché.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.theatre",
+    "text": "Tournez à gauche après le théâtre.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.avant.bus_stop",
+    "text": "Tournez à gauche avant l'arrêt de bus.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I1",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.avant.school",
+    "text": "Tournez à gauche avant l'école.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I1",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.avant.hospital",
+    "text": "Tournez à gauche avant l'hôpital.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I1",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.avant.bus_station",
+    "text": "Tournez à gauche avant la gare routière.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I1",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.avant.museum",
+    "text": "Tournez à gauche avant le musée.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I1",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.avant.car_park",
+    "text": "Tournez à gauche avant le parking.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I1",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.avant.supermarket",
+    "text": "Tournez à gauche avant le supermarché.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I1",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.school",
+    "text": "Tournez à gauche devant l'école.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.hospital",
+    "text": "Tournez à gauche devant l'hôpital.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.hotel",
+    "text": "Tournez à gauche devant l'hôtel.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.bank",
+    "text": "Tournez à gauche devant la banque.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.library",
+    "text": "Tournez à gauche devant la bibliothèque.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.bakery",
+    "text": "Tournez à gauche devant la boulangerie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.bus_station",
+    "text": "Tournez à gauche devant la gare routière.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.train_station",
+    "text": "Tournez à gauche devant la gare.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.bookshop",
+    "text": "Tournez à gauche devant la librairie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.town_hall",
+    "text": "Tournez à gauche devant la mairie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.pharmacy",
+    "text": "Tournez à gauche devant la pharmacie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.swimming_pool",
+    "text": "Tournez à gauche devant la piscine.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.square",
+    "text": "Tournez à gauche devant la place.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.post_office",
+    "text": "Tournez à gauche devant la poste.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.gas_station",
+    "text": "Tournez à gauche devant la station-service.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.cafe",
+    "text": "Tournez à gauche devant le café.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.shopping_centre",
+    "text": "Tournez à gauche devant le centre commercial.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.cinema",
+    "text": "Tournez à gauche devant le cinéma.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.police_station",
+    "text": "Tournez à gauche devant le commissariat de police.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.shop",
+    "text": "Tournez à gauche devant le magasin.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.market",
+    "text": "Tournez à gauche devant le marché.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.museum",
+    "text": "Tournez à gauche devant le musée.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.park",
+    "text": "Tournez à gauche devant le parc.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.car_park",
+    "text": "Tournez à gauche devant le parking.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.restaurant",
+    "text": "Tournez à gauche devant le restaurant.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.stadium",
+    "text": "Tournez à gauche devant le stade.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.supermarket",
+    "text": "Tournez à gauche devant le supermarché.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.devant.theatre",
+    "text": "Tournez à gauche devant le théâtre.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.left+puis+street.right.deuxieme",
+    "text": "Tournez à gauche, puis prenez la deuxième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.left+puis+street.left.deuxieme",
+    "text": "Tournez à gauche, puis prenez la deuxième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.left+puis+street.right.premiere",
+    "text": "Tournez à gauche, puis prenez la première rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.left+puis+street.left.premiere",
+    "text": "Tournez à gauche, puis prenez la première rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.left+puis+street.right.prochaine",
+    "text": "Tournez à gauche, puis prenez la prochaine rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.left+puis+street.left.prochaine",
+    "text": "Tournez à gauche, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.left+puis+turn.right",
+    "text": "Tournez à gauche, puis tournez à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.left+puis+turn.left",
+    "text": "Tournez à gauche, puis tournez à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.left+puis+roundabout.deuxieme",
+    "text": "Tournez à gauche, puis, au rond-point, prenez la deuxième sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.left+puis+roundabout.premiere",
+    "text": "Tournez à gauche, puis, au rond-point, prenez la première sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.left+puis+roundabout.troisieme",
+    "text": "Tournez à gauche, puis, au rond-point, prenez la troisième sortie.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left",
+    "text": "Tournez à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E1",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.wrong_street",
+    "text": "Ce n'est pas la bonne rue.",
+    "voice": "DISPATCHER",
+    "category": "RECOVERY",
+    "template": "R",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.u_turn",
+    "text": "Faites demi-tour.",
+    "voice": "DISPATCHER",
+    "category": "RECOVERY",
+    "template": "R",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "repeat.calm",
+    "text": "Pouvez-vous répéter, s'il vous plaît ?",
+    "voice": "OFFICER",
+    "category": "REPEAT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "repeat.frantic",
+    "text": "Répétez ! Vite !",
+    "voice": "OFFICER",
+    "category": "REPEAT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "repeat.urgent",
+    "text": "Répétez, s'il vous plaît !",
+    "voice": "OFFICER",
+    "category": "REPEAT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "outcome.captured",
+    "text": "Le suspect est arrêté !",
+    "voice": "DISPATCHER",
+    "category": "OUTCOME",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.moving_away",
+    "text": "Le suspect s'éloigne.",
+    "voice": "DISPATCHER",
+    "category": "OUTCOME",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "outcome.escaped",
+    "text": "Le suspect s'est échappé.",
+    "voice": "DISPATCHER",
+    "category": "OUTCOME",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  }
+]

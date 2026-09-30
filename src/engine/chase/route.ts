@@ -16,6 +16,8 @@ import type { MapLocation } from '../world/types';
 export interface RouteSpec {
   length: [number, number];
   mode: TravelMode;
+  /** Extra condition a route must meet (for example, one the level's French can describe). */
+  accept?: (nodes: readonly string[]) => boolean;
 }
 
 export interface GeneratedRoute {
@@ -123,6 +125,7 @@ export function generateRoute(graph: TownGraph, rng: Rng, spec: RouteSpec, attem
     if (followProblem(graph, nodes, spec.mode)) continue;
     const length = pathLength(graph, nodes);
     if (length < spec.length[0] || length > spec.length[1]) continue;
+    if (spec.accept && !spec.accept(nodes)) continue;
     return { nodes, length, destination: destination.id };
   }
   throw new Error(`No valid route after ${attempts} attempts`);
