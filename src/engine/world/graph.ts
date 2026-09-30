@@ -61,6 +61,11 @@ export class TownGraph {
     return this.edgeById.has(id);
   }
 
+  /** The edge joining two nodes, if there is one. */
+  edgeBetween(a: string, b: string): MapEdge | undefined {
+    return this.edgesAt(a).find((e) => this.other(e, a) === b);
+  }
+
   edgesAt(nodeId: string): readonly MapEdge[] {
     return this.incident.get(nodeId) ?? [];
   }
@@ -127,6 +132,39 @@ export class TownGraph {
       at = p.node;
     }
     return { nodes, edges, length: dist.get(to) ?? 0 };
+  }
+
+  private readonly distanceCache = new Map<string, Map<string, number>>();
+
+  /** Shortest travel distance from `start` to every reachable node (cached: the map never changes). */
+  distancesFrom(start: string, mode: TravelMode): Map<string, number> {
+    const key = `${mode}:${start}`;
+    let cached = this.distanceCache.get(key);
+    if (!cached) {
+      cached = this.computeDistancesFrom(start, mode);
+      this.distanceCache.set(key, cached);
+    }
+    return cached;
+  }
+
+  private computeDistancesFrom(start: string, mode: TravelMode): Map<string, number> {
+    const dist = new Map<string, number>([[start, 0]]);
+    const done = new Set<string>();
+    while (true) {
+      let current: string | undefined;
+      let best = Infinity;
+      for (const [id, d] of dist) {
+        if (!done.has(id) && d < best) {
+          best = d;
+          current = id;
+        }
+      }
+      if (current === undefined) return dist;
+      done.add(current);
+      for (const step of this.steps(current, mode)) {
+        if (best + step.length < (dist.get(step.to) ?? Infinity)) dist.set(step.to, best + step.length);
+      }
+    }
   }
 
   /** All nodes reachable from `start` (following one-way rules for cars). */

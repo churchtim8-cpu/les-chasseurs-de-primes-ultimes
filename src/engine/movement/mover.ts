@@ -18,7 +18,7 @@ import { MOVEMENT } from './settings';
 import { exitsAt, type Exit, type TurnIntent } from './turns';
 
 export type Throttle = 'CRUISE' | 'ACCELERATE' | 'BRAKE';
-export type WaitReason = 'JUNCTION' | 'DEAD_END';
+export type WaitReason = 'JUNCTION' | 'DEAD_END' | 'ARRIVED';
 
 export interface MoverStart {
   edgeId: string;
@@ -53,6 +53,11 @@ export class Mover {
   private queuedIntent: TurnIntent | null = null;
   private waitingReason: WaitReason | null = null;
   private currentMode: TravelMode;
+  /** Planned route (node IDs) for computer-driven movers; index of the next node to reach. */
+  private plan: string[] | null = null;
+  private planIndex = 0;
+  /** Multiplies cruise and top speed (the suspect uses this to be slower or faster). */
+  speedFactor = 1;
 
   constructor(
     private readonly graph: TownGraph,
@@ -92,6 +97,11 @@ export class Mover {
     };
   }
 
+  /** Debug tools and tests: set the current speed directly (e.g. to match another mover). */
+  setSpeed(speed: number): void {
+    this.speed = Math.max(0, speed);
+  }
+
   /** Where the mover is, in the form the constructor takes (to park or restart it). */
   location(): MoverStart {
     const length = this.graph.edgeLength(this.edge);
@@ -102,6 +112,22 @@ export class Mover {
       towards: this.target,
       mode: this.currentMode,
     };
+  }
+
+  /**
+   * Follow a fixed list of nodes (the suspect's route). `nodes` must start with
+   * the node this mover is heading towards; each later node must be a legal
+   * next step. The mover stops with reason ARRIVED at the last node.
+   */
+  followPlan(nodes: string[]): void {
+    if (nodes[0] !== this.target) throw new Error(`Plan must start at ${this.target}, not ${nodes[0]}`);
+    this.plan = nodes;
+    this.planIndex = 0;
+  }
+
+  /** How many planned nodes have been reached (0 when not following a plan). */
+  get planProgress(): number {
+    return this.planIndex;
   }
 
   setThrottle(throttle: Throttle): void {
@@ -163,7 +189,8 @@ export class Mover {
       return passed;
     }
 
-    const targetSpeed = this.throttle === 'ACCELERATE' ? settings.max : this.throttle === 'BRAKE' ? 0 : settings.cruise;
+    const top = (this.throttle === 'ACCELERATE' ? settings.max : settings.cruise) * this.speedFactor;
+    const targetSpeed = this.throttle === 'BRAKE' ? 0 : top;
     if (this.speed < targetSpeed) this.speed = Math.min(targetSpeed, this.speed + settings.acceleration * dt);
     else this.speed = Math.max(targetSpeed, this.speed - settings.braking * dt);
 
@@ -193,6 +220,21 @@ export class Mover {
 
   /** At the end of the current edge: pick the next edge or start waiting. */
   private chooseNext(): boolean {
+    if (this.plan) {
+      this.planIndex++;
+      const nextNode = this.plan[this.planIndex];
+      const exit =
+        nextNode === undefined
+          ? undefined
+          : exitsAt(this.graph, this.edge, this.target, this.currentMode).find((e) => e.step.to === nextNode);
+      if (!exit) {
+        this.waitingReason = 'ARRIVED';
+        this.speed = 0;
+        return false;
+      }
+      this.enter(exit);
+      return true;
+    }
     const exits = exitsAt(this.graph, this.edge, this.target, this.currentMode);
     const next = this.pickExit(exits);
     if (!next) {
@@ -217,6 +259,7 @@ export class Mover {
   }
 
   private mustWaitAt(nodeId: string): boolean {
+    if (this.plan) return this.planIndex >= this.plan.length - 1;
     const exits = exitsAt(this.graph, this.edge, nodeId, this.currentMode);
     if (exits.length === 0) return true;
     if (exits.length === 1) return false;

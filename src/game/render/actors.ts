@@ -16,6 +16,17 @@ export function createPoliceCar(scene: Phaser.Scene): Phaser.GameObjects.Contain
   return scene.add.container(0, 0, [g, lightRed, lightBlue]).setDepth(30).setScale(1.3);
 }
 
+/** Placeholder suspect car, drawn facing east. */
+export function createSuspectCar(scene: Phaser.Scene, colour = 0xc0392b): Phaser.GameObjects.Container {
+  const g = scene.add.graphics();
+  g.fillStyle(0x000000, 0.25).fillRoundedRect(-9 + 1.5, -4.8 + 2, 18, 9.6, 2.5);
+  g.fillStyle(colour).fillRoundedRect(-9, -4.8, 18, 9.6, 2.5);
+  g.fillStyle(0x27323a).fillRoundedRect(1.5, -3.8, 3.5, 7.6, 1);
+  g.fillStyle(0x27323a).fillRoundedRect(-6.5, -3.6, 2.5, 7.2, 1);
+  g.lineStyle(1, 0xffffff, 0.5).strokeRoundedRect(-9, -4.8, 18, 9.6, 2.5);
+  return scene.add.container(0, 0, [g]).setDepth(29).setScale(1.3);
+}
+
 /** Placeholder police officer on foot, seen from above. */
 export function createOfficer(scene: Phaser.Scene): Phaser.GameObjects.Container {
   const g = scene.add.graphics();
