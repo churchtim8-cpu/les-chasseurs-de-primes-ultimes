@@ -8,12 +8,11 @@ export const GAME_WIDTH = 1280;
 export const GAME_HEIGHT = 720;
 
 /**
- * Title screen. For milestone M0 it proves rendering, input (keyboard and
- * touch) and seed creation work; later milestones start a chase from here.
+ * Title screen. Starting creates a chase seed and opens the town; later
+ * milestones go through difficulty selection and the mission briefing.
  */
 export class TitleScene extends Phaser.Scene {
   static readonly KEY = 'Title';
-  private status?: Phaser.GameObjects.Text;
   private seed?: ChaseSeed;
 
   constructor() {
@@ -52,15 +51,6 @@ export class TitleScene extends Phaser.Scene {
       .setOrigin(0.5);
     this.tweens.add({ targets: prompt, alpha: 0.35, duration: 900, yoyo: true, repeat: -1 });
 
-    this.status = this.add
-      .text(GAME_WIDTH / 2, 440, '', {
-        fontFamily: FONT_FAMILY,
-        fontSize: '20px',
-        color: toCss(PALETTE.ink),
-        align: 'center',
-      })
-      .setOrigin(0.5);
-
     this.input.keyboard?.on('keydown-ENTER', () => this.start());
     this.input.keyboard?.on('keydown-SPACE', () => this.start());
     this.input.on('pointerdown', () => this.start());
@@ -70,7 +60,7 @@ export class TitleScene extends Phaser.Scene {
     this.seed = newSeed('EASY');
     debugState.info.set('seed', this.seed.code);
     debugState.info.set('difficulty', DIFFICULTY_SETTINGS[this.seed.difficulty].label.en);
-    this.status?.setText(`Poursuite ${this.seed.code}\nBellevue City arrive bientôt…`);
+    this.scene.start('Town');
   }
 
   /** A simple top-down coastline: town blocks, a promenade, sand and sea. */
