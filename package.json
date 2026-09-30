@@ -1,0 +1,39 @@
+{
+  "name": "les-chasseurs-de-primes-ultimes",
+  "version": "0.1.0",
+  "description": "A French listening-comprehension chase game set in Bellevue City.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 4173 --strictPort",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "check": "npm run typecheck && npm test && npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/churchtim8-cpu/les-chasseurs-de-primes-ultimes.git"
+  },
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/churchtim8-cpu/les-chasseurs-de-primes-ultimes/issues"
+  },
+  "homepage": "https://github.com/churchtim8-cpu/les-chasseurs-de-primes-ultimes#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1",
+    "vitest": "^5.0.2"
+  },
+  "dependencies": {
+    "phaser": "^4.2.1"
+  },
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  }
+}
