@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test('title screen loads, accepts input and shows debug info', async ({ page }) => {
+test('title screen opens Bellevue City, debug info works', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('console', (message) => {
@@ -14,11 +14,17 @@ test('title screen loads, accepts input and shows debug info', async ({ page }) 
     page.evaluate(() => window.__bellevue?.game.scene.getScenes(true).map((s) => s.scene.key) ?? []);
   await expect.poll(activeScenes).toEqual(expect.arrayContaining(['Title', 'DebugOverlay']));
 
-  // Starting (keyboard) creates a valid Easy seed code.
-  await page.locator('#game canvas').click();
+  // Starting creates a valid Easy seed code and opens the town.
   await page.keyboard.press('Enter');
+  await expect.poll(activeScenes).toEqual(expect.arrayContaining(['Town', 'DebugOverlay']));
   const seed = await page.evaluate(() => window.__bellevue?.debug.info.get('seed'));
   expect(seed).toMatch(/^BV-E-[0-9A-Z]{4}-[0-9A-Z]{4}$/);
+
+  // Zooming in changes the camera zoom.
+  const zoom = () => page.evaluate(() => Number(window.__bellevue?.debug.info.get('zoom')));
+  const before = await zoom();
+  await page.keyboard.press('Equal');
+  await expect.poll(zoom).toBeGreaterThan(before);
 
   // Debug mode toggles off with the backtick key.
   await page.keyboard.press('Backquote');

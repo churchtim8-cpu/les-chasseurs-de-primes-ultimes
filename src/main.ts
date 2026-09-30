@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { DebugOverlayScene } from './game/debug/DebugOverlayScene';
 import { debugState } from './game/debug/debugState';
 import { GAME_HEIGHT, GAME_WIDTH, TitleScene } from './game/scenes/TitleScene';
+import { TownScene } from './game/scenes/TownScene';
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
@@ -10,7 +11,7 @@ const game = new Phaser.Game({
   height: GAME_HEIGHT,
   backgroundColor: '#16323d',
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
-  scene: [TitleScene, DebugOverlayScene],
+  scene: [TitleScene, TownScene, DebugOverlayScene],
 });
 
 // The overlay runs on top of every other scene.
