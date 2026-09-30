@@ -34,11 +34,15 @@ The police car drives forward on its own; you choose where it goes. Choices are 
 | ↓ / S (hold) | ▼ | Slow down and stop |
 | Space / U | ⟲ | Turn around (faire demi-tour) |
 | E | ⇄ | Get out of the car / back in (next to it) |
-| R | | Repeat the last scanner call (after a chase: replay the same chase) |
+| R | ⟳ RÉPÉTER | Ask for the last scanner call again (after a chase: replay the same chase). Easy: unlimited; Intermediate: 3 per chase; Hard: costs 5 s; Expert: once. |
 | M | | Whole-town overview (debug mode) |
 | Esc | | Back to the title screen |
 
 Touch buttons appear on touch screens (or add `?touch=1` to the address).
+
+## French audio
+
+The scanner plays pre-recorded ElevenLabs clips. `npm run audio:script` writes every line the game can say to `docs/audio/script.csv` for review. Recordings go in `public/audio/dispatcher/` and `public/audio/officer/`, named by audio ID (for example `dir.turn.left.mp3`); `npm run audio:manifest` then lists them in `public/audio/manifest.json`. Until a line is recorded it is shown as text, with the radio beep and static. Add `?radio=0` to hear the clips without the radio filter.
 
 ## Debug mode
 

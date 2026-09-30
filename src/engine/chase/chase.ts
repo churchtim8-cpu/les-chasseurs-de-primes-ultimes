@@ -17,6 +17,7 @@ import { Rng } from '../rng/prng';
 import type { TownGraph } from '../world/graph';
 import { roadDistance } from './distance';
 import type { ChaseScenario } from './scenario';
+import { RepeatCounter, type RepeatResult } from '../audio/repeat';
 import { CHASE_SETTINGS, type ChaseSettings } from './settings';
 
 export type ChasePhase = 'PURSUIT' | 'CAPTURED' | 'ESCAPED';
@@ -45,6 +46,9 @@ export interface ChaseStatus {
   warning: boolean;
   /** 0..1 while closing in for the capture. */
   captureProgress: number;
+  /** Repeats asked for so far (for scoring), and how many are left (null = no limit). */
+  repeatsUsed: number;
+  repeatsLeft: number | null;
   escapeReason?: EscapeReason;
 }
 
@@ -52,6 +56,7 @@ export class Chase {
   player: Mover;
   readonly suspect: Mover;
   readonly navigator: Navigator;
+  private readonly repeats: RepeatCounter;
   private readonly settings: ChaseSettings;
   private phase: ChasePhase = 'PURSUIT';
   private elapsed = 0;
@@ -71,6 +76,7 @@ export class Chase {
   ) {
     this.settings = CHASE_SETTINGS[scenario.difficulty];
     this.timeLeft = DIFFICULTY_SETTINGS[scenario.difficulty].timeLimitSeconds;
+    this.repeats = new RepeatCounter(DIFFICULTY_SETTINGS[scenario.difficulty].repeat);
     this.player = new Mover(graph, scenario.playerStart);
     this.suspect = new Mover(graph, scenario.suspectStart);
     this.suspect.followPlan(scenario.suspectPlan);
@@ -139,6 +145,19 @@ export class Chase {
     return events;
   }
 
+  /**
+   * The player asks for the last call again. Returns what the officer should
+   * say (by urgency) or that no repeats are left; the caller replays
+   * `navigator.last`. On Hard a repeat costs time.
+   */
+  requestRepeat(): RepeatResult | null {
+    if (this.phase !== 'PURSUIT' || !this.navigator.last) return null;
+    const status = this.status;
+    const result = this.repeats.request(status.signal, status.warning);
+    if (result.allowed) this.timeLeft = Math.max(0, this.timeLeft - result.penaltySeconds);
+    return result;
+  }
+
   /** Debug tools: end the chase now with a given outcome. */
   forceOutcome(outcome: 'CAPTURED' | 'ESCAPED'): ChaseEvent[] {
     if (this.phase !== 'PURSUIT') return [];
@@ -174,6 +193,8 @@ export class Chase {
       suspectVisible: this.sighted,
       warning: this.warning,
       captureProgress: Math.min(1, this.closeFor / s.captureHold),
+      repeatsUsed: this.repeats.used,
+      repeatsLeft: this.repeats.left,
       ...(this.escapeReason ? { escapeReason: this.escapeReason } : {}),
     };
   }

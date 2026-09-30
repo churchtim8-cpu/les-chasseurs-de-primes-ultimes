@@ -17,6 +17,7 @@ export class Hud {
   private readonly toast: Phaser.GameObjects.Text;
   private readonly banner: Phaser.GameObjects.Text;
   private readonly scanner: Phaser.GameObjects.Text;
+  private readonly repeat: Phaser.GameObjects.Text;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -55,6 +56,18 @@ export class Hud {
       this.signalBars.push(this.add(scene.add.rectangle(92 + i * 14, 88, 10, 10 + i * 4, PALETTE.cream).setOrigin(0, 1)));
     }
 
+    // The Repeat button (blueprint sections 16 and 19); R on the keyboard.
+    this.repeat = this.add(
+      scene.add.text(16, 102, '', {
+        fontFamily: FONT_FAMILY,
+        fontSize: '17px',
+        fontStyle: 'bold',
+        color: toCss(PALETTE.cream),
+        backgroundColor: 'rgba(22, 50, 61, 0.85)',
+        padding: { x: 10, y: 7 },
+      }),
+    ).setInteractive({ useHandCursor: true });
+
     this.toast = this.add(
       scene.add
         .text(width / 2, 74, '', {
@@ -67,7 +80,7 @@ export class Hud {
         .setOrigin(0.5, 0)
         .setVisible(false),
     );
-    // The police scanner: the French instruction, shown for a few seconds (audio arrives in M5).
+    // The police scanner: the French instruction as text, for as long as the level allows.
     this.scanner = this.add(
       scene.add
         .text(width / 2, scene.scale.height - 28, '', {
@@ -109,6 +122,18 @@ export class Hud {
     this.signalBars.forEach((bar, i) => bar.setFillStyle(i < lit ? colour : 0x55656b, 1));
     const blink = status.warning && Math.floor(this.scene.time.now / 300) % 2 === 0;
     this.signalLabel.setColor(blink ? '#ffb4a2' : toCss(PALETTE.cream));
+
+    const left = status.repeatsLeft;
+    this.repeat.setText(left === null ? '⟳ RÉPÉTER (R)' : `⟳ RÉPÉTER (R) · ${left}`);
+    this.repeat.setAlpha(left === 0 ? 0.45 : 1);
+  }
+
+  /** Called when the Repeat button is clicked or tapped. */
+  onRepeat(listener: () => void): void {
+    this.repeat.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
+      event.stopPropagation();
+      listener();
+    });
   }
 
   showToast(message: string, ms = 1600): void {
@@ -117,10 +142,14 @@ export class Hud {
     this.scene.tweens.add({ targets: this.toast, alpha: 0, delay: ms, duration: 400 });
   }
 
-  /** Show a scanner call ("SCANNER : Tournez à gauche.") for `seconds`. */
+  /** Show a scanner call ("SCANNER : Tournez à gauche.") for `seconds`; 0 hides the text (audio only). */
   showScanner(text: string, seconds: number): void {
-    this.scanner.setText(`SCANNER : ${text}`).setVisible(true).setAlpha(1);
     this.scene.tweens.killTweensOf(this.scanner);
+    if (seconds <= 0) {
+      this.scanner.setVisible(false);
+      return;
+    }
+    this.scanner.setText(`SCANNER : ${text}`).setVisible(true).setAlpha(1);
     this.scene.tweens.add({ targets: this.scanner, alpha: 0, delay: seconds * 1000, duration: 400 });
   }
 

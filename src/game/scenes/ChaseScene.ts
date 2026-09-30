@@ -1,5 +1,8 @@
 import Phaser from 'phaser';
 import { BELLEVUE } from '../../content/map/bellevue';
+import { audioCheck } from '../../engine/audio/manifest';
+import { OUTCOME_LINES, REPEAT_LINES } from '../../engine/audio/script';
+import { DIFFICULTY_SETTINGS } from '../../engine/difficulty';
 import { Chase, type ChaseEvent } from '../../engine/chase/chase';
 import { generateScenario } from '../../engine/chase/scenario';
 import type { Transmission } from '../../engine/language/navigator';
@@ -8,6 +11,7 @@ import { LOCATION_WORD_BY_ID, withArticle } from '../../engine/language/location
 import { Mover, type MoverStart } from '../../engine/movement/mover';
 import { BOARDING_DISTANCE } from '../../engine/movement/settings';
 import { TownGraph } from '../../engine/world/graph';
+import { scannerAudio, type SpokenLine } from '../audio/ScannerAudio';
 import { CameraRig } from '../camera/cameraRig';
 import { debugState } from '../debug/debugState';
 import { Hud } from '../hud/Hud';
@@ -24,8 +28,9 @@ type Stage = 'COUNTDOWN' | 'PURSUIT' | 'RESULTS';
 
 /**
  * One chase: the suspect drives its generated route and the player pursues,
- * guided by the police scanner's French instructions (shown as text until
- * the recordings arrive in M5). R repeats the last call.
+ * guided by the police scanner's French: pre-recorded clips from the audio
+ * manifest, with the text on screen as the level allows (and always when a
+ * line has no recording yet). R or the Repeat button asks for the last call again.
  *
  * Debug keys (debug mode only): C = jump onto the suspect (test capture),
  * X = force escape, N = next chase.
@@ -61,7 +66,11 @@ export class ChaseScene extends Phaser.Scene {
 
   create(): void {
     this.graph = new TownGraph(BELLEVUE);
-    this.chase = new Chase(this.graph, generateScenario(this.graph, this.seed));
+    this.chase = new Chase(this.graph, generateScenario(this.graph, this.seed), {
+      hasAudio: audioCheck(scannerAudio.library),
+    });
+    scannerAudio.preload([...Object.values(REPEAT_LINES), ...Object.values(OUTCOME_LINES)].map((l) => l.audioId));
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => scannerAudio.stop());
     this.layers = drawTown(this, this.graph);
     this.routeOverlay = this.drawRoute();
     this.suspectCar = createSuspectCar(this).setAlpha(0);
@@ -79,6 +88,7 @@ export class ChaseScene extends Phaser.Scene {
     this.controls = new Controls(this);
     this.controls.onAction((action) => this.handleAction(action));
     this.hud = new Hud(this, { number: 1, total: 8 });
+    this.hud.onRepeat(() => this.repeat());
 
     const ui = this.cameras.add(0, 0, this.scale.width, this.scale.height);
     ui.ignore(worldObjects);
@@ -94,6 +104,7 @@ export class ChaseScene extends Phaser.Scene {
     debugState.info.set('difficulty', this.chase.scenario.difficulty);
     debugState.info.set('destination', destination ? withArticle(destination) : this.chase.scenario.destination);
     debugState.info.set('route', `${this.chase.scenario.route.length} nodes, ${Math.round(this.chase.scenario.routeLength)} m`);
+    debugState.info.set('audio', `${scannerAudio.clipCount} clips`);
     this.hud.update(this.chase.status, 'CAR');
     this.countdown();
   }
@@ -118,6 +129,7 @@ export class ChaseScene extends Phaser.Scene {
       debugState.info.set('queued', me.queued ?? '-');
       debugState.info.set('speed', me.speed.toFixed(0));
       debugState.info.set('zoom', this.cameras.main.zoom.toFixed(3));
+      debugState.info.set('repeats', `${status.repeatsUsed} used, ${status.repeatsLeft ?? 'unlimited'} left`);
     }
   }
 
@@ -135,12 +147,18 @@ export class ChaseScene extends Phaser.Scene {
           if (event.on) this.hud.showToast('Suspect en vue !');
           break;
         case 'WARNING':
-          if (event.on) this.hud.showToast('Le suspect s’éloigne !');
+          if (event.on) {
+            this.hud.showToast('Le suspect s’éloigne !');
+            void scannerAudio.play([{ audioId: OUTCOME_LINES.WARNING.audioId, radio: true }]);
+          }
           break;
         case 'CAPTURED':
-        case 'ESCAPED':
+        case 'ESCAPED': {
+          const line = event.type === 'CAPTURED' ? OUTCOME_LINES.CAPTURED : OUTCOME_LINES.ESCAPED;
+          void scannerAudio.play([{ audioId: line.audioId, radio: true }]);
           this.showResults();
           break;
+        }
         case 'SUSPECT_ARRIVED':
           break;
         case 'TRANSMISSION':
@@ -150,8 +168,17 @@ export class ChaseScene extends Phaser.Scene {
     }
   }
 
-  private showTransmission(transmission: Transmission): void {
-    this.hud.showScanner(transmission.text, LANGUAGE_SETTINGS[this.chase.scenario.difficulty].textSeconds);
+  /**
+   * Speak a scanner call and show its text as the level allows: Hard and
+   * Expert are audio only, but a line with no recording yet is always shown.
+   * `before` is spoken first (the officer asking for a repeat).
+   */
+  private showTransmission(transmission: Transmission, before: SpokenLine[] = []): void {
+    const difficulty = this.chase.scenario.difficulty;
+    const voiced = transmission.instructions.every((i) => scannerAudio.has(i.audioId));
+    const audioOnly = DIFFICULTY_SETTINGS[difficulty].textDisplay === 'AUDIO_ONLY' && voiced;
+    this.hud.showScanner(transmission.text, audioOnly ? 0 : LANGUAGE_SETTINGS[difficulty].textSeconds);
+    void scannerAudio.play([...before, ...transmission.instructions.map((i) => ({ audioId: i.audioId, radio: true }))]);
     const detail = transmission.instructions.map((i) => `${i.template} ${i.audioId}`).join(' + ');
     debugState.info.set('scanner', `${transmission.kind}: ${detail}`);
   }
@@ -255,7 +282,7 @@ export class ChaseScene extends Phaser.Scene {
     keyboard.on('keydown-ENTER', () => this.stage === 'RESULTS' && this.nextChase());
     keyboard.on('keydown-R', () => {
       if (this.stage === 'RESULTS') this.scene.restart({ seed: this.seed });
-      else if (this.stage === 'PURSUIT' && this.chase.navigator.last) this.showTransmission(this.chase.navigator.last);
+      else this.repeat();
     });
     keyboard.on('keydown-C', () => {
       if (debugState.isEnabled && this.stage === 'PURSUIT') this.chase.teleportPlayerToSuspect();
@@ -264,6 +291,21 @@ export class ChaseScene extends Phaser.Scene {
       if (debugState.isEnabled && this.stage === 'PURSUIT') this.handleEvents(this.chase.forceOutcome('ESCAPED'));
     });
     keyboard.on('keydown-N', () => debugState.isEnabled && this.nextChase());
+  }
+
+  /** The officer asks the dispatcher to repeat, then the last call plays again, unchanged. */
+  private repeat(): void {
+    if (this.stage !== 'PURSUIT') return;
+    const last = this.chase.navigator.last;
+    const result = this.chase.requestRepeat();
+    if (!result || !last) return;
+    if (!result.allowed) {
+      this.hud.showToast('Plus de répétitions !');
+      return;
+    }
+    const request = REPEAT_LINES[result.urgency];
+    this.hud.showToast(result.penaltySeconds > 0 ? `${request.text}  (−${result.penaltySeconds} s)` : request.text);
+    this.showTransmission(last, [{ audioId: request.audioId, radio: false }]);
   }
 
   /** Debug: the suspect's whole route and its destination. */
