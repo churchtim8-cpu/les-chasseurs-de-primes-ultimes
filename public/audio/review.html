@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scanner recordings</title>
+<style>
+  :root { --bg: #f6ecd2; --ink: #16323d; --muted: #5b6b70; --line: #d9ccaa; --accent: #c8553d; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.4 system-ui, sans-serif; }
+  main { max-width: 900px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 24px; margin: 8px 0 4px; }
+  p { color: var(--muted); margin: 0 0 12px; }
+  input { width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: 16px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 12px; }
+  ol { list-style: none; padding: 0; margin: 0; }
+  li { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .text { flex: 1 1 280px; font-weight: 600; }
+  .meta { color: var(--muted); font-size: 13px; font-weight: 400; display: block; }
+  audio { height: 36px; flex: 0 1 300px; max-width: 100%; }
+  .officer .text { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Scanner recordings</h1>
+  <p>Every French line the game can play, as recorded. Type to filter.</p>
+  <input id="filter" type="search" placeholder="Filtrer : banque, deuxième, rond-point…">
+  <ol id="list"></ol>
+</main>
+<script>
+  const list = document.getElementById('list');
+  fetch('manifest.json').then((r) => r.json()).then((manifest) => {
+    const clips = Object.entries(manifest.clips).sort((a, b) => a[1].text.localeCompare(b[1].text, 'fr'));
+    for (const [id, clip] of clips) {
+      const li = document.createElement('li');
+      li.className = clip.voice.toLowerCase();
+      li.dataset.search = `${clip.text} ${id}`.toLowerCase();
+      const text = document.createElement('span');
+      text.className = 'text';
+      text.textContent = clip.text;
+      const meta = document.createElement('span');
+      meta.className = 'meta';
+      meta.textContent = `${clip.voice === 'OFFICER' ? 'Officer' : 'Dispatcher'} · ${id}`;
+      text.append(meta);
+      const audio = document.createElement('audio');
+      audio.controls = true;
+      audio.preload = 'none';
+      audio.src = clip.file;
+      li.append(text, audio);
+      list.append(li);
+    }
+  });
+  document.getElementById('filter').addEventListener('input', (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    for (const li of list.children) li.hidden = q !== '' && !li.dataset.search.includes(q);
+  });
+</script>
+</body>
+</html>
