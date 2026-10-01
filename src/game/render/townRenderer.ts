@@ -5,7 +5,7 @@ import { HALF_WIDTH, PAVEMENT, pointInPolygon, pointInRect, pointSegmentDistance
 import type { TownGraph } from '../../engine/world/graph';
 import type { EdgeKind, MapEdge, Rect, RegionKind } from '../../engine/world/types';
 import { FONT_FAMILY, PALETTE, toCss } from '../palette';
-import { building, palm, shade, tree, WHITE } from './art';
+import { building, palm, tree } from './art';
 import { LANDMARKS, type SignText } from './landmarks';
 
 /**
@@ -52,7 +52,6 @@ export function drawTown(scene: Phaser.Scene, graph: TownGraph): TownLayers {
     g.fillPoints(region.points.map(([x, y]) => new Phaser.Math.Vector2(x, y)), true);
   }
   drawRailway(g, map.regions.find((r) => r.kind === 'RAILWAY')?.points);
-  drawWaves(g, map.width, map.regions.find((r) => r.id === 'sea')?.points);
 
   const carEdges = map.edges.filter((e) => e.car);
   const footEdges = map.edges.filter((e) => !e.car);
@@ -69,7 +68,6 @@ export function drawTown(scene: Phaser.Scene, graph: TownGraph): TownLayers {
   for (const e of carEdges) {
     if ((e.kind === 'AVENUE' || e.kind === 'STREET') && !e.bridge) drawCentreLine(g, graph, e);
   }
-  drawBoats(g);
   drawCrossings(g, graph);
   for (const node of map.nodes.filter((n) => n.trafficLight)) drawTrafficLight(g, node.x, node.y);
 
@@ -286,33 +284,6 @@ function drawTrees(g: Phaser.GameObjects.Graphics, graph: TownGraph) {
   }
 }
 
-/** Fishing boats moored in the canal and sailing boats out at sea. */
-function drawBoats(g: Phaser.GameObjects.Graphics) {
-  const moored = [
-    [748, 432, 0x2f6e9e],
-    [776, 446, 0xd64b3c],
-    [745, 600, 0x3f9b5a],
-    [775, 640, 0xf2c94c],
-    [748, 860, 0xd64b3c],
-    [774, 920, 0x2f6e9e],
-  ] as const;
-  for (const [x, y, deck] of moored) {
-    g.fillStyle(0x000000, 0.15).fillEllipse(x + 1.5, y + 2, 9, 24);
-    g.fillStyle(WHITE).fillEllipse(x, y, 9, 24);
-    g.fillStyle(deck).fillEllipse(x, y + 1, 6, 15);
-    g.fillStyle(shade(WHITE, -10)).fillRect(x - 2.5, y - 3, 5, 5);
-  }
-  for (const [x, y] of [
-    [380, 1245],
-    [1300, 1270],
-    [2050, 1240],
-  ] as const) {
-    g.fillStyle(0x000000, 0.12).fillTriangle(x + 2, y - 14, x + 2, y + 8, x + 16, y + 8);
-    g.fillStyle(WHITE).fillEllipse(x, y + 6, 26, 8);
-    g.fillStyle(0xf6f1e4).fillTriangle(x, y - 16, x, y + 4, x + 13, y + 4);
-  }
-}
-
 function drawRailway(g: Phaser.GameObjects.Graphics, points?: [number, number][]) {
   if (!points) return;
   const xs = points.map((p) => p[0]);
@@ -324,19 +295,6 @@ function drawRailway(g: Phaser.GameObjects.Graphics, points?: [number, number][]
     g.lineStyle(2, 0x4a4540);
     g.lineBetween(x0, ty - 4, x1, ty - 4);
     g.lineBetween(x0, ty + 4, x1, ty + 4);
-  }
-}
-
-function drawWaves(g: Phaser.GameObjects.Graphics, width: number, points?: [number, number][]) {
-  if (!points) return;
-  const top = Math.min(...points.map((p) => p[1]));
-  g.lineStyle(2, PALETTE.lightBlue, 0.7);
-  for (let row = 0; row < 3; row++) {
-    for (let x = (row % 2) * 40; x < width; x += 80) {
-      g.beginPath();
-      g.arc(x + 40, top + 25 + row * 28, 14, Math.PI * 1.15, Math.PI * 1.85);
-      g.strokePath();
-    }
   }
 }
 
