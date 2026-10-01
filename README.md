@@ -9,7 +9,7 @@ Web-first, offline-capable, built with TypeScript and Phaser.
 ## How the game is built
 
 - `src/engine/`: the scenario engine in plain TypeScript (seeded randomness, map, routes, suspect, French instructions, validation). No graphics code, so it runs in tests and on a server.
-- `src/game/`: the Phaser layer that draws and plays what the engine decides.
+- `src/game/`: the Phaser layer that draws and plays what the engine decides. The town is drawn in code from the map data (`src/game/render/`): roads and paths from the graph, each of the 30 places with its own look on its footprint (`landmarks.ts`), and trees only on ground no route uses. It is drawn once into image tiles when a chase starts.
 - `docs/plan.md`: the approved feasibility and architecture plan and milestone list.
 
 ## Development
