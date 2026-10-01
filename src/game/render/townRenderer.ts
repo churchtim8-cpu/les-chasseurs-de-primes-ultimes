@@ -1,15 +1,18 @@
 import Phaser from 'phaser';
 import { LOCATION_WORD_BY_ID, withArticle } from '../../engine/language/locations';
-import { HALF_WIDTH, PAVEMENT } from '../../engine/world/geometry';
+import { Rng } from '../../engine/rng/prng';
+import { HALF_WIDTH, PAVEMENT, pointInPolygon, pointInRect, pointSegmentDistance } from '../../engine/world/geometry';
 import type { TownGraph } from '../../engine/world/graph';
-import type { District, EdgeKind, MapEdge, Rect, RegionKind } from '../../engine/world/types';
+import type { EdgeKind, MapEdge, Rect, RegionKind } from '../../engine/world/types';
 import { FONT_FAMILY, PALETTE, toCss } from '../palette';
+import { building, palm, shade, tree, WHITE } from './art';
+import { LANDMARKS, type SignText } from './landmarks';
 
 /**
  * Draws Bellevue City from the map data. Roads, paths, the bridge and the
  * roundabout are generated from the navigation graph, so the picture can never
- * disagree with the routes. Later art passes replace building blocks with
- * sprites placed on the same footprints.
+ * disagree with the routes. Buildings, trees and other decoration are
+ * drawn on the footprints and open ground the map data leaves free.
  */
 
 const REGION_COLOUR: Record<RegionKind, number> = {
@@ -19,14 +22,6 @@ const REGION_COLOUR: Record<RegionKind, number> = {
   PARK: PALETTE.green,
   PLAZA: PALETTE.stone,
   RAILWAY: 0xb9aea0,
-};
-
-const DISTRICT_ROOF: Record<District, number> = {
-  TOWN_CENTRE: PALETTE.terracotta,
-  COMMERCIAL: 0xd9895b,
-  CIVIC: 0x6f8fa6,
-  TRANSPORT: 0x7d7a8c,
-  COASTAL: 0x4f9a8c,
 };
 
 const ROOF_VARIANTS = [0xc8674a, 0xb65c43, 0x9c6b5a, 0xd98c75, 0x8a6f63, 0xc47a52];
@@ -71,23 +66,39 @@ export function drawTown(scene: Phaser.Scene, graph: TownGraph): TownLayers {
   for (const e of carEdges) strokeEdge(g, graph, e, HALF_WIDTH[e.kind], PALETTE.road);
   drawRoundabout(g, graph, false);
   for (const e of carEdges) if (e.bridge) drawBridge(g, graph, e);
-  for (const e of carEdges) if (e.kind === 'AVENUE' && !e.bridge) drawCentreLine(g, graph, e);
+  for (const e of carEdges) {
+    if ((e.kind === 'AVENUE' || e.kind === 'STREET') && !e.bridge) drawCentreLine(g, graph, e);
+  }
+  drawBoats(g);
   drawCrossings(g, graph);
   for (const node of map.nodes.filter((n) => n.trafficLight)) drawTrafficLight(g, node.x, node.y);
 
-  // Buildings: plain fillers then vocabulary locations.
-  map.fillers.forEach((f, i) => drawBuilding(g, f.footprint, ROOF_VARIANTS[i % ROOF_VARIANTS.length] as number, 0.85));
-  for (const loc of map.locations) {
-    if (loc.open) continue;
-    drawBuilding(g, loc.footprint, DISTRICT_ROOF[loc.district], 1);
-  }
+  // Trees on free ground, then buildings: plain houses, then the vocabulary places.
+  drawTrees(g, graph);
+  map.fillers.forEach((f, i) => drawHouse(g, f.footprint, i));
+  const sign: SignText = (x, y, text, size, colour, bold = false) => {
+    scene.add
+      .text(x, y, text, {
+        fontFamily: FONT_FAMILY,
+        fontSize: `${size}px`,
+        fontStyle: bold ? 'bold' : 'normal',
+        color: toCss(colour),
+      })
+      .setOrigin(0.5)
+      .setResolution(4)
+      .setDepth(1);
+  };
+  for (const loc of map.locations) LANDMARKS[loc.id]?.(g, loc.footprint, sign);
+  bake(scene, g, map.width, map.height);
 
   // French labels for every location.
   const labels = map.locations.map((loc) => {
     const word = LOCATION_WORD_BY_ID.get(loc.id);
     const { x, y, w, h } = loc.footprint;
+    // Under the building's front so its picture stays visible (centred on open places).
+    const labelY = loc.open ? y + h / 2 : y + h + 4;
     const text = scene.add
-      .text(x + w / 2, y + h / 2, word ? withArticle(word) : loc.id, {
+      .text(x + w / 2, labelY, word ? withArticle(word) : loc.id, {
         fontFamily: FONT_FAMILY,
         fontSize: '15px',
         fontStyle: 'bold',
@@ -96,12 +107,41 @@ export function drawTown(scene: Phaser.Scene, graph: TownGraph): TownLayers {
         padding: { x: 5, y: 2 },
         align: 'center',
       })
-      .setOrigin(0.5)
+      .setOrigin(0.5, loc.open ? 0.5 : 0)
       .setDepth(10);
     return { text, width: w };
   });
 
   return { labels, debug: drawDebugGraph(scene, graph) };
+}
+
+/** Pixels per metre in the baked town tiles: sharp in car view, close to it on foot. */
+const BAKE_SCALE = 2;
+/** Metres per tile (textures just over 1024 pixels, safe on every device). */
+const BAKE_TILE = 512;
+
+/**
+ * Draws the finished town into a few image tiles once, so the thousands of
+ * shapes are not redrawn every frame (which slowed the game on modest devices).
+ */
+function bake(scene: Phaser.Scene, g: Phaser.GameObjects.Graphics, width: number, height: number) {
+  g.setScale(BAKE_SCALE);
+  for (let y0 = 0; y0 < height; y0 += BAKE_TILE) {
+    for (let x0 = 0; x0 < width; x0 += BAKE_TILE) {
+      const key = `town-${x0}-${y0}`;
+      if (scene.textures.exists(key)) scene.textures.remove(key);
+      // Tiles overlap by a metre so no hairline seam shows between them.
+      const left = Math.max(0, x0 - 1);
+      const top = Math.max(0, y0 - 1);
+      const w = Math.min(x0 + BAKE_TILE + 1, width) - left;
+      const h = Math.min(y0 + BAKE_TILE + 1, height) - top;
+      const tile = scene.textures.addDynamicTexture(key, w * BAKE_SCALE, h * BAKE_SCALE);
+      if (!tile) continue;
+      tile.draw(g, -left * BAKE_SCALE, -top * BAKE_SCALE).render();
+      scene.add.image(left, top, key).setOrigin(0).setScale(1 / BAKE_SCALE);
+    }
+  }
+  g.destroy();
 }
 
 function strokeEdge(g: Phaser.GameObjects.Graphics, graph: TownGraph, e: MapEdge, halfWidth: number, colour: number) {
@@ -191,13 +231,86 @@ function drawTrafficLight(g: Phaser.GameObjects.Graphics, x: number, y: number) 
   }
 }
 
-/** A building seen from slightly south: front wall, then roof. */
-function drawBuilding(g: Phaser.GameObjects.Graphics, r: Rect, roof: number, alpha: number) {
-  const wall = Phaser.Display.Color.IntegerToColor(roof).darken(35).color;
-  g.fillStyle(0x000000, 0.12).fillRect(r.x + 4, r.y + 6, r.w, r.h);
-  g.fillStyle(wall, alpha).fillRect(r.x, r.y + 5, r.w, r.h - 5);
-  g.fillStyle(roof, alpha).fillRect(r.x, r.y, r.w, r.h - 7);
-  g.lineStyle(1, 0xffffff, 0.25).strokeRect(r.x + 2, r.y + 2, r.w - 4, r.h - 11);
+const WALL_VARIANTS = [0xf3e2a9, 0xe8d3b5, 0xf1dcc6, 0xe6d8b8, 0xd9c4a3, 0xf0e6d0];
+
+/** A plain town house: pitched terracotta roof, cream walls, and now and then a chimney. */
+function drawHouse(g: Phaser.GameObjects.Graphics, r: Rect, i: number) {
+  const roof = building(g, r, {
+    roof: ROOF_VARIANTS[i % ROOF_VARIANTS.length] as number,
+    wall: WALL_VARIANTS[(i * 7) % WALL_VARIANTS.length] as number,
+    wallHeight: 5,
+    door: r.w > 18,
+  });
+  if (i % 3 === 0 && roof.w > 14 && roof.h > 12) {
+    g.fillStyle(0x7a5546).fillRect(roof.x + roof.w * 0.72, roof.y + 3, 4, 4);
+  }
+}
+
+/**
+ * Trees on open ground: never on a road, path, building or water, so the
+ * picture never hides a way the player could take.
+ */
+function drawTrees(g: Phaser.GameObjects.Graphics, graph: TownGraph) {
+  const map = graph.map;
+  const rng = Rng.fromSeed(`${map.id}-trees`);
+  const blocked = map.regions.filter((r) => r.kind !== 'PLAZA');
+  const footprints = [...map.locations.map((l) => l.footprint), ...map.fillers.map((f) => f.footprint)];
+  const edges = map.edges.map((e) => ({
+    a: graph.node(e.from),
+    b: graph.node(e.to),
+    clear: HALF_WIDTH[e.kind] + (e.car ? PAVEMENT : 0) + 7,
+  }));
+  const step = 24;
+  for (let y = 20; y < map.height - 20; y += step) {
+    for (let x = 20; x < map.width - 20; x += step) {
+      const p = { x: x + rng.range(-7, 7), y: y + rng.range(-7, 7) };
+      const radius = rng.range(6, 9.5);
+      if (rng.next() > 0.4) continue;
+      if (blocked.some((r) => pointInPolygon(p, r.points))) continue;
+      if (footprints.some((f) => pointInRect(p, { x: f.x - radius, y: f.y - radius, w: f.w + 2 * radius, h: f.h + 2 * radius }))) continue;
+      if (edges.some((e) => pointSegmentDistance(p, e.a, e.b) < e.clear + radius * 0.4)) continue;
+      tree(g, p.x, p.y, radius, rng.next() < 0.3 ? 0x6fae5a : 0x5f9e4f);
+    }
+  }
+  // Palms along the promenade, on the sand side.
+  const promenade = map.edges.filter((e) => e.kind === 'PROMENADE');
+  for (const e of promenade) {
+    const a = graph.node(e.from);
+    const b = graph.node(e.to);
+    for (let t = 0.25; t < 1; t += 0.5) {
+      const x = a.x + (b.x - a.x) * t;
+      const y = a.y + 16;
+      if (map.regions.some((r) => r.kind === 'WATER' && pointInPolygon({ x, y }, r.points))) continue;
+      palm(g, x, y, 8);
+    }
+  }
+}
+
+/** Fishing boats moored in the canal and sailing boats out at sea. */
+function drawBoats(g: Phaser.GameObjects.Graphics) {
+  const moored = [
+    [748, 432, 0x2f6e9e],
+    [776, 446, 0xd64b3c],
+    [745, 600, 0x3f9b5a],
+    [775, 640, 0xf2c94c],
+    [748, 860, 0xd64b3c],
+    [774, 920, 0x2f6e9e],
+  ] as const;
+  for (const [x, y, deck] of moored) {
+    g.fillStyle(0x000000, 0.15).fillEllipse(x + 1.5, y + 2, 9, 24);
+    g.fillStyle(WHITE).fillEllipse(x, y, 9, 24);
+    g.fillStyle(deck).fillEllipse(x, y + 1, 6, 15);
+    g.fillStyle(shade(WHITE, -10)).fillRect(x - 2.5, y - 3, 5, 5);
+  }
+  for (const [x, y] of [
+    [380, 1245],
+    [1300, 1270],
+    [2050, 1240],
+  ] as const) {
+    g.fillStyle(0x000000, 0.12).fillTriangle(x + 2, y - 14, x + 2, y + 8, x + 16, y + 8);
+    g.fillStyle(WHITE).fillEllipse(x, y + 6, 26, 8);
+    g.fillStyle(0xf6f1e4).fillTriangle(x, y - 16, x, y + 4, x + 13, y + 4);
+  }
 }
 
 function drawRailway(g: Phaser.GameObjects.Graphics, points?: [number, number][]) {
