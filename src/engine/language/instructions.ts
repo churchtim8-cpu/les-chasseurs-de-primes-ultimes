@@ -53,11 +53,10 @@ export type TemplateId = 'E1' | 'E2' | 'E3' | 'I1' | 'I2' | 'I3' | 'H1' | 'H2' |
 export type Form = 'SENTENCE' | 'LINKED';
 
 /**
- * One recording. Single steps and plain "…, puis …" pairs are single
- * sentence clips. Longer instructions add whole clauses recorded with their
- * linking word ("Puis tournez à droite.", "Ensuite, tournez à gauche.") and
- * played back to back (approved Decision 1), so no new combinations of
- * landmarks and turns need recording.
+ * One recording. One- and two-step instructions are single full-sentence
+ * clips. Three-step and Expert instructions are whole clauses recorded with
+ * their linking word ("Ensuite, tournez à gauche.") and played back to back
+ * (approved Decision 1).
  */
 export interface Clip {
   audioId: string;
@@ -156,15 +155,15 @@ function lowerFirst(text: string): string {
   return text.charAt(0).toLowerCase() + text.slice(1);
 }
 
-export type LinkWord = 'PUIS' | 'DABORD' | 'ENSUITE' | 'ENFIN';
-const LINK_FR: Record<LinkWord, string> = { PUIS: 'Puis', DABORD: "D'abord,", ENSUITE: 'Ensuite,', ENFIN: 'Enfin,' };
+export type LinkWord = 'DABORD' | 'ENSUITE' | 'ENFIN';
+const LINK_FR: Record<LinkWord, string> = { DABORD: "D'abord", ENSUITE: 'Ensuite', ENFIN: 'Enfin' };
 
-/** A clause recorded with its linking word: "Ensuite, prenez la deuxième rue à gauche." / "Puis tournez à droite." */
+/** A clause recorded with its linking word: "Ensuite, prenez la deuxième rue à gauche." */
 export function linkedClip(word: LinkWord, clause: Clause): Clip {
-  const text = lowerFirst(clauseText(clause));
-  // As in the "…, puis …" sentences: "Puis, au rond-point, prenez la deuxième sortie."
-  const link = word === 'PUIS' && text.startsWith('au ') ? 'Puis,' : LINK_FR[word];
-  return { audioId: `link.${word.toLowerCase()}.${clauseKey(clause)}`, text: `${link} ${text}.` };
+  return {
+    audioId: `link.${word.toLowerCase()}.${clauseKey(clause)}`,
+    text: `${LINK_FR[word]}, ${lowerFirst(clauseText(clause))}.`,
+  };
 }
 
 function sentenceClip(clauses: readonly Clause[]): Clip {
@@ -188,10 +187,8 @@ const hasLandmark = (c: Clause) => c.action === 'TURN' && c.landmark !== undefin
 export function clipsFor(clauses: readonly Clause[], form: Form): Clip[] {
   if (form === 'LINKED') return linkWords(clauses.length).map((w, i) => linkedClip(w, clauses[i] as Clause));
   const [first, second, third] = clauses as [Clause, Clause?, Clause?];
-  if (!second) return [sentenceClip(clauses)];
-  // H1, H2: the landmark sentence already recorded, then "Puis …" (one clip per simple action).
-  if (hasLandmark(first)) return [sentenceClip([first]), linkedClip('PUIS', second)];
-  if (!third) return [sentenceClip(clauses)];
+  // One and two steps (E, I and H1/H2) are full sentences (Mr Henry, 2026-10-01).
+  if (!second || !third) return [sentenceClip(clauses)];
   // H3: the "…, puis …" sentence for the first two steps, then "Ensuite, …".
   return [sentenceClip([first, second]), linkedClip('ENSUITE', third)];
 }

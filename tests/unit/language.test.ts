@@ -81,17 +81,17 @@ describe('French sentences', () => {
     ).toBe('Tournez à droite, puis, au rond-point, prenez la deuxième sortie.');
   });
 
-  it('builds the Hard shapes from recorded sentences and "Puis / Ensuite" clauses (H1–H4)', () => {
+  it('builds the Hard shapes: full two-step sentences, and "Ensuite" for a third step (H1–H4)', () => {
     const left: Clause = { action: 'TURN', side: 'LEFT' };
     const right: Clause = { action: 'TURN', side: 'RIGHT' };
     const street2: Clause = { action: 'TAKE_STREET', side: 'LEFT', ordinal: 2, word: 'DEUXIEME' };
     const h1 = makeInstruction([{ action: 'TURN', side: 'LEFT', landmark: 'BANK', relation: 'DEVANT' }, street2], 'HARD');
     expect(h1.template).toBe('H1');
-    expect(h1.text).toBe('Tournez à gauche devant la banque. Puis prenez la deuxième rue à gauche.');
-    expect(h1.clips.map((c) => c.audioId)).toEqual(['dir.turn.left.devant.bank', 'link.puis.street.left.deuxieme']);
+    expect(h1.text).toBe('Tournez à gauche devant la banque, puis prenez la deuxième rue à gauche.');
+    expect(h1.clips.map((c) => c.audioId)).toEqual(['seq.turn.left.devant.bank+puis+street.left.deuxieme']);
     const h2 = makeInstruction([{ action: 'TURN', side: 'RIGHT', landmark: 'CINEMA', relation: 'APRES' }, left], 'HARD');
     expect(h2.template).toBe('H2');
-    expect(h2.text).toBe('Tournez à droite après le cinéma. Puis tournez à gauche.');
+    expect(h2.text).toBe('Tournez à droite après le cinéma, puis tournez à gauche.');
     const h3 = makeInstruction([left, right, street2], 'HARD');
     expect(h3.template).toBe('H3');
     expect(h3.text).toBe('Tournez à gauche, puis tournez à droite. Ensuite, prenez la deuxième rue à gauche.');
