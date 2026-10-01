@@ -17064,12 +17064,1477 @@
     ]
   },
   {
+    "audioId": "event.sighting.van.school",
+    "text": "La camionnette est près de l'école.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.van.hospital",
+    "text": "La camionnette est près de l'hôpital.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.van.hotel",
+    "text": "La camionnette est près de l'hôtel.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.van.bakery",
+    "text": "La camionnette est près de la boulangerie.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.van.bus_station",
+    "text": "La camionnette est près de la gare routière.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.van.bookshop",
+    "text": "La camionnette est près de la librairie.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.van.pharmacy",
+    "text": "La camionnette est près de la pharmacie.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.van.swimming_pool",
+    "text": "La camionnette est près de la piscine.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.van.square",
+    "text": "La camionnette est près de la place.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.van.beach",
+    "text": "La camionnette est près de la plage.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.van.gas_station",
+    "text": "La camionnette est près de la station-service.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.van.cinema",
+    "text": "La camionnette est près du cinéma.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.van.police_station",
+    "text": "La camionnette est près du commissariat de police.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.van.shop",
+    "text": "La camionnette est près du magasin.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.van.museum",
+    "text": "La camionnette est près du musée.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.van.park",
+    "text": "La camionnette est près du parc.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.van.car_park",
+    "text": "La camionnette est près du parking.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.van.restaurant",
+    "text": "La camionnette est près du restaurant.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.van.stadium",
+    "text": "La camionnette est près du stade.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.white.school",
+    "text": "La voiture blanche est près de l'école.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.white.hospital",
+    "text": "La voiture blanche est près de l'hôpital.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.white.hotel",
+    "text": "La voiture blanche est près de l'hôtel.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.white.bakery",
+    "text": "La voiture blanche est près de la boulangerie.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.white.bus_station",
+    "text": "La voiture blanche est près de la gare routière.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.white.bookshop",
+    "text": "La voiture blanche est près de la librairie.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.white.pharmacy",
+    "text": "La voiture blanche est près de la pharmacie.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.white.swimming_pool",
+    "text": "La voiture blanche est près de la piscine.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.white.square",
+    "text": "La voiture blanche est près de la place.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.white.beach",
+    "text": "La voiture blanche est près de la plage.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.white.gas_station",
+    "text": "La voiture blanche est près de la station-service.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.white.cinema",
+    "text": "La voiture blanche est près du cinéma.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.white.police_station",
+    "text": "La voiture blanche est près du commissariat de police.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.white.shop",
+    "text": "La voiture blanche est près du magasin.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.white.museum",
+    "text": "La voiture blanche est près du musée.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.white.park",
+    "text": "La voiture blanche est près du parc.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.white.car_park",
+    "text": "La voiture blanche est près du parking.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.white.restaurant",
+    "text": "La voiture blanche est près du restaurant.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.white.stadium",
+    "text": "La voiture blanche est près du stade.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.blue.school",
+    "text": "La voiture bleue est près de l'école.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.blue.hospital",
+    "text": "La voiture bleue est près de l'hôpital.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.blue.hotel",
+    "text": "La voiture bleue est près de l'hôtel.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.blue.bakery",
+    "text": "La voiture bleue est près de la boulangerie.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.blue.bus_station",
+    "text": "La voiture bleue est près de la gare routière.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.blue.bookshop",
+    "text": "La voiture bleue est près de la librairie.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.blue.pharmacy",
+    "text": "La voiture bleue est près de la pharmacie.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.blue.swimming_pool",
+    "text": "La voiture bleue est près de la piscine.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.blue.square",
+    "text": "La voiture bleue est près de la place.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.blue.beach",
+    "text": "La voiture bleue est près de la plage.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.blue.gas_station",
+    "text": "La voiture bleue est près de la station-service.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.blue.cinema",
+    "text": "La voiture bleue est près du cinéma.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.blue.police_station",
+    "text": "La voiture bleue est près du commissariat de police.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.blue.shop",
+    "text": "La voiture bleue est près du magasin.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.blue.museum",
+    "text": "La voiture bleue est près du musée.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.blue.park",
+    "text": "La voiture bleue est près du parc.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.blue.car_park",
+    "text": "La voiture bleue est près du parking.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.blue.restaurant",
+    "text": "La voiture bleue est près du restaurant.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.blue.stadium",
+    "text": "La voiture bleue est près du stade.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.black.school",
+    "text": "La voiture noire est près de l'école.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.black.hospital",
+    "text": "La voiture noire est près de l'hôpital.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.black.hotel",
+    "text": "La voiture noire est près de l'hôtel.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.black.bakery",
+    "text": "La voiture noire est près de la boulangerie.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.black.bus_station",
+    "text": "La voiture noire est près de la gare routière.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.black.bookshop",
+    "text": "La voiture noire est près de la librairie.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.black.pharmacy",
+    "text": "La voiture noire est près de la pharmacie.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.black.swimming_pool",
+    "text": "La voiture noire est près de la piscine.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.black.square",
+    "text": "La voiture noire est près de la place.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.black.beach",
+    "text": "La voiture noire est près de la plage.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.black.gas_station",
+    "text": "La voiture noire est près de la station-service.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.black.cinema",
+    "text": "La voiture noire est près du cinéma.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.black.police_station",
+    "text": "La voiture noire est près du commissariat de police.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.black.shop",
+    "text": "La voiture noire est près du magasin.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.black.museum",
+    "text": "La voiture noire est près du musée.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.black.park",
+    "text": "La voiture noire est près du parc.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.black.car_park",
+    "text": "La voiture noire est près du parking.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.black.restaurant",
+    "text": "La voiture noire est près du restaurant.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.black.stadium",
+    "text": "La voiture noire est près du stade.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.green.school",
+    "text": "La voiture verte est près de l'école.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.green.hospital",
+    "text": "La voiture verte est près de l'hôpital.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.green.hotel",
+    "text": "La voiture verte est près de l'hôtel.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.green.bakery",
+    "text": "La voiture verte est près de la boulangerie.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.green.bus_station",
+    "text": "La voiture verte est près de la gare routière.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.green.bookshop",
+    "text": "La voiture verte est près de la librairie.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.green.pharmacy",
+    "text": "La voiture verte est près de la pharmacie.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.green.swimming_pool",
+    "text": "La voiture verte est près de la piscine.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.green.square",
+    "text": "La voiture verte est près de la place.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.green.beach",
+    "text": "La voiture verte est près de la plage.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.green.gas_station",
+    "text": "La voiture verte est près de la station-service.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.green.cinema",
+    "text": "La voiture verte est près du cinéma.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.green.police_station",
+    "text": "La voiture verte est près du commissariat de police.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.green.shop",
+    "text": "La voiture verte est près du magasin.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.green.museum",
+    "text": "La voiture verte est près du musée.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.green.park",
+    "text": "La voiture verte est près du parc.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.green.car_park",
+    "text": "La voiture verte est près du parking.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.green.restaurant",
+    "text": "La voiture verte est près du restaurant.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.green.stadium",
+    "text": "La voiture verte est près du stade.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
     "audioId": "event.changed_direction",
     "text": "Le suspect a changé de direction.",
     "voice": "DISPATCHER",
     "category": "EVENT",
     "template": null,
     "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.vehicle.taxi",
+    "text": "Le suspect est dans un taxi.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.vehicle.van",
+    "text": "Le suspect est dans une camionnette.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.vehicle.white",
+    "text": "Le suspect est dans une voiture blanche.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.vehicle.blue",
+    "text": "Le suspect est dans une voiture bleue.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.vehicle.black",
+    "text": "Le suspect est dans une voiture noire.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.vehicle.green",
+    "text": "Le suspect est dans une voiture verte.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.sighting.suspect.school",
+    "text": "Le suspect est près de l'école.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.sighting.suspect.hospital",
+    "text": "Le suspect est près de l'hôpital.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.sighting.suspect.hotel",
+    "text": "Le suspect est près de l'hôtel.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.sighting.suspect.bakery",
+    "text": "Le suspect est près de la boulangerie.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.sighting.suspect.bus_station",
+    "text": "Le suspect est près de la gare routière.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.sighting.suspect.bookshop",
+    "text": "Le suspect est près de la librairie.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.sighting.suspect.pharmacy",
+    "text": "Le suspect est près de la pharmacie.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.sighting.suspect.swimming_pool",
+    "text": "Le suspect est près de la piscine.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.sighting.suspect.square",
+    "text": "Le suspect est près de la place.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.sighting.suspect.beach",
+    "text": "Le suspect est près de la plage.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.sighting.suspect.gas_station",
+    "text": "Le suspect est près de la station-service.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.sighting.suspect.cinema",
+    "text": "Le suspect est près du cinéma.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.sighting.suspect.police_station",
+    "text": "Le suspect est près du commissariat de police.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.sighting.suspect.shop",
+    "text": "Le suspect est près du magasin.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.sighting.suspect.museum",
+    "text": "Le suspect est près du musée.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.sighting.suspect.park",
+    "text": "Le suspect est près du parc.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.sighting.suspect.car_park",
+    "text": "Le suspect est près du parking.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.sighting.suspect.restaurant",
+    "text": "Le suspect est près du restaurant.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.sighting.suspect.stadium",
+    "text": "Le suspect est près du stade.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
       "INTERMEDIATE",
       "HARD",
       "EXPERT"
@@ -17088,6 +18553,234 @@
     ]
   },
   {
+    "audioId": "event.sighting.taxi.school",
+    "text": "Le taxi est près de l'école.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.taxi.hospital",
+    "text": "Le taxi est près de l'hôpital.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.taxi.hotel",
+    "text": "Le taxi est près de l'hôtel.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.taxi.bakery",
+    "text": "Le taxi est près de la boulangerie.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.taxi.bus_station",
+    "text": "Le taxi est près de la gare routière.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.taxi.bookshop",
+    "text": "Le taxi est près de la librairie.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.taxi.pharmacy",
+    "text": "Le taxi est près de la pharmacie.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.taxi.swimming_pool",
+    "text": "Le taxi est près de la piscine.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.taxi.square",
+    "text": "Le taxi est près de la place.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.taxi.beach",
+    "text": "Le taxi est près de la plage.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.taxi.gas_station",
+    "text": "Le taxi est près de la station-service.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.taxi.cinema",
+    "text": "Le taxi est près du cinéma.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.taxi.police_station",
+    "text": "Le taxi est près du commissariat de police.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.taxi.shop",
+    "text": "Le taxi est près du magasin.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.taxi.museum",
+    "text": "Le taxi est près du musée.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.taxi.park",
+    "text": "Le taxi est près du parc.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.taxi.car_park",
+    "text": "Le taxi est près du parking.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.taxi.restaurant",
+    "text": "Le taxi est près du restaurant.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
+    "audioId": "event.sighting.taxi.stadium",
+    "text": "Le taxi est près du stade.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD"
+    ]
+  },
+  {
     "audioId": "event.get_in",
     "text": "Montez dans la voiture !",
     "voice": "DISPATCHER",
@@ -17095,6 +18788,16 @@
     "template": null,
     "levels": [
       "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.lost_signal",
+    "text": "Nous avons perdu le signal.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
       "EXPERT"
     ]
   },

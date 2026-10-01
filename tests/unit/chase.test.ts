@@ -13,7 +13,8 @@ import { TownGraph } from '../../src/engine/world/graph';
 const graph = new TownGraph(BELLEVUE);
 
 /** These tests drive the route by hand, so they use one-stage car chases (transport changes: transport.test.ts). */
-const CAR = { chaseType: 'CAR_CAR' } as const;
+// Movement and balance only: no sightings to answer (the listener tests cover those).
+const CAR = { chaseType: 'CAR_CAR', sightings: false } as const;
 
 function seeds(difficulty: Difficulty, count: number, label = 'tests'): string[] {
   const rng = Rng.fromSeed(`${label}-${difficulty}`);

@@ -20,6 +20,7 @@ import { Rng } from '../rng/prng';
 import { parseSeed } from '../rng/seedCode';
 import type { TownGraph, TravelMode } from '../world/graph';
 import { arrivalNode, followProblem, generateRoute, pathLength, placeOnRoute, transferNodes } from './route';
+import { pickVehicles, planSightings, sightingProblems, type Sighting } from './sightings';
 import {
   CHASE_SETTINGS,
   CHASE_TYPE_MODES,
@@ -28,6 +29,7 @@ import {
   TURN_OFF,
   type ChaseSettings,
   type ChaseType,
+  type Vehicle,
 } from './settings';
 
 export type { ChaseType } from './settings';
@@ -75,6 +77,12 @@ export interface ChaseScenario {
   suspectPlan: string[];
   /** A change of direction, if this chase has one. */
   turnOff: TurnOff | null;
+  /** The suspect's vehicle in each stage (null on foot). */
+  vehicles: (Vehicle | null)[];
+  /** Sightings, in the order they come. */
+  sightings: Sighting[];
+  /** The signal is lost once, after a multi-step call (Expert). */
+  lostSignal: boolean;
 }
 
 export interface ScenarioOptions {
@@ -82,6 +90,10 @@ export interface ScenarioOptions {
   chaseType?: ChaseType;
   /** Debug and tests: force a change of direction on (if the route allows one) or off. */
   turnOff?: boolean;
+  /** Debug and tests: force sightings on (the level's number) or off. */
+  sightings?: boolean;
+  /** Debug and tests: force a lost signal on or off. */
+  lostSignal?: boolean;
 }
 
 /** The chase type a seed gives at its difficulty (its own random stream, so routes are not reshuffled). */
@@ -126,6 +138,15 @@ export function generateScenario(graph: TownGraph, seedCode: string, options: Sc
   const wantTurnOff = options.turnOff ?? eventsRng.chance(settings.directionChange);
   const turnOff = wantTurnOff ? planTurnOff(graph, eventsRng, stages, difficulty, PLAYER_OFFSET + headStart) : null;
 
+  // Their own streams, so adding these events reshuffles nothing above.
+  const sightingRng = rng.fork('sightings');
+  const vehicles = pickVehicles(sightingRng, stages);
+  const sightings =
+    options.sightings === false
+      ? []
+      : planSightings(graph, sightingRng, stages, vehicles, difficulty, PLAYER_OFFSET + headStart);
+  const lostSignal = options.lostSignal ?? rng.fork('lost-signal').chance(settings.lostSignal);
+
   const scenario: ChaseScenario = {
     seed: code,
     difficulty,
@@ -138,6 +159,9 @@ export function generateScenario(graph: TownGraph, seedCode: string, options: Sc
     suspectStart: suspect.start,
     suspectPlan: suspect.plan,
     turnOff,
+    vehicles,
+    sightings,
+    lostSignal,
   };
   const problems = validateScenario(graph, scenario);
   if (problems.length > 0) throw new Error(`Invalid chase ${code}: ${problems.join('; ')}`);
@@ -315,6 +339,7 @@ export function validateScenario(graph: TownGraph, s: ChaseScenario): string[] {
       problems.push('The predicted route is not a fair, different way on');
     }
   }
+  problems.push(...sightingProblems(graph, s.stages, s.vehicles, s.sightings));
   const planStart = s.route.indexOf(s.suspectPlan[0] as string);
   if (planStart < 1 || s.route.slice(planStart).join() !== s.suspectPlan.join()) {
     problems.push('Suspect plan is not the rest of the route');

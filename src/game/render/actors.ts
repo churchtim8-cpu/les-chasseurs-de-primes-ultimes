@@ -1,5 +1,41 @@
 import Phaser from 'phaser';
+import type { Vehicle } from '../../engine/chase/settings';
 import type { TurnIntent } from '../../engine/movement/turns';
+
+/** Body colours of the suspect's possible vehicles (they must match the French: "une voiture verte"). */
+export const VEHICLE_COLOURS: Record<Vehicle, number> = {
+  BLUE: 0x2f6fd6,
+  BLACK: 0x1d1f22,
+  WHITE: 0xf4f4f0,
+  GREEN: 0x2e9e5b,
+  TAXI: 0xf2c230,
+  VAN: 0x9aa3ab,
+};
+
+/** Draws a vehicle facing east (heading 0) into `g`, in metres. */
+export function drawVehicle(g: Phaser.GameObjects.Graphics, vehicle: Vehicle): void {
+  const colour = VEHICLE_COLOURS[vehicle];
+  const [w, h] = vehicle === 'VAN' ? [22, 10.4] : [18, 9.6];
+  g.fillStyle(0x000000, 0.25).fillRoundedRect(-w / 2 + 1.5, -h / 2 + 2, w, h, 2.5);
+  g.fillStyle(colour).fillRoundedRect(-w / 2, -h / 2, w, h, 2.5);
+  if (vehicle === 'VAN') {
+    g.fillStyle(0x27323a).fillRoundedRect(w / 2 - 5, -h / 2 + 1, 3, h - 2, 1); // windscreen
+    g.fillStyle(0xffffff, 0.25).fillRect(-w / 2 + 2, -h / 2 + 1.5, w - 9, h - 3); // box
+  } else {
+    g.fillStyle(0x27323a).fillRoundedRect(1.5, -3.8, 3.5, 7.6, 1);
+    g.fillStyle(0x27323a).fillRoundedRect(-6.5, -3.6, 2.5, 7.2, 1);
+  }
+  if (vehicle === 'TAXI') g.fillStyle(0x21313a).fillRect(-2.6, -2.2, 3, 4.4); // roof sign
+  g.lineStyle(1, vehicle === 'WHITE' ? 0x21313a : 0xffffff, 0.6).strokeRoundedRect(-w / 2, -h / 2, w, h, 2.5);
+}
+
+/** A suspect on foot, seen from above, into `g`. */
+export function drawRunner(g: Phaser.GameObjects.Graphics, colour = 0xc0392b): void {
+  g.fillStyle(0x000000, 0.25).fillEllipse(0.8, 1.2, 7, 6);
+  g.fillStyle(colour).fillEllipse(0, 0, 5.5, 7); // shoulders
+  g.fillStyle(0x2a1d17).fillCircle(0.3, 0, 2.1); // head
+  g.lineStyle(0.6, 0xffffff, 0.6).strokeEllipse(0, 0, 5.5, 7);
+}
 
 /** Placeholder police car, drawn facing east (heading 0). Sizes in metres. */
 export function createPoliceCar(scene: Phaser.Scene): Phaser.GameObjects.Container {
@@ -16,14 +52,10 @@ export function createPoliceCar(scene: Phaser.Scene): Phaser.GameObjects.Contain
   return scene.add.container(0, 0, [g, lightRed, lightBlue]).setDepth(30).setScale(1.3);
 }
 
-/** Placeholder suspect car, drawn facing east. */
-export function createSuspectCar(scene: Phaser.Scene, colour = 0xc0392b): Phaser.GameObjects.Container {
+/** The suspect's vehicle (the one the scanner names), drawn facing east. */
+export function createSuspectCar(scene: Phaser.Scene, vehicle: Vehicle): Phaser.GameObjects.Container {
   const g = scene.add.graphics();
-  g.fillStyle(0x000000, 0.25).fillRoundedRect(-9 + 1.5, -4.8 + 2, 18, 9.6, 2.5);
-  g.fillStyle(colour).fillRoundedRect(-9, -4.8, 18, 9.6, 2.5);
-  g.fillStyle(0x27323a).fillRoundedRect(1.5, -3.8, 3.5, 7.6, 1);
-  g.fillStyle(0x27323a).fillRoundedRect(-6.5, -3.6, 2.5, 7.2, 1);
-  g.lineStyle(1, 0xffffff, 0.5).strokeRoundedRect(-9, -4.8, 18, 9.6, 2.5);
+  drawVehicle(g, vehicle);
   return scene.add.container(0, 0, [g]).setDepth(29).setScale(1.3);
 }
 
@@ -38,13 +70,10 @@ export function createOfficer(scene: Phaser.Scene): Phaser.GameObjects.Container
   return scene.add.container(0, 0, [g]).setDepth(31).setScale(2);
 }
 
-/** Placeholder suspect on foot: the same red as the suspect's car, seen from above. */
-export function createSuspectRunner(scene: Phaser.Scene, colour = 0xc0392b): Phaser.GameObjects.Container {
+/** Placeholder suspect on foot, seen from above. */
+export function createSuspectRunner(scene: Phaser.Scene): Phaser.GameObjects.Container {
   const g = scene.add.graphics();
-  g.fillStyle(0x000000, 0.25).fillEllipse(0.8, 1.2, 7, 6);
-  g.fillStyle(colour).fillEllipse(0, 0, 5.5, 7); // shoulders
-  g.fillStyle(0x2a1d17).fillCircle(0.3, 0, 2.1); // head
-  g.lineStyle(0.6, 0xffffff, 0.6).strokeEllipse(0, 0, 5.5, 7);
+  drawRunner(g);
   return scene.add.container(0, 0, [g]).setDepth(29).setScale(2);
 }
 

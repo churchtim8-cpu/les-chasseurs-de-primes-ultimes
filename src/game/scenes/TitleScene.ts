@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { DIFFICULTY_SETTINGS, parseSeed, type ChaseSeed } from '../../engine';
+import { DIFFICULTIES, DIFFICULTY_SETTINGS, parseSeed, type ChaseSeed, type Difficulty } from '../../engine';
 import type { AudioManifest } from '../../engine/audio/manifest';
 import { scannerAudio } from '../audio/ScannerAudio';
 import { debugState } from '../debug/debugState';
@@ -9,14 +9,36 @@ import { newSeed } from '../seedSource';
 export const GAME_WIDTH = 1280;
 export const GAME_HEIGHT = 720;
 
+const LEVEL_KEY = 'chasseurs.level';
+
+/** The level last played, so "next chase" and the next visit start there. */
+function loadLevel(): Difficulty {
+  try {
+    const saved = window.localStorage.getItem(LEVEL_KEY);
+    return (DIFFICULTIES as readonly string[]).includes(saved ?? '') ? (saved as Difficulty) : 'EASY';
+  } catch {
+    return 'EASY';
+  }
+}
+
+function saveLevel(level: Difficulty): void {
+  try {
+    window.localStorage.setItem(LEVEL_KEY, level);
+  } catch {
+    // Private windows can refuse storage; the level is then remembered for this visit only.
+  }
+}
+
 /**
- * Title screen. Starting creates a chase seed (or uses `?seed=` from the
- * address, so a chase can be replayed exactly) and opens the chase; later
- * milestones go through difficulty selection and the mission briefing.
+ * Title screen with the level picker. Starting creates a chase seed at the
+ * chosen level (or uses `?seed=` from the address, so a chase can be replayed
+ * exactly) and opens the chase; the campaign and mission briefing come later.
  */
 export class TitleScene extends Phaser.Scene {
   static readonly KEY = 'Title';
   private seed?: ChaseSeed;
+  private static level: Difficulty | null = null;
+  private levelButtons: { level: Difficulty; box: Phaser.GameObjects.Rectangle; label: Phaser.GameObjects.Text }[] = [];
 
   constructor() {
     super(TitleScene.KEY);
@@ -61,22 +83,82 @@ export class TitleScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    const prompt = this.add
-      .text(GAME_WIDTH / 2, 380, 'Appuyez sur ENTRÉE ou touchez l’écran pour commencer', {
+    this.add
+      .text(GAME_WIDTH / 2, 352, 'Choisissez un niveau', {
         fontFamily: FONT_FAMILY,
         fontSize: '26px',
         color: toCss(PALETTE.ink),
       })
       .setOrigin(0.5);
+
+    const width = 262;
+    const gap = 16;
+    const left = GAME_WIDTH / 2 - (DIFFICULTIES.length * width + (DIFFICULTIES.length - 1) * gap) / 2;
+    this.levelButtons = DIFFICULTIES.map((level, i) => {
+      const x = left + i * (width + gap) + width / 2;
+      const box = this.add
+        .rectangle(x, 420, width, 64, PALETTE.cream)
+        .setStrokeStyle(3, PALETTE.ink)
+        .setInteractive({ useHandCursor: true });
+      const label = this.add
+        .text(x, 420, `${i + 1}  ${DIFFICULTY_SETTINGS[level].label.fr}`, {
+          fontFamily: FONT_FAMILY,
+          fontSize: '26px',
+          fontStyle: 'bold',
+          color: toCss(PALETTE.ink),
+        })
+        .setOrigin(0.5);
+      box.on('pointerover', () => this.select(level));
+      box.on('pointerdown', () => this.start(level));
+      return { level, box, label };
+    });
+    this.select(TitleScene.currentLevel);
+
+    const prompt = this.add
+      .text(GAME_WIDTH / 2, 482, 'Touchez un niveau, ou appuyez sur 1 à 4 puis ENTRÉE', {
+        fontFamily: FONT_FAMILY,
+        fontSize: '20px',
+        color: toCss(PALETTE.ink),
+      })
+      .setOrigin(0.5);
     this.tweens.add({ targets: prompt, alpha: 0.35, duration: 900, yoyo: true, repeat: -1 });
 
-    this.input.keyboard?.on('keydown-ENTER', () => this.start());
-    this.input.keyboard?.on('keydown-SPACE', () => this.start());
-    this.input.on('pointerdown', () => this.start());
+    const keyboard = this.input.keyboard;
+    DIFFICULTIES.forEach((level, i) => {
+      const names = ['ONE', 'TWO', 'THREE', 'FOUR'];
+      keyboard?.on(`keydown-${names[i]}`, () => this.select(level));
+      keyboard?.on(`keydown-NUMPAD_${names[i]}`, () => this.select(level));
+    });
+    const step = (by: number) => {
+      const i = DIFFICULTIES.indexOf(TitleScene.currentLevel);
+      this.select(DIFFICULTIES[Math.max(0, Math.min(DIFFICULTIES.length - 1, i + by))] as Difficulty);
+    };
+    keyboard?.on('keydown-LEFT', () => step(-1));
+    keyboard?.on('keydown-RIGHT', () => step(1));
+    keyboard?.on('keydown-ENTER', () => this.start());
+    keyboard?.on('keydown-SPACE', () => this.start());
   }
 
-  private start(): void {
-    this.seed = this.seedFromAddress() ?? newSeed('EASY');
+  private static get currentLevel(): Difficulty {
+    TitleScene.level ??= loadLevel();
+    return TitleScene.level;
+  }
+
+  private select(level: Difficulty): void {
+    TitleScene.level = level;
+    for (const button of this.levelButtons) {
+      const on = button.level === level;
+      button.box.setFillStyle(on ? PALETTE.terracotta : PALETTE.cream);
+      button.label.setColor(toCss(on ? PALETTE.cream : PALETTE.ink));
+    }
+  }
+
+  private start(level?: Difficulty): void {
+    if (level) this.select(level);
+    this.seed = this.seedFromAddress() ?? newSeed(TitleScene.currentLevel);
+    // Replaying a shared seed sets the level for the chases that follow.
+    TitleScene.level = this.seed.difficulty;
+    saveLevel(this.seed.difficulty);
     debugState.info.set('seed', this.seed.code);
     debugState.info.set('difficulty', DIFFICULTY_SETTINGS[this.seed.difficulty].label.en);
     this.scene.start('Chase', { seed: this.seed.code });

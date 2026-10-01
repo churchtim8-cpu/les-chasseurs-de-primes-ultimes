@@ -85,7 +85,50 @@ export interface ChaseSettings {
    * followed by corrected directions (X3). Blueprint: few route changes at Easy.
    */
   directionChange: number;
+  /**
+   * Sightings (blueprint section 18): the scanner reports the suspect near a
+   * place ("La voiture verte est près de la bibliothèque.") and the player
+   * picks the matching suspect from `cards` choices within `pickSeconds`.
+   */
+  sightings: { count: number; cards: number; pickSeconds: number };
+  /**
+   * Chance of a lost signal (Expert, blueprint section 10): right after a
+   * multi-step call the scanner says "Nous avons perdu le signal." and goes
+   * quiet, so the player must remember the directions.
+   */
+  lostSignal: number;
 }
+
+/** Vehicles the suspect can drive (approved vocabulary, blueprint section 11). */
+export const VEHICLES = ['BLUE', 'BLACK', 'WHITE', 'GREEN', 'TAXI', 'VAN'] as const;
+export type Vehicle = (typeof VEHICLES)[number];
+
+/** Sighting tuning, shared by all levels (provisional). */
+export const SIGHTING = {
+  /** The suspect is "près de" a place when this close (metres) to its building. */
+  nearWithin: 45,
+  /** No sighting in the first metres of a stage... */
+  minFromStart: 150,
+  /** ...nor with less than this share of the stage left. */
+  minRemainingShare: 0.2,
+  /** Sightings in the same stage are at least this far apart (metres along the route). */
+  spacing: 350,
+  /** Seconds added to the clock for the right answer, and taken off for a wrong one (or none). */
+  bonusSeconds: 4,
+  penaltySeconds: 6,
+  /** After the right answer the suspect shows on the map for this long (seconds). */
+  revealSeconds: 6,
+} as const;
+
+/** Lost-signal tuning (provisional). */
+export const LOST_SIGNAL = {
+  /** Not in the first seconds of the chase. From then on the scanner prefers calls with several turns. */
+  minElapsed: 6,
+  /** The call just before must give at least this many turns to remember. */
+  minSteps: 2,
+  /** The signal comes back once the player has used the directions they were given, or after this long (seconds). */
+  maxSeconds: 20,
+} as const;
 
 /** Direction-change tuning, shared by all levels (provisional). */
 export const TURN_OFF = {
@@ -120,6 +163,8 @@ export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
     escapeDistance: 850,
     escapeHold: 4,
     directionChange: 0,
+    sightings: { count: 1, cards: 2, pickSeconds: 12 },
+    lostSignal: 0,
   },
   INTERMEDIATE: {
     routeLength: [1700, 2700],
@@ -136,6 +181,8 @@ export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
     escapeDistance: 800,
     escapeHold: 3.5,
     directionChange: 0.3,
+    sightings: { count: 1, cards: 3, pickSeconds: 10 },
+    lostSignal: 0,
   },
   HARD: {
     routeLength: [2100, 3300],
@@ -152,6 +199,8 @@ export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
     escapeDistance: 750,
     escapeHold: 3,
     directionChange: 0.5,
+    sightings: { count: 2, cards: 3, pickSeconds: 9 },
+    lostSignal: 0,
   },
   EXPERT: {
     routeLength: [2400, 3800],
@@ -168,5 +217,7 @@ export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
     escapeDistance: 700,
     escapeHold: 2.5,
     directionChange: 0.7,
+    sightings: { count: 2, cards: 3, pickSeconds: 9 },
+    lostSignal: 0.9,
   },
 };

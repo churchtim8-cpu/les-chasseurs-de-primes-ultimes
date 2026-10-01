@@ -35,10 +35,11 @@ The police car drives forward on its own; you choose where it goes. Choices are 
 | Space / U | ⟲ | Turn around (faire demi-tour) |
 | E | ⇄ | Get out of the car / back in (next to it) |
 | R | ⟳ RÉPÉTER | Ask for the last scanner call again (after a chase: replay the same chase). Easy: unlimited; Intermediate: 3 per chase; Hard: costs 5 s; Expert: once. |
+| 1 to 4 | Tap a card | Answer a sighting (on the title screen: choose the level) |
 | M | | Whole-town overview (debug mode) |
 | Esc | | Back to the title screen |
 
-Touch buttons appear on touch screens (or add `?touch=1` to the address).
+Touch buttons appear on touch screens (or add `?touch=1` to the address). The title screen has a level picker (Facile, Intermédiaire, Difficile, Expert); the level is remembered for the next chase and the next visit.
 
 ## Chase types
 
@@ -57,11 +58,19 @@ The weights, stage lengths and timings live in `src/engine/chase/settings.ts`. W
 
 From Intermediate up (30% of chases at Intermediate, 50% at Hard, 70% at Expert), the scanner first guides the player along the route it predicts for the suspect. In the last stage the suspect then turns off it elsewhere: "Attention ! Le suspect a changé de direction." is followed straight away by corrected directions from where the player is ("Faites demi-tour." first if needed). This is template X3. The predicted route is checked as carefully as the real one, and the correction waits until the player is not about to reach a junction. With debug on, `?turnoff=1` or `?turnoff=0` forces it on or off.
 
+### Sightings
+
+The scanner names the suspect's vehicle when a driving stage starts ("Le suspect est dans une voiture verte."): a blue, black, white or green car, a taxi, or a van (never the van, nor the car it left, when it gets into one mid-chase). As the suspect passes a place, the scanner reports it ("La voiture verte est près de la bibliothèque.", or "Le suspect est près de …" on foot) and the chase pauses while the player picks the matching card, each a vehicle and a place (click, tap, or 1 to 4). From Intermediate up one card is the right vehicle at the wrong place and another the wrong vehicle at the right place, so both must be understood. At Expert the sighting only says "Le suspect est près de …": the player has to remember the vehicle. The right card adds 4 seconds and shows the suspect on the map for a moment; a wrong card, or none in time, costs 6 seconds. Easy and Intermediate have one sighting per chase, Hard and Expert two. `?sightings=0` turns them off.
+
+### Lost signal
+
+At Expert (90% of chases, when the route allows), right after a call with two or three turns the scanner says "Nous avons perdu le signal." It goes quiet, the suspect is hidden and repeats are blocked until the player has used those directions (or goes wrong); then directions resume, with the usual correction after a wrong turn. This is the memory event: the call is heard once and must be remembered. `?lost=1` or `?lost=0` forces it.
+
 ## French audio
 
 The scanner plays pre-recorded ElevenLabs clips. `npm run audio:script` writes every line the game can say to `docs/audio/script.csv` for review. Recordings go in `public/audio/dispatcher/` and `public/audio/officer/`, named by audio ID (for example `dir.turn.left.mp3`); `npm run audio:manifest` then lists them in `public/audio/manifest.json`. Once the library has any clips, the scanner only chooses directions whose clips are all recorded, so new sentence types appear in play as soon as their clips are added. Event lines with no recording yet are shown as text, with the radio beep and static. Add `?radio=0` to hear the clips without the radio filter. `audio/review.html` on the site lists every recording with a play button, for checking pronunciation.
 
-The current library (334 lines) was recorded with ElevenLabs Eleven v4: Christophe for the dispatcher and Alain for the officer. Not recorded yet: the 8 lines for transport changes and on-foot sentences, the 2 direction-change lines, and the 382 clause clips for Hard and Expert (see below). Alain (male) and Geneviève (female) are the chosen dispatcher voices and will replace Christophe; new recordings go to them. The clips keep ElevenLabs' content-credential tag.
+The current library (334 lines) was recorded with ElevenLabs Eleven v4: Christophe for the dispatcher and Alain for the officer. Not recorded yet: the 8 lines for transport changes and on-foot sentences, the 2 direction-change lines, the Hard and Expert sentences and clauses (see below), and the 140 vehicle, sighting and lost-signal lines. Alain (male) and Geneviève (female) are the chosen dispatcher voices and will replace Christophe; new recordings go to them. The clips keep ElevenLabs' content-credential tag.
 
 ### Hard and Expert instructions
 

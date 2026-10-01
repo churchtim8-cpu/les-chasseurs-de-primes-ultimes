@@ -1537,12 +1537,152 @@
 1536,Intermediate and up,EVENT,Descendez de la voiture !,Dispatcher (calm),25,event.get_out
 1537,Intermediate and up,EVENT,Il est à pied !,Dispatcher (calm),15,event.on_foot
 1538,Hard and up,EVENT,Il monte dans une voiture !,Dispatcher (calm),27,event.suspect_boards
-1539,Intermediate and up,EVENT,Le suspect a changé de direction.,Dispatcher (calm),33,event.changed_direction
-1540,Intermediate and up,EVENT,Le suspect est sorti de la voiture.,Dispatcher (calm),35,event.suspect_left_car
-1541,Hard and up,EVENT,Montez dans la voiture !,Dispatcher (calm),24,event.get_in
-1542,All levels,Officer asks for a repeat,"Pouvez-vous répéter, s'il vous plaît ?",Officer (urgent),38,repeat.calm
-1543,All levels,Officer asks for a repeat,Répétez ! Vite !,Officer (urgent),16,repeat.frantic
-1544,All levels,Officer asks for a repeat,"Répétez, s'il vous plaît !",Officer (urgent),26,repeat.urgent
-1545,All levels,End of chase,Le suspect est arrêté !,Dispatcher (calm),23,outcome.captured
-1546,All levels,End of chase,Le suspect s'éloigne.,Dispatcher (calm),21,event.moving_away
-1547,All levels,End of chase,Le suspect s'est échappé.,Dispatcher (calm),25,outcome.escaped
+1539,Easy and up,EVENT,La camionnette est près de l'école.,Dispatcher (calm),35,event.sighting.van.school
+1540,Easy and up,EVENT,La camionnette est près de l'hôpital.,Dispatcher (calm),37,event.sighting.van.hospital
+1541,Easy and up,EVENT,La camionnette est près de l'hôtel.,Dispatcher (calm),35,event.sighting.van.hotel
+1542,Easy and up,EVENT,La camionnette est près de la boulangerie.,Dispatcher (calm),42,event.sighting.van.bakery
+1543,Easy and up,EVENT,La camionnette est près de la gare routière.,Dispatcher (calm),44,event.sighting.van.bus_station
+1544,Easy and up,EVENT,La camionnette est près de la librairie.,Dispatcher (calm),40,event.sighting.van.bookshop
+1545,Easy and up,EVENT,La camionnette est près de la pharmacie.,Dispatcher (calm),40,event.sighting.van.pharmacy
+1546,Easy and up,EVENT,La camionnette est près de la piscine.,Dispatcher (calm),38,event.sighting.van.swimming_pool
+1547,Easy and up,EVENT,La camionnette est près de la place.,Dispatcher (calm),36,event.sighting.van.square
+1548,Easy and up,EVENT,La camionnette est près de la plage.,Dispatcher (calm),36,event.sighting.van.beach
+1549,Easy and up,EVENT,La camionnette est près de la station-service.,Dispatcher (calm),46,event.sighting.van.gas_station
+1550,Easy and up,EVENT,La camionnette est près du cinéma.,Dispatcher (calm),34,event.sighting.van.cinema
+1551,Easy and up,EVENT,La camionnette est près du commissariat de police.,Dispatcher (calm),50,event.sighting.van.police_station
+1552,Easy and up,EVENT,La camionnette est près du magasin.,Dispatcher (calm),35,event.sighting.van.shop
+1553,Easy and up,EVENT,La camionnette est près du musée.,Dispatcher (calm),33,event.sighting.van.museum
+1554,Easy and up,EVENT,La camionnette est près du parc.,Dispatcher (calm),32,event.sighting.van.park
+1555,Easy and up,EVENT,La camionnette est près du parking.,Dispatcher (calm),35,event.sighting.van.car_park
+1556,Easy and up,EVENT,La camionnette est près du restaurant.,Dispatcher (calm),38,event.sighting.van.restaurant
+1557,Easy and up,EVENT,La camionnette est près du stade.,Dispatcher (calm),33,event.sighting.van.stadium
+1558,Easy and up,EVENT,La voiture blanche est près de l'école.,Dispatcher (calm),39,event.sighting.white.school
+1559,Easy and up,EVENT,La voiture blanche est près de l'hôpital.,Dispatcher (calm),41,event.sighting.white.hospital
+1560,Easy and up,EVENT,La voiture blanche est près de l'hôtel.,Dispatcher (calm),39,event.sighting.white.hotel
+1561,Easy and up,EVENT,La voiture blanche est près de la boulangerie.,Dispatcher (calm),46,event.sighting.white.bakery
+1562,Easy and up,EVENT,La voiture blanche est près de la gare routière.,Dispatcher (calm),48,event.sighting.white.bus_station
+1563,Easy and up,EVENT,La voiture blanche est près de la librairie.,Dispatcher (calm),44,event.sighting.white.bookshop
+1564,Easy and up,EVENT,La voiture blanche est près de la pharmacie.,Dispatcher (calm),44,event.sighting.white.pharmacy
+1565,Easy and up,EVENT,La voiture blanche est près de la piscine.,Dispatcher (calm),42,event.sighting.white.swimming_pool
+1566,Easy and up,EVENT,La voiture blanche est près de la place.,Dispatcher (calm),40,event.sighting.white.square
+1567,Easy and up,EVENT,La voiture blanche est près de la plage.,Dispatcher (calm),40,event.sighting.white.beach
+1568,Easy and up,EVENT,La voiture blanche est près de la station-service.,Dispatcher (calm),50,event.sighting.white.gas_station
+1569,Easy and up,EVENT,La voiture blanche est près du cinéma.,Dispatcher (calm),38,event.sighting.white.cinema
+1570,Easy and up,EVENT,La voiture blanche est près du commissariat de police.,Dispatcher (calm),54,event.sighting.white.police_station
+1571,Easy and up,EVENT,La voiture blanche est près du magasin.,Dispatcher (calm),39,event.sighting.white.shop
+1572,Easy and up,EVENT,La voiture blanche est près du musée.,Dispatcher (calm),37,event.sighting.white.museum
+1573,Easy and up,EVENT,La voiture blanche est près du parc.,Dispatcher (calm),36,event.sighting.white.park
+1574,Easy and up,EVENT,La voiture blanche est près du parking.,Dispatcher (calm),39,event.sighting.white.car_park
+1575,Easy and up,EVENT,La voiture blanche est près du restaurant.,Dispatcher (calm),42,event.sighting.white.restaurant
+1576,Easy and up,EVENT,La voiture blanche est près du stade.,Dispatcher (calm),37,event.sighting.white.stadium
+1577,Easy and up,EVENT,La voiture bleue est près de l'école.,Dispatcher (calm),37,event.sighting.blue.school
+1578,Easy and up,EVENT,La voiture bleue est près de l'hôpital.,Dispatcher (calm),39,event.sighting.blue.hospital
+1579,Easy and up,EVENT,La voiture bleue est près de l'hôtel.,Dispatcher (calm),37,event.sighting.blue.hotel
+1580,Easy and up,EVENT,La voiture bleue est près de la boulangerie.,Dispatcher (calm),44,event.sighting.blue.bakery
+1581,Easy and up,EVENT,La voiture bleue est près de la gare routière.,Dispatcher (calm),46,event.sighting.blue.bus_station
+1582,Easy and up,EVENT,La voiture bleue est près de la librairie.,Dispatcher (calm),42,event.sighting.blue.bookshop
+1583,Easy and up,EVENT,La voiture bleue est près de la pharmacie.,Dispatcher (calm),42,event.sighting.blue.pharmacy
+1584,Easy and up,EVENT,La voiture bleue est près de la piscine.,Dispatcher (calm),40,event.sighting.blue.swimming_pool
+1585,Easy and up,EVENT,La voiture bleue est près de la place.,Dispatcher (calm),38,event.sighting.blue.square
+1586,Easy and up,EVENT,La voiture bleue est près de la plage.,Dispatcher (calm),38,event.sighting.blue.beach
+1587,Easy and up,EVENT,La voiture bleue est près de la station-service.,Dispatcher (calm),48,event.sighting.blue.gas_station
+1588,Easy and up,EVENT,La voiture bleue est près du cinéma.,Dispatcher (calm),36,event.sighting.blue.cinema
+1589,Easy and up,EVENT,La voiture bleue est près du commissariat de police.,Dispatcher (calm),52,event.sighting.blue.police_station
+1590,Easy and up,EVENT,La voiture bleue est près du magasin.,Dispatcher (calm),37,event.sighting.blue.shop
+1591,Easy and up,EVENT,La voiture bleue est près du musée.,Dispatcher (calm),35,event.sighting.blue.museum
+1592,Easy and up,EVENT,La voiture bleue est près du parc.,Dispatcher (calm),34,event.sighting.blue.park
+1593,Easy and up,EVENT,La voiture bleue est près du parking.,Dispatcher (calm),37,event.sighting.blue.car_park
+1594,Easy and up,EVENT,La voiture bleue est près du restaurant.,Dispatcher (calm),40,event.sighting.blue.restaurant
+1595,Easy and up,EVENT,La voiture bleue est près du stade.,Dispatcher (calm),35,event.sighting.blue.stadium
+1596,Easy and up,EVENT,La voiture noire est près de l'école.,Dispatcher (calm),37,event.sighting.black.school
+1597,Easy and up,EVENT,La voiture noire est près de l'hôpital.,Dispatcher (calm),39,event.sighting.black.hospital
+1598,Easy and up,EVENT,La voiture noire est près de l'hôtel.,Dispatcher (calm),37,event.sighting.black.hotel
+1599,Easy and up,EVENT,La voiture noire est près de la boulangerie.,Dispatcher (calm),44,event.sighting.black.bakery
+1600,Easy and up,EVENT,La voiture noire est près de la gare routière.,Dispatcher (calm),46,event.sighting.black.bus_station
+1601,Easy and up,EVENT,La voiture noire est près de la librairie.,Dispatcher (calm),42,event.sighting.black.bookshop
+1602,Easy and up,EVENT,La voiture noire est près de la pharmacie.,Dispatcher (calm),42,event.sighting.black.pharmacy
+1603,Easy and up,EVENT,La voiture noire est près de la piscine.,Dispatcher (calm),40,event.sighting.black.swimming_pool
+1604,Easy and up,EVENT,La voiture noire est près de la place.,Dispatcher (calm),38,event.sighting.black.square
+1605,Easy and up,EVENT,La voiture noire est près de la plage.,Dispatcher (calm),38,event.sighting.black.beach
+1606,Easy and up,EVENT,La voiture noire est près de la station-service.,Dispatcher (calm),48,event.sighting.black.gas_station
+1607,Easy and up,EVENT,La voiture noire est près du cinéma.,Dispatcher (calm),36,event.sighting.black.cinema
+1608,Easy and up,EVENT,La voiture noire est près du commissariat de police.,Dispatcher (calm),52,event.sighting.black.police_station
+1609,Easy and up,EVENT,La voiture noire est près du magasin.,Dispatcher (calm),37,event.sighting.black.shop
+1610,Easy and up,EVENT,La voiture noire est près du musée.,Dispatcher (calm),35,event.sighting.black.museum
+1611,Easy and up,EVENT,La voiture noire est près du parc.,Dispatcher (calm),34,event.sighting.black.park
+1612,Easy and up,EVENT,La voiture noire est près du parking.,Dispatcher (calm),37,event.sighting.black.car_park
+1613,Easy and up,EVENT,La voiture noire est près du restaurant.,Dispatcher (calm),40,event.sighting.black.restaurant
+1614,Easy and up,EVENT,La voiture noire est près du stade.,Dispatcher (calm),35,event.sighting.black.stadium
+1615,Easy and up,EVENT,La voiture verte est près de l'école.,Dispatcher (calm),37,event.sighting.green.school
+1616,Easy and up,EVENT,La voiture verte est près de l'hôpital.,Dispatcher (calm),39,event.sighting.green.hospital
+1617,Easy and up,EVENT,La voiture verte est près de l'hôtel.,Dispatcher (calm),37,event.sighting.green.hotel
+1618,Easy and up,EVENT,La voiture verte est près de la boulangerie.,Dispatcher (calm),44,event.sighting.green.bakery
+1619,Easy and up,EVENT,La voiture verte est près de la gare routière.,Dispatcher (calm),46,event.sighting.green.bus_station
+1620,Easy and up,EVENT,La voiture verte est près de la librairie.,Dispatcher (calm),42,event.sighting.green.bookshop
+1621,Easy and up,EVENT,La voiture verte est près de la pharmacie.,Dispatcher (calm),42,event.sighting.green.pharmacy
+1622,Easy and up,EVENT,La voiture verte est près de la piscine.,Dispatcher (calm),40,event.sighting.green.swimming_pool
+1623,Easy and up,EVENT,La voiture verte est près de la place.,Dispatcher (calm),38,event.sighting.green.square
+1624,Easy and up,EVENT,La voiture verte est près de la plage.,Dispatcher (calm),38,event.sighting.green.beach
+1625,Easy and up,EVENT,La voiture verte est près de la station-service.,Dispatcher (calm),48,event.sighting.green.gas_station
+1626,Easy and up,EVENT,La voiture verte est près du cinéma.,Dispatcher (calm),36,event.sighting.green.cinema
+1627,Easy and up,EVENT,La voiture verte est près du commissariat de police.,Dispatcher (calm),52,event.sighting.green.police_station
+1628,Easy and up,EVENT,La voiture verte est près du magasin.,Dispatcher (calm),37,event.sighting.green.shop
+1629,Easy and up,EVENT,La voiture verte est près du musée.,Dispatcher (calm),35,event.sighting.green.museum
+1630,Easy and up,EVENT,La voiture verte est près du parc.,Dispatcher (calm),34,event.sighting.green.park
+1631,Easy and up,EVENT,La voiture verte est près du parking.,Dispatcher (calm),37,event.sighting.green.car_park
+1632,Easy and up,EVENT,La voiture verte est près du restaurant.,Dispatcher (calm),40,event.sighting.green.restaurant
+1633,Easy and up,EVENT,La voiture verte est près du stade.,Dispatcher (calm),35,event.sighting.green.stadium
+1634,Intermediate and up,EVENT,Le suspect a changé de direction.,Dispatcher (calm),33,event.changed_direction
+1635,All levels,EVENT,Le suspect est dans un taxi.,Dispatcher (calm),28,event.vehicle.taxi
+1636,All levels,EVENT,Le suspect est dans une camionnette.,Dispatcher (calm),36,event.vehicle.van
+1637,All levels,EVENT,Le suspect est dans une voiture blanche.,Dispatcher (calm),40,event.vehicle.white
+1638,All levels,EVENT,Le suspect est dans une voiture bleue.,Dispatcher (calm),38,event.vehicle.blue
+1639,All levels,EVENT,Le suspect est dans une voiture noire.,Dispatcher (calm),38,event.vehicle.black
+1640,All levels,EVENT,Le suspect est dans une voiture verte.,Dispatcher (calm),38,event.vehicle.green
+1641,All levels,EVENT,Le suspect est près de l'école.,Dispatcher (calm),31,event.sighting.suspect.school
+1642,All levels,EVENT,Le suspect est près de l'hôpital.,Dispatcher (calm),33,event.sighting.suspect.hospital
+1643,All levels,EVENT,Le suspect est près de l'hôtel.,Dispatcher (calm),31,event.sighting.suspect.hotel
+1644,All levels,EVENT,Le suspect est près de la boulangerie.,Dispatcher (calm),38,event.sighting.suspect.bakery
+1645,All levels,EVENT,Le suspect est près de la gare routière.,Dispatcher (calm),40,event.sighting.suspect.bus_station
+1646,All levels,EVENT,Le suspect est près de la librairie.,Dispatcher (calm),36,event.sighting.suspect.bookshop
+1647,All levels,EVENT,Le suspect est près de la pharmacie.,Dispatcher (calm),36,event.sighting.suspect.pharmacy
+1648,All levels,EVENT,Le suspect est près de la piscine.,Dispatcher (calm),34,event.sighting.suspect.swimming_pool
+1649,All levels,EVENT,Le suspect est près de la place.,Dispatcher (calm),32,event.sighting.suspect.square
+1650,All levels,EVENT,Le suspect est près de la plage.,Dispatcher (calm),32,event.sighting.suspect.beach
+1651,All levels,EVENT,Le suspect est près de la station-service.,Dispatcher (calm),42,event.sighting.suspect.gas_station
+1652,All levels,EVENT,Le suspect est près du cinéma.,Dispatcher (calm),30,event.sighting.suspect.cinema
+1653,All levels,EVENT,Le suspect est près du commissariat de police.,Dispatcher (calm),46,event.sighting.suspect.police_station
+1654,All levels,EVENT,Le suspect est près du magasin.,Dispatcher (calm),31,event.sighting.suspect.shop
+1655,All levels,EVENT,Le suspect est près du musée.,Dispatcher (calm),29,event.sighting.suspect.museum
+1656,All levels,EVENT,Le suspect est près du parc.,Dispatcher (calm),28,event.sighting.suspect.park
+1657,All levels,EVENT,Le suspect est près du parking.,Dispatcher (calm),31,event.sighting.suspect.car_park
+1658,All levels,EVENT,Le suspect est près du restaurant.,Dispatcher (calm),34,event.sighting.suspect.restaurant
+1659,All levels,EVENT,Le suspect est près du stade.,Dispatcher (calm),29,event.sighting.suspect.stadium
+1660,Intermediate and up,EVENT,Le suspect est sorti de la voiture.,Dispatcher (calm),35,event.suspect_left_car
+1661,Easy and up,EVENT,Le taxi est près de l'école.,Dispatcher (calm),28,event.sighting.taxi.school
+1662,Easy and up,EVENT,Le taxi est près de l'hôpital.,Dispatcher (calm),30,event.sighting.taxi.hospital
+1663,Easy and up,EVENT,Le taxi est près de l'hôtel.,Dispatcher (calm),28,event.sighting.taxi.hotel
+1664,Easy and up,EVENT,Le taxi est près de la boulangerie.,Dispatcher (calm),35,event.sighting.taxi.bakery
+1665,Easy and up,EVENT,Le taxi est près de la gare routière.,Dispatcher (calm),37,event.sighting.taxi.bus_station
+1666,Easy and up,EVENT,Le taxi est près de la librairie.,Dispatcher (calm),33,event.sighting.taxi.bookshop
+1667,Easy and up,EVENT,Le taxi est près de la pharmacie.,Dispatcher (calm),33,event.sighting.taxi.pharmacy
+1668,Easy and up,EVENT,Le taxi est près de la piscine.,Dispatcher (calm),31,event.sighting.taxi.swimming_pool
+1669,Easy and up,EVENT,Le taxi est près de la place.,Dispatcher (calm),29,event.sighting.taxi.square
+1670,Easy and up,EVENT,Le taxi est près de la plage.,Dispatcher (calm),29,event.sighting.taxi.beach
+1671,Easy and up,EVENT,Le taxi est près de la station-service.,Dispatcher (calm),39,event.sighting.taxi.gas_station
+1672,Easy and up,EVENT,Le taxi est près du cinéma.,Dispatcher (calm),27,event.sighting.taxi.cinema
+1673,Easy and up,EVENT,Le taxi est près du commissariat de police.,Dispatcher (calm),43,event.sighting.taxi.police_station
+1674,Easy and up,EVENT,Le taxi est près du magasin.,Dispatcher (calm),28,event.sighting.taxi.shop
+1675,Easy and up,EVENT,Le taxi est près du musée.,Dispatcher (calm),26,event.sighting.taxi.museum
+1676,Easy and up,EVENT,Le taxi est près du parc.,Dispatcher (calm),25,event.sighting.taxi.park
+1677,Easy and up,EVENT,Le taxi est près du parking.,Dispatcher (calm),28,event.sighting.taxi.car_park
+1678,Easy and up,EVENT,Le taxi est près du restaurant.,Dispatcher (calm),31,event.sighting.taxi.restaurant
+1679,Easy and up,EVENT,Le taxi est près du stade.,Dispatcher (calm),26,event.sighting.taxi.stadium
+1680,Hard and up,EVENT,Montez dans la voiture !,Dispatcher (calm),24,event.get_in
+1681,Expert and up,EVENT,Nous avons perdu le signal.,Dispatcher (calm),27,event.lost_signal
+1682,All levels,Officer asks for a repeat,"Pouvez-vous répéter, s'il vous plaît ?",Officer (urgent),38,repeat.calm
+1683,All levels,Officer asks for a repeat,Répétez ! Vite !,Officer (urgent),16,repeat.frantic
+1684,All levels,Officer asks for a repeat,"Répétez, s'il vous plaît !",Officer (urgent),26,repeat.urgent
+1685,All levels,End of chase,Le suspect est arrêté !,Dispatcher (calm),23,outcome.captured
+1686,All levels,End of chase,Le suspect s'éloigne.,Dispatcher (calm),21,event.moving_away
+1687,All levels,End of chase,Le suspect s'est échappé.,Dispatcher (calm),25,outcome.escaped

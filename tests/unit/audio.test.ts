@@ -43,9 +43,9 @@ describe('recording script', () => {
 
   it('stays a manageable size for recording', () => {
     // Two-step Hard sentences are recorded whole (only the pairs the map can produce);
-    // three-step and Expert calls reuse one clip per linked clause.
-    expect(script.length).toBeLessThan(1_700);
-    expect(script.reduce((n, l) => n + l.text.length, 0)).toBeLessThan(100_000);
+    // three-step and Expert calls reuse one clip per linked clause. Sightings add about 140 short lines.
+    expect(script.length).toBeLessThan(1_900);
+    expect(script.reduce((n, l) => n + l.text.length, 0)).toBeLessThan(110_000);
   });
 
   it.each(DIFFICULTIES)('chases work using only recorded sentences (%s)', (difficulty) => {
@@ -55,7 +55,15 @@ describe('recording script', () => {
     for (const seed of list) {
       const chase = new Chase(graph, generateScenario(graph, seed), { hasAudio: (id) => recorded.has(id) });
       const bot = new ListenerBot(graph);
-      for (let t = 0; t < 400 && chase.status.phase === 'PURSUIT'; t += 0.05) bot.step(chase, 0.05);
+      const spoken: string[] = [];
+      for (let t = 0; t < 400 && chase.status.phase === 'PURSUIT'; t += 0.05) {
+        for (const e of bot.step(chase, 0.05)) {
+          if (e.type === 'ANNOUNCE') spoken.push(...e.lines.map((l) => l.audioId));
+          if (e.type === 'SIGHTING') spoken.push(e.line.audioId);
+        }
+      }
+      // Events, vehicles and sightings are in the script for this level too.
+      for (const id of spoken) expect(recorded, `${seed}: ${id}`).toContain(id);
       expect(bot.log.length, seed).toBeGreaterThan(0);
       for (const t of bot.log) {
         for (const i of t.instructions) for (const c of i.clips) expect(recorded, `${seed}: ${i.text}`).toContain(c.audioId);

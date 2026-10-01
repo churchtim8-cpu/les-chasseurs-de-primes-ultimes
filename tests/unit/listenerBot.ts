@@ -6,10 +6,19 @@
  * It gets out of the car on "Descendez de la voiture !" and back in on
  * "Montez dans la voiture !", and drops the directions it was following on
  * "Le suspect a changé de direction."
+ *
+ * It remembers the vehicle it is told about ("Le suspect est dans une voiture
+ * verte.") and answers sightings from what it heard: the vehicle and place
+ * named in the call, or the remembered vehicle when the call only says
+ * "Le suspect est près de …". When the signal is lost it carries on with the
+ * directions it already has.
  */
 
 import { EVENT_LINES, TRANSPORT_LINES } from '../../src/engine/audio/script';
 import type { Chase, ChaseEvent } from '../../src/engine/chase/chase';
+import { VEHICLES, type Vehicle } from '../../src/engine/chase/settings';
+import { sightingLine, vehicleLine } from '../../src/engine/language/sightings';
+import type { SightingCard } from '../../src/engine/chase/sightings';
 import { isAt, isDecision, locationById, opensOn, passPoint, scanAhead } from '../../src/engine/language/analysis';
 import type { Clause } from '../../src/engine/language/instructions';
 import type { Transmission } from '../../src/engine/language/navigator';
@@ -29,6 +38,11 @@ export class ListenerBot {
   private orders: { at: number; audioId: string }[] = [];
   /** Times at which the bot has understood that the suspect changed direction. */
   private changes: number[] = [];
+  /** The vehicle it was last told the suspect is in. */
+  private vehicle: Vehicle | null = null;
+  private question: { at: number; cards: SightingCard[]; audioId: string } | null = null;
+  /** Sightings it could not work out from what it heard. */
+  readonly unsure: string[] = [];
   /** Mode changes that failed (for example, the car out of reach). */
   readonly failedOrders: string[] = [];
   private tasks: Task[] = [];
@@ -55,7 +69,11 @@ export class ListenerBot {
             this.orders.push({ at: this.time + this.reaction, audioId: line.audioId });
           }
           if (line.audioId === EVENT_LINES.CHANGED_DIRECTION.audioId) this.changes.push(this.time + this.reaction);
+          const told = VEHICLES.find((v) => vehicleLine(v).audioId === line.audioId);
+          if (told) this.vehicle = told;
         }
+      } else if (e.type === 'SIGHTING') {
+        this.question = { at: this.time + this.reaction, cards: e.cards, audioId: e.line.audioId };
       }
     }
   }
@@ -63,6 +81,14 @@ export class ListenerBot {
   /** Act, then advance the chase by dt. */
   step(chase: Chase, dt: number): ChaseEvent[] {
     this.time += dt;
+    if (this.question && this.question.at <= this.time) {
+      const choice = this.answer(this.question.cards, this.question.audioId);
+      if (choice === -1) this.unsure.push(this.question.audioId);
+      this.question = null;
+      const events = chase.answerSighting(choice);
+      this.hear(events);
+      return events;
+    }
     while (this.orders.length > 0 && (this.orders[0]?.at ?? Infinity) <= this.time) {
       const order = this.orders.shift()!;
       const { result, events } = chase.toggleMode();
@@ -116,6 +142,16 @@ export class ListenerBot {
     const events = chase.update(dt);
     this.hear(events);
     return events;
+  }
+
+  /** The card matching the call it heard: the place said, and the vehicle said or remembered (any, on foot). */
+  private answer(cards: readonly SightingCard[], audioId: string): number {
+    const heard = cards
+      .flatMap((c) => [...VEHICLES, null].map((named) => ({ named, place: c.place })))
+      .find((h) => sightingLine(h.named, h.place).audioId === audioId);
+    if (!heard) return -1;
+    const vehicle = heard.named ?? this.vehicle;
+    return cards.findIndex((c) => c.place === heard.place && (c.vehicle === null || c.vehicle === vehicle));
   }
 
   /** Is it time to press the arrow for this clause? */
