@@ -29,12 +29,12 @@ The police car drives forward on its own; you choose where it goes. Choices are 
 
 | Keyboard | Touch | Action |
 |---|---|---|
-| ← / A, → / D | ◀ ▶ | Turn left / right at the next junction. At a roundabout the exits are numbered on the map (1 = la première sortie): ◀ ▶ choose the exit and the car goes round and takes it |
+| ← / A, → / D | ◀ ▶ | Turn left / right at the next junction: the driver's left and right, as in "à gauche". The arrow above the player turns with them, so it points the way they will go. At a roundabout the exits are numbered on the map (1 = la première sortie): ◀ ▶ choose the exit and the car goes round and takes it |
 | ↑ / W | ▲ | Straight on at the next junction; hold to speed up |
 | ↓ / S (hold) | ▼ | Slow down and stop |
 | Space / U | ⟲ | Turn around (faire demi-tour) |
 | E | ⇄ | Get out of the car / back in (next to it) |
-| R | ⟳ RÉPÉTER | Ask for the last scanner call again (after a chase: replay the same chase). Easy: unlimited; Intermediate: 3 per chase; Hard: costs 5 s; Expert: once. |
+| R | ⟳ RÉPÉTER | Play the last scanner call again straight away; the officer's "Répétez, s'il vous plaît !" shows as text only (after a chase: replay the same chase). Easy: unlimited; Intermediate: 3 per chase; Hard: costs 5 s; Expert: once. |
 | 1 to 4 | Tap a card | Answer a sighting (on the title screen: choose the level) |
 | M | | Whole-town overview (debug mode) |
 | Esc | | Back to the title screen |
