@@ -69,10 +69,29 @@ export function roundaboutExits(graph: TownGraph, nodes: readonly string[], mode
   return out;
 }
 
-/** Can a player at this level be guided along this path (no roundabout exit beyond the level's ordinals)? */
+/**
+ * Can a player at this level be guided along this path? No roundabout exit
+ * beyond the level's ordinals, and every turn has a true, unambiguous
+ * sentence from at least one junction before it. (On foot, a path leaving
+ * a junction at a slant beside a street can have no fair description.)
+ */
 export function describable(graph: TownGraph, nodes: readonly string[], mode: TravelMode, difficulty: Difficulty): boolean {
   const max = LANGUAGE_SETTINGS[difficulty].maxRoundaboutOrdinal;
-  return roundaboutExits(graph, nodes, mode).every((n) => n <= max);
+  if (!roundaboutExits(graph, nodes, mode).every((n) => n <= max)) return false;
+  const settings = LANGUAGE_SETTINGS[difficulty];
+  const allowed = (c: Clause) => (settings.weights[templateFor([c], difficulty)] ?? 0) > 0;
+  const actions = actionIndices(graph, nodes, mode);
+  for (const [k, a] of actions.entries()) {
+    const node = nodes[a] as string;
+    const to = nodes[a + 1] as string;
+    let found = false;
+    for (let i = a - 1; i >= Math.max(0, (actions[k - 1] ?? 0)) && !found; i--) {
+      const from = positionLeaving(graph, nodes[i] as string, nodes[i + 1] as string, mode);
+      found = describe(graph, from, node, to, difficulty, false).some((c) => allowed(c) && readsAs(graph, from, c, node, to));
+    }
+    if (!found) return false;
+  }
+  return true;
 }
 
 /** True when the interpreter's only reading of the clause is this junction and this exit. */

@@ -59,7 +59,8 @@ export class Navigator {
     private readonly difficulty: Difficulty,
     private readonly rng: Rng,
     route: readonly string[],
-    private readonly destination: string,
+    /** Where the suspect is heading, or null when this stage ends at a change of transport (no final line). */
+    private readonly destination: string | null,
     mode: TravelMode = 'CAR',
     /** Only sentences with a recording may be used (all, until audio is loaded). */
     private readonly hasAudio: AudioCheck = () => true,
@@ -125,7 +126,7 @@ export class Navigator {
     const pos = player;
     const nextIndex = this.actions.findIndex((a) => a > this.progress);
     if (nextIndex === -1) {
-      if (!this.finalDone) {
+      if (!this.finalDone && this.destination !== null) {
         this.finalDone = true;
         const final = finalInstruction(this.graph, pos, this.guide, this.destination, this.difficulty, this.rng, this.hasAudio);
         if (final) this.emit('FINAL', [final], out);
@@ -187,42 +188,8 @@ export class Navigator {
     }
   }
 
-  /**
-   * A new guide from the player's position back onto the suspect's route:
-   * either driving on, or turning round, whichever gets there sooner.
-   */
   private replan(player: MoverStart, suspectRoute: readonly string[]): { guide: string[]; uTurn: boolean } | null {
-    const mode = player.mode;
-    const edge = this.graph.edge(player.edgeId);
-    const origin = this.graph.other(edge, player.towards);
-    const length = this.graph.edgeLength(edge);
-    const fromOrigin = (origin === edge.from ? player.t : 1 - player.t) * length;
-    const blocked = new Set([edge.id]);
-
-    const options: { first: [string, string]; lead: number; uTurn: boolean }[] = [
-      { first: [origin, player.towards], lead: length - fromOrigin, uTurn: false },
-    ];
-    if (canTravel(edge, mode, player.towards)) {
-      options.push({ first: [player.towards, origin], lead: fromOrigin + U_TURN_PENALTY, uTurn: true });
-    }
-
-    let best: { guide: string[]; uTurn: boolean; cost: number } | null = null;
-    for (const option of options) {
-      const start = option.first[1];
-      for (let k = 0; k < suspectRoute.length; k++) {
-        const join = suspectRoute[k] as string;
-        const path =
-          start === join ? { nodes: [start], length: 0 } : this.graph.shortestPath(start, join, mode, blocked);
-        if (!path) continue;
-        const guide = [option.first[0], ...path.nodes, ...suspectRoute.slice(k + 1)];
-        if (new Set(guide).size !== guide.length || followProblem(this.graph, guide, mode)) continue;
-        if (!describable(this.graph, guide, mode, this.difficulty)) continue;
-        const cost = option.lead + path.length - pathLength(this.graph, suspectRoute.slice(0, k + 1));
-        if (!best || cost < best.cost) best = { guide, uTurn: option.uTurn, cost };
-        break;
-      }
-    }
-    return best;
+    return planGuide(this.graph, player, suspectRoute, this.difficulty);
   }
 
   private emit(kind: TransmissionKind, instructions: Instruction[], out: Transmission[]): void {
@@ -235,4 +202,47 @@ export class Navigator {
     this.history.push(transmission);
     out.push(transmission);
   }
+}
+
+/**
+ * A guide from the player's position onto the suspect's route: either going
+ * on, or turning round, whichever gets there sooner. The guide starts with
+ * the edge the player is on (turned round when `uTurn` is set).
+ */
+export function planGuide(
+  graph: TownGraph,
+  player: MoverStart,
+  suspectRoute: readonly string[],
+  difficulty: Difficulty,
+): { guide: string[]; uTurn: boolean } | null {
+  const mode = player.mode;
+  const edge = graph.edge(player.edgeId);
+  const origin = graph.other(edge, player.towards);
+  const length = graph.edgeLength(edge);
+  const fromOrigin = (origin === edge.from ? player.t : 1 - player.t) * length;
+  const blocked = new Set([edge.id]);
+
+  const options: { first: [string, string]; lead: number; uTurn: boolean }[] = [
+    { first: [origin, player.towards], lead: length - fromOrigin, uTurn: false },
+  ];
+  if (canTravel(edge, mode, player.towards)) {
+    options.push({ first: [player.towards, origin], lead: fromOrigin + U_TURN_PENALTY, uTurn: true });
+  }
+
+  let best: { guide: string[]; uTurn: boolean; cost: number } | null = null;
+  for (const option of options) {
+    const start = option.first[1];
+    for (let k = 0; k < suspectRoute.length; k++) {
+      const join = suspectRoute[k] as string;
+      const path = start === join ? { nodes: [start], length: 0 } : graph.shortestPath(start, join, mode, blocked);
+      if (!path) continue;
+      const guide = [option.first[0], ...path.nodes, ...suspectRoute.slice(k + 1)];
+      if (new Set(guide).size !== guide.length || followProblem(graph, guide, mode)) continue;
+      if (!describable(graph, guide, mode, difficulty)) continue;
+      const cost = option.lead + path.length - pathLength(graph, suspectRoute.slice(0, k + 1));
+      if (!best || cost < best.cost) best = { guide, uTurn: option.uTurn, cost };
+      break;
+    }
+  }
+  return best;
 }

@@ -18,13 +18,23 @@ export interface RouteSpec {
   mode: TravelMode;
   /** Extra condition a route must meet (for example, one the level's French can describe). */
   accept?: (nodes: readonly string[]) => boolean;
+  /** Start from this node (where the suspect changed transport) instead of a random road. */
+  from?: string;
+  /** Do not leave `from` along this edge (the one the suspect arrived by). */
+  avoidEdge?: string;
+  /**
+   * End at a place where the suspect changes to this mode, instead of at a
+   * location: a junction both modes can use.
+   */
+  transferTo?: TravelMode;
 }
 
 export interface GeneratedRoute {
   /** Nodes in order; the route starts travelling from nodes[0] to nodes[1]. */
   nodes: string[];
   length: number;
-  destination: string;
+  /** Location ID the route ends at, or null when it ends at a transport change. */
+  destination: string | null;
 }
 
 /** Total length of a node path. */
@@ -95,15 +105,40 @@ function startCandidates(graph: TownGraph, mode: TravelMode): [string, string][]
   return out;
 }
 
+/**
+ * Junctions where the suspect can change between `from` and `to`: ordinary
+ * junctions both modes can use. Getting out of a car prefers a junction next
+ * to a footpath, so the chase on foot can go where cars cannot.
+ */
+export function transferNodes(graph: TownGraph, from: TravelMode, to: TravelMode): string[] {
+  const both = graph
+    .nodesFor('CAR')
+    .filter((id) => graph.node(id).kind === 'JUNCTION' && graph.steps(id, 'FOOT').length > 0);
+  if (from !== 'CAR' || to !== 'FOOT') return both;
+  const byPath = both.filter((id) => graph.steps(id, 'FOOT').some((s) => !s.edge.car));
+  return byPath.length > 0 ? byPath : both;
+}
+
+function startsFrom(graph: TownGraph, spec: RouteSpec): [string, string][] {
+  if (spec.from === undefined) return startCandidates(graph, spec.mode);
+  const from = spec.from;
+  return graph
+    .steps(from, spec.mode)
+    .filter((s) => s.edge.id !== spec.avoidEdge)
+    .map((s): [string, string] => [from, s.to]);
+}
+
 export function generateRoute(graph: TownGraph, rng: Rng, spec: RouteSpec, attempts = 400): GeneratedRoute {
-  const starts = startCandidates(graph, spec.mode);
+  const starts = startsFrom(graph, spec);
+  if (starts.length === 0) throw new Error(`No way to start a ${spec.mode} route from ${spec.from}`);
   const waypoints = graph.nodesFor(spec.mode).filter((id) => graph.node(id).kind === 'JUNCTION');
   const locations = graph.map.locations;
+  const transfers = spec.transferTo ? transferNodes(graph, spec.mode, spec.transferTo) : [];
 
   for (let attempt = 0; attempt < attempts; attempt++) {
     const [origin, towards] = rng.pick(starts);
-    const destination = rng.pick(locations);
-    const end = arrivalNode(graph, destination, spec.mode);
+    const destination = spec.transferTo ? null : rng.pick(locations);
+    const end = destination ? arrivalNode(graph, destination, spec.mode) : rng.pick(transfers);
     if (end === origin || end === towards) continue;
 
     // Start → (0 to 2 random waypoints) → destination, never reversing at a waypoint.
@@ -126,7 +161,7 @@ export function generateRoute(graph: TownGraph, rng: Rng, spec: RouteSpec, attem
     const length = pathLength(graph, nodes);
     if (length < spec.length[0] || length > spec.length[1]) continue;
     if (spec.accept && !spec.accept(nodes)) continue;
-    return { nodes, length, destination: destination.id };
+    return { nodes, length, destination: destination?.id ?? null };
   }
   throw new Error(`No valid route after ${attempts} attempts`);
 }

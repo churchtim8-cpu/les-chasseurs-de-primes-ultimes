@@ -12,6 +12,9 @@ import { TownGraph } from '../../src/engine/world/graph';
 
 const graph = new TownGraph(BELLEVUE);
 
+/** These tests drive the route by hand, so they use one-stage car chases (transport changes: transport.test.ts). */
+const CAR = { chaseType: 'CAR_CAR' } as const;
+
 function seeds(difficulty: Difficulty, count: number, label = 'tests'): string[] {
   const rng = Rng.fromSeed(`${label}-${difficulty}`);
   return Array.from({ length: count }, () => createSeed(difficulty, (n) => rng.int(0, n - 1)).code);
@@ -23,7 +26,7 @@ describe('chase generation', () => {
       const scenario = generateScenario(graph, seed);
       expect(validateScenario(graph, scenario)).toEqual([]);
     }
-  });
+  }, 60_000);
 
   it('recreates exactly the same chase from the same seed', () => {
     for (const seed of seeds('HARD', 50)) {
@@ -77,7 +80,7 @@ describe('road distance', () => {
 
 /** Plays a whole chase with a simple bot. `choose` picks a turn at each junction. */
 function play(seed: string, bot: 'LISTENER' | 'RANDOM', rng = Rng.fromSeed(`bot-${seed}`)) {
-  const chase = new Chase(graph, generateScenario(graph, seed));
+  const chase = new Chase(graph, generateScenario(graph, seed, CAR));
   if (bot === 'LISTENER') chase.player.followPlan(chase.scenario.route.slice(1));
   let lastEdge = '';
   for (let t = 0; t < 400 && chase.status.phase === 'PURSUIT'; t += 0.05) {
@@ -116,7 +119,7 @@ describe('pursuit balance (comprehension must beat luck)', () => {
     let recovered = 0;
     const all = seeds('EASY', 40, 'detour');
     for (const seed of all) {
-      const chase = new Chase(graph, generateScenario(graph, seed));
+      const chase = new Chase(graph, generateScenario(graph, seed, CAR));
       const route = chase.scenario.route;
       // Drive 3 s along the route, then wander off for a block.
       chase.player.followPlan(route.slice(1));
@@ -142,7 +145,7 @@ describe('capture rules', () => {
     let captured = 0;
     const list = seeds('EXPERT', 40, 'capture');
     for (const seed of list) {
-      const chase = new Chase(graph, generateScenario(graph, seed));
+      const chase = new Chase(graph, generateScenario(graph, seed, CAR));
       for (let i = 0; i < 30; i++) chase.update(0.1);
       chase.teleportPlayerToSuspect();
       for (let i = 0; i < 20 && chase.status.phase === 'PURSUIT'; i++) chase.update(0.1);

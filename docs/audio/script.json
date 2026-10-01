@@ -2834,6 +2834,19 @@
     ]
   },
   {
+    "audioId": "dir.turn.right.devant.beach",
+    "text": "Tournez à droite devant la plage.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "dir.turn.right.devant.post_office",
     "text": "Tournez à droite devant la poste.",
     "voice": "DISPATCHER",
@@ -3189,6 +3202,19 @@
   {
     "audioId": "dir.turn.left.apres.school",
     "text": "Tournez à gauche après l'école.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "dir.turn.left.apres.hospital",
+    "text": "Tournez à gauche après l'hôpital.",
     "voice": "DISPATCHER",
     "category": "DIRECTION",
     "template": "E3",
@@ -3739,6 +3765,19 @@
     ]
   },
   {
+    "audioId": "dir.turn.left.devant.beach",
+    "text": "Tournez à gauche devant la plage.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "E3",
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "dir.turn.left.devant.post_office",
     "text": "Tournez à gauche devant la poste.",
     "voice": "DISPATCHER",
@@ -4100,6 +4139,64 @@
     "levels": [
       "EASY",
       "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.get_out",
+    "text": "Descendez de la voiture !",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.on_foot",
+    "text": "Il est à pied !",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.suspect_boards",
+    "text": "Il monte dans une voiture !",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.suspect_left_car",
+    "text": "Le suspect est sorti de la voiture.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.get_in",
+    "text": "Montez dans la voiture !",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
       "HARD",
       "EXPERT"
     ]

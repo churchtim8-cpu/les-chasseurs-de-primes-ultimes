@@ -1,14 +1,62 @@
 import type { Difficulty } from '../difficulty';
+import type { TravelMode } from '../world/graph';
+
+/**
+ * Chase types (blueprint section 8): how the suspect travels, stage by stage.
+ * The player starts in the suspect's first mode and changes when the suspect does.
+ */
+export const CHASE_TYPES = ['CAR_CAR', 'FOOT_FOOT', 'CAR_FOOT', 'FOOT_CAR', 'CAR_FOOT_CAR', 'FOOT_CAR_FOOT'] as const;
+export type ChaseType = (typeof CHASE_TYPES)[number];
+
+export const CHASE_TYPE_MODES: Record<ChaseType, TravelMode[]> = {
+  CAR_CAR: ['CAR'],
+  FOOT_FOOT: ['FOOT'],
+  CAR_FOOT: ['CAR', 'FOOT'],
+  FOOT_CAR: ['FOOT', 'CAR'],
+  CAR_FOOT_CAR: ['CAR', 'FOOT', 'CAR'],
+  FOOT_CAR_FOOT: ['FOOT', 'CAR', 'FOOT'],
+};
+
+/**
+ * How often each chase type comes up per difficulty (relative weights; missing = never).
+ * Easy is mostly Car → Car; transport changes grow with the level, and the
+ * three-stage chains are Expert only (blueprint sections 8 and 10).
+ */
+export const CHASE_TYPE_WEIGHTS: Record<Difficulty, Partial<Record<ChaseType, number>>> = {
+  EASY: { CAR_CAR: 4, FOOT_FOOT: 1 },
+  INTERMEDIATE: { CAR_CAR: 3, CAR_FOOT: 2, FOOT_FOOT: 1 },
+  HARD: { CAR_CAR: 2, CAR_FOOT: 2, FOOT_CAR: 1.5, FOOT_FOOT: 1 },
+  EXPERT: { CAR_CAR: 1, CAR_FOOT: 1.5, FOOT_CAR: 1.5, CAR_FOOT_CAR: 1, FOOT_CAR_FOOT: 1 },
+};
+
+/** Transport-change tuning, shared by all levels (provisional). */
+export const TRANSFER = {
+  /** Seconds the suspect takes to get out of or into a car. */
+  suspectSeconds: 1.5,
+  /** "Descendez de la voiture !" is said when the player is this close (metres) to where the suspect got out. */
+  getOutWithin: 70,
+  /**
+   * When the suspect gets into a car, a colleague brings the police car to the
+   * nearest road; the player can get in from this far away (metres).
+   */
+  pickupWithin: 160,
+  /** Extra time on the clock for each change of transport (getting out, catching up on foot is slow). */
+  extraSeconds: 12,
+} as const;
 
 /**
  * Chase tuning per difficulty (provisional; tune in playtesting).
  * Distances are metres measured along roads, not straight lines.
  */
 export interface ChaseSettings {
-  /** Length of the suspect's route. */
+  /** Length of the suspect's route in a Car → Car chase. */
   routeLength: [number, number];
-  /** How far ahead of the player the suspect starts. */
-  headStart: number;
+  /** Length of a whole Foot → Foot chase. */
+  footRouteLength: [number, number];
+  /** Length of each stage when the suspect changes transport: walking is three times slower than driving. */
+  stageLength: Record<TravelMode, [number, number]>;
+  /** How far ahead of the player the suspect starts, by starting mode. */
+  headStart: Record<TravelMode, number>;
   /** Suspect speed as a fraction of the player's cruising speed. */
   suspectSpeed: number;
   /**
@@ -36,7 +84,9 @@ export interface ChaseSettings {
 export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
   EASY: {
     routeLength: [1300, 2200],
-    headStart: 220,
+    footRouteLength: [600, 950],
+    stageLength: { CAR: [1000, 1500], FOOT: [250, 400] },
+    headStart: { CAR: 220, FOOT: 90 },
     suspectSpeed: 0.78,
     suspectFleeSpeed: 0.97,
     fleeDistance: 160,
@@ -49,7 +99,9 @@ export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
   },
   INTERMEDIATE: {
     routeLength: [1700, 2700],
-    headStart: 240,
+    footRouteLength: [650, 1000],
+    stageLength: { CAR: [1000, 1600], FOOT: [250, 420] },
+    headStart: { CAR: 240, FOOT: 95 },
     suspectSpeed: 0.8,
     suspectFleeSpeed: 0.97,
     fleeDistance: 160,
@@ -62,7 +114,9 @@ export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
   },
   HARD: {
     routeLength: [2100, 3300],
-    headStart: 260,
+    footRouteLength: [700, 1050],
+    stageLength: { CAR: [1100, 1700], FOOT: [260, 440] },
+    headStart: { CAR: 260, FOOT: 100 },
     suspectSpeed: 0.82,
     suspectFleeSpeed: 0.97,
     fleeDistance: 160,
@@ -75,7 +129,9 @@ export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
   },
   EXPERT: {
     routeLength: [2400, 3800],
-    headStart: 280,
+    footRouteLength: [700, 1100],
+    stageLength: { CAR: [1000, 1600], FOOT: [250, 420] },
+    headStart: { CAR: 280, FOOT: 105 },
     suspectSpeed: 0.85,
     suspectFleeSpeed: 0.97,
     fleeDistance: 160,

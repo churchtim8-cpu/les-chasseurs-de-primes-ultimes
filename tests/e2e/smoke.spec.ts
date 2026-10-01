@@ -19,7 +19,7 @@ const info = (page: Page, key: string) => page.evaluate((k) => window.__bellevue
 
 test('title screen starts a chase; drive, get out and debug toggle work', async ({ page }) => {
   const errors = watchErrors(page);
-  await page.goto('./?debug=1');
+  await page.goto('./?debug=1&type=CAR_CAR');
   await expect(page.locator('#game canvas')).toBeVisible();
   await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Title', 'DebugOverlay']));
 
@@ -52,7 +52,7 @@ test('title screen starts a chase; drive, get out and debug toggle work', async 
 test('a seed in the address replays that exact chase, and debug capture ends it', async ({ page }) => {
   const errors = watchErrors(page);
   const seed = 'BV-I-NW3A-HRZZ';
-  await page.goto(`./?debug=1&seed=${seed}`);
+  await page.goto(`./?debug=1&type=CAR_CAR&seed=${seed}`);
   await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Title']));
   await page.keyboard.press('Enter');
   await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Chase']));
@@ -77,6 +77,35 @@ test('a seed in the address replays that exact chase, and debug capture ends it'
   expect(await info(page, 'phase')).toBe('PURSUIT');
   expect(await info(page, 'seed')).toBe(seed);
   expect(await info(page, 'route')).toBe(route);
+
+  expect(errors).toEqual([]);
+});
+
+test('the suspect gets out and runs: the scanner orders the player out, and the chase goes on on foot', async ({ page }) => {
+  test.setTimeout(240_000);
+  const errors = watchErrors(page);
+  await page.goto('./?debug=1&type=CAR_FOOT&seed=BV-I-NW3A-HRZZ');
+  await page.keyboard.press('Enter');
+  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Chase']));
+  expect(await info(page, 'chase')).toBe('CAR_FOOT');
+  await expect.poll(async () => Number(await info(page, 'speed')), SLOW).toBeGreaterThan(10);
+
+  // Drive the suspect's route (the French is tested elsewhere), keeping back so the suspect gets out first.
+  await page.evaluate(() => {
+    const scene = window.__bellevue!.game.scene.getScene('Chase') as unknown as {
+      chase: { player: { followPlan(n: string[]): void; speedFactor: number }; scenario: { route: string[] } };
+    };
+    scene.chase.player.followPlan(scene.chase.scenario.route.slice(1));
+    scene.chase.player.speedFactor = 0.6;
+  });
+  await expect.poll(() => info(page, 'scanner'), { timeout: 90_000 }).toBe('EVENT: event.get_out');
+  expect(await info(page, 'stage')).toBe('suspect 2, player 1');
+
+  await page.keyboard.press('e');
+  await expect.poll(() => info(page, 'mode')).toBe('FOOT');
+  // On foot the player follows the suspect's tracks to where it got out, then directions start again.
+  await expect.poll(() => info(page, 'stage'), { timeout: 60_000 }).toBe('suspect 2, player 2');
+  await expect.poll(() => info(page, 'scanner'), SLOW).toMatch(/^(DIRECTION|FILLER|FINAL): /);
 
   expect(errors).toEqual([]);
 });
