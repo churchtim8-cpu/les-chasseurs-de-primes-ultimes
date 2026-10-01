@@ -53,11 +53,15 @@ A chase can change transport, as in the blueprint: the suspect drives or runs, a
 
 The weights, stage lengths and timings live in `src/engine/chase/settings.ts`. With debug on, `?type=CAR_FOOT` (with or without `?seed=`) forces a chase type.
 
+### Changes of direction
+
+From Intermediate up (30% of chases at Intermediate, 50% at Hard, 70% at Expert), the scanner first guides the player along the route it predicts for the suspect. In the last stage the suspect then turns off it elsewhere: "Attention ! Le suspect a changé de direction." is followed straight away by corrected directions from where the player is ("Faites demi-tour." first if needed). This is template X3. The predicted route is checked as carefully as the real one, and the correction waits until the player is not about to reach a junction. With debug on, `?turnoff=1` or `?turnoff=0` forces it on or off.
+
 ## French audio
 
 The scanner plays pre-recorded ElevenLabs clips. `npm run audio:script` writes every line the game can say to `docs/audio/script.csv` for review. Recordings go in `public/audio/dispatcher/` and `public/audio/officer/`, named by audio ID (for example `dir.turn.left.mp3`); `npm run audio:manifest` then lists them in `public/audio/manifest.json`. Once the library has any clips, the scanner only chooses directions whose clips are all recorded, so new sentence types appear in play as soon as their clips are added. Event lines with no recording yet are shown as text, with the radio beep and static. Add `?radio=0` to hear the clips without the radio filter. `audio/review.html` on the site lists every recording with a play button, for checking pronunciation.
 
-The current library (334 lines) was recorded with ElevenLabs Eleven v4: Christophe for the dispatcher and Alain for the officer. Not recorded yet: the 8 lines for transport changes and on-foot sentences, and the 382 clause clips for Hard and Expert (see below). Alain (male) and Geneviève (female) are the chosen dispatcher voices and will replace Christophe; new recordings go to them. The clips keep ElevenLabs' content-credential tag.
+The current library (334 lines) was recorded with ElevenLabs Eleven v4: Christophe for the dispatcher and Alain for the officer. Not recorded yet: the 8 lines for transport changes and on-foot sentences, the 2 direction-change lines, and the 382 clause clips for Hard and Expert (see below). Alain (male) and Geneviève (female) are the chosen dispatcher voices and will replace Christophe; new recordings go to them. The clips keep ElevenLabs' content-credential tag.
 
 ### Hard and Expert instructions
 
@@ -71,7 +75,7 @@ Longer instructions are built from recordings that already exist plus whole clau
 | X1 | D'abord, tournez à gauche. Ensuite, prenez la première rue à droite. Enfin, … | "D'abord, …" + "Ensuite, …" (+ "Enfin, …") |
 | X2 | D'abord, tournez à gauche devant la banque. Ensuite, tournez à droite après le cinéma. | the same, with two or more landmarks |
 
-Each clause is checked from just after the turn before it, so the whole call is true and unambiguous. Weights and distances are in `src/engine/language/settings.ts`. X3 (corrections) comes with the chase events.
+Each clause is checked from just after the turn before it, so the whole call is true and unambiguous. Weights and distances are in `src/engine/language/settings.ts`. X3 (corrections) is described under Changes of direction above.
 
 ## Debug mode
 

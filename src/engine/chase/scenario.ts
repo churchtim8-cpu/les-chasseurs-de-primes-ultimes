@@ -3,6 +3,11 @@
  * VALID ROUTE → TRANSPORTATION STAGES → VALIDATE CHASE. The French
  * instructions and audio are chosen live from this route by the navigator.
  *
+ * At higher levels the suspect may change direction (pipeline step VALID
+ * EVENTS): the scanner first guides the player along the route it predicts
+ * (the "decoy"), then the suspect turns off it elsewhere, and the scanner
+ * corrects itself.
+ *
  * A chase has one stage per mode of transport. In a Car → Foot chase the
  * suspect drives to a junction, gets out and runs on; the player is told to
  * get out too, and follows on foot.
@@ -20,6 +25,7 @@ import {
   CHASE_TYPE_MODES,
   CHASE_TYPE_WEIGHTS,
   CHASE_TYPES,
+  TURN_OFF,
   type ChaseSettings,
   type ChaseType,
 } from './settings';
@@ -34,6 +40,21 @@ export interface ChaseStage {
   /** Nodes in order. Each later stage starts where the previous one ended. */
   route: string[];
   length: number;
+}
+
+/**
+ * A change of direction in the last stage. The scanner predicts that, at
+ * `stage.route[at]`, the suspect will carry on along `decoy` (towards
+ * `decoyDestination`). It really follows the stage route instead, and the
+ * scanner corrects itself once the suspect has turned off.
+ */
+export interface TurnOff {
+  stage: number;
+  /** Index in the stage route of the junction where the suspect leaves the predicted route. */
+  at: number;
+  /** The predicted route from that junction on (starts with the junction). */
+  decoy: string[];
+  decoyDestination: string;
 }
 
 export interface ChaseScenario {
@@ -52,11 +73,15 @@ export interface ChaseScenario {
   suspectStart: MoverStart;
   /** Nodes the suspect will follow in the first stage, starting with the node it is heading towards. */
   suspectPlan: string[];
+  /** A change of direction, if this chase has one. */
+  turnOff: TurnOff | null;
 }
 
 export interface ScenarioOptions {
   /** Debug and tests: force a chase type instead of drawing one from the seed. */
   chaseType?: ChaseType;
+  /** Debug and tests: force a change of direction on (if the route allows one) or off. */
+  turnOff?: boolean;
 }
 
 /** The chase type a seed gives at its difficulty (its own random stream, so routes are not reshuffled). */
@@ -97,6 +122,10 @@ export function generateScenario(graph: TownGraph, seedCode: string, options: Sc
   const headStart = Math.min(settings.headStart[first.mode], first.length - PLAYER_OFFSET - 20);
   const suspect = placeOnRoute(graph, first.route, PLAYER_OFFSET + headStart, first.mode);
 
+  const eventsRng = rng.fork('events');
+  const wantTurnOff = options.turnOff ?? eventsRng.chance(settings.directionChange);
+  const turnOff = wantTurnOff ? planTurnOff(graph, eventsRng, stages, difficulty, PLAYER_OFFSET + headStart) : null;
+
   const scenario: ChaseScenario = {
     seed: code,
     difficulty,
@@ -108,6 +137,7 @@ export function generateScenario(graph: TownGraph, seedCode: string, options: Sc
     playerStart: player.start,
     suspectStart: suspect.start,
     suspectPlan: suspect.plan,
+    turnOff,
   };
   const problems = validateScenario(graph, scenario);
   if (problems.length > 0) throw new Error(`Invalid chase ${code}: ${problems.join('; ')}`);
@@ -157,6 +187,68 @@ function planStages(
     }
   }
   return destination ? { stages, destination } : null;
+}
+
+/**
+ * Where the suspect could turn off the route the scanner predicts, in the
+ * last stage: a junction where another way on gives a route the level's
+ * French can describe all the way from the stage start. Null if none.
+ */
+function planTurnOff(
+  graph: TownGraph,
+  rng: Rng,
+  stages: readonly ChaseStage[],
+  difficulty: Difficulty,
+  suspectStartsAt: number,
+): TurnOff | null {
+  const stage = stages.length - 1;
+  const { route, mode, length } = stages[stage] as ChaseStage;
+  const earliest = (stage === 0 ? suspectStartsAt : 0) + TURN_OFF.minFromStart;
+  const candidates: number[] = [];
+  let s = 0;
+  for (let i = 1; i < route.length - 1; i++) {
+    s += pathLength(graph, [route[i - 1] as string, route[i] as string]);
+    if (s >= earliest && length - s >= length * TURN_OFF.minRemainingShare) candidates.push(i);
+  }
+  const used = new Set(stages.flatMap((st) => st.route));
+  for (const at of rng.shuffle(candidates)) {
+    const node = route[at] as string;
+    const arrivedBy = graph.edgeBetween(route[at - 1] as string, node)?.id;
+    try {
+      const decoy = generateRoute(
+        graph,
+        rng,
+        {
+          length: TURN_OFF.decoyLength,
+          mode,
+          from: node,
+          ...(arrivedBy ? { avoidEdge: arrivedBy } : {}),
+          accept: (nodes) => decoyOk(graph, route, at, nodes, mode, difficulty, used),
+        },
+        40,
+      );
+      if (decoy.destination) return { stage, at, decoy: decoy.nodes, decoyDestination: decoy.destination };
+    } catch {
+      // No predicted route leaves this junction: try another.
+    }
+  }
+  return null;
+}
+
+/** A predicted route that differs from the real one at once, and that the scanner can describe from the stage start. */
+function decoyOk(
+  graph: TownGraph,
+  route: readonly string[],
+  at: number,
+  decoy: readonly string[],
+  mode: TravelMode,
+  difficulty: Difficulty,
+  used: ReadonlySet<string>,
+): boolean {
+  if (decoy[0] !== route[at] || decoy[1] === route[at + 1]) return false;
+  if (decoy.slice(1).some((n) => used.has(n))) return false;
+  const guide = [...route.slice(0, at), ...decoy];
+  return followProblem(graph, guide, mode) === null && describable(graph, guide, mode, difficulty);
 }
 
 /** Pipeline step "VALIDATE CHASE": every check a generated chase must pass. */
@@ -213,6 +305,16 @@ export function validateScenario(graph: TownGraph, s: ChaseScenario): string[] {
     problems.push('Player and suspect do not start in the first stage’s mode');
   }
   if (s.suspectPlan[0] !== s.suspectStart.towards) problems.push('Suspect plan does not match its start');
+  if (s.turnOff) {
+    const { stage, at, decoy } = s.turnOff;
+    const st = s.stages[stage];
+    const used = new Set(s.stages.flatMap((e) => e.route));
+    if (stage !== s.stages.length - 1 || !st) problems.push('The change of direction is not in the last stage');
+    else if (at < 1 || at > st.route.length - 2) problems.push('The change of direction is not inside the route');
+    else if (!decoyOk(graph, st.route, at, decoy, st.mode, s.difficulty, used)) {
+      problems.push('The predicted route is not a fair, different way on');
+    }
+  }
   const planStart = s.route.indexOf(s.suspectPlan[0] as string);
   if (planStart < 1 || s.route.slice(planStart).join() !== s.suspectPlan.join()) {
     problems.push('Suspect plan is not the rest of the route');

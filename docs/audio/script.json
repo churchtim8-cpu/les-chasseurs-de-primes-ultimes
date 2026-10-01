@@ -7986,6 +7986,18 @@
     ]
   },
   {
+    "audioId": "event.attention",
+    "text": "Attention !",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "event.get_out",
     "text": "Descendez de la voiture !",
     "voice": "DISPATCHER",
@@ -8016,6 +8028,18 @@
     "category": "EVENT",
     "template": null,
     "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.changed_direction",
+    "text": "Le suspect a changé de direction.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "INTERMEDIATE",
       "HARD",
       "EXPERT"
     ]

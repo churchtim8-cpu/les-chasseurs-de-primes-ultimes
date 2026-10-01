@@ -10,7 +10,7 @@
  * never chosen (see `AudioCheck`).
  */
 
-import { CHASE_TYPE_MODES, CHASE_TYPE_WEIGHTS, CHASE_TYPES, type ChaseType } from '../chase/settings';
+import { CHASE_SETTINGS, CHASE_TYPE_MODES, CHASE_TYPE_WEIGHTS, CHASE_TYPES, type ChaseType } from '../chase/settings';
 import { DIFFICULTIES, type Difficulty } from '../difficulty';
 import { isDecision, scanAhead } from '../language/analysis';
 import { describe, positionLeaving, readsAs, weightOf } from '../language/generate';
@@ -70,6 +70,12 @@ export const TRANSPORT_LINES = {
   GET_OUT: { audioId: 'event.get_out', text: 'Descendez de la voiture !' },
   SUSPECT_BOARDS: { audioId: 'event.suspect_boards', text: 'Il monte dans une voiture !' },
   GET_IN: { audioId: 'event.get_in', text: 'Montez dans la voiture !' },
+} as const;
+
+/** Chase events from the approved Events list (blueprint sections 11 and 18). */
+export const EVENT_LINES = {
+  ATTENTION: { audioId: 'event.attention', text: 'Attention !' },
+  CHANGED_DIRECTION: { audioId: 'event.changed_direction', text: 'Le suspect a changé de direction.' },
 } as const;
 
 /** The transport lines a chase type can need. */
@@ -220,6 +226,11 @@ export function buildScript(graph: TownGraph, modes: readonly TravelMode[] = ['C
     }
     for (const line of Object.values(OUTCOME_LINES)) {
       addLine(out, { ...line, voice: 'DISPATCHER', category: 'OUTCOME', template: null }, level);
+    }
+    if (CHASE_SETTINGS[level].directionChange > 0) {
+      for (const line of [EVENT_LINES.ATTENTION, EVENT_LINES.CHANGED_DIRECTION]) {
+        addLine(out, { ...line, voice: 'DISPATCHER', category: 'EVENT', template: null }, level);
+      }
     }
     const types = CHASE_TYPES.filter((t) => (CHASE_TYPE_WEIGHTS[level][t] ?? 0) > 0);
     for (const key of new Set(types.flatMap(transportLinesFor))) {

@@ -712,14 +712,16 @@
 711,All levels,Simple direction,Tournez à gauche.,Dispatcher (calm),17,dir.turn.left
 712,All levels,Wrong-turn correction,Ce n'est pas la bonne rue.,Dispatcher (calm),26,dir.wrong_street
 713,All levels,Wrong-turn correction,Faites demi-tour.,Dispatcher (calm),17,dir.u_turn
-714,Intermediate and up,EVENT,Descendez de la voiture !,Dispatcher (calm),25,event.get_out
-715,Intermediate and up,EVENT,Il est à pied !,Dispatcher (calm),15,event.on_foot
-716,Hard and up,EVENT,Il monte dans une voiture !,Dispatcher (calm),27,event.suspect_boards
-717,Intermediate and up,EVENT,Le suspect est sorti de la voiture.,Dispatcher (calm),35,event.suspect_left_car
-718,Hard and up,EVENT,Montez dans la voiture !,Dispatcher (calm),24,event.get_in
-719,All levels,Officer asks for a repeat,"Pouvez-vous répéter, s'il vous plaît ?",Officer (urgent),38,repeat.calm
-720,All levels,Officer asks for a repeat,Répétez ! Vite !,Officer (urgent),16,repeat.frantic
-721,All levels,Officer asks for a repeat,"Répétez, s'il vous plaît !",Officer (urgent),26,repeat.urgent
-722,All levels,End of chase,Le suspect est arrêté !,Dispatcher (calm),23,outcome.captured
-723,All levels,End of chase,Le suspect s'éloigne.,Dispatcher (calm),21,event.moving_away
-724,All levels,End of chase,Le suspect s'est échappé.,Dispatcher (calm),25,outcome.escaped
+714,Intermediate and up,EVENT,Attention !,Dispatcher (calm),11,event.attention
+715,Intermediate and up,EVENT,Descendez de la voiture !,Dispatcher (calm),25,event.get_out
+716,Intermediate and up,EVENT,Il est à pied !,Dispatcher (calm),15,event.on_foot
+717,Hard and up,EVENT,Il monte dans une voiture !,Dispatcher (calm),27,event.suspect_boards
+718,Intermediate and up,EVENT,Le suspect a changé de direction.,Dispatcher (calm),33,event.changed_direction
+719,Intermediate and up,EVENT,Le suspect est sorti de la voiture.,Dispatcher (calm),35,event.suspect_left_car
+720,Hard and up,EVENT,Montez dans la voiture !,Dispatcher (calm),24,event.get_in
+721,All levels,Officer asks for a repeat,"Pouvez-vous répéter, s'il vous plaît ?",Officer (urgent),38,repeat.calm
+722,All levels,Officer asks for a repeat,Répétez ! Vite !,Officer (urgent),16,repeat.frantic
+723,All levels,Officer asks for a repeat,"Répétez, s'il vous plaît !",Officer (urgent),26,repeat.urgent
+724,All levels,End of chase,Le suspect est arrêté !,Dispatcher (calm),23,outcome.captured
+725,All levels,End of chase,Le suspect s'éloigne.,Dispatcher (calm),21,event.moving_away
+726,All levels,End of chase,Le suspect s'est échappé.,Dispatcher (calm),25,outcome.escaped
