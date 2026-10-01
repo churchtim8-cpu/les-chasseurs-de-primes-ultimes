@@ -55,6 +55,7 @@ export class Mover {
   private currentMode: TravelMode;
   /** Planned route (node IDs) for computer-driven movers; index of the next node to reach. */
   private plan: string[] | null = null;
+  private aim: { node: string; to: string } | null = null;
   private planIndex = 0;
   /** Multiplies cruise and top speed (the suspect uses this to be slower or faster). */
   speedFactor = 1;
@@ -148,6 +149,22 @@ export class Mover {
 
   clearQueue(): void {
     this.queuedIntent = null;
+    this.aim = null;
+  }
+
+  /**
+   * Leave a roundabout by one exit: keep going round until reaching `node`,
+   * then take the way to `to`. Null keeps going round (or straight on).
+   */
+  aimExit(exit: { node: string; to: string } | null): void {
+    this.aim = exit;
+    this.queuedIntent = null;
+    if (exit && this.waitingReason === 'JUNCTION') this.tryLeaveJunction();
+  }
+
+  /** The roundabout exit chosen with `aimExit`, until it is taken. */
+  get aimedExit(): { node: string; to: string } | null {
+    return this.aim;
   }
 
   /** Turn around on the spot (faire demi-tour). Not allowed against one-way traffic. */
@@ -158,6 +175,7 @@ export class Mover {
     this.speed = 0;
     this.waitingReason = null;
     this.queuedIntent = null;
+    this.aim = null;
     return true;
   }
 
@@ -253,6 +271,13 @@ export class Mover {
   }
 
   private pickExit(exits: Exit[]): Exit | undefined {
+    if (this.aim && this.target === this.aim.node) {
+      const aimed = exits.find((e) => e.step.to === this.aim?.to);
+      if (aimed) {
+        this.aim = null;
+        return aimed;
+      }
+    }
     if (exits.length === 1) return exits[0]; // a bend is not a choice; keep any queued turn
     if (this.queuedIntent) {
       const chosen = exits.find((e) => e.kind === this.queuedIntent);
@@ -269,6 +294,7 @@ export class Mover {
     const exits = exitsAt(this.graph, this.edge, nodeId, this.currentMode);
     if (exits.length === 0) return true;
     if (exits.length === 1) return false;
+    if (this.aim?.node === nodeId && exits.some((e) => e.step.to === this.aim?.to)) return false;
     if (this.queuedIntent && exits.some((e) => e.kind === this.queuedIntent)) return false;
     return !exits.some((e) => e.kind === 'STRAIGHT');
   }

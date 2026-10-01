@@ -162,13 +162,13 @@ export class Hud {
   }
 
   /** Ask where the suspect is: one card per choice; `onPick` gets the card index. */
-  showSighting(cards: readonly SightingCard[], seconds: number, onPick: (index: number) => void): void {
-    this.sighting.show(cards, seconds, onPick);
+  showSighting(cards: readonly SightingCard[], seconds: number, call: string, onPick: (index: number) => void): void {
+    this.sighting.show(cards, seconds, call, onPick);
   }
 
-  /** Show which card was right (and the wrong pick), then close the question. */
-  resolveSighting(answer: number, chosen: number | null): void {
-    this.sighting.resolve(answer, chosen);
+  /** Show which card was right (and the wrong pick) and the result, then close the question. */
+  resolveSighting(answer: number, chosen: number | null, result: string): void {
+    this.sighting.resolve(answer, chosen, result);
   }
 
   /** Big centred text, e.g. the 3-2-1-GO countdown. Empty string hides it. */
@@ -183,18 +183,27 @@ export class Hud {
   }
 }
 
-const CARD_W = 210;
-const CARD_H = 158;
+const CARD_W = 150;
+const CARD_H = 104;
+const CARD_GAP = 12;
 const MAX_CARDS = 4;
+/** The question sits in a strip at the top, so the car and the streets around it stay in view. */
+const TOP = 66;
+const TITLE_Y = TOP + 20;
+const CALL_Y = TOP + 46;
+const CARDS_Y = TOP + 64 + CARD_H / 2;
+const BAR_Y = CARDS_Y + CARD_H / 2 + 12;
 
 /**
  * The sighting question: "Où est le suspect ?" with one card per choice, each
- * a vehicle (or a runner) and a place, and a shrinking time bar. Built once
- * and reused, so the scene's cameras are set up for it from the start.
+ * a vehicle (or a runner) and a place, and a shrinking time bar. The call is
+ * repeated in the strip when the level shows text. Built once and reused, so
+ * the scene's cameras are set up for it from the start.
  */
 class SightingPanel {
   private readonly backdrop: Phaser.GameObjects.Rectangle;
   private readonly title: Phaser.GameObjects.Text;
+  private readonly call: Phaser.GameObjects.Text;
   private readonly bar: Phaser.GameObjects.Rectangle;
   private readonly cards: {
     box: Phaser.GameObjects.Rectangle;
@@ -210,21 +219,25 @@ class SightingPanel {
     private readonly scene: Phaser.Scene,
     add: <T extends Phaser.GameObjects.GameObject>(o: T) => T,
   ) {
-    const { width, height } = scene.scale;
-    const y = height / 2 - 30;
-    this.backdrop = add(scene.add.rectangle(width / 2, y, 100, CARD_H + 110, PALETTE.ink, 0.88));
+    const { width } = scene.scale;
+    this.backdrop = add(scene.add.rectangle(width / 2, TOP, 100, 100, PALETTE.ink, 0.9).setOrigin(0.5, 0));
     this.title = add(
       scene.add
-        .text(width / 2, y - CARD_H / 2 - 30, 'Où est le suspect ?', {
+        .text(width / 2, TITLE_Y, 'Où est le suspect ?', {
           fontFamily: FONT_FAMILY,
-          fontSize: '28px',
+          fontSize: '24px',
           fontStyle: 'bold',
           color: toCss(PALETTE.cream),
         })
         .setOrigin(0.5),
     );
+    this.call = add(
+      scene.add
+        .text(width / 2, CALL_Y, '', { fontFamily: FONT_FAMILY, fontSize: '18px', color: toCss(PALETTE.paleYellow) })
+        .setOrigin(0.5),
+    );
     for (let i = 0; i < MAX_CARDS; i++) {
-      const box = add(scene.add.rectangle(0, y + 10, CARD_W, CARD_H, PALETTE.cream).setStrokeStyle(4, PALETTE.ink));
+      const box = add(scene.add.rectangle(0, CARDS_Y, CARD_W, CARD_H, PALETTE.cream).setStrokeStyle(3, PALETTE.ink));
       box.setInteractive({ useHandCursor: true });
       box.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
         event.stopPropagation();
@@ -233,83 +246,87 @@ class SightingPanel {
       const icon = add(scene.add.graphics());
       const place = add(
         scene.add
-          .text(0, y + 58, '', {
+          .text(0, CARDS_Y + 32, '', {
             fontFamily: FONT_FAMILY,
-            fontSize: '22px',
+            fontSize: '18px',
             fontStyle: 'bold',
             color: toCss(PALETTE.ink),
             align: 'center',
-            wordWrap: { width: CARD_W - 16 },
+            wordWrap: { width: CARD_W - 12 },
           })
           .setOrigin(0.5),
       );
       const key = add(
         scene.add
-          .text(0, y - CARD_H / 2 + 22, String(i + 1), {
+          .text(0, 0, String(i + 1), {
             fontFamily: FONT_FAMILY,
-            fontSize: '20px',
+            fontSize: '16px',
             fontStyle: 'bold',
             color: toCss(PALETTE.cream),
             backgroundColor: toCss(PALETTE.ink),
-            padding: { x: 8, y: 2 },
+            padding: { x: 6, y: 1 },
           })
           .setOrigin(0.5),
       );
       this.cards.push({ box, icon, place, key });
     }
-    this.bar = add(scene.add.rectangle(0, y + CARD_H / 2 + 34, 100, 8, PALETTE.paleYellow).setOrigin(0, 0.5));
+    this.bar = add(scene.add.rectangle(0, BAR_Y, 100, 6, PALETTE.paleYellow).setOrigin(0, 0.5));
     this.setVisible(false);
   }
 
-  show(cards: readonly SightingCard[], seconds: number, onPick: (index: number) => void): void {
-    const { width, height } = this.scene.scale;
-    const y = height / 2 - 30;
+  /** `call` is the French to repeat in the strip ('' at levels that are audio only). */
+  show(cards: readonly SightingCard[], seconds: number, call: string, onPick: (index: number) => void): void {
+    const { width } = this.scene.scale;
     this.count = Math.min(cards.length, MAX_CARDS);
     this.seconds = seconds;
     this.onPick = (i) => {
       if (i < this.count) onPick(i);
     };
-    const gap = 18;
-    const total = this.count * CARD_W + (this.count - 1) * gap;
-    this.backdrop.setSize(total + 48, CARD_H + 120).setPosition(width / 2, y + 4);
-    this.backdrop.setOrigin(0.5);
+    const total = this.count * CARD_W + (this.count - 1) * CARD_GAP;
+    this.backdrop.setSize(Math.max(total, 420) + 32, BAR_Y - TOP + 14).setPosition(width / 2, TOP);
+    this.title.setText('Où est le suspect ?').setColor(toCss(PALETTE.cream));
+    this.call.setText(call ? `« ${call} »` : '');
     this.cards.forEach((card, i) => {
       const data = cards[i];
       const on = i < this.count && data !== undefined;
       for (const o of [card.box, card.icon, card.place, card.key]) o.setVisible(on);
       if (!on) return;
-      const x = width / 2 - total / 2 + CARD_W / 2 + i * (CARD_W + gap);
-      card.box.setPosition(x, y + 10).setFillStyle(PALETTE.cream).setStrokeStyle(4, PALETTE.ink).setAlpha(1);
-      card.key.setPosition(x - CARD_W / 2 + 20, y - CARD_H / 2 + 26);
-      card.icon.clear().setPosition(x, y - 4).setScale(data.vehicle ? 4.2 : 6);
+      const x = width / 2 - total / 2 + CARD_W / 2 + i * (CARD_W + CARD_GAP);
+      card.box.setPosition(x, CARDS_Y).setFillStyle(PALETTE.cream).setStrokeStyle(3, PALETTE.ink).setAlpha(1);
+      card.key.setPosition(x - CARD_W / 2 + 14, CARDS_Y - CARD_H / 2 + 14);
+      card.icon.clear().setPosition(x, CARDS_Y - 14).setScale(data.vehicle ? 3 : 4.2);
       if (data.vehicle) drawVehicle(card.icon, data.vehicle);
       else drawRunner(card.icon);
       const word = LOCATION_WORD_BY_ID.get(data.place);
-      card.place.setText(word ? withArticle(word) : data.place).setPosition(x, y + 58);
+      card.place.setText(word ? withArticle(word) : data.place).setPosition(x, CARDS_Y + 30);
     });
-    this.bar.setPosition(width / 2 - total / 2, y + CARD_H / 2 + 34).setSize(total, 8);
+    this.bar.setPosition(width / 2 - total / 2, BAR_Y).setSize(total, 6);
     this.setVisible(true);
   }
 
   tick(secondsLeft: number): void {
-    const total = this.count * CARD_W + (this.count - 1) * 18;
-    this.bar.setSize(Math.max(0, total * (secondsLeft / this.seconds)), 8);
+    const total = this.count * CARD_W + (this.count - 1) * CARD_GAP;
+    this.bar.setSize(Math.max(0, total * (secondsLeft / this.seconds)), 6);
   }
 
-  resolve(answer: number, chosen: number | null): void {
+  /** Marks the right card (and a wrong pick) and says how it went, then closes. */
+  resolve(answer: number, chosen: number | null, result: string): void {
     this.onPick = null;
+    this.title.setText(result).setColor(chosen === answer ? '#bfe5b4' : '#ffb4a2');
     this.cards.forEach((card, i) => {
-      if (i === answer) card.box.setFillStyle(0xbfe5b4).setStrokeStyle(6, 0x2e9e5b);
-      else if (i === chosen) card.box.setFillStyle(0xf3c1b4).setStrokeStyle(6, 0xc0392b);
+      if (i === answer) card.box.setFillStyle(0xbfe5b4).setStrokeStyle(5, 0x2e9e5b);
+      else if (i === chosen) card.box.setFillStyle(0xf3c1b4).setStrokeStyle(5, 0xc0392b);
       else card.box.setAlpha(0.5);
     });
     this.bar.setVisible(false);
-    this.scene.time.delayedCall(1300, () => this.setVisible(false));
+    this.scene.time.delayedCall(1600, () => {
+      if (!this.onPick) this.setVisible(false);
+    });
   }
 
   /** Shows or hides the panel; `show` has already chosen which cards are in use. */
   private setVisible(on: boolean): void {
-    for (const o of [this.backdrop, this.title, this.bar]) o.setVisible(on);
+    for (const o of [this.backdrop, this.title, this.call, this.bar]) o.setVisible(on);
     if (!on) for (const card of this.cards) for (const o of [card.box, card.icon, card.place, card.key]) o.setVisible(false);
   }
 }
