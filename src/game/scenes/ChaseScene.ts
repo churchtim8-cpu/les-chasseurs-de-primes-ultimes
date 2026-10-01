@@ -27,6 +27,7 @@ import {
 } from '../render/actors';
 import { RoundaboutGuide } from '../render/roundaboutGuide';
 import { drawTown, type TownLayers } from '../render/townRenderer';
+import { TownLife } from '../render/townLife';
 
 export interface ChaseSceneData {
   seed: string;
@@ -50,6 +51,7 @@ export class ChaseScene extends Phaser.Scene {
   static readonly KEY = 'Chase';
   private graph!: TownGraph;
   private layers?: TownLayers;
+  private life?: TownLife;
   private chase!: Chase;
   private controls!: Controls;
   private rig!: CameraRig;
@@ -96,6 +98,9 @@ export class ChaseScene extends Phaser.Scene {
     );
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => scannerAudio.stop());
     this.layers = drawTown(this, this.graph);
+    if (new URLSearchParams(window.location.search).get('life') !== '0') {
+      this.life = new TownLife(this, this.graph, { player: () => this.chase.player.snapshot() });
+    }
     this.routeOverlay = this.drawRoute();
     // A suspect only ever leaves its first car behind (a later car stage is the last).
     const vehicles = this.chase.scenario.vehicles;
@@ -151,6 +156,7 @@ export class ChaseScene extends Phaser.Scene {
       this.handleEvents(this.chase.update(dt));
     }
     this.drawActors(delta);
+    this.life?.update(delta);
     this.hud.update(this.chase.status, this.chase.player.mode);
 
     if (debugState.isEnabled) {
@@ -508,6 +514,7 @@ export class ChaseScene extends Phaser.Scene {
 /**
  * Debug and tests: `?type=CAR_FOOT` forces a chase type; `?turnoff=1` (or 0) a
  * change of direction, `?sightings=0` no sightings, `?lost=1` a lost signal.
+ * (`?life=0` turns off the town's traffic and other movement.)
  */
 function scenarioOptionsFromAddress(): ScenarioOptions {
   const params = new URLSearchParams(window.location.search);
