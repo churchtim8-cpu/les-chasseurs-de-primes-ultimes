@@ -87,7 +87,6 @@ export class ChaseScene extends Phaser.Scene {
     });
     scannerAudio.preload(
       [
-        ...Object.values(REPEAT_LINES),
         ...Object.values(OUTCOME_LINES),
         ...Object.values(TRANSPORT_LINES),
         ...Object.values(EVENT_LINES),
@@ -354,7 +353,7 @@ export class ChaseScene extends Phaser.Scene {
     this.placeParked(this.car, me.mode === 'CAR' ? null : this.chase.parkedCar, me.mode === 'CAR');
     this.placeParked(this.abandonedCar, this.chase.abandonedCar, false);
     this.badge.container.setPosition(me.x, me.y - (me.mode === 'CAR' ? 16 : 10));
-    this.badge.show(this.stage === 'PURSUIT' ? me.queued : null);
+    this.badge.show(this.stage === 'PURSUIT' ? me.queued : null, this.displayHeading);
     const status = this.chase.status;
     this.roundabout.update(this.chase.player, this.stage === 'PURSUIT' && !status.followingTracks);
 
@@ -441,7 +440,11 @@ export class ChaseScene extends Phaser.Scene {
     });
   }
 
-  /** The officer asks the dispatcher to repeat, then the last call plays again, unchanged. */
+  /**
+   * The last call plays again at once, unchanged. The officer's request
+   * ("Répétez, s'il vous plaît !") shows as text only: spoken first, it made
+   * the wait for the repeat too long (Mr Henry's playtest).
+   */
   private repeat(): void {
     if (this.stage !== 'PURSUIT') return;
     if (this.chase.status.signalLost) {
@@ -450,10 +453,7 @@ export class ChaseScene extends Phaser.Scene {
     }
     // While a sighting question is open, R repeats that call (free: the chase is paused).
     if (this.chase.status.sighting && this.sightingLine) {
-      void scannerAudio.play([
-        { audioId: REPEAT_LINES.CALM.audioId, radio: false },
-        { audioId: this.sightingLine.audioId, radio: true },
-      ]);
+      void scannerAudio.play([{ audioId: this.sightingLine.audioId, radio: true }]);
       return;
     }
     const last = this.chase.navigator.last;
@@ -465,7 +465,7 @@ export class ChaseScene extends Phaser.Scene {
     }
     const request = REPEAT_LINES[result.urgency];
     this.hud.showToast(result.penaltySeconds > 0 ? `${request.text}  (−${result.penaltySeconds} s)` : request.text);
-    this.showTransmission(last, [{ audioId: request.audioId, radio: false }]);
+    this.showTransmission(last);
   }
 
   /** Debug: the suspect's whole route, stage by stage (orange driving, green on foot), and its destination. */

@@ -77,17 +77,23 @@ export function createSuspectRunner(scene: Phaser.Scene): Phaser.GameObjects.Con
   return scene.add.container(0, 0, [g]).setDepth(29).setScale(2);
 }
 
-/** Small arrow above the player showing the turn they have chosen (input feedback only). */
+/**
+ * Small arrow above the player showing the turn they have chosen (input feedback only).
+ * Turns are the driver's left and right ("à gauche", "à droite"), so the arrow turns
+ * with the player: it points the way they will actually go, whichever way they face.
+ */
 export function createIntentBadge(scene: Phaser.Scene): {
   container: Phaser.GameObjects.Container;
-  show: (intent: TurnIntent | null) => void;
+  show: (intent: TurnIntent | null, heading: number) => void;
 } {
   const g = scene.add.graphics();
   const container = scene.add.container(0, 0, [g]).setDepth(40);
-  const show = (intent: TurnIntent | null) => {
+  const show = (intent: TurnIntent | null, heading: number) => {
     g.clear();
     container.setVisible(intent !== null);
     if (!intent) return;
+    // Drawn with "ahead" pointing up, then turned to face the way the player faces.
+    g.setRotation(heading + Math.PI / 2);
     g.fillStyle(0x16323d, 0.85).fillCircle(0, 0, 7);
     g.lineStyle(1.6, 0xf6ecd2);
     const angle = intent === 'LEFT' ? Math.PI : intent === 'RIGHT' ? 0 : -Math.PI / 2;
@@ -96,6 +102,6 @@ export function createIntentBadge(scene: Phaser.Scene): {
     g.lineBetween(tip.x, tip.y, tip.x - Math.cos(angle - 0.6) * 3, tip.y - Math.sin(angle - 0.6) * 3);
     g.lineBetween(tip.x, tip.y, tip.x - Math.cos(angle + 0.6) * 3, tip.y - Math.sin(angle + 0.6) * 3);
   };
-  show(null);
+  show(null, 0);
   return { container, show };
 }
