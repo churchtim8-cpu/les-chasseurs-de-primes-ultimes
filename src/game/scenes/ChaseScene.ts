@@ -12,6 +12,7 @@ import { LANGUAGE_SETTINGS } from '../../engine/language/settings';
 import { LOCATION_WORD_BY_ID, withArticle } from '../../engine/language/locations';
 import type { MoverStart } from '../../engine/movement/mover';
 import { TownGraph, type TravelMode } from '../../engine/world/graph';
+import { ChaseMusic } from '../audio/ChaseMusic';
 import { scannerAudio, type SpokenLine } from '../audio/ScannerAudio';
 import { CameraRig } from '../camera/cameraRig';
 import { debugState } from '../debug/debugState';
@@ -19,6 +20,7 @@ import { Hud } from '../hud/Hud';
 import { Controls, type ControlAction } from '../input/controls';
 import { FONT_FAMILY, PALETTE, toCss } from '../palette';
 import {
+  animateOfficer,
   createIntentBadge,
   createOfficer,
   createPoliceCar,
@@ -58,6 +60,11 @@ export class ChaseScene extends Phaser.Scene {
   private hud!: Hud;
   private car!: Phaser.GameObjects.Container;
   private officer!: Phaser.GameObjects.Container;
+  private music!: ChaseMusic;
+  /** Speed streaks behind the police car. */
+  private trail!: Phaser.GameObjects.Graphics;
+  private trailPoints: { x: number; y: number; heading: number }[] = [];
+  private stride = 0;
   /** The suspect's vehicle in each stage (null on foot). */
   private suspectCars: (Phaser.GameObjects.Container | null)[] = [];
   private suspectRunner!: Phaser.GameObjects.Container;
@@ -96,7 +103,13 @@ export class ChaseScene extends Phaser.Scene {
         (l) => l.audioId,
       ),
     );
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => scannerAudio.stop());
+    this.music = new ChaseMusic(scannerAudio);
+    this.music.setMode(this.chase.player.mode);
+    this.music.start();
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      scannerAudio.stop();
+      this.music.stop();
+    });
     this.layers = drawTown(this, this.graph);
     if (new URLSearchParams(window.location.search).get('life') !== '0') {
       this.life = new TownLife(this, this.graph, { player: () => this.chase.player.snapshot() });
@@ -107,6 +120,7 @@ export class ChaseScene extends Phaser.Scene {
     this.abandonedCar = createSuspectCar(this, vehicles.find((v) => v !== null) ?? 'BLUE').setVisible(false);
     this.suspectCars = vehicles.map((v) => (v ? createSuspectCar(this, v).setAlpha(0) : null));
     this.suspectRunner = createSuspectRunner(this).setAlpha(0);
+    this.trail = this.add.graphics().setDepth(28);
     this.car = createPoliceCar(this);
     this.officer = createOfficer(this).setVisible(false);
     this.badge = createIntentBadge(this);
@@ -126,6 +140,8 @@ export class ChaseScene extends Phaser.Scene {
     this.controls.onAction((action) => this.handleAction(action));
     this.hud = new Hud(this, { number: 1, total: 8 });
     this.hud.onRepeat(() => this.repeat());
+    this.hud.onMusic(() => this.toggleMusic());
+    this.hud.setMusic(!this.music.isMuted);
 
     const ui = this.cameras.add(0, 0, this.scale.width, this.scale.height);
     ui.ignore(worldObjects);
@@ -351,16 +367,23 @@ export class ChaseScene extends Phaser.Scene {
       this.cameraMode = me.mode;
       this.rig.setMode(me.mode);
       this.displayHeading = me.heading;
+      this.music.setMode(me.mode);
+      this.trailPoints = [];
+      this.flashMode(me.mode);
     }
     this.displayHeading += Phaser.Math.Angle.Wrap(me.heading - this.displayHeading) * Math.min(1, delta / 90);
     const avatar = me.mode === 'CAR' ? this.car : this.officer;
     avatar.setPosition(me.x, me.y).setRotation(this.displayHeading);
     this.officer.setVisible(me.mode === 'FOOT');
+    this.stride += (delta / 1000) * me.speed * 0.45;
+    if (me.mode === 'FOOT') animateOfficer(this.officer, this.stride, me.speed > 1);
+    this.drawTrail(me);
     this.placeParked(this.car, me.mode === 'CAR' ? null : this.chase.parkedCar, me.mode === 'CAR');
     this.placeParked(this.abandonedCar, this.chase.abandonedCar, false);
     this.badge.container.setPosition(me.x, me.y - (me.mode === 'CAR' ? 16 : 10));
     this.badge.show(this.stage === 'PURSUIT' ? me.queued : null, this.displayHeading);
     const status = this.chase.status;
+    this.music.setIntensity(status.signal);
     this.roundabout.update(this.chase.player, this.stage === 'PURSUIT' && !status.followingTracks);
 
     const suspect = this.chase.suspect.snapshot();
@@ -375,6 +398,42 @@ export class ChaseScene extends Phaser.Scene {
 
     this.rig.update(me, delta);
     this.scaleLabels();
+  }
+
+  /** Light streaks behind the police car at speed: driving feels fast, running does not leave them. */
+  private drawTrail(me: { x: number; y: number; heading: number; speed: number; mode: TravelMode }): void {
+    this.trail.clear();
+    if (me.mode !== 'CAR' || this.stage !== 'PURSUIT' || me.speed < 30) {
+      this.trailPoints = [];
+      return;
+    }
+    this.trailPoints.unshift({ x: me.x, y: me.y, heading: me.heading });
+    if (this.trailPoints.length > 12) this.trailPoints.length = 12;
+    for (const side of [-3.6, 3.6]) {
+      for (let i = 1; i < this.trailPoints.length; i++) {
+        const a = this.trailPoints[i - 1]!;
+        const b = this.trailPoints[i]!;
+        const back = 11;
+        const ax = a.x - Math.cos(a.heading) * back - Math.sin(a.heading) * side;
+        const ay = a.y - Math.sin(a.heading) * back + Math.cos(a.heading) * side;
+        const bx = b.x - Math.cos(b.heading) * back - Math.sin(b.heading) * side;
+        const by = b.y - Math.sin(b.heading) * back + Math.cos(b.heading) * side;
+        this.trail.lineStyle(1.6, 0xffffff, 0.45 * (1 - i / this.trailPoints.length)).lineBetween(ax, ay, bx, by);
+      }
+    }
+  }
+
+  /** "À PIED !" / "EN VOITURE !" across the screen when the player changes transport. */
+  private flashMode(mode: TravelMode): void {
+    if (this.stage !== 'PURSUIT') return;
+    this.hud.showBanner(mode === 'FOOT' ? 'À PIED !' : 'EN VOITURE !');
+    this.time.delayedCall(1100, () => this.stage === 'PURSUIT' && this.hud.showBanner(''));
+    this.cameras.main.flash(180, 255, 255, 255, false);
+  }
+
+  private toggleMusic(): void {
+    const muted = this.music.toggleMute();
+    this.hud.setMusic(!muted);
   }
 
   /** A parked car (the police car while on foot, or the one the suspect left), or hidden. */
@@ -394,6 +453,7 @@ export class ChaseScene extends Phaser.Scene {
 
   private showResults(): void {
     this.stage = 'RESULTS';
+    this.music.stop();
     const status = this.chase.status;
     const captured = status.phase === 'CAPTURED';
     const title = captured ? 'Le suspect est arrêté !' : 'Le suspect s’est échappé.';
@@ -440,6 +500,7 @@ export class ChaseScene extends Phaser.Scene {
       if (debugState.isEnabled && this.stage === 'PURSUIT') this.handleEvents(this.chase.forceOutcome('ESCAPED'));
     });
     keyboard.on('keydown-N', () => debugState.isEnabled && this.nextChase());
+    keyboard.on('keydown-B', () => this.toggleMusic());
     // Sighting answers.
     ['ONE', 'TWO', 'THREE', 'FOUR'].forEach((key, i) => {
       const answer = () => this.stage === 'PURSUIT' && this.handleEvents(this.chase.answerSighting(i));

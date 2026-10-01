@@ -58,14 +58,14 @@ export const DIFFICULTY_SETTINGS: Record<Difficulty, DifficultySettings> = {
   },
   HARD: {
     label: { fr: 'Difficile', en: 'Hard' },
-    timeLimitSeconds: 90,
+    timeLimitSeconds: 110,
     textDisplay: 'AUDIO_ONLY',
     repeat: { kind: 'COSTS_TIME', secondsPerRepeat: 5 },
     eventCount: [3, 4],
   },
   EXPERT: {
     label: { fr: 'Expert', en: 'Expert' },
-    timeLimitSeconds: 60,
+    timeLimitSeconds: 90,
     textDisplay: 'AUDIO_ONLY',
     repeat: { kind: 'ONCE' },
     eventCount: [4, 5],

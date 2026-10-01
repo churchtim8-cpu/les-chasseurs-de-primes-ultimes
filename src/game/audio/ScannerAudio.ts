@@ -11,7 +11,7 @@ const MIX = {
   scanner: 1,
   effects: 0.35,
   /** Music and ambience level while French is playing (blueprint section 17). */
-  duckTo: 0.25,
+  duckTo: 0.18,
   duckSeconds: 0.15,
   /** Radio band: telephone-like, still clear enough for learners. */
   radioLowCut: 300,
@@ -84,6 +84,15 @@ export class ScannerAudio {
     const ticket = ++this.generation;
     this.busy = this.busy.then(() => (ticket === this.generation ? this.sequence(lines, ticket) : undefined));
     return this.busy;
+  }
+
+  /**
+   * Where background music plays: the music bus, which ducks under the French.
+   * Null until the browser allows sound (after the first key press or tap).
+   */
+  musicOutput(): { ctx: AudioContext; bus: GainNode } | null {
+    if (!this.ctx || !this.buses || this.ctx.state !== 'running') return null;
+    return { ctx: this.ctx, bus: this.buses.music };
   }
 
   /** Stop everything now (leaving the chase). */

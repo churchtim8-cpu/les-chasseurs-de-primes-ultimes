@@ -10,6 +10,7 @@ import { FONT_FAMILY, PALETTE, toCss } from '../palette';
  *   Space          turn around (faire demi-tour)
  *   E              get out of / back into the car
  *   M              map overview (debug and practice)
+ *   B              music on or off (handled by the chase scene)
  */
 
 export type ControlAction = 'LEFT' | 'RIGHT' | 'STRAIGHT' | 'U_TURN' | 'TOGGLE_MODE' | 'OVERVIEW';

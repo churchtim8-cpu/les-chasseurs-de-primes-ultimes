@@ -118,6 +118,8 @@ describe('suspect sightings', () => {
     const run = (pick: 'RIGHT' | 'WRONG') => {
       const chase = new Chase(graph, generateScenario(graph, seed, { chaseType: 'CAR_CAR', turnOff: false, sightings: true }));
       chase.player.followPlan(chase.scenario.route.slice(1));
+      // Keep pace behind the suspect so the chase reaches the sighting.
+      chase.player.speedFactor = CHASE_SETTINGS.INTERMEDIATE.suspectSpeed.CAR;
       for (let t = 0; t < 400 && chase.status.phase === 'PURSUIT'; t += 0.05) {
         const question = chase.update(0.05).find((e) => e.type === 'SIGHTING');
         if (!question || question.type !== 'SIGHTING') continue;

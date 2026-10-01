@@ -15,8 +15,8 @@ export interface MovementSettings {
 }
 
 export const MOVEMENT: Record<TravelMode, MovementSettings> = {
-  CAR: { cruise: 70, max: 100, acceleration: 45, braking: 150 },
-  FOOT: { cruise: 22, max: 30, acceleration: 60, braking: 120 },
+  CAR: { cruise: 85, max: 115, acceleration: 55, braking: 170 },
+  FOOT: { cruise: 26, max: 34, acceleration: 70, braking: 130 },
 };
 
 /** How close (metres) the player must be to the parked car to get back in. */

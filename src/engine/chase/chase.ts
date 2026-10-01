@@ -203,7 +203,8 @@ export class Chase {
 
   /** The suspect keeps pace until its last stage, where the police slowly close in. */
   private suspectSpeedFor(stage: number): number {
-    return stage === this.lastStage ? this.settings.suspectSpeed : TRANSFER.suspectSpeedBeforeLastStage;
+    const mode = this.scenario.stages[stage]!.mode;
+    return stage === this.lastStage ? this.settings.suspectSpeed[mode] : TRANSFER.suspectSpeedBeforeLastStage;
   }
 
   private get lastStage(): number {
