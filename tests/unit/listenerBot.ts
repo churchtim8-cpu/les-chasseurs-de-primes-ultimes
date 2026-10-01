@@ -3,8 +3,11 @@
  * the scanner's French (as structured clauses) and looks at the map, like a
  * student would. It acts on each clause live, counting streets and watching
  * for landmarks as it drives, so it checks the generator independently.
+ * It gets out of the car on "Descendez de la voiture !" and back in on
+ * "Montez dans la voiture !".
  */
 
+import { TRANSPORT_LINES } from '../../src/engine/audio/script';
 import type { Chase, ChaseEvent } from '../../src/engine/chase/chase';
 import { isAt, isDecision, locationById, opensOn, passPoint, scanAhead } from '../../src/engine/language/analysis';
 import type { Clause } from '../../src/engine/language/instructions';
@@ -22,6 +25,9 @@ interface Task {
 
 export class ListenerBot {
   private heard: { at: number; transmission: Transmission }[] = [];
+  private orders: { at: number; audioId: string }[] = [];
+  /** Mode changes that failed (for example, the car out of reach). */
+  readonly failedOrders: string[] = [];
   private tasks: Task[] = [];
   private time = 0;
   private lastEdge = '';
@@ -40,6 +46,12 @@ export class ListenerBot {
       if (e.type === 'TRANSMISSION') {
         this.heard.push({ at: this.time + this.reaction, transmission: e.transmission });
         this.log.push(e.transmission);
+      } else if (e.type === 'ANNOUNCE') {
+        for (const line of e.lines) {
+          if (line.audioId === TRANSPORT_LINES.GET_OUT.audioId || line.audioId === TRANSPORT_LINES.GET_IN.audioId) {
+            this.orders.push({ at: this.time + this.reaction, audioId: line.audioId });
+          }
+        }
       }
     }
   }
@@ -47,6 +59,14 @@ export class ListenerBot {
   /** Act, then advance the chase by dt. */
   step(chase: Chase, dt: number): ChaseEvent[] {
     this.time += dt;
+    while (this.orders.length > 0 && (this.orders[0]?.at ?? Infinity) <= this.time) {
+      const order = this.orders.shift()!;
+      const { result, events } = chase.toggleMode();
+      if (!result.ok) this.failedOrders.push(`${order.audioId}: ${result.reason}`);
+      this.tasks = [];
+      this.lastEdge = '';
+      this.hear(events);
+    }
     const player = chase.player;
     while (this.heard.length > 0 && (this.heard[0]?.at ?? Infinity) <= this.time) {
       const { transmission } = this.heard.shift()!;

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { BELLEVUE } from '../../src/content/map/bellevue';
 import { Chase } from '../../src/engine/chase/chase';
-import { generateScenario } from '../../src/engine/chase/scenario';
+import { generateScenario, type ScenarioOptions } from '../../src/engine/chase/scenario';
 import { DIFFICULTIES, type Difficulty } from '../../src/engine/difficulty';
 import { actionIndices } from '../../src/engine/language/generate';
 import { makeInstruction, type Clause, type TemplateId } from '../../src/engine/language/instructions';
@@ -129,8 +129,8 @@ describe('interpreter (how a listener reads an instruction)', () => {
 });
 
 /** Plays one chase with the listening bot. */
-function listen(seed: string, reaction = 1.2) {
-  const chase = new Chase(graph, generateScenario(graph, seed));
+function listen(seed: string, reaction = 1.2, options: ScenarioOptions = {}) {
+  const chase = new Chase(graph, generateScenario(graph, seed, options));
   const bot = new ListenerBot(graph, reaction);
   for (let t = 0; t < 400 && chase.status.phase === 'PURSUIT'; t += 0.05) bot.step(chase, 0.05);
   return { chase, status: chase.status, log: bot.log };
@@ -150,7 +150,7 @@ describe('scanner instructions in real chases', () => {
 
   it.each(DIFFICULTIES)('every turn on the route is announced before the junction (%s)', (difficulty) => {
     for (const seed of seeds(difficulty, 60, 'announce')) {
-      const { chase, log } = listen(seed);
+      const { chase, log } = listen(seed, 1.2, { chaseType: 'CAR_CAR' });
       const route = chase.scenario.route;
       const announced = new Set(log.flatMap((t) => t.instructions.flatMap((i) => i.atNodes)));
       const reached = new Set<string>();
@@ -198,7 +198,7 @@ describe('scanner instructions in real chases', () => {
     let caught = 0;
     const all = seeds('EASY', 60, 'wrong-turn');
     for (const seed of all) {
-      const chase = new Chase(graph, generateScenario(graph, seed));
+      const chase = new Chase(graph, generateScenario(graph, seed, { chaseType: 'CAR_CAR' }));
       const bot = new ListenerBot(graph);
       // Take the first wrong street offered, then listen again.
       let wrongDone = false;

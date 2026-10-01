@@ -40,11 +40,24 @@ The police car drives forward on its own; you choose where it goes. Choices are 
 
 Touch buttons appear on touch screens (or add `?touch=1` to the address).
 
+## Chase types
+
+A chase can change transport, as in the blueprint: the suspect drives or runs, and may get out of a car (or into one) mid-chase. The scanner says so ("Le suspect est sorti de la voiture. Il est à pied !", "Il monte dans une voiture !"); the player is told "Descendez de la voiture !" on reaching the spot, or "Montez dans la voiture !" when a colleague brings the police car to the nearest road. After changing, the player follows the suspect's tracks to where it changed, and directions start again from there. Each change adds 12 s to the clock.
+
+| Level | Chase types |
+|---|---|
+| Easy | Car → Car (mostly), Foot → Foot |
+| Intermediate | adds Car → Foot |
+| Hard | adds Foot → Car |
+| Expert | adds Car → Foot → Car and Foot → Car → Foot |
+
+The weights, stage lengths and timings live in `src/engine/chase/settings.ts`. With debug on, `?type=CAR_FOOT` (with or without `?seed=`) forces a chase type.
+
 ## French audio
 
 The scanner plays pre-recorded ElevenLabs clips. `npm run audio:script` writes every line the game can say to `docs/audio/script.csv` for review. Recordings go in `public/audio/dispatcher/` and `public/audio/officer/`, named by audio ID (for example `dir.turn.left.mp3`); `npm run audio:manifest` then lists them in `public/audio/manifest.json`. Until a line is recorded it is shown as text, with the radio beep and static. Add `?radio=0` to hear the clips without the radio filter. `audio/review.html` on the site lists every recording with a play button, for checking pronunciation.
 
-The current library (334 lines) was recorded with ElevenLabs Eleven v4: Christophe for the dispatcher and Alain for the officer. New lines must use the same model and voices. The clips keep ElevenLabs' content-credential tag.
+The current library (334 lines) was recorded with ElevenLabs Eleven v4: Christophe for the dispatcher and Alain for the officer. The 8 lines added for transport changes and three on-foot sentences are not recorded yet, so they show as text. New lines must use the same model and voices. The clips keep ElevenLabs' content-credential tag.
 
 ## Debug mode
 

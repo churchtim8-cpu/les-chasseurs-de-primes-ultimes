@@ -38,6 +38,16 @@ export function createOfficer(scene: Phaser.Scene): Phaser.GameObjects.Container
   return scene.add.container(0, 0, [g]).setDepth(31).setScale(2);
 }
 
+/** Placeholder suspect on foot: the same red as the suspect's car, seen from above. */
+export function createSuspectRunner(scene: Phaser.Scene, colour = 0xc0392b): Phaser.GameObjects.Container {
+  const g = scene.add.graphics();
+  g.fillStyle(0x000000, 0.25).fillEllipse(0.8, 1.2, 7, 6);
+  g.fillStyle(colour).fillEllipse(0, 0, 5.5, 7); // shoulders
+  g.fillStyle(0x2a1d17).fillCircle(0.3, 0, 2.1); // head
+  g.lineStyle(0.6, 0xffffff, 0.6).strokeEllipse(0, 0, 5.5, 7);
+  return scene.add.container(0, 0, [g]).setDepth(29).setScale(2);
+}
+
 /** Small arrow above the player showing the turn they have chosen (input feedback only). */
 export function createIntentBadge(scene: Phaser.Scene): {
   container: Phaser.GameObjects.Container;

@@ -10,6 +10,7 @@
  * never chosen (see `AudioCheck`).
  */
 
+import { CHASE_TYPE_MODES, CHASE_TYPE_WEIGHTS, CHASE_TYPES, type ChaseType } from '../chase/settings';
 import { DIFFICULTIES, type Difficulty } from '../difficulty';
 import { isDecision, scanAhead } from '../language/analysis';
 import { describe, positionLeaving, readsAs } from '../language/generate';
@@ -19,7 +20,7 @@ import { canTravel, type TownGraph, type TravelMode } from '../world/graph';
 
 /** Two voices (blueprint section 17): the calm dispatcher and the officer in the car. */
 export type Voice = 'DISPATCHER' | 'OFFICER';
-export type LineCategory = 'DIRECTION' | 'RECOVERY' | 'REPEAT' | 'OUTCOME';
+export type LineCategory = 'DIRECTION' | 'RECOVERY' | 'EVENT' | 'REPEAT' | 'OUTCOME';
 
 export interface ScriptLine {
   audioId: string;
@@ -47,6 +48,30 @@ export const OUTCOME_LINES = {
   ESCAPED: { audioId: 'outcome.escaped', text: "Le suspect s'est échappé." },
   WARNING: { audioId: 'event.moving_away', text: "Le suspect s'éloigne." },
 } as const;
+
+/**
+ * Changes of transport mid-chase (blueprint sections 11 and 18). All from the
+ * approved Events and Foot chase lists; "Montez dans la voiture !" completes
+ * the approved "Montez…".
+ */
+export const TRANSPORT_LINES = {
+  SUSPECT_LEFT_CAR: { audioId: 'event.suspect_left_car', text: 'Le suspect est sorti de la voiture.' },
+  ON_FOOT: { audioId: 'event.on_foot', text: 'Il est à pied !' },
+  GET_OUT: { audioId: 'event.get_out', text: 'Descendez de la voiture !' },
+  SUSPECT_BOARDS: { audioId: 'event.suspect_boards', text: 'Il monte dans une voiture !' },
+  GET_IN: { audioId: 'event.get_in', text: 'Montez dans la voiture !' },
+} as const;
+
+/** The transport lines a chase type can need. */
+function transportLinesFor(type: ChaseType): (keyof typeof TRANSPORT_LINES)[] {
+  const modes = CHASE_TYPE_MODES[type];
+  const out = new Set<keyof typeof TRANSPORT_LINES>();
+  for (let i = 1; i < modes.length; i++) {
+    if (modes[i] === 'FOOT') ['SUSPECT_LEFT_CAR', 'ON_FOOT', 'GET_OUT'].forEach((k) => out.add(k as keyof typeof TRANSPORT_LINES));
+    else ['SUSPECT_BOARDS', 'GET_IN'].forEach((k) => out.add(k as keyof typeof TRANSPORT_LINES));
+  }
+  return [...out];
+}
 
 type Collected = Map<string, ScriptLine>;
 
@@ -120,11 +145,11 @@ function directionLines(graph: TownGraph, level: Difficulty, out: Collected, mod
   }
 }
 
-/** The complete recording script, sorted by category then text. */
-export function buildScript(graph: TownGraph, mode: TravelMode = 'CAR'): ScriptLine[] {
+/** The complete recording script (driving and on foot), sorted by category then text. */
+export function buildScript(graph: TownGraph, modes: readonly TravelMode[] = ['CAR', 'FOOT']): ScriptLine[] {
   const out: Collected = new Map();
   for (const level of DIFFICULTIES) {
-    directionLines(graph, level, out, mode);
+    for (const mode of modes) directionLines(graph, level, out, mode);
     addClauses(out, [{ action: 'STRAIGHT' }], level);
     for (const location of graph.map.locations) {
       for (const verb of ['CONTINUEZ', 'ALLEZ'] as const) {
@@ -139,8 +164,12 @@ export function buildScript(graph: TownGraph, mode: TravelMode = 'CAR'): ScriptL
     for (const line of Object.values(OUTCOME_LINES)) {
       addLine(out, { ...line, voice: 'DISPATCHER', category: 'OUTCOME', template: null }, level);
     }
+    const types = CHASE_TYPES.filter((t) => (CHASE_TYPE_WEIGHTS[level][t] ?? 0) > 0);
+    for (const key of new Set(types.flatMap(transportLinesFor))) {
+      addLine(out, { ...TRANSPORT_LINES[key], voice: 'DISPATCHER', category: 'EVENT', template: null }, level);
+    }
   }
-  const order: LineCategory[] = ['DIRECTION', 'RECOVERY', 'REPEAT', 'OUTCOME'];
+  const order: LineCategory[] = ['DIRECTION', 'RECOVERY', 'EVENT', 'REPEAT', 'OUTCOME'];
   return [...out.values()].sort(
     (a, b) => order.indexOf(a.category) - order.indexOf(b.category) || a.text.localeCompare(b.text, 'fr'),
   );

@@ -16,5 +16,7 @@ export default defineConfig({
   test: {
     include: ['tests/unit/**/*.test.ts'],
     environment: 'node',
+    // Many tests play whole simulated chases; CI runners share cores across test files.
+    testTimeout: 30_000,
   },
 });
