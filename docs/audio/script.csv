@@ -87,257 +87,639 @@
 86,All levels,Continue to a place,Continuez jusqu'au supermarché.,Dispatcher (calm),31,dir.continuez_until.supermarket
 87,All levels,Continue to a place,Continuez jusqu'au théâtre.,Dispatcher (calm),27,dir.continuez_until.theatre
 88,All levels,Simple direction,Continuez tout droit.,Dispatcher (calm),21,dir.straight
-89,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à droite, puis prenez la deuxième rue à droite.",Dispatcher (calm),70,seq.street.right.deuxieme+puis+street.right.deuxieme
-90,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à droite, puis prenez la deuxième rue à gauche.",Dispatcher (calm),70,seq.street.right.deuxieme+puis+street.left.deuxieme
-91,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à droite, puis prenez la première rue à droite.",Dispatcher (calm),70,seq.street.right.deuxieme+puis+street.right.premiere
-92,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à droite, puis prenez la première rue à gauche.",Dispatcher (calm),70,seq.street.right.deuxieme+puis+street.left.premiere
-93,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à droite, puis prenez la prochaine rue à droite.",Dispatcher (calm),71,seq.street.right.deuxieme+puis+street.right.prochaine
-94,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à droite, puis prenez la prochaine rue à gauche.",Dispatcher (calm),71,seq.street.right.deuxieme+puis+street.left.prochaine
-95,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à droite, puis tournez à droite.",Dispatcher (calm),55,seq.street.right.deuxieme+puis+turn.right
-96,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à droite, puis tournez à gauche.",Dispatcher (calm),55,seq.street.right.deuxieme+puis+turn.left
-97,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à droite, puis, au rond-point, prenez la deuxième sortie.",Dispatcher (calm),80,seq.street.right.deuxieme+puis+roundabout.deuxieme
-98,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à droite, puis, au rond-point, prenez la première sortie.",Dispatcher (calm),80,seq.street.right.deuxieme+puis+roundabout.premiere
-99,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à droite, puis, au rond-point, prenez la troisième sortie.",Dispatcher (calm),81,seq.street.right.deuxieme+puis+roundabout.troisieme
-100,Intermediate and up,Count the streets,Prenez la deuxième rue à droite.,Dispatcher (calm),32,dir.street.right.deuxieme
-101,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à gauche, puis prenez la deuxième rue à droite.",Dispatcher (calm),70,seq.street.left.deuxieme+puis+street.right.deuxieme
-102,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à gauche, puis prenez la deuxième rue à gauche.",Dispatcher (calm),70,seq.street.left.deuxieme+puis+street.left.deuxieme
-103,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à gauche, puis prenez la première rue à droite.",Dispatcher (calm),70,seq.street.left.deuxieme+puis+street.right.premiere
-104,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à gauche, puis prenez la première rue à gauche.",Dispatcher (calm),70,seq.street.left.deuxieme+puis+street.left.premiere
-105,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à gauche, puis prenez la prochaine rue à droite.",Dispatcher (calm),71,seq.street.left.deuxieme+puis+street.right.prochaine
-106,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à gauche, puis prenez la prochaine rue à gauche.",Dispatcher (calm),71,seq.street.left.deuxieme+puis+street.left.prochaine
-107,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à gauche, puis tournez à droite.",Dispatcher (calm),55,seq.street.left.deuxieme+puis+turn.right
-108,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à gauche, puis tournez à gauche.",Dispatcher (calm),55,seq.street.left.deuxieme+puis+turn.left
-109,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à gauche, puis, au rond-point, prenez la deuxième sortie.",Dispatcher (calm),80,seq.street.left.deuxieme+puis+roundabout.deuxieme
-110,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à gauche, puis, au rond-point, prenez la première sortie.",Dispatcher (calm),80,seq.street.left.deuxieme+puis+roundabout.premiere
-111,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à gauche, puis, au rond-point, prenez la troisième sortie.",Dispatcher (calm),81,seq.street.left.deuxieme+puis+roundabout.troisieme
-112,Intermediate and up,Count the streets,Prenez la deuxième rue à gauche.,Dispatcher (calm),32,dir.street.left.deuxieme
-113,Intermediate and up,Two steps (puis),"Prenez la première rue à droite, puis prenez la deuxième rue à droite.",Dispatcher (calm),70,seq.street.right.premiere+puis+street.right.deuxieme
-114,Intermediate and up,Two steps (puis),"Prenez la première rue à droite, puis prenez la deuxième rue à gauche.",Dispatcher (calm),70,seq.street.right.premiere+puis+street.left.deuxieme
-115,Intermediate and up,Two steps (puis),"Prenez la première rue à droite, puis prenez la première rue à droite.",Dispatcher (calm),70,seq.street.right.premiere+puis+street.right.premiere
-116,Intermediate and up,Two steps (puis),"Prenez la première rue à droite, puis prenez la première rue à gauche.",Dispatcher (calm),70,seq.street.right.premiere+puis+street.left.premiere
-117,Intermediate and up,Two steps (puis),"Prenez la première rue à droite, puis prenez la prochaine rue à droite.",Dispatcher (calm),71,seq.street.right.premiere+puis+street.right.prochaine
-118,Intermediate and up,Two steps (puis),"Prenez la première rue à droite, puis prenez la prochaine rue à gauche.",Dispatcher (calm),71,seq.street.right.premiere+puis+street.left.prochaine
-119,Intermediate and up,Two steps (puis),"Prenez la première rue à droite, puis tournez à droite.",Dispatcher (calm),55,seq.street.right.premiere+puis+turn.right
-120,Intermediate and up,Two steps (puis),"Prenez la première rue à droite, puis tournez à gauche.",Dispatcher (calm),55,seq.street.right.premiere+puis+turn.left
-121,Intermediate and up,Two steps (puis),"Prenez la première rue à droite, puis, au rond-point, prenez la deuxième sortie.",Dispatcher (calm),80,seq.street.right.premiere+puis+roundabout.deuxieme
-122,Intermediate and up,Two steps (puis),"Prenez la première rue à droite, puis, au rond-point, prenez la première sortie.",Dispatcher (calm),80,seq.street.right.premiere+puis+roundabout.premiere
-123,Intermediate and up,Two steps (puis),"Prenez la première rue à droite, puis, au rond-point, prenez la troisième sortie.",Dispatcher (calm),81,seq.street.right.premiere+puis+roundabout.troisieme
-124,Intermediate and up,Count the streets,Prenez la première rue à droite.,Dispatcher (calm),32,dir.street.right.premiere
-125,Intermediate and up,Two steps (puis),"Prenez la première rue à gauche, puis prenez la deuxième rue à droite.",Dispatcher (calm),70,seq.street.left.premiere+puis+street.right.deuxieme
-126,Intermediate and up,Two steps (puis),"Prenez la première rue à gauche, puis prenez la deuxième rue à gauche.",Dispatcher (calm),70,seq.street.left.premiere+puis+street.left.deuxieme
-127,Intermediate and up,Two steps (puis),"Prenez la première rue à gauche, puis prenez la première rue à droite.",Dispatcher (calm),70,seq.street.left.premiere+puis+street.right.premiere
-128,Intermediate and up,Two steps (puis),"Prenez la première rue à gauche, puis prenez la première rue à gauche.",Dispatcher (calm),70,seq.street.left.premiere+puis+street.left.premiere
-129,Intermediate and up,Two steps (puis),"Prenez la première rue à gauche, puis prenez la prochaine rue à droite.",Dispatcher (calm),71,seq.street.left.premiere+puis+street.right.prochaine
-130,Intermediate and up,Two steps (puis),"Prenez la première rue à gauche, puis prenez la prochaine rue à gauche.",Dispatcher (calm),71,seq.street.left.premiere+puis+street.left.prochaine
-131,Intermediate and up,Two steps (puis),"Prenez la première rue à gauche, puis tournez à droite.",Dispatcher (calm),55,seq.street.left.premiere+puis+turn.right
-132,Intermediate and up,Two steps (puis),"Prenez la première rue à gauche, puis tournez à gauche.",Dispatcher (calm),55,seq.street.left.premiere+puis+turn.left
-133,Intermediate and up,Two steps (puis),"Prenez la première rue à gauche, puis, au rond-point, prenez la deuxième sortie.",Dispatcher (calm),80,seq.street.left.premiere+puis+roundabout.deuxieme
-134,Intermediate and up,Two steps (puis),"Prenez la première rue à gauche, puis, au rond-point, prenez la première sortie.",Dispatcher (calm),80,seq.street.left.premiere+puis+roundabout.premiere
-135,Intermediate and up,Two steps (puis),"Prenez la première rue à gauche, puis, au rond-point, prenez la troisième sortie.",Dispatcher (calm),81,seq.street.left.premiere+puis+roundabout.troisieme
-136,Intermediate and up,Count the streets,Prenez la première rue à gauche.,Dispatcher (calm),32,dir.street.left.premiere
-137,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à droite, puis prenez la deuxième rue à droite.",Dispatcher (calm),71,seq.street.right.prochaine+puis+street.right.deuxieme
-138,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à droite, puis prenez la deuxième rue à gauche.",Dispatcher (calm),71,seq.street.right.prochaine+puis+street.left.deuxieme
-139,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à droite, puis prenez la première rue à droite.",Dispatcher (calm),71,seq.street.right.prochaine+puis+street.right.premiere
-140,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à droite, puis prenez la première rue à gauche.",Dispatcher (calm),71,seq.street.right.prochaine+puis+street.left.premiere
-141,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à droite, puis prenez la prochaine rue à droite.",Dispatcher (calm),72,seq.street.right.prochaine+puis+street.right.prochaine
-142,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à droite, puis prenez la prochaine rue à gauche.",Dispatcher (calm),72,seq.street.right.prochaine+puis+street.left.prochaine
-143,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à droite, puis tournez à droite.",Dispatcher (calm),56,seq.street.right.prochaine+puis+turn.right
-144,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à droite, puis tournez à gauche.",Dispatcher (calm),56,seq.street.right.prochaine+puis+turn.left
-145,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à droite, puis, au rond-point, prenez la deuxième sortie.",Dispatcher (calm),81,seq.street.right.prochaine+puis+roundabout.deuxieme
-146,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à droite, puis, au rond-point, prenez la première sortie.",Dispatcher (calm),81,seq.street.right.prochaine+puis+roundabout.premiere
-147,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à droite, puis, au rond-point, prenez la troisième sortie.",Dispatcher (calm),82,seq.street.right.prochaine+puis+roundabout.troisieme
-148,Intermediate and up,Count the streets,Prenez la prochaine rue à droite.,Dispatcher (calm),33,dir.street.right.prochaine
-149,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à gauche, puis prenez la deuxième rue à droite.",Dispatcher (calm),71,seq.street.left.prochaine+puis+street.right.deuxieme
-150,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à gauche, puis prenez la deuxième rue à gauche.",Dispatcher (calm),71,seq.street.left.prochaine+puis+street.left.deuxieme
-151,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à gauche, puis prenez la première rue à droite.",Dispatcher (calm),71,seq.street.left.prochaine+puis+street.right.premiere
-152,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à gauche, puis prenez la première rue à gauche.",Dispatcher (calm),71,seq.street.left.prochaine+puis+street.left.premiere
-153,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à gauche, puis prenez la prochaine rue à droite.",Dispatcher (calm),72,seq.street.left.prochaine+puis+street.right.prochaine
-154,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à gauche, puis prenez la prochaine rue à gauche.",Dispatcher (calm),72,seq.street.left.prochaine+puis+street.left.prochaine
-155,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à gauche, puis tournez à droite.",Dispatcher (calm),56,seq.street.left.prochaine+puis+turn.right
-156,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à gauche, puis tournez à gauche.",Dispatcher (calm),56,seq.street.left.prochaine+puis+turn.left
-157,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à gauche, puis, au rond-point, prenez la deuxième sortie.",Dispatcher (calm),81,seq.street.left.prochaine+puis+roundabout.deuxieme
-158,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à gauche, puis, au rond-point, prenez la première sortie.",Dispatcher (calm),81,seq.street.left.prochaine+puis+roundabout.premiere
-159,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à gauche, puis, au rond-point, prenez la troisième sortie.",Dispatcher (calm),82,seq.street.left.prochaine+puis+roundabout.troisieme
-160,Intermediate and up,Count the streets,Prenez la prochaine rue à gauche.,Dispatcher (calm),33,dir.street.left.prochaine
-161,Intermediate and up,Two steps (puis),"Prenez la troisième rue à droite, puis prenez la deuxième rue à droite.",Dispatcher (calm),71,seq.street.right.troisieme+puis+street.right.deuxieme
-162,Intermediate and up,Two steps (puis),"Prenez la troisième rue à droite, puis prenez la deuxième rue à gauche.",Dispatcher (calm),71,seq.street.right.troisieme+puis+street.left.deuxieme
-163,Intermediate and up,Two steps (puis),"Prenez la troisième rue à droite, puis prenez la première rue à droite.",Dispatcher (calm),71,seq.street.right.troisieme+puis+street.right.premiere
-164,Intermediate and up,Two steps (puis),"Prenez la troisième rue à droite, puis prenez la première rue à gauche.",Dispatcher (calm),71,seq.street.right.troisieme+puis+street.left.premiere
-165,Intermediate and up,Two steps (puis),"Prenez la troisième rue à droite, puis prenez la prochaine rue à droite.",Dispatcher (calm),72,seq.street.right.troisieme+puis+street.right.prochaine
-166,Intermediate and up,Two steps (puis),"Prenez la troisième rue à droite, puis prenez la prochaine rue à gauche.",Dispatcher (calm),72,seq.street.right.troisieme+puis+street.left.prochaine
-167,Intermediate and up,Two steps (puis),"Prenez la troisième rue à droite, puis tournez à droite.",Dispatcher (calm),56,seq.street.right.troisieme+puis+turn.right
-168,Intermediate and up,Two steps (puis),"Prenez la troisième rue à droite, puis tournez à gauche.",Dispatcher (calm),56,seq.street.right.troisieme+puis+turn.left
-169,Intermediate and up,Two steps (puis),"Prenez la troisième rue à droite, puis, au rond-point, prenez la deuxième sortie.",Dispatcher (calm),81,seq.street.right.troisieme+puis+roundabout.deuxieme
-170,Intermediate and up,Two steps (puis),"Prenez la troisième rue à droite, puis, au rond-point, prenez la première sortie.",Dispatcher (calm),81,seq.street.right.troisieme+puis+roundabout.premiere
-171,Intermediate and up,Two steps (puis),"Prenez la troisième rue à droite, puis, au rond-point, prenez la troisième sortie.",Dispatcher (calm),82,seq.street.right.troisieme+puis+roundabout.troisieme
-172,Intermediate and up,Count the streets,Prenez la troisième rue à droite.,Dispatcher (calm),33,dir.street.right.troisieme
-173,Intermediate and up,Two steps (puis),"Prenez la troisième rue à gauche, puis prenez la deuxième rue à droite.",Dispatcher (calm),71,seq.street.left.troisieme+puis+street.right.deuxieme
-174,Intermediate and up,Two steps (puis),"Prenez la troisième rue à gauche, puis prenez la deuxième rue à gauche.",Dispatcher (calm),71,seq.street.left.troisieme+puis+street.left.deuxieme
-175,Intermediate and up,Two steps (puis),"Prenez la troisième rue à gauche, puis prenez la première rue à droite.",Dispatcher (calm),71,seq.street.left.troisieme+puis+street.right.premiere
-176,Intermediate and up,Two steps (puis),"Prenez la troisième rue à gauche, puis prenez la première rue à gauche.",Dispatcher (calm),71,seq.street.left.troisieme+puis+street.left.premiere
-177,Intermediate and up,Two steps (puis),"Prenez la troisième rue à gauche, puis prenez la prochaine rue à droite.",Dispatcher (calm),72,seq.street.left.troisieme+puis+street.right.prochaine
-178,Intermediate and up,Two steps (puis),"Prenez la troisième rue à gauche, puis prenez la prochaine rue à gauche.",Dispatcher (calm),72,seq.street.left.troisieme+puis+street.left.prochaine
-179,Intermediate and up,Two steps (puis),"Prenez la troisième rue à gauche, puis tournez à droite.",Dispatcher (calm),56,seq.street.left.troisieme+puis+turn.right
-180,Intermediate and up,Two steps (puis),"Prenez la troisième rue à gauche, puis tournez à gauche.",Dispatcher (calm),56,seq.street.left.troisieme+puis+turn.left
-181,Intermediate and up,Two steps (puis),"Prenez la troisième rue à gauche, puis, au rond-point, prenez la deuxième sortie.",Dispatcher (calm),81,seq.street.left.troisieme+puis+roundabout.deuxieme
-182,Intermediate and up,Two steps (puis),"Prenez la troisième rue à gauche, puis, au rond-point, prenez la première sortie.",Dispatcher (calm),81,seq.street.left.troisieme+puis+roundabout.premiere
-183,Intermediate and up,Two steps (puis),"Prenez la troisième rue à gauche, puis, au rond-point, prenez la troisième sortie.",Dispatcher (calm),82,seq.street.left.troisieme+puis+roundabout.troisieme
-184,Intermediate and up,Count the streets,Prenez la troisième rue à gauche.,Dispatcher (calm),33,dir.street.left.troisieme
-185,All levels,Turn at / after a place,Tournez à droite après l'arrêt de bus.,Dispatcher (calm),38,dir.turn.right.apres.bus_stop
-186,All levels,Turn at / after a place,Tournez à droite après l'école.,Dispatcher (calm),31,dir.turn.right.apres.school
-187,All levels,Turn at / after a place,Tournez à droite après l'hôpital.,Dispatcher (calm),33,dir.turn.right.apres.hospital
-188,All levels,Turn at / after a place,Tournez à droite après la banque.,Dispatcher (calm),33,dir.turn.right.apres.bank
-189,All levels,Turn at / after a place,Tournez à droite après la bibliothèque.,Dispatcher (calm),39,dir.turn.right.apres.library
-190,All levels,Turn at / after a place,Tournez à droite après la boulangerie.,Dispatcher (calm),38,dir.turn.right.apres.bakery
-191,All levels,Turn at / after a place,Tournez à droite après la gare routière.,Dispatcher (calm),40,dir.turn.right.apres.bus_station
-192,All levels,Turn at / after a place,Tournez à droite après la librairie.,Dispatcher (calm),36,dir.turn.right.apres.bookshop
-193,All levels,Turn at / after a place,Tournez à droite après la mairie.,Dispatcher (calm),33,dir.turn.right.apres.town_hall
-194,All levels,Turn at / after a place,Tournez à droite après la pharmacie.,Dispatcher (calm),36,dir.turn.right.apres.pharmacy
-195,All levels,Turn at / after a place,Tournez à droite après la poste.,Dispatcher (calm),32,dir.turn.right.apres.post_office
-196,All levels,Turn at / after a place,Tournez à droite après la station-service.,Dispatcher (calm),42,dir.turn.right.apres.gas_station
-197,All levels,Turn at / after a place,Tournez à droite après le café.,Dispatcher (calm),31,dir.turn.right.apres.cafe
-198,All levels,Turn at / after a place,Tournez à droite après le centre commercial.,Dispatcher (calm),44,dir.turn.right.apres.shopping_centre
-199,All levels,Turn at / after a place,Tournez à droite après le commissariat de police.,Dispatcher (calm),49,dir.turn.right.apres.police_station
-200,All levels,Turn at / after a place,Tournez à droite après le magasin.,Dispatcher (calm),34,dir.turn.right.apres.shop
-201,All levels,Turn at / after a place,Tournez à droite après le marché.,Dispatcher (calm),33,dir.turn.right.apres.market
-202,All levels,Turn at / after a place,Tournez à droite après le musée.,Dispatcher (calm),32,dir.turn.right.apres.museum
-203,All levels,Turn at / after a place,Tournez à droite après le parking.,Dispatcher (calm),34,dir.turn.right.apres.car_park
-204,All levels,Turn at / after a place,Tournez à droite après le restaurant.,Dispatcher (calm),37,dir.turn.right.apres.restaurant
-205,All levels,Turn at / after a place,Tournez à droite après le supermarché.,Dispatcher (calm),38,dir.turn.right.apres.supermarket
-206,All levels,Turn at / after a place,Tournez à droite après le théâtre.,Dispatcher (calm),34,dir.turn.right.apres.theatre
-207,Intermediate and up,Turn before a place,Tournez à droite avant l'arrêt de bus.,Dispatcher (calm),38,dir.turn.right.avant.bus_stop
-208,Intermediate and up,Turn before a place,Tournez à droite avant l'hôtel.,Dispatcher (calm),31,dir.turn.right.avant.hotel
-209,Intermediate and up,Turn before a place,Tournez à droite avant la gare routière.,Dispatcher (calm),40,dir.turn.right.avant.bus_station
-210,Intermediate and up,Turn before a place,Tournez à droite avant la piscine.,Dispatcher (calm),34,dir.turn.right.avant.swimming_pool
-211,Intermediate and up,Turn before a place,Tournez à droite avant le cinéma.,Dispatcher (calm),33,dir.turn.right.avant.cinema
-212,Intermediate and up,Turn before a place,Tournez à droite avant le marché.,Dispatcher (calm),33,dir.turn.right.avant.market
-213,Intermediate and up,Turn before a place,Tournez à droite avant le parking.,Dispatcher (calm),34,dir.turn.right.avant.car_park
-214,Intermediate and up,Turn before a place,Tournez à droite avant le stade.,Dispatcher (calm),32,dir.turn.right.avant.stadium
-215,Intermediate and up,Turn before a place,Tournez à droite avant le supermarché.,Dispatcher (calm),38,dir.turn.right.avant.supermarket
-216,All levels,Turn at / after a place,Tournez à droite devant l'école.,Dispatcher (calm),32,dir.turn.right.devant.school
-217,All levels,Turn at / after a place,Tournez à droite devant l'hôpital.,Dispatcher (calm),34,dir.turn.right.devant.hospital
-218,All levels,Turn at / after a place,Tournez à droite devant l'hôtel.,Dispatcher (calm),32,dir.turn.right.devant.hotel
-219,All levels,Turn at / after a place,Tournez à droite devant la banque.,Dispatcher (calm),34,dir.turn.right.devant.bank
-220,All levels,Turn at / after a place,Tournez à droite devant la bibliothèque.,Dispatcher (calm),40,dir.turn.right.devant.library
-221,All levels,Turn at / after a place,Tournez à droite devant la boulangerie.,Dispatcher (calm),39,dir.turn.right.devant.bakery
-222,All levels,Turn at / after a place,Tournez à droite devant la gare routière.,Dispatcher (calm),41,dir.turn.right.devant.bus_station
-223,All levels,Turn at / after a place,Tournez à droite devant la gare.,Dispatcher (calm),32,dir.turn.right.devant.train_station
-224,All levels,Turn at / after a place,Tournez à droite devant la librairie.,Dispatcher (calm),37,dir.turn.right.devant.bookshop
-225,All levels,Turn at / after a place,Tournez à droite devant la mairie.,Dispatcher (calm),34,dir.turn.right.devant.town_hall
-226,All levels,Turn at / after a place,Tournez à droite devant la pharmacie.,Dispatcher (calm),37,dir.turn.right.devant.pharmacy
-227,All levels,Turn at / after a place,Tournez à droite devant la piscine.,Dispatcher (calm),35,dir.turn.right.devant.swimming_pool
-228,All levels,Turn at / after a place,Tournez à droite devant la place.,Dispatcher (calm),33,dir.turn.right.devant.square
-229,All levels,Turn at / after a place,Tournez à droite devant la plage.,Dispatcher (calm),33,dir.turn.right.devant.beach
-230,All levels,Turn at / after a place,Tournez à droite devant la poste.,Dispatcher (calm),33,dir.turn.right.devant.post_office
-231,All levels,Turn at / after a place,Tournez à droite devant la station-service.,Dispatcher (calm),43,dir.turn.right.devant.gas_station
-232,All levels,Turn at / after a place,Tournez à droite devant le café.,Dispatcher (calm),32,dir.turn.right.devant.cafe
-233,All levels,Turn at / after a place,Tournez à droite devant le centre commercial.,Dispatcher (calm),45,dir.turn.right.devant.shopping_centre
-234,All levels,Turn at / after a place,Tournez à droite devant le cinéma.,Dispatcher (calm),34,dir.turn.right.devant.cinema
-235,All levels,Turn at / after a place,Tournez à droite devant le commissariat de police.,Dispatcher (calm),50,dir.turn.right.devant.police_station
-236,All levels,Turn at / after a place,Tournez à droite devant le magasin.,Dispatcher (calm),35,dir.turn.right.devant.shop
-237,All levels,Turn at / after a place,Tournez à droite devant le marché.,Dispatcher (calm),34,dir.turn.right.devant.market
-238,All levels,Turn at / after a place,Tournez à droite devant le musée.,Dispatcher (calm),33,dir.turn.right.devant.museum
-239,All levels,Turn at / after a place,Tournez à droite devant le parc.,Dispatcher (calm),32,dir.turn.right.devant.park
-240,All levels,Turn at / after a place,Tournez à droite devant le parking.,Dispatcher (calm),35,dir.turn.right.devant.car_park
-241,All levels,Turn at / after a place,Tournez à droite devant le restaurant.,Dispatcher (calm),38,dir.turn.right.devant.restaurant
-242,All levels,Turn at / after a place,Tournez à droite devant le stade.,Dispatcher (calm),33,dir.turn.right.devant.stadium
-243,All levels,Turn at / after a place,Tournez à droite devant le supermarché.,Dispatcher (calm),39,dir.turn.right.devant.supermarket
-244,All levels,Turn at / after a place,Tournez à droite devant le théâtre.,Dispatcher (calm),35,dir.turn.right.devant.theatre
-245,Intermediate and up,Two steps (puis),"Tournez à droite, puis prenez la deuxième rue à droite.",Dispatcher (calm),55,seq.turn.right+puis+street.right.deuxieme
-246,Intermediate and up,Two steps (puis),"Tournez à droite, puis prenez la deuxième rue à gauche.",Dispatcher (calm),55,seq.turn.right+puis+street.left.deuxieme
-247,Intermediate and up,Two steps (puis),"Tournez à droite, puis prenez la première rue à droite.",Dispatcher (calm),55,seq.turn.right+puis+street.right.premiere
-248,Intermediate and up,Two steps (puis),"Tournez à droite, puis prenez la première rue à gauche.",Dispatcher (calm),55,seq.turn.right+puis+street.left.premiere
-249,Intermediate and up,Two steps (puis),"Tournez à droite, puis prenez la prochaine rue à droite.",Dispatcher (calm),56,seq.turn.right+puis+street.right.prochaine
-250,Intermediate and up,Two steps (puis),"Tournez à droite, puis prenez la prochaine rue à gauche.",Dispatcher (calm),56,seq.turn.right+puis+street.left.prochaine
-251,Intermediate and up,Two steps (puis),"Tournez à droite, puis tournez à droite.",Dispatcher (calm),40,seq.turn.right+puis+turn.right
-252,Intermediate and up,Two steps (puis),"Tournez à droite, puis tournez à gauche.",Dispatcher (calm),40,seq.turn.right+puis+turn.left
-253,Intermediate and up,Two steps (puis),"Tournez à droite, puis, au rond-point, prenez la deuxième sortie.",Dispatcher (calm),65,seq.turn.right+puis+roundabout.deuxieme
-254,Intermediate and up,Two steps (puis),"Tournez à droite, puis, au rond-point, prenez la première sortie.",Dispatcher (calm),65,seq.turn.right+puis+roundabout.premiere
-255,Intermediate and up,Two steps (puis),"Tournez à droite, puis, au rond-point, prenez la troisième sortie.",Dispatcher (calm),66,seq.turn.right+puis+roundabout.troisieme
-256,All levels,Simple direction,Tournez à droite.,Dispatcher (calm),17,dir.turn.right
-257,All levels,Turn at / after a place,Tournez à gauche après l'arrêt de bus.,Dispatcher (calm),38,dir.turn.left.apres.bus_stop
-258,All levels,Turn at / after a place,Tournez à gauche après l'école.,Dispatcher (calm),31,dir.turn.left.apres.school
-259,All levels,Turn at / after a place,Tournez à gauche après l'hôpital.,Dispatcher (calm),33,dir.turn.left.apres.hospital
-260,All levels,Turn at / after a place,Tournez à gauche après l'hôtel.,Dispatcher (calm),31,dir.turn.left.apres.hotel
-261,All levels,Turn at / after a place,Tournez à gauche après la banque.,Dispatcher (calm),33,dir.turn.left.apres.bank
-262,All levels,Turn at / after a place,Tournez à gauche après la bibliothèque.,Dispatcher (calm),39,dir.turn.left.apres.library
-263,All levels,Turn at / after a place,Tournez à gauche après la boulangerie.,Dispatcher (calm),38,dir.turn.left.apres.bakery
-264,All levels,Turn at / after a place,Tournez à gauche après la gare routière.,Dispatcher (calm),40,dir.turn.left.apres.bus_station
-265,All levels,Turn at / after a place,Tournez à gauche après la librairie.,Dispatcher (calm),36,dir.turn.left.apres.bookshop
-266,All levels,Turn at / after a place,Tournez à gauche après la mairie.,Dispatcher (calm),33,dir.turn.left.apres.town_hall
-267,All levels,Turn at / after a place,Tournez à gauche après la pharmacie.,Dispatcher (calm),36,dir.turn.left.apres.pharmacy
-268,All levels,Turn at / after a place,Tournez à gauche après la piscine.,Dispatcher (calm),34,dir.turn.left.apres.swimming_pool
-269,All levels,Turn at / after a place,Tournez à gauche après la poste.,Dispatcher (calm),32,dir.turn.left.apres.post_office
-270,All levels,Turn at / after a place,Tournez à gauche après la station-service.,Dispatcher (calm),42,dir.turn.left.apres.gas_station
-271,All levels,Turn at / after a place,Tournez à gauche après le café.,Dispatcher (calm),31,dir.turn.left.apres.cafe
-272,All levels,Turn at / after a place,Tournez à gauche après le centre commercial.,Dispatcher (calm),44,dir.turn.left.apres.shopping_centre
-273,All levels,Turn at / after a place,Tournez à gauche après le cinéma.,Dispatcher (calm),33,dir.turn.left.apres.cinema
-274,All levels,Turn at / after a place,Tournez à gauche après le commissariat de police.,Dispatcher (calm),49,dir.turn.left.apres.police_station
-275,All levels,Turn at / after a place,Tournez à gauche après le magasin.,Dispatcher (calm),34,dir.turn.left.apres.shop
-276,All levels,Turn at / after a place,Tournez à gauche après le marché.,Dispatcher (calm),33,dir.turn.left.apres.market
-277,All levels,Turn at / after a place,Tournez à gauche après le parking.,Dispatcher (calm),34,dir.turn.left.apres.car_park
-278,All levels,Turn at / after a place,Tournez à gauche après le restaurant.,Dispatcher (calm),37,dir.turn.left.apres.restaurant
-279,All levels,Turn at / after a place,Tournez à gauche après le stade.,Dispatcher (calm),32,dir.turn.left.apres.stadium
-280,All levels,Turn at / after a place,Tournez à gauche après le supermarché.,Dispatcher (calm),38,dir.turn.left.apres.supermarket
-281,All levels,Turn at / after a place,Tournez à gauche après le théâtre.,Dispatcher (calm),34,dir.turn.left.apres.theatre
-282,Intermediate and up,Turn before a place,Tournez à gauche avant l'arrêt de bus.,Dispatcher (calm),38,dir.turn.left.avant.bus_stop
-283,Intermediate and up,Turn before a place,Tournez à gauche avant l'école.,Dispatcher (calm),31,dir.turn.left.avant.school
-284,Intermediate and up,Turn before a place,Tournez à gauche avant l'hôpital.,Dispatcher (calm),33,dir.turn.left.avant.hospital
-285,Intermediate and up,Turn before a place,Tournez à gauche avant la gare routière.,Dispatcher (calm),40,dir.turn.left.avant.bus_station
-286,Intermediate and up,Turn before a place,Tournez à gauche avant le musée.,Dispatcher (calm),32,dir.turn.left.avant.museum
-287,Intermediate and up,Turn before a place,Tournez à gauche avant le parking.,Dispatcher (calm),34,dir.turn.left.avant.car_park
-288,Intermediate and up,Turn before a place,Tournez à gauche avant le supermarché.,Dispatcher (calm),38,dir.turn.left.avant.supermarket
-289,All levels,Turn at / after a place,Tournez à gauche devant l'école.,Dispatcher (calm),32,dir.turn.left.devant.school
-290,All levels,Turn at / after a place,Tournez à gauche devant l'hôpital.,Dispatcher (calm),34,dir.turn.left.devant.hospital
-291,All levels,Turn at / after a place,Tournez à gauche devant l'hôtel.,Dispatcher (calm),32,dir.turn.left.devant.hotel
-292,All levels,Turn at / after a place,Tournez à gauche devant la banque.,Dispatcher (calm),34,dir.turn.left.devant.bank
-293,All levels,Turn at / after a place,Tournez à gauche devant la bibliothèque.,Dispatcher (calm),40,dir.turn.left.devant.library
-294,All levels,Turn at / after a place,Tournez à gauche devant la boulangerie.,Dispatcher (calm),39,dir.turn.left.devant.bakery
-295,All levels,Turn at / after a place,Tournez à gauche devant la gare routière.,Dispatcher (calm),41,dir.turn.left.devant.bus_station
-296,All levels,Turn at / after a place,Tournez à gauche devant la gare.,Dispatcher (calm),32,dir.turn.left.devant.train_station
-297,All levels,Turn at / after a place,Tournez à gauche devant la librairie.,Dispatcher (calm),37,dir.turn.left.devant.bookshop
-298,All levels,Turn at / after a place,Tournez à gauche devant la mairie.,Dispatcher (calm),34,dir.turn.left.devant.town_hall
-299,All levels,Turn at / after a place,Tournez à gauche devant la pharmacie.,Dispatcher (calm),37,dir.turn.left.devant.pharmacy
-300,All levels,Turn at / after a place,Tournez à gauche devant la piscine.,Dispatcher (calm),35,dir.turn.left.devant.swimming_pool
-301,All levels,Turn at / after a place,Tournez à gauche devant la place.,Dispatcher (calm),33,dir.turn.left.devant.square
-302,All levels,Turn at / after a place,Tournez à gauche devant la plage.,Dispatcher (calm),33,dir.turn.left.devant.beach
-303,All levels,Turn at / after a place,Tournez à gauche devant la poste.,Dispatcher (calm),33,dir.turn.left.devant.post_office
-304,All levels,Turn at / after a place,Tournez à gauche devant la station-service.,Dispatcher (calm),43,dir.turn.left.devant.gas_station
-305,All levels,Turn at / after a place,Tournez à gauche devant le café.,Dispatcher (calm),32,dir.turn.left.devant.cafe
-306,All levels,Turn at / after a place,Tournez à gauche devant le centre commercial.,Dispatcher (calm),45,dir.turn.left.devant.shopping_centre
-307,All levels,Turn at / after a place,Tournez à gauche devant le cinéma.,Dispatcher (calm),34,dir.turn.left.devant.cinema
-308,All levels,Turn at / after a place,Tournez à gauche devant le commissariat de police.,Dispatcher (calm),50,dir.turn.left.devant.police_station
-309,All levels,Turn at / after a place,Tournez à gauche devant le magasin.,Dispatcher (calm),35,dir.turn.left.devant.shop
-310,All levels,Turn at / after a place,Tournez à gauche devant le marché.,Dispatcher (calm),34,dir.turn.left.devant.market
-311,All levels,Turn at / after a place,Tournez à gauche devant le musée.,Dispatcher (calm),33,dir.turn.left.devant.museum
-312,All levels,Turn at / after a place,Tournez à gauche devant le parc.,Dispatcher (calm),32,dir.turn.left.devant.park
-313,All levels,Turn at / after a place,Tournez à gauche devant le parking.,Dispatcher (calm),35,dir.turn.left.devant.car_park
-314,All levels,Turn at / after a place,Tournez à gauche devant le restaurant.,Dispatcher (calm),38,dir.turn.left.devant.restaurant
-315,All levels,Turn at / after a place,Tournez à gauche devant le stade.,Dispatcher (calm),33,dir.turn.left.devant.stadium
-316,All levels,Turn at / after a place,Tournez à gauche devant le supermarché.,Dispatcher (calm),39,dir.turn.left.devant.supermarket
-317,All levels,Turn at / after a place,Tournez à gauche devant le théâtre.,Dispatcher (calm),35,dir.turn.left.devant.theatre
-318,Intermediate and up,Two steps (puis),"Tournez à gauche, puis prenez la deuxième rue à droite.",Dispatcher (calm),55,seq.turn.left+puis+street.right.deuxieme
-319,Intermediate and up,Two steps (puis),"Tournez à gauche, puis prenez la deuxième rue à gauche.",Dispatcher (calm),55,seq.turn.left+puis+street.left.deuxieme
-320,Intermediate and up,Two steps (puis),"Tournez à gauche, puis prenez la première rue à droite.",Dispatcher (calm),55,seq.turn.left+puis+street.right.premiere
-321,Intermediate and up,Two steps (puis),"Tournez à gauche, puis prenez la première rue à gauche.",Dispatcher (calm),55,seq.turn.left+puis+street.left.premiere
-322,Intermediate and up,Two steps (puis),"Tournez à gauche, puis prenez la prochaine rue à droite.",Dispatcher (calm),56,seq.turn.left+puis+street.right.prochaine
-323,Intermediate and up,Two steps (puis),"Tournez à gauche, puis prenez la prochaine rue à gauche.",Dispatcher (calm),56,seq.turn.left+puis+street.left.prochaine
-324,Intermediate and up,Two steps (puis),"Tournez à gauche, puis tournez à droite.",Dispatcher (calm),40,seq.turn.left+puis+turn.right
-325,Intermediate and up,Two steps (puis),"Tournez à gauche, puis tournez à gauche.",Dispatcher (calm),40,seq.turn.left+puis+turn.left
-326,Intermediate and up,Two steps (puis),"Tournez à gauche, puis, au rond-point, prenez la deuxième sortie.",Dispatcher (calm),65,seq.turn.left+puis+roundabout.deuxieme
-327,Intermediate and up,Two steps (puis),"Tournez à gauche, puis, au rond-point, prenez la première sortie.",Dispatcher (calm),65,seq.turn.left+puis+roundabout.premiere
-328,Intermediate and up,Two steps (puis),"Tournez à gauche, puis, au rond-point, prenez la troisième sortie.",Dispatcher (calm),66,seq.turn.left+puis+roundabout.troisieme
-329,All levels,Simple direction,Tournez à gauche.,Dispatcher (calm),17,dir.turn.left
-330,All levels,Wrong-turn correction,Ce n'est pas la bonne rue.,Dispatcher (calm),26,dir.wrong_street
-331,All levels,Wrong-turn correction,Faites demi-tour.,Dispatcher (calm),17,dir.u_turn
-332,Intermediate and up,EVENT,Descendez de la voiture !,Dispatcher (calm),25,event.get_out
-333,Intermediate and up,EVENT,Il est à pied !,Dispatcher (calm),15,event.on_foot
-334,Hard and up,EVENT,Il monte dans une voiture !,Dispatcher (calm),27,event.suspect_boards
-335,Intermediate and up,EVENT,Le suspect est sorti de la voiture.,Dispatcher (calm),35,event.suspect_left_car
-336,Hard and up,EVENT,Montez dans la voiture !,Dispatcher (calm),24,event.get_in
-337,All levels,Officer asks for a repeat,"Pouvez-vous répéter, s'il vous plaît ?",Officer (urgent),38,repeat.calm
-338,All levels,Officer asks for a repeat,Répétez ! Vite !,Officer (urgent),16,repeat.frantic
-339,All levels,Officer asks for a repeat,"Répétez, s'il vous plaît !",Officer (urgent),26,repeat.urgent
-340,All levels,End of chase,Le suspect est arrêté !,Dispatcher (calm),23,outcome.captured
-341,All levels,End of chase,Le suspect s'éloigne.,Dispatcher (calm),21,event.moving_away
-342,All levels,End of chase,Le suspect s'est échappé.,Dispatcher (calm),25,outcome.escaped
+89,Expert and up,DIRECTION,"D'abord, au rond-point, prenez la deuxième sortie.",Dispatcher (calm),50,link.dabord.roundabout.deuxieme
+90,Expert and up,DIRECTION,"D'abord, au rond-point, prenez la première sortie.",Dispatcher (calm),50,link.dabord.roundabout.premiere
+91,Expert and up,DIRECTION,"D'abord, au rond-point, prenez la troisième sortie.",Dispatcher (calm),51,link.dabord.roundabout.troisieme
+92,Expert and up,DIRECTION,"D'abord, prenez la deuxième rue à droite.",Dispatcher (calm),41,link.dabord.street.right.deuxieme
+93,Expert and up,DIRECTION,"D'abord, prenez la deuxième rue à gauche.",Dispatcher (calm),41,link.dabord.street.left.deuxieme
+94,Expert and up,DIRECTION,"D'abord, prenez la première rue à droite.",Dispatcher (calm),41,link.dabord.street.right.premiere
+95,Expert and up,DIRECTION,"D'abord, prenez la première rue à gauche.",Dispatcher (calm),41,link.dabord.street.left.premiere
+96,Expert and up,DIRECTION,"D'abord, prenez la prochaine rue à droite.",Dispatcher (calm),42,link.dabord.street.right.prochaine
+97,Expert and up,DIRECTION,"D'abord, prenez la prochaine rue à gauche.",Dispatcher (calm),42,link.dabord.street.left.prochaine
+98,Expert and up,DIRECTION,"D'abord, prenez la troisième rue à droite.",Dispatcher (calm),42,link.dabord.street.right.troisieme
+99,Expert and up,DIRECTION,"D'abord, prenez la troisième rue à gauche.",Dispatcher (calm),42,link.dabord.street.left.troisieme
+100,Expert and up,DIRECTION,"D'abord, tournez à droite après l'arrêt de bus.",Dispatcher (calm),47,link.dabord.turn.right.apres.bus_stop
+101,Expert and up,DIRECTION,"D'abord, tournez à droite après l'école.",Dispatcher (calm),40,link.dabord.turn.right.apres.school
+102,Expert and up,DIRECTION,"D'abord, tournez à droite après la banque.",Dispatcher (calm),42,link.dabord.turn.right.apres.bank
+103,Expert and up,DIRECTION,"D'abord, tournez à droite après la bibliothèque.",Dispatcher (calm),48,link.dabord.turn.right.apres.library
+104,Expert and up,DIRECTION,"D'abord, tournez à droite après la boulangerie.",Dispatcher (calm),47,link.dabord.turn.right.apres.bakery
+105,Expert and up,DIRECTION,"D'abord, tournez à droite après la gare routière.",Dispatcher (calm),49,link.dabord.turn.right.apres.bus_station
+106,Expert and up,DIRECTION,"D'abord, tournez à droite après la librairie.",Dispatcher (calm),45,link.dabord.turn.right.apres.bookshop
+107,Expert and up,DIRECTION,"D'abord, tournez à droite après la mairie.",Dispatcher (calm),42,link.dabord.turn.right.apres.town_hall
+108,Expert and up,DIRECTION,"D'abord, tournez à droite après la pharmacie.",Dispatcher (calm),45,link.dabord.turn.right.apres.pharmacy
+109,Expert and up,DIRECTION,"D'abord, tournez à droite après la poste.",Dispatcher (calm),41,link.dabord.turn.right.apres.post_office
+110,Expert and up,DIRECTION,"D'abord, tournez à droite après la station-service.",Dispatcher (calm),51,link.dabord.turn.right.apres.gas_station
+111,Expert and up,DIRECTION,"D'abord, tournez à droite après le café.",Dispatcher (calm),40,link.dabord.turn.right.apres.cafe
+112,Expert and up,DIRECTION,"D'abord, tournez à droite après le centre commercial.",Dispatcher (calm),53,link.dabord.turn.right.apres.shopping_centre
+113,Expert and up,DIRECTION,"D'abord, tournez à droite après le commissariat de police.",Dispatcher (calm),58,link.dabord.turn.right.apres.police_station
+114,Expert and up,DIRECTION,"D'abord, tournez à droite après le magasin.",Dispatcher (calm),43,link.dabord.turn.right.apres.shop
+115,Expert and up,DIRECTION,"D'abord, tournez à droite après le marché.",Dispatcher (calm),42,link.dabord.turn.right.apres.market
+116,Expert and up,DIRECTION,"D'abord, tournez à droite après le restaurant.",Dispatcher (calm),46,link.dabord.turn.right.apres.restaurant
+117,Expert and up,DIRECTION,"D'abord, tournez à droite après le supermarché.",Dispatcher (calm),47,link.dabord.turn.right.apres.supermarket
+118,Expert and up,DIRECTION,"D'abord, tournez à droite après le théâtre.",Dispatcher (calm),43,link.dabord.turn.right.apres.theatre
+119,Expert and up,DIRECTION,"D'abord, tournez à droite avant l'arrêt de bus.",Dispatcher (calm),47,link.dabord.turn.right.avant.bus_stop
+120,Expert and up,DIRECTION,"D'abord, tournez à droite avant la gare routière.",Dispatcher (calm),49,link.dabord.turn.right.avant.bus_station
+121,Expert and up,DIRECTION,"D'abord, tournez à droite avant le parking.",Dispatcher (calm),43,link.dabord.turn.right.avant.car_park
+122,Expert and up,DIRECTION,"D'abord, tournez à droite avant le supermarché.",Dispatcher (calm),47,link.dabord.turn.right.avant.supermarket
+123,Expert and up,DIRECTION,"D'abord, tournez à droite devant l'école.",Dispatcher (calm),41,link.dabord.turn.right.devant.school
+124,Expert and up,DIRECTION,"D'abord, tournez à droite devant l'hôpital.",Dispatcher (calm),43,link.dabord.turn.right.devant.hospital
+125,Expert and up,DIRECTION,"D'abord, tournez à droite devant l'hôtel.",Dispatcher (calm),41,link.dabord.turn.right.devant.hotel
+126,Expert and up,DIRECTION,"D'abord, tournez à droite devant la banque.",Dispatcher (calm),43,link.dabord.turn.right.devant.bank
+127,Expert and up,DIRECTION,"D'abord, tournez à droite devant la bibliothèque.",Dispatcher (calm),49,link.dabord.turn.right.devant.library
+128,Expert and up,DIRECTION,"D'abord, tournez à droite devant la boulangerie.",Dispatcher (calm),48,link.dabord.turn.right.devant.bakery
+129,Expert and up,DIRECTION,"D'abord, tournez à droite devant la gare routière.",Dispatcher (calm),50,link.dabord.turn.right.devant.bus_station
+130,Expert and up,DIRECTION,"D'abord, tournez à droite devant la gare.",Dispatcher (calm),41,link.dabord.turn.right.devant.train_station
+131,Expert and up,DIRECTION,"D'abord, tournez à droite devant la librairie.",Dispatcher (calm),46,link.dabord.turn.right.devant.bookshop
+132,Expert and up,DIRECTION,"D'abord, tournez à droite devant la mairie.",Dispatcher (calm),43,link.dabord.turn.right.devant.town_hall
+133,Expert and up,DIRECTION,"D'abord, tournez à droite devant la pharmacie.",Dispatcher (calm),46,link.dabord.turn.right.devant.pharmacy
+134,Expert and up,DIRECTION,"D'abord, tournez à droite devant la piscine.",Dispatcher (calm),44,link.dabord.turn.right.devant.swimming_pool
+135,Expert and up,DIRECTION,"D'abord, tournez à droite devant la place.",Dispatcher (calm),42,link.dabord.turn.right.devant.square
+136,Expert and up,DIRECTION,"D'abord, tournez à droite devant la plage.",Dispatcher (calm),42,link.dabord.turn.right.devant.beach
+137,Expert and up,DIRECTION,"D'abord, tournez à droite devant la poste.",Dispatcher (calm),42,link.dabord.turn.right.devant.post_office
+138,Expert and up,DIRECTION,"D'abord, tournez à droite devant la station-service.",Dispatcher (calm),52,link.dabord.turn.right.devant.gas_station
+139,Expert and up,DIRECTION,"D'abord, tournez à droite devant le café.",Dispatcher (calm),41,link.dabord.turn.right.devant.cafe
+140,Expert and up,DIRECTION,"D'abord, tournez à droite devant le centre commercial.",Dispatcher (calm),54,link.dabord.turn.right.devant.shopping_centre
+141,Expert and up,DIRECTION,"D'abord, tournez à droite devant le cinéma.",Dispatcher (calm),43,link.dabord.turn.right.devant.cinema
+142,Expert and up,DIRECTION,"D'abord, tournez à droite devant le commissariat de police.",Dispatcher (calm),59,link.dabord.turn.right.devant.police_station
+143,Expert and up,DIRECTION,"D'abord, tournez à droite devant le magasin.",Dispatcher (calm),44,link.dabord.turn.right.devant.shop
+144,Expert and up,DIRECTION,"D'abord, tournez à droite devant le marché.",Dispatcher (calm),43,link.dabord.turn.right.devant.market
+145,Expert and up,DIRECTION,"D'abord, tournez à droite devant le musée.",Dispatcher (calm),42,link.dabord.turn.right.devant.museum
+146,Expert and up,DIRECTION,"D'abord, tournez à droite devant le parc.",Dispatcher (calm),41,link.dabord.turn.right.devant.park
+147,Expert and up,DIRECTION,"D'abord, tournez à droite devant le parking.",Dispatcher (calm),44,link.dabord.turn.right.devant.car_park
+148,Expert and up,DIRECTION,"D'abord, tournez à droite devant le restaurant.",Dispatcher (calm),47,link.dabord.turn.right.devant.restaurant
+149,Expert and up,DIRECTION,"D'abord, tournez à droite devant le stade.",Dispatcher (calm),42,link.dabord.turn.right.devant.stadium
+150,Expert and up,DIRECTION,"D'abord, tournez à droite devant le supermarché.",Dispatcher (calm),48,link.dabord.turn.right.devant.supermarket
+151,Expert and up,DIRECTION,"D'abord, tournez à droite devant le théâtre.",Dispatcher (calm),44,link.dabord.turn.right.devant.theatre
+152,Expert and up,DIRECTION,"D'abord, tournez à droite.",Dispatcher (calm),26,link.dabord.turn.right
+153,Expert and up,DIRECTION,"D'abord, tournez à gauche après l'arrêt de bus.",Dispatcher (calm),47,link.dabord.turn.left.apres.bus_stop
+154,Expert and up,DIRECTION,"D'abord, tournez à gauche après l'école.",Dispatcher (calm),40,link.dabord.turn.left.apres.school
+155,Expert and up,DIRECTION,"D'abord, tournez à gauche après la banque.",Dispatcher (calm),42,link.dabord.turn.left.apres.bank
+156,Expert and up,DIRECTION,"D'abord, tournez à gauche après la bibliothèque.",Dispatcher (calm),48,link.dabord.turn.left.apres.library
+157,Expert and up,DIRECTION,"D'abord, tournez à gauche après la boulangerie.",Dispatcher (calm),47,link.dabord.turn.left.apres.bakery
+158,Expert and up,DIRECTION,"D'abord, tournez à gauche après la gare routière.",Dispatcher (calm),49,link.dabord.turn.left.apres.bus_station
+159,Expert and up,DIRECTION,"D'abord, tournez à gauche après la librairie.",Dispatcher (calm),45,link.dabord.turn.left.apres.bookshop
+160,Expert and up,DIRECTION,"D'abord, tournez à gauche après la mairie.",Dispatcher (calm),42,link.dabord.turn.left.apres.town_hall
+161,Expert and up,DIRECTION,"D'abord, tournez à gauche après la pharmacie.",Dispatcher (calm),45,link.dabord.turn.left.apres.pharmacy
+162,Expert and up,DIRECTION,"D'abord, tournez à gauche après la poste.",Dispatcher (calm),41,link.dabord.turn.left.apres.post_office
+163,Expert and up,DIRECTION,"D'abord, tournez à gauche après la station-service.",Dispatcher (calm),51,link.dabord.turn.left.apres.gas_station
+164,Expert and up,DIRECTION,"D'abord, tournez à gauche après le café.",Dispatcher (calm),40,link.dabord.turn.left.apres.cafe
+165,Expert and up,DIRECTION,"D'abord, tournez à gauche après le centre commercial.",Dispatcher (calm),53,link.dabord.turn.left.apres.shopping_centre
+166,Expert and up,DIRECTION,"D'abord, tournez à gauche après le cinéma.",Dispatcher (calm),42,link.dabord.turn.left.apres.cinema
+167,Expert and up,DIRECTION,"D'abord, tournez à gauche après le commissariat de police.",Dispatcher (calm),58,link.dabord.turn.left.apres.police_station
+168,Expert and up,DIRECTION,"D'abord, tournez à gauche après le magasin.",Dispatcher (calm),43,link.dabord.turn.left.apres.shop
+169,Expert and up,DIRECTION,"D'abord, tournez à gauche après le marché.",Dispatcher (calm),42,link.dabord.turn.left.apres.market
+170,Expert and up,DIRECTION,"D'abord, tournez à gauche après le parking.",Dispatcher (calm),43,link.dabord.turn.left.apres.car_park
+171,Expert and up,DIRECTION,"D'abord, tournez à gauche après le restaurant.",Dispatcher (calm),46,link.dabord.turn.left.apres.restaurant
+172,Expert and up,DIRECTION,"D'abord, tournez à gauche après le supermarché.",Dispatcher (calm),47,link.dabord.turn.left.apres.supermarket
+173,Expert and up,DIRECTION,"D'abord, tournez à gauche après le théâtre.",Dispatcher (calm),43,link.dabord.turn.left.apres.theatre
+174,Expert and up,DIRECTION,"D'abord, tournez à gauche avant l'arrêt de bus.",Dispatcher (calm),47,link.dabord.turn.left.avant.bus_stop
+175,Expert and up,DIRECTION,"D'abord, tournez à gauche avant le supermarché.",Dispatcher (calm),47,link.dabord.turn.left.avant.supermarket
+176,Expert and up,DIRECTION,"D'abord, tournez à gauche devant l'école.",Dispatcher (calm),41,link.dabord.turn.left.devant.school
+177,Expert and up,DIRECTION,"D'abord, tournez à gauche devant l'hôpital.",Dispatcher (calm),43,link.dabord.turn.left.devant.hospital
+178,Expert and up,DIRECTION,"D'abord, tournez à gauche devant l'hôtel.",Dispatcher (calm),41,link.dabord.turn.left.devant.hotel
+179,Expert and up,DIRECTION,"D'abord, tournez à gauche devant la banque.",Dispatcher (calm),43,link.dabord.turn.left.devant.bank
+180,Expert and up,DIRECTION,"D'abord, tournez à gauche devant la bibliothèque.",Dispatcher (calm),49,link.dabord.turn.left.devant.library
+181,Expert and up,DIRECTION,"D'abord, tournez à gauche devant la boulangerie.",Dispatcher (calm),48,link.dabord.turn.left.devant.bakery
+182,Expert and up,DIRECTION,"D'abord, tournez à gauche devant la gare routière.",Dispatcher (calm),50,link.dabord.turn.left.devant.bus_station
+183,Expert and up,DIRECTION,"D'abord, tournez à gauche devant la gare.",Dispatcher (calm),41,link.dabord.turn.left.devant.train_station
+184,Expert and up,DIRECTION,"D'abord, tournez à gauche devant la librairie.",Dispatcher (calm),46,link.dabord.turn.left.devant.bookshop
+185,Expert and up,DIRECTION,"D'abord, tournez à gauche devant la mairie.",Dispatcher (calm),43,link.dabord.turn.left.devant.town_hall
+186,Expert and up,DIRECTION,"D'abord, tournez à gauche devant la pharmacie.",Dispatcher (calm),46,link.dabord.turn.left.devant.pharmacy
+187,Expert and up,DIRECTION,"D'abord, tournez à gauche devant la piscine.",Dispatcher (calm),44,link.dabord.turn.left.devant.swimming_pool
+188,Expert and up,DIRECTION,"D'abord, tournez à gauche devant la place.",Dispatcher (calm),42,link.dabord.turn.left.devant.square
+189,Expert and up,DIRECTION,"D'abord, tournez à gauche devant la plage.",Dispatcher (calm),42,link.dabord.turn.left.devant.beach
+190,Expert and up,DIRECTION,"D'abord, tournez à gauche devant la poste.",Dispatcher (calm),42,link.dabord.turn.left.devant.post_office
+191,Expert and up,DIRECTION,"D'abord, tournez à gauche devant la station-service.",Dispatcher (calm),52,link.dabord.turn.left.devant.gas_station
+192,Expert and up,DIRECTION,"D'abord, tournez à gauche devant le café.",Dispatcher (calm),41,link.dabord.turn.left.devant.cafe
+193,Expert and up,DIRECTION,"D'abord, tournez à gauche devant le centre commercial.",Dispatcher (calm),54,link.dabord.turn.left.devant.shopping_centre
+194,Expert and up,DIRECTION,"D'abord, tournez à gauche devant le cinéma.",Dispatcher (calm),43,link.dabord.turn.left.devant.cinema
+195,Expert and up,DIRECTION,"D'abord, tournez à gauche devant le commissariat de police.",Dispatcher (calm),59,link.dabord.turn.left.devant.police_station
+196,Expert and up,DIRECTION,"D'abord, tournez à gauche devant le magasin.",Dispatcher (calm),44,link.dabord.turn.left.devant.shop
+197,Expert and up,DIRECTION,"D'abord, tournez à gauche devant le marché.",Dispatcher (calm),43,link.dabord.turn.left.devant.market
+198,Expert and up,DIRECTION,"D'abord, tournez à gauche devant le musée.",Dispatcher (calm),42,link.dabord.turn.left.devant.museum
+199,Expert and up,DIRECTION,"D'abord, tournez à gauche devant le parc.",Dispatcher (calm),41,link.dabord.turn.left.devant.park
+200,Expert and up,DIRECTION,"D'abord, tournez à gauche devant le parking.",Dispatcher (calm),44,link.dabord.turn.left.devant.car_park
+201,Expert and up,DIRECTION,"D'abord, tournez à gauche devant le restaurant.",Dispatcher (calm),47,link.dabord.turn.left.devant.restaurant
+202,Expert and up,DIRECTION,"D'abord, tournez à gauche devant le stade.",Dispatcher (calm),42,link.dabord.turn.left.devant.stadium
+203,Expert and up,DIRECTION,"D'abord, tournez à gauche devant le supermarché.",Dispatcher (calm),48,link.dabord.turn.left.devant.supermarket
+204,Expert and up,DIRECTION,"D'abord, tournez à gauche devant le théâtre.",Dispatcher (calm),44,link.dabord.turn.left.devant.theatre
+205,Expert and up,DIRECTION,"D'abord, tournez à gauche.",Dispatcher (calm),26,link.dabord.turn.left
+206,Expert and up,DIRECTION,"Enfin, au rond-point, prenez la deuxième sortie.",Dispatcher (calm),48,link.enfin.roundabout.deuxieme
+207,Expert and up,DIRECTION,"Enfin, au rond-point, prenez la première sortie.",Dispatcher (calm),48,link.enfin.roundabout.premiere
+208,Expert and up,DIRECTION,"Enfin, au rond-point, prenez la troisième sortie.",Dispatcher (calm),49,link.enfin.roundabout.troisieme
+209,Expert and up,DIRECTION,"Enfin, prenez la deuxième rue à droite.",Dispatcher (calm),39,link.enfin.street.right.deuxieme
+210,Expert and up,DIRECTION,"Enfin, prenez la deuxième rue à gauche.",Dispatcher (calm),39,link.enfin.street.left.deuxieme
+211,Expert and up,DIRECTION,"Enfin, prenez la première rue à droite.",Dispatcher (calm),39,link.enfin.street.right.premiere
+212,Expert and up,DIRECTION,"Enfin, prenez la première rue à gauche.",Dispatcher (calm),39,link.enfin.street.left.premiere
+213,Expert and up,DIRECTION,"Enfin, prenez la prochaine rue à droite.",Dispatcher (calm),40,link.enfin.street.right.prochaine
+214,Expert and up,DIRECTION,"Enfin, prenez la prochaine rue à gauche.",Dispatcher (calm),40,link.enfin.street.left.prochaine
+215,Expert and up,DIRECTION,"Enfin, prenez la troisième rue à droite.",Dispatcher (calm),40,link.enfin.street.right.troisieme
+216,Expert and up,DIRECTION,"Enfin, prenez la troisième rue à gauche.",Dispatcher (calm),40,link.enfin.street.left.troisieme
+217,Expert and up,DIRECTION,"Enfin, tournez à droite après l'arrêt de bus.",Dispatcher (calm),45,link.enfin.turn.right.apres.bus_stop
+218,Expert and up,DIRECTION,"Enfin, tournez à droite après l'école.",Dispatcher (calm),38,link.enfin.turn.right.apres.school
+219,Expert and up,DIRECTION,"Enfin, tournez à droite après la banque.",Dispatcher (calm),40,link.enfin.turn.right.apres.bank
+220,Expert and up,DIRECTION,"Enfin, tournez à droite après la bibliothèque.",Dispatcher (calm),46,link.enfin.turn.right.apres.library
+221,Expert and up,DIRECTION,"Enfin, tournez à droite après la boulangerie.",Dispatcher (calm),45,link.enfin.turn.right.apres.bakery
+222,Expert and up,DIRECTION,"Enfin, tournez à droite après la gare routière.",Dispatcher (calm),47,link.enfin.turn.right.apres.bus_station
+223,Expert and up,DIRECTION,"Enfin, tournez à droite après la librairie.",Dispatcher (calm),43,link.enfin.turn.right.apres.bookshop
+224,Expert and up,DIRECTION,"Enfin, tournez à droite après la mairie.",Dispatcher (calm),40,link.enfin.turn.right.apres.town_hall
+225,Expert and up,DIRECTION,"Enfin, tournez à droite après la pharmacie.",Dispatcher (calm),43,link.enfin.turn.right.apres.pharmacy
+226,Expert and up,DIRECTION,"Enfin, tournez à droite après la poste.",Dispatcher (calm),39,link.enfin.turn.right.apres.post_office
+227,Expert and up,DIRECTION,"Enfin, tournez à droite après la station-service.",Dispatcher (calm),49,link.enfin.turn.right.apres.gas_station
+228,Expert and up,DIRECTION,"Enfin, tournez à droite après le café.",Dispatcher (calm),38,link.enfin.turn.right.apres.cafe
+229,Expert and up,DIRECTION,"Enfin, tournez à droite après le centre commercial.",Dispatcher (calm),51,link.enfin.turn.right.apres.shopping_centre
+230,Expert and up,DIRECTION,"Enfin, tournez à droite après le commissariat de police.",Dispatcher (calm),56,link.enfin.turn.right.apres.police_station
+231,Expert and up,DIRECTION,"Enfin, tournez à droite après le magasin.",Dispatcher (calm),41,link.enfin.turn.right.apres.shop
+232,Expert and up,DIRECTION,"Enfin, tournez à droite après le marché.",Dispatcher (calm),40,link.enfin.turn.right.apres.market
+233,Expert and up,DIRECTION,"Enfin, tournez à droite après le restaurant.",Dispatcher (calm),44,link.enfin.turn.right.apres.restaurant
+234,Expert and up,DIRECTION,"Enfin, tournez à droite après le supermarché.",Dispatcher (calm),45,link.enfin.turn.right.apres.supermarket
+235,Expert and up,DIRECTION,"Enfin, tournez à droite après le théâtre.",Dispatcher (calm),41,link.enfin.turn.right.apres.theatre
+236,Expert and up,DIRECTION,"Enfin, tournez à droite avant l'arrêt de bus.",Dispatcher (calm),45,link.enfin.turn.right.avant.bus_stop
+237,Expert and up,DIRECTION,"Enfin, tournez à droite avant l'hôtel.",Dispatcher (calm),38,link.enfin.turn.right.avant.hotel
+238,Expert and up,DIRECTION,"Enfin, tournez à droite avant la gare routière.",Dispatcher (calm),47,link.enfin.turn.right.avant.bus_station
+239,Expert and up,DIRECTION,"Enfin, tournez à droite avant la piscine.",Dispatcher (calm),41,link.enfin.turn.right.avant.swimming_pool
+240,Expert and up,DIRECTION,"Enfin, tournez à droite avant le cinéma.",Dispatcher (calm),40,link.enfin.turn.right.avant.cinema
+241,Expert and up,DIRECTION,"Enfin, tournez à droite avant le marché.",Dispatcher (calm),40,link.enfin.turn.right.avant.market
+242,Expert and up,DIRECTION,"Enfin, tournez à droite avant le parking.",Dispatcher (calm),41,link.enfin.turn.right.avant.car_park
+243,Expert and up,DIRECTION,"Enfin, tournez à droite avant le stade.",Dispatcher (calm),39,link.enfin.turn.right.avant.stadium
+244,Expert and up,DIRECTION,"Enfin, tournez à droite avant le supermarché.",Dispatcher (calm),45,link.enfin.turn.right.avant.supermarket
+245,Expert and up,DIRECTION,"Enfin, tournez à droite devant l'école.",Dispatcher (calm),39,link.enfin.turn.right.devant.school
+246,Expert and up,DIRECTION,"Enfin, tournez à droite devant l'hôpital.",Dispatcher (calm),41,link.enfin.turn.right.devant.hospital
+247,Expert and up,DIRECTION,"Enfin, tournez à droite devant l'hôtel.",Dispatcher (calm),39,link.enfin.turn.right.devant.hotel
+248,Expert and up,DIRECTION,"Enfin, tournez à droite devant la banque.",Dispatcher (calm),41,link.enfin.turn.right.devant.bank
+249,Expert and up,DIRECTION,"Enfin, tournez à droite devant la bibliothèque.",Dispatcher (calm),47,link.enfin.turn.right.devant.library
+250,Expert and up,DIRECTION,"Enfin, tournez à droite devant la boulangerie.",Dispatcher (calm),46,link.enfin.turn.right.devant.bakery
+251,Expert and up,DIRECTION,"Enfin, tournez à droite devant la gare routière.",Dispatcher (calm),48,link.enfin.turn.right.devant.bus_station
+252,Expert and up,DIRECTION,"Enfin, tournez à droite devant la gare.",Dispatcher (calm),39,link.enfin.turn.right.devant.train_station
+253,Expert and up,DIRECTION,"Enfin, tournez à droite devant la librairie.",Dispatcher (calm),44,link.enfin.turn.right.devant.bookshop
+254,Expert and up,DIRECTION,"Enfin, tournez à droite devant la mairie.",Dispatcher (calm),41,link.enfin.turn.right.devant.town_hall
+255,Expert and up,DIRECTION,"Enfin, tournez à droite devant la pharmacie.",Dispatcher (calm),44,link.enfin.turn.right.devant.pharmacy
+256,Expert and up,DIRECTION,"Enfin, tournez à droite devant la piscine.",Dispatcher (calm),42,link.enfin.turn.right.devant.swimming_pool
+257,Expert and up,DIRECTION,"Enfin, tournez à droite devant la place.",Dispatcher (calm),40,link.enfin.turn.right.devant.square
+258,Expert and up,DIRECTION,"Enfin, tournez à droite devant la plage.",Dispatcher (calm),40,link.enfin.turn.right.devant.beach
+259,Expert and up,DIRECTION,"Enfin, tournez à droite devant la poste.",Dispatcher (calm),40,link.enfin.turn.right.devant.post_office
+260,Expert and up,DIRECTION,"Enfin, tournez à droite devant la station-service.",Dispatcher (calm),50,link.enfin.turn.right.devant.gas_station
+261,Expert and up,DIRECTION,"Enfin, tournez à droite devant le café.",Dispatcher (calm),39,link.enfin.turn.right.devant.cafe
+262,Expert and up,DIRECTION,"Enfin, tournez à droite devant le centre commercial.",Dispatcher (calm),52,link.enfin.turn.right.devant.shopping_centre
+263,Expert and up,DIRECTION,"Enfin, tournez à droite devant le cinéma.",Dispatcher (calm),41,link.enfin.turn.right.devant.cinema
+264,Expert and up,DIRECTION,"Enfin, tournez à droite devant le commissariat de police.",Dispatcher (calm),57,link.enfin.turn.right.devant.police_station
+265,Expert and up,DIRECTION,"Enfin, tournez à droite devant le magasin.",Dispatcher (calm),42,link.enfin.turn.right.devant.shop
+266,Expert and up,DIRECTION,"Enfin, tournez à droite devant le marché.",Dispatcher (calm),41,link.enfin.turn.right.devant.market
+267,Expert and up,DIRECTION,"Enfin, tournez à droite devant le musée.",Dispatcher (calm),40,link.enfin.turn.right.devant.museum
+268,Expert and up,DIRECTION,"Enfin, tournez à droite devant le parc.",Dispatcher (calm),39,link.enfin.turn.right.devant.park
+269,Expert and up,DIRECTION,"Enfin, tournez à droite devant le parking.",Dispatcher (calm),42,link.enfin.turn.right.devant.car_park
+270,Expert and up,DIRECTION,"Enfin, tournez à droite devant le restaurant.",Dispatcher (calm),45,link.enfin.turn.right.devant.restaurant
+271,Expert and up,DIRECTION,"Enfin, tournez à droite devant le stade.",Dispatcher (calm),40,link.enfin.turn.right.devant.stadium
+272,Expert and up,DIRECTION,"Enfin, tournez à droite devant le supermarché.",Dispatcher (calm),46,link.enfin.turn.right.devant.supermarket
+273,Expert and up,DIRECTION,"Enfin, tournez à droite devant le théâtre.",Dispatcher (calm),42,link.enfin.turn.right.devant.theatre
+274,Expert and up,DIRECTION,"Enfin, tournez à droite.",Dispatcher (calm),24,link.enfin.turn.right
+275,Expert and up,DIRECTION,"Enfin, tournez à gauche après l'arrêt de bus.",Dispatcher (calm),45,link.enfin.turn.left.apres.bus_stop
+276,Expert and up,DIRECTION,"Enfin, tournez à gauche après l'école.",Dispatcher (calm),38,link.enfin.turn.left.apres.school
+277,Expert and up,DIRECTION,"Enfin, tournez à gauche après la banque.",Dispatcher (calm),40,link.enfin.turn.left.apres.bank
+278,Expert and up,DIRECTION,"Enfin, tournez à gauche après la bibliothèque.",Dispatcher (calm),46,link.enfin.turn.left.apres.library
+279,Expert and up,DIRECTION,"Enfin, tournez à gauche après la boulangerie.",Dispatcher (calm),45,link.enfin.turn.left.apres.bakery
+280,Expert and up,DIRECTION,"Enfin, tournez à gauche après la gare routière.",Dispatcher (calm),47,link.enfin.turn.left.apres.bus_station
+281,Expert and up,DIRECTION,"Enfin, tournez à gauche après la librairie.",Dispatcher (calm),43,link.enfin.turn.left.apres.bookshop
+282,Expert and up,DIRECTION,"Enfin, tournez à gauche après la mairie.",Dispatcher (calm),40,link.enfin.turn.left.apres.town_hall
+283,Expert and up,DIRECTION,"Enfin, tournez à gauche après la pharmacie.",Dispatcher (calm),43,link.enfin.turn.left.apres.pharmacy
+284,Expert and up,DIRECTION,"Enfin, tournez à gauche après la poste.",Dispatcher (calm),39,link.enfin.turn.left.apres.post_office
+285,Expert and up,DIRECTION,"Enfin, tournez à gauche après la station-service.",Dispatcher (calm),49,link.enfin.turn.left.apres.gas_station
+286,Expert and up,DIRECTION,"Enfin, tournez à gauche après le café.",Dispatcher (calm),38,link.enfin.turn.left.apres.cafe
+287,Expert and up,DIRECTION,"Enfin, tournez à gauche après le centre commercial.",Dispatcher (calm),51,link.enfin.turn.left.apres.shopping_centre
+288,Expert and up,DIRECTION,"Enfin, tournez à gauche après le cinéma.",Dispatcher (calm),40,link.enfin.turn.left.apres.cinema
+289,Expert and up,DIRECTION,"Enfin, tournez à gauche après le commissariat de police.",Dispatcher (calm),56,link.enfin.turn.left.apres.police_station
+290,Expert and up,DIRECTION,"Enfin, tournez à gauche après le magasin.",Dispatcher (calm),41,link.enfin.turn.left.apres.shop
+291,Expert and up,DIRECTION,"Enfin, tournez à gauche après le marché.",Dispatcher (calm),40,link.enfin.turn.left.apres.market
+292,Expert and up,DIRECTION,"Enfin, tournez à gauche après le parking.",Dispatcher (calm),41,link.enfin.turn.left.apres.car_park
+293,Expert and up,DIRECTION,"Enfin, tournez à gauche après le restaurant.",Dispatcher (calm),44,link.enfin.turn.left.apres.restaurant
+294,Expert and up,DIRECTION,"Enfin, tournez à gauche après le stade.",Dispatcher (calm),39,link.enfin.turn.left.apres.stadium
+295,Expert and up,DIRECTION,"Enfin, tournez à gauche après le supermarché.",Dispatcher (calm),45,link.enfin.turn.left.apres.supermarket
+296,Expert and up,DIRECTION,"Enfin, tournez à gauche après le théâtre.",Dispatcher (calm),41,link.enfin.turn.left.apres.theatre
+297,Expert and up,DIRECTION,"Enfin, tournez à gauche avant l'arrêt de bus.",Dispatcher (calm),45,link.enfin.turn.left.avant.bus_stop
+298,Expert and up,DIRECTION,"Enfin, tournez à gauche avant l'école.",Dispatcher (calm),38,link.enfin.turn.left.avant.school
+299,Expert and up,DIRECTION,"Enfin, tournez à gauche avant l'hôpital.",Dispatcher (calm),40,link.enfin.turn.left.avant.hospital
+300,Expert and up,DIRECTION,"Enfin, tournez à gauche avant la gare routière.",Dispatcher (calm),47,link.enfin.turn.left.avant.bus_station
+301,Expert and up,DIRECTION,"Enfin, tournez à gauche avant le musée.",Dispatcher (calm),39,link.enfin.turn.left.avant.museum
+302,Expert and up,DIRECTION,"Enfin, tournez à gauche avant le parking.",Dispatcher (calm),41,link.enfin.turn.left.avant.car_park
+303,Expert and up,DIRECTION,"Enfin, tournez à gauche avant le supermarché.",Dispatcher (calm),45,link.enfin.turn.left.avant.supermarket
+304,Expert and up,DIRECTION,"Enfin, tournez à gauche devant l'école.",Dispatcher (calm),39,link.enfin.turn.left.devant.school
+305,Expert and up,DIRECTION,"Enfin, tournez à gauche devant l'hôpital.",Dispatcher (calm),41,link.enfin.turn.left.devant.hospital
+306,Expert and up,DIRECTION,"Enfin, tournez à gauche devant l'hôtel.",Dispatcher (calm),39,link.enfin.turn.left.devant.hotel
+307,Expert and up,DIRECTION,"Enfin, tournez à gauche devant la banque.",Dispatcher (calm),41,link.enfin.turn.left.devant.bank
+308,Expert and up,DIRECTION,"Enfin, tournez à gauche devant la bibliothèque.",Dispatcher (calm),47,link.enfin.turn.left.devant.library
+309,Expert and up,DIRECTION,"Enfin, tournez à gauche devant la boulangerie.",Dispatcher (calm),46,link.enfin.turn.left.devant.bakery
+310,Expert and up,DIRECTION,"Enfin, tournez à gauche devant la gare routière.",Dispatcher (calm),48,link.enfin.turn.left.devant.bus_station
+311,Expert and up,DIRECTION,"Enfin, tournez à gauche devant la gare.",Dispatcher (calm),39,link.enfin.turn.left.devant.train_station
+312,Expert and up,DIRECTION,"Enfin, tournez à gauche devant la librairie.",Dispatcher (calm),44,link.enfin.turn.left.devant.bookshop
+313,Expert and up,DIRECTION,"Enfin, tournez à gauche devant la mairie.",Dispatcher (calm),41,link.enfin.turn.left.devant.town_hall
+314,Expert and up,DIRECTION,"Enfin, tournez à gauche devant la pharmacie.",Dispatcher (calm),44,link.enfin.turn.left.devant.pharmacy
+315,Expert and up,DIRECTION,"Enfin, tournez à gauche devant la piscine.",Dispatcher (calm),42,link.enfin.turn.left.devant.swimming_pool
+316,Expert and up,DIRECTION,"Enfin, tournez à gauche devant la place.",Dispatcher (calm),40,link.enfin.turn.left.devant.square
+317,Expert and up,DIRECTION,"Enfin, tournez à gauche devant la plage.",Dispatcher (calm),40,link.enfin.turn.left.devant.beach
+318,Expert and up,DIRECTION,"Enfin, tournez à gauche devant la poste.",Dispatcher (calm),40,link.enfin.turn.left.devant.post_office
+319,Expert and up,DIRECTION,"Enfin, tournez à gauche devant la station-service.",Dispatcher (calm),50,link.enfin.turn.left.devant.gas_station
+320,Expert and up,DIRECTION,"Enfin, tournez à gauche devant le café.",Dispatcher (calm),39,link.enfin.turn.left.devant.cafe
+321,Expert and up,DIRECTION,"Enfin, tournez à gauche devant le centre commercial.",Dispatcher (calm),52,link.enfin.turn.left.devant.shopping_centre
+322,Expert and up,DIRECTION,"Enfin, tournez à gauche devant le cinéma.",Dispatcher (calm),41,link.enfin.turn.left.devant.cinema
+323,Expert and up,DIRECTION,"Enfin, tournez à gauche devant le commissariat de police.",Dispatcher (calm),57,link.enfin.turn.left.devant.police_station
+324,Expert and up,DIRECTION,"Enfin, tournez à gauche devant le magasin.",Dispatcher (calm),42,link.enfin.turn.left.devant.shop
+325,Expert and up,DIRECTION,"Enfin, tournez à gauche devant le marché.",Dispatcher (calm),41,link.enfin.turn.left.devant.market
+326,Expert and up,DIRECTION,"Enfin, tournez à gauche devant le musée.",Dispatcher (calm),40,link.enfin.turn.left.devant.museum
+327,Expert and up,DIRECTION,"Enfin, tournez à gauche devant le parc.",Dispatcher (calm),39,link.enfin.turn.left.devant.park
+328,Expert and up,DIRECTION,"Enfin, tournez à gauche devant le parking.",Dispatcher (calm),42,link.enfin.turn.left.devant.car_park
+329,Expert and up,DIRECTION,"Enfin, tournez à gauche devant le restaurant.",Dispatcher (calm),45,link.enfin.turn.left.devant.restaurant
+330,Expert and up,DIRECTION,"Enfin, tournez à gauche devant le stade.",Dispatcher (calm),40,link.enfin.turn.left.devant.stadium
+331,Expert and up,DIRECTION,"Enfin, tournez à gauche devant le supermarché.",Dispatcher (calm),46,link.enfin.turn.left.devant.supermarket
+332,Expert and up,DIRECTION,"Enfin, tournez à gauche devant le théâtre.",Dispatcher (calm),42,link.enfin.turn.left.devant.theatre
+333,Expert and up,DIRECTION,"Enfin, tournez à gauche.",Dispatcher (calm),24,link.enfin.turn.left
+334,Hard and up,DIRECTION,"Ensuite, au rond-point, prenez la deuxième sortie.",Dispatcher (calm),50,link.ensuite.roundabout.deuxieme
+335,Hard and up,DIRECTION,"Ensuite, au rond-point, prenez la première sortie.",Dispatcher (calm),50,link.ensuite.roundabout.premiere
+336,Hard and up,DIRECTION,"Ensuite, au rond-point, prenez la troisième sortie.",Dispatcher (calm),51,link.ensuite.roundabout.troisieme
+337,Hard and up,DIRECTION,"Ensuite, prenez la deuxième rue à droite.",Dispatcher (calm),41,link.ensuite.street.right.deuxieme
+338,Hard and up,DIRECTION,"Ensuite, prenez la deuxième rue à gauche.",Dispatcher (calm),41,link.ensuite.street.left.deuxieme
+339,Hard and up,DIRECTION,"Ensuite, prenez la première rue à droite.",Dispatcher (calm),41,link.ensuite.street.right.premiere
+340,Hard and up,DIRECTION,"Ensuite, prenez la première rue à gauche.",Dispatcher (calm),41,link.ensuite.street.left.premiere
+341,Hard and up,DIRECTION,"Ensuite, prenez la prochaine rue à droite.",Dispatcher (calm),42,link.ensuite.street.right.prochaine
+342,Hard and up,DIRECTION,"Ensuite, prenez la prochaine rue à gauche.",Dispatcher (calm),42,link.ensuite.street.left.prochaine
+343,Hard and up,DIRECTION,"Ensuite, prenez la troisième rue à droite.",Dispatcher (calm),42,link.ensuite.street.right.troisieme
+344,Hard and up,DIRECTION,"Ensuite, prenez la troisième rue à gauche.",Dispatcher (calm),42,link.ensuite.street.left.troisieme
+345,Expert and up,DIRECTION,"Ensuite, tournez à droite après l'arrêt de bus.",Dispatcher (calm),47,link.ensuite.turn.right.apres.bus_stop
+346,Expert and up,DIRECTION,"Ensuite, tournez à droite après l'école.",Dispatcher (calm),40,link.ensuite.turn.right.apres.school
+347,Expert and up,DIRECTION,"Ensuite, tournez à droite après la banque.",Dispatcher (calm),42,link.ensuite.turn.right.apres.bank
+348,Expert and up,DIRECTION,"Ensuite, tournez à droite après la bibliothèque.",Dispatcher (calm),48,link.ensuite.turn.right.apres.library
+349,Expert and up,DIRECTION,"Ensuite, tournez à droite après la boulangerie.",Dispatcher (calm),47,link.ensuite.turn.right.apres.bakery
+350,Expert and up,DIRECTION,"Ensuite, tournez à droite après la gare routière.",Dispatcher (calm),49,link.ensuite.turn.right.apres.bus_station
+351,Expert and up,DIRECTION,"Ensuite, tournez à droite après la librairie.",Dispatcher (calm),45,link.ensuite.turn.right.apres.bookshop
+352,Expert and up,DIRECTION,"Ensuite, tournez à droite après la mairie.",Dispatcher (calm),42,link.ensuite.turn.right.apres.town_hall
+353,Expert and up,DIRECTION,"Ensuite, tournez à droite après la pharmacie.",Dispatcher (calm),45,link.ensuite.turn.right.apres.pharmacy
+354,Expert and up,DIRECTION,"Ensuite, tournez à droite après la poste.",Dispatcher (calm),41,link.ensuite.turn.right.apres.post_office
+355,Expert and up,DIRECTION,"Ensuite, tournez à droite après la station-service.",Dispatcher (calm),51,link.ensuite.turn.right.apres.gas_station
+356,Expert and up,DIRECTION,"Ensuite, tournez à droite après le café.",Dispatcher (calm),40,link.ensuite.turn.right.apres.cafe
+357,Expert and up,DIRECTION,"Ensuite, tournez à droite après le centre commercial.",Dispatcher (calm),53,link.ensuite.turn.right.apres.shopping_centre
+358,Expert and up,DIRECTION,"Ensuite, tournez à droite après le commissariat de police.",Dispatcher (calm),58,link.ensuite.turn.right.apres.police_station
+359,Expert and up,DIRECTION,"Ensuite, tournez à droite après le magasin.",Dispatcher (calm),43,link.ensuite.turn.right.apres.shop
+360,Expert and up,DIRECTION,"Ensuite, tournez à droite après le marché.",Dispatcher (calm),42,link.ensuite.turn.right.apres.market
+361,Expert and up,DIRECTION,"Ensuite, tournez à droite après le restaurant.",Dispatcher (calm),46,link.ensuite.turn.right.apres.restaurant
+362,Expert and up,DIRECTION,"Ensuite, tournez à droite après le supermarché.",Dispatcher (calm),47,link.ensuite.turn.right.apres.supermarket
+363,Expert and up,DIRECTION,"Ensuite, tournez à droite après le théâtre.",Dispatcher (calm),43,link.ensuite.turn.right.apres.theatre
+364,Expert and up,DIRECTION,"Ensuite, tournez à droite avant l'arrêt de bus.",Dispatcher (calm),47,link.ensuite.turn.right.avant.bus_stop
+365,Expert and up,DIRECTION,"Ensuite, tournez à droite avant l'hôtel.",Dispatcher (calm),40,link.ensuite.turn.right.avant.hotel
+366,Expert and up,DIRECTION,"Ensuite, tournez à droite avant la gare routière.",Dispatcher (calm),49,link.ensuite.turn.right.avant.bus_station
+367,Expert and up,DIRECTION,"Ensuite, tournez à droite avant la piscine.",Dispatcher (calm),43,link.ensuite.turn.right.avant.swimming_pool
+368,Expert and up,DIRECTION,"Ensuite, tournez à droite avant le cinéma.",Dispatcher (calm),42,link.ensuite.turn.right.avant.cinema
+369,Expert and up,DIRECTION,"Ensuite, tournez à droite avant le marché.",Dispatcher (calm),42,link.ensuite.turn.right.avant.market
+370,Expert and up,DIRECTION,"Ensuite, tournez à droite avant le parking.",Dispatcher (calm),43,link.ensuite.turn.right.avant.car_park
+371,Expert and up,DIRECTION,"Ensuite, tournez à droite avant le stade.",Dispatcher (calm),41,link.ensuite.turn.right.avant.stadium
+372,Expert and up,DIRECTION,"Ensuite, tournez à droite avant le supermarché.",Dispatcher (calm),47,link.ensuite.turn.right.avant.supermarket
+373,Expert and up,DIRECTION,"Ensuite, tournez à droite devant l'école.",Dispatcher (calm),41,link.ensuite.turn.right.devant.school
+374,Expert and up,DIRECTION,"Ensuite, tournez à droite devant l'hôpital.",Dispatcher (calm),43,link.ensuite.turn.right.devant.hospital
+375,Expert and up,DIRECTION,"Ensuite, tournez à droite devant l'hôtel.",Dispatcher (calm),41,link.ensuite.turn.right.devant.hotel
+376,Expert and up,DIRECTION,"Ensuite, tournez à droite devant la banque.",Dispatcher (calm),43,link.ensuite.turn.right.devant.bank
+377,Expert and up,DIRECTION,"Ensuite, tournez à droite devant la bibliothèque.",Dispatcher (calm),49,link.ensuite.turn.right.devant.library
+378,Expert and up,DIRECTION,"Ensuite, tournez à droite devant la boulangerie.",Dispatcher (calm),48,link.ensuite.turn.right.devant.bakery
+379,Expert and up,DIRECTION,"Ensuite, tournez à droite devant la gare routière.",Dispatcher (calm),50,link.ensuite.turn.right.devant.bus_station
+380,Expert and up,DIRECTION,"Ensuite, tournez à droite devant la gare.",Dispatcher (calm),41,link.ensuite.turn.right.devant.train_station
+381,Expert and up,DIRECTION,"Ensuite, tournez à droite devant la librairie.",Dispatcher (calm),46,link.ensuite.turn.right.devant.bookshop
+382,Expert and up,DIRECTION,"Ensuite, tournez à droite devant la mairie.",Dispatcher (calm),43,link.ensuite.turn.right.devant.town_hall
+383,Expert and up,DIRECTION,"Ensuite, tournez à droite devant la pharmacie.",Dispatcher (calm),46,link.ensuite.turn.right.devant.pharmacy
+384,Expert and up,DIRECTION,"Ensuite, tournez à droite devant la piscine.",Dispatcher (calm),44,link.ensuite.turn.right.devant.swimming_pool
+385,Expert and up,DIRECTION,"Ensuite, tournez à droite devant la place.",Dispatcher (calm),42,link.ensuite.turn.right.devant.square
+386,Expert and up,DIRECTION,"Ensuite, tournez à droite devant la plage.",Dispatcher (calm),42,link.ensuite.turn.right.devant.beach
+387,Expert and up,DIRECTION,"Ensuite, tournez à droite devant la poste.",Dispatcher (calm),42,link.ensuite.turn.right.devant.post_office
+388,Expert and up,DIRECTION,"Ensuite, tournez à droite devant la station-service.",Dispatcher (calm),52,link.ensuite.turn.right.devant.gas_station
+389,Expert and up,DIRECTION,"Ensuite, tournez à droite devant le café.",Dispatcher (calm),41,link.ensuite.turn.right.devant.cafe
+390,Expert and up,DIRECTION,"Ensuite, tournez à droite devant le centre commercial.",Dispatcher (calm),54,link.ensuite.turn.right.devant.shopping_centre
+391,Expert and up,DIRECTION,"Ensuite, tournez à droite devant le cinéma.",Dispatcher (calm),43,link.ensuite.turn.right.devant.cinema
+392,Expert and up,DIRECTION,"Ensuite, tournez à droite devant le commissariat de police.",Dispatcher (calm),59,link.ensuite.turn.right.devant.police_station
+393,Expert and up,DIRECTION,"Ensuite, tournez à droite devant le magasin.",Dispatcher (calm),44,link.ensuite.turn.right.devant.shop
+394,Expert and up,DIRECTION,"Ensuite, tournez à droite devant le marché.",Dispatcher (calm),43,link.ensuite.turn.right.devant.market
+395,Expert and up,DIRECTION,"Ensuite, tournez à droite devant le musée.",Dispatcher (calm),42,link.ensuite.turn.right.devant.museum
+396,Expert and up,DIRECTION,"Ensuite, tournez à droite devant le parc.",Dispatcher (calm),41,link.ensuite.turn.right.devant.park
+397,Expert and up,DIRECTION,"Ensuite, tournez à droite devant le parking.",Dispatcher (calm),44,link.ensuite.turn.right.devant.car_park
+398,Expert and up,DIRECTION,"Ensuite, tournez à droite devant le restaurant.",Dispatcher (calm),47,link.ensuite.turn.right.devant.restaurant
+399,Expert and up,DIRECTION,"Ensuite, tournez à droite devant le stade.",Dispatcher (calm),42,link.ensuite.turn.right.devant.stadium
+400,Expert and up,DIRECTION,"Ensuite, tournez à droite devant le supermarché.",Dispatcher (calm),48,link.ensuite.turn.right.devant.supermarket
+401,Expert and up,DIRECTION,"Ensuite, tournez à droite devant le théâtre.",Dispatcher (calm),44,link.ensuite.turn.right.devant.theatre
+402,Hard and up,DIRECTION,"Ensuite, tournez à droite.",Dispatcher (calm),26,link.ensuite.turn.right
+403,Expert and up,DIRECTION,"Ensuite, tournez à gauche après l'arrêt de bus.",Dispatcher (calm),47,link.ensuite.turn.left.apres.bus_stop
+404,Expert and up,DIRECTION,"Ensuite, tournez à gauche après l'école.",Dispatcher (calm),40,link.ensuite.turn.left.apres.school
+405,Expert and up,DIRECTION,"Ensuite, tournez à gauche après la banque.",Dispatcher (calm),42,link.ensuite.turn.left.apres.bank
+406,Expert and up,DIRECTION,"Ensuite, tournez à gauche après la bibliothèque.",Dispatcher (calm),48,link.ensuite.turn.left.apres.library
+407,Expert and up,DIRECTION,"Ensuite, tournez à gauche après la boulangerie.",Dispatcher (calm),47,link.ensuite.turn.left.apres.bakery
+408,Expert and up,DIRECTION,"Ensuite, tournez à gauche après la gare routière.",Dispatcher (calm),49,link.ensuite.turn.left.apres.bus_station
+409,Expert and up,DIRECTION,"Ensuite, tournez à gauche après la librairie.",Dispatcher (calm),45,link.ensuite.turn.left.apres.bookshop
+410,Expert and up,DIRECTION,"Ensuite, tournez à gauche après la mairie.",Dispatcher (calm),42,link.ensuite.turn.left.apres.town_hall
+411,Expert and up,DIRECTION,"Ensuite, tournez à gauche après la pharmacie.",Dispatcher (calm),45,link.ensuite.turn.left.apres.pharmacy
+412,Expert and up,DIRECTION,"Ensuite, tournez à gauche après la poste.",Dispatcher (calm),41,link.ensuite.turn.left.apres.post_office
+413,Expert and up,DIRECTION,"Ensuite, tournez à gauche après la station-service.",Dispatcher (calm),51,link.ensuite.turn.left.apres.gas_station
+414,Expert and up,DIRECTION,"Ensuite, tournez à gauche après le café.",Dispatcher (calm),40,link.ensuite.turn.left.apres.cafe
+415,Expert and up,DIRECTION,"Ensuite, tournez à gauche après le centre commercial.",Dispatcher (calm),53,link.ensuite.turn.left.apres.shopping_centre
+416,Expert and up,DIRECTION,"Ensuite, tournez à gauche après le cinéma.",Dispatcher (calm),42,link.ensuite.turn.left.apres.cinema
+417,Expert and up,DIRECTION,"Ensuite, tournez à gauche après le commissariat de police.",Dispatcher (calm),58,link.ensuite.turn.left.apres.police_station
+418,Expert and up,DIRECTION,"Ensuite, tournez à gauche après le magasin.",Dispatcher (calm),43,link.ensuite.turn.left.apres.shop
+419,Expert and up,DIRECTION,"Ensuite, tournez à gauche après le marché.",Dispatcher (calm),42,link.ensuite.turn.left.apres.market
+420,Expert and up,DIRECTION,"Ensuite, tournez à gauche après le restaurant.",Dispatcher (calm),46,link.ensuite.turn.left.apres.restaurant
+421,Expert and up,DIRECTION,"Ensuite, tournez à gauche après le supermarché.",Dispatcher (calm),47,link.ensuite.turn.left.apres.supermarket
+422,Expert and up,DIRECTION,"Ensuite, tournez à gauche après le théâtre.",Dispatcher (calm),43,link.ensuite.turn.left.apres.theatre
+423,Expert and up,DIRECTION,"Ensuite, tournez à gauche avant l'arrêt de bus.",Dispatcher (calm),47,link.ensuite.turn.left.avant.bus_stop
+424,Expert and up,DIRECTION,"Ensuite, tournez à gauche avant l'école.",Dispatcher (calm),40,link.ensuite.turn.left.avant.school
+425,Expert and up,DIRECTION,"Ensuite, tournez à gauche avant l'hôpital.",Dispatcher (calm),42,link.ensuite.turn.left.avant.hospital
+426,Expert and up,DIRECTION,"Ensuite, tournez à gauche avant la gare routière.",Dispatcher (calm),49,link.ensuite.turn.left.avant.bus_station
+427,Expert and up,DIRECTION,"Ensuite, tournez à gauche avant le musée.",Dispatcher (calm),41,link.ensuite.turn.left.avant.museum
+428,Expert and up,DIRECTION,"Ensuite, tournez à gauche avant le parking.",Dispatcher (calm),43,link.ensuite.turn.left.avant.car_park
+429,Expert and up,DIRECTION,"Ensuite, tournez à gauche avant le supermarché.",Dispatcher (calm),47,link.ensuite.turn.left.avant.supermarket
+430,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant l'école.",Dispatcher (calm),41,link.ensuite.turn.left.devant.school
+431,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant l'hôpital.",Dispatcher (calm),43,link.ensuite.turn.left.devant.hospital
+432,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant l'hôtel.",Dispatcher (calm),41,link.ensuite.turn.left.devant.hotel
+433,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant la banque.",Dispatcher (calm),43,link.ensuite.turn.left.devant.bank
+434,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant la bibliothèque.",Dispatcher (calm),49,link.ensuite.turn.left.devant.library
+435,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant la boulangerie.",Dispatcher (calm),48,link.ensuite.turn.left.devant.bakery
+436,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant la gare routière.",Dispatcher (calm),50,link.ensuite.turn.left.devant.bus_station
+437,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant la gare.",Dispatcher (calm),41,link.ensuite.turn.left.devant.train_station
+438,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant la librairie.",Dispatcher (calm),46,link.ensuite.turn.left.devant.bookshop
+439,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant la mairie.",Dispatcher (calm),43,link.ensuite.turn.left.devant.town_hall
+440,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant la pharmacie.",Dispatcher (calm),46,link.ensuite.turn.left.devant.pharmacy
+441,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant la piscine.",Dispatcher (calm),44,link.ensuite.turn.left.devant.swimming_pool
+442,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant la place.",Dispatcher (calm),42,link.ensuite.turn.left.devant.square
+443,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant la plage.",Dispatcher (calm),42,link.ensuite.turn.left.devant.beach
+444,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant la poste.",Dispatcher (calm),42,link.ensuite.turn.left.devant.post_office
+445,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant la station-service.",Dispatcher (calm),52,link.ensuite.turn.left.devant.gas_station
+446,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant le café.",Dispatcher (calm),41,link.ensuite.turn.left.devant.cafe
+447,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant le centre commercial.",Dispatcher (calm),54,link.ensuite.turn.left.devant.shopping_centre
+448,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant le cinéma.",Dispatcher (calm),43,link.ensuite.turn.left.devant.cinema
+449,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant le commissariat de police.",Dispatcher (calm),59,link.ensuite.turn.left.devant.police_station
+450,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant le magasin.",Dispatcher (calm),44,link.ensuite.turn.left.devant.shop
+451,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant le marché.",Dispatcher (calm),43,link.ensuite.turn.left.devant.market
+452,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant le musée.",Dispatcher (calm),42,link.ensuite.turn.left.devant.museum
+453,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant le parc.",Dispatcher (calm),41,link.ensuite.turn.left.devant.park
+454,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant le parking.",Dispatcher (calm),44,link.ensuite.turn.left.devant.car_park
+455,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant le restaurant.",Dispatcher (calm),47,link.ensuite.turn.left.devant.restaurant
+456,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant le stade.",Dispatcher (calm),42,link.ensuite.turn.left.devant.stadium
+457,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant le supermarché.",Dispatcher (calm),48,link.ensuite.turn.left.devant.supermarket
+458,Expert and up,DIRECTION,"Ensuite, tournez à gauche devant le théâtre.",Dispatcher (calm),44,link.ensuite.turn.left.devant.theatre
+459,Hard and up,DIRECTION,"Ensuite, tournez à gauche.",Dispatcher (calm),26,link.ensuite.turn.left
+460,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à droite, puis prenez la deuxième rue à droite.",Dispatcher (calm),70,seq.street.right.deuxieme+puis+street.right.deuxieme
+461,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à droite, puis prenez la deuxième rue à gauche.",Dispatcher (calm),70,seq.street.right.deuxieme+puis+street.left.deuxieme
+462,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à droite, puis prenez la première rue à droite.",Dispatcher (calm),70,seq.street.right.deuxieme+puis+street.right.premiere
+463,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à droite, puis prenez la première rue à gauche.",Dispatcher (calm),70,seq.street.right.deuxieme+puis+street.left.premiere
+464,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à droite, puis prenez la prochaine rue à droite.",Dispatcher (calm),71,seq.street.right.deuxieme+puis+street.right.prochaine
+465,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à droite, puis prenez la prochaine rue à gauche.",Dispatcher (calm),71,seq.street.right.deuxieme+puis+street.left.prochaine
+466,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à droite, puis tournez à droite.",Dispatcher (calm),55,seq.street.right.deuxieme+puis+turn.right
+467,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à droite, puis tournez à gauche.",Dispatcher (calm),55,seq.street.right.deuxieme+puis+turn.left
+468,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à droite, puis, au rond-point, prenez la deuxième sortie.",Dispatcher (calm),80,seq.street.right.deuxieme+puis+roundabout.deuxieme
+469,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à droite, puis, au rond-point, prenez la première sortie.",Dispatcher (calm),80,seq.street.right.deuxieme+puis+roundabout.premiere
+470,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à droite, puis, au rond-point, prenez la troisième sortie.",Dispatcher (calm),81,seq.street.right.deuxieme+puis+roundabout.troisieme
+471,Intermediate and up,Count the streets,Prenez la deuxième rue à droite.,Dispatcher (calm),32,dir.street.right.deuxieme
+472,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à gauche, puis prenez la deuxième rue à droite.",Dispatcher (calm),70,seq.street.left.deuxieme+puis+street.right.deuxieme
+473,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à gauche, puis prenez la deuxième rue à gauche.",Dispatcher (calm),70,seq.street.left.deuxieme+puis+street.left.deuxieme
+474,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à gauche, puis prenez la première rue à droite.",Dispatcher (calm),70,seq.street.left.deuxieme+puis+street.right.premiere
+475,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à gauche, puis prenez la première rue à gauche.",Dispatcher (calm),70,seq.street.left.deuxieme+puis+street.left.premiere
+476,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à gauche, puis prenez la prochaine rue à droite.",Dispatcher (calm),71,seq.street.left.deuxieme+puis+street.right.prochaine
+477,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à gauche, puis prenez la prochaine rue à gauche.",Dispatcher (calm),71,seq.street.left.deuxieme+puis+street.left.prochaine
+478,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à gauche, puis tournez à droite.",Dispatcher (calm),55,seq.street.left.deuxieme+puis+turn.right
+479,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à gauche, puis tournez à gauche.",Dispatcher (calm),55,seq.street.left.deuxieme+puis+turn.left
+480,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à gauche, puis, au rond-point, prenez la deuxième sortie.",Dispatcher (calm),80,seq.street.left.deuxieme+puis+roundabout.deuxieme
+481,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à gauche, puis, au rond-point, prenez la première sortie.",Dispatcher (calm),80,seq.street.left.deuxieme+puis+roundabout.premiere
+482,Intermediate and up,Two steps (puis),"Prenez la deuxième rue à gauche, puis, au rond-point, prenez la troisième sortie.",Dispatcher (calm),81,seq.street.left.deuxieme+puis+roundabout.troisieme
+483,Intermediate and up,Count the streets,Prenez la deuxième rue à gauche.,Dispatcher (calm),32,dir.street.left.deuxieme
+484,Intermediate and up,Two steps (puis),"Prenez la première rue à droite, puis prenez la deuxième rue à droite.",Dispatcher (calm),70,seq.street.right.premiere+puis+street.right.deuxieme
+485,Intermediate and up,Two steps (puis),"Prenez la première rue à droite, puis prenez la deuxième rue à gauche.",Dispatcher (calm),70,seq.street.right.premiere+puis+street.left.deuxieme
+486,Intermediate and up,Two steps (puis),"Prenez la première rue à droite, puis prenez la première rue à droite.",Dispatcher (calm),70,seq.street.right.premiere+puis+street.right.premiere
+487,Intermediate and up,Two steps (puis),"Prenez la première rue à droite, puis prenez la première rue à gauche.",Dispatcher (calm),70,seq.street.right.premiere+puis+street.left.premiere
+488,Intermediate and up,Two steps (puis),"Prenez la première rue à droite, puis prenez la prochaine rue à droite.",Dispatcher (calm),71,seq.street.right.premiere+puis+street.right.prochaine
+489,Intermediate and up,Two steps (puis),"Prenez la première rue à droite, puis prenez la prochaine rue à gauche.",Dispatcher (calm),71,seq.street.right.premiere+puis+street.left.prochaine
+490,Intermediate and up,Two steps (puis),"Prenez la première rue à droite, puis tournez à droite.",Dispatcher (calm),55,seq.street.right.premiere+puis+turn.right
+491,Intermediate and up,Two steps (puis),"Prenez la première rue à droite, puis tournez à gauche.",Dispatcher (calm),55,seq.street.right.premiere+puis+turn.left
+492,Intermediate and up,Two steps (puis),"Prenez la première rue à droite, puis, au rond-point, prenez la deuxième sortie.",Dispatcher (calm),80,seq.street.right.premiere+puis+roundabout.deuxieme
+493,Intermediate and up,Two steps (puis),"Prenez la première rue à droite, puis, au rond-point, prenez la première sortie.",Dispatcher (calm),80,seq.street.right.premiere+puis+roundabout.premiere
+494,Intermediate and up,Two steps (puis),"Prenez la première rue à droite, puis, au rond-point, prenez la troisième sortie.",Dispatcher (calm),81,seq.street.right.premiere+puis+roundabout.troisieme
+495,Intermediate and up,Count the streets,Prenez la première rue à droite.,Dispatcher (calm),32,dir.street.right.premiere
+496,Intermediate and up,Two steps (puis),"Prenez la première rue à gauche, puis prenez la deuxième rue à droite.",Dispatcher (calm),70,seq.street.left.premiere+puis+street.right.deuxieme
+497,Intermediate and up,Two steps (puis),"Prenez la première rue à gauche, puis prenez la deuxième rue à gauche.",Dispatcher (calm),70,seq.street.left.premiere+puis+street.left.deuxieme
+498,Intermediate and up,Two steps (puis),"Prenez la première rue à gauche, puis prenez la première rue à droite.",Dispatcher (calm),70,seq.street.left.premiere+puis+street.right.premiere
+499,Intermediate and up,Two steps (puis),"Prenez la première rue à gauche, puis prenez la première rue à gauche.",Dispatcher (calm),70,seq.street.left.premiere+puis+street.left.premiere
+500,Intermediate and up,Two steps (puis),"Prenez la première rue à gauche, puis prenez la prochaine rue à droite.",Dispatcher (calm),71,seq.street.left.premiere+puis+street.right.prochaine
+501,Intermediate and up,Two steps (puis),"Prenez la première rue à gauche, puis prenez la prochaine rue à gauche.",Dispatcher (calm),71,seq.street.left.premiere+puis+street.left.prochaine
+502,Intermediate and up,Two steps (puis),"Prenez la première rue à gauche, puis tournez à droite.",Dispatcher (calm),55,seq.street.left.premiere+puis+turn.right
+503,Intermediate and up,Two steps (puis),"Prenez la première rue à gauche, puis tournez à gauche.",Dispatcher (calm),55,seq.street.left.premiere+puis+turn.left
+504,Intermediate and up,Two steps (puis),"Prenez la première rue à gauche, puis, au rond-point, prenez la deuxième sortie.",Dispatcher (calm),80,seq.street.left.premiere+puis+roundabout.deuxieme
+505,Intermediate and up,Two steps (puis),"Prenez la première rue à gauche, puis, au rond-point, prenez la première sortie.",Dispatcher (calm),80,seq.street.left.premiere+puis+roundabout.premiere
+506,Intermediate and up,Two steps (puis),"Prenez la première rue à gauche, puis, au rond-point, prenez la troisième sortie.",Dispatcher (calm),81,seq.street.left.premiere+puis+roundabout.troisieme
+507,Intermediate and up,Count the streets,Prenez la première rue à gauche.,Dispatcher (calm),32,dir.street.left.premiere
+508,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à droite, puis prenez la deuxième rue à droite.",Dispatcher (calm),71,seq.street.right.prochaine+puis+street.right.deuxieme
+509,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à droite, puis prenez la deuxième rue à gauche.",Dispatcher (calm),71,seq.street.right.prochaine+puis+street.left.deuxieme
+510,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à droite, puis prenez la première rue à droite.",Dispatcher (calm),71,seq.street.right.prochaine+puis+street.right.premiere
+511,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à droite, puis prenez la première rue à gauche.",Dispatcher (calm),71,seq.street.right.prochaine+puis+street.left.premiere
+512,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à droite, puis prenez la prochaine rue à droite.",Dispatcher (calm),72,seq.street.right.prochaine+puis+street.right.prochaine
+513,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à droite, puis prenez la prochaine rue à gauche.",Dispatcher (calm),72,seq.street.right.prochaine+puis+street.left.prochaine
+514,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à droite, puis tournez à droite.",Dispatcher (calm),56,seq.street.right.prochaine+puis+turn.right
+515,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à droite, puis tournez à gauche.",Dispatcher (calm),56,seq.street.right.prochaine+puis+turn.left
+516,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à droite, puis, au rond-point, prenez la deuxième sortie.",Dispatcher (calm),81,seq.street.right.prochaine+puis+roundabout.deuxieme
+517,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à droite, puis, au rond-point, prenez la première sortie.",Dispatcher (calm),81,seq.street.right.prochaine+puis+roundabout.premiere
+518,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à droite, puis, au rond-point, prenez la troisième sortie.",Dispatcher (calm),82,seq.street.right.prochaine+puis+roundabout.troisieme
+519,Intermediate and up,Count the streets,Prenez la prochaine rue à droite.,Dispatcher (calm),33,dir.street.right.prochaine
+520,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à gauche, puis prenez la deuxième rue à droite.",Dispatcher (calm),71,seq.street.left.prochaine+puis+street.right.deuxieme
+521,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à gauche, puis prenez la deuxième rue à gauche.",Dispatcher (calm),71,seq.street.left.prochaine+puis+street.left.deuxieme
+522,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à gauche, puis prenez la première rue à droite.",Dispatcher (calm),71,seq.street.left.prochaine+puis+street.right.premiere
+523,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à gauche, puis prenez la première rue à gauche.",Dispatcher (calm),71,seq.street.left.prochaine+puis+street.left.premiere
+524,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à gauche, puis prenez la prochaine rue à droite.",Dispatcher (calm),72,seq.street.left.prochaine+puis+street.right.prochaine
+525,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à gauche, puis prenez la prochaine rue à gauche.",Dispatcher (calm),72,seq.street.left.prochaine+puis+street.left.prochaine
+526,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à gauche, puis tournez à droite.",Dispatcher (calm),56,seq.street.left.prochaine+puis+turn.right
+527,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à gauche, puis tournez à gauche.",Dispatcher (calm),56,seq.street.left.prochaine+puis+turn.left
+528,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à gauche, puis, au rond-point, prenez la deuxième sortie.",Dispatcher (calm),81,seq.street.left.prochaine+puis+roundabout.deuxieme
+529,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à gauche, puis, au rond-point, prenez la première sortie.",Dispatcher (calm),81,seq.street.left.prochaine+puis+roundabout.premiere
+530,Intermediate and up,Two steps (puis),"Prenez la prochaine rue à gauche, puis, au rond-point, prenez la troisième sortie.",Dispatcher (calm),82,seq.street.left.prochaine+puis+roundabout.troisieme
+531,Intermediate and up,Count the streets,Prenez la prochaine rue à gauche.,Dispatcher (calm),33,dir.street.left.prochaine
+532,Intermediate and up,Two steps (puis),"Prenez la troisième rue à droite, puis prenez la deuxième rue à droite.",Dispatcher (calm),71,seq.street.right.troisieme+puis+street.right.deuxieme
+533,Intermediate and up,Two steps (puis),"Prenez la troisième rue à droite, puis prenez la deuxième rue à gauche.",Dispatcher (calm),71,seq.street.right.troisieme+puis+street.left.deuxieme
+534,Intermediate and up,Two steps (puis),"Prenez la troisième rue à droite, puis prenez la première rue à droite.",Dispatcher (calm),71,seq.street.right.troisieme+puis+street.right.premiere
+535,Intermediate and up,Two steps (puis),"Prenez la troisième rue à droite, puis prenez la première rue à gauche.",Dispatcher (calm),71,seq.street.right.troisieme+puis+street.left.premiere
+536,Intermediate and up,Two steps (puis),"Prenez la troisième rue à droite, puis prenez la prochaine rue à droite.",Dispatcher (calm),72,seq.street.right.troisieme+puis+street.right.prochaine
+537,Intermediate and up,Two steps (puis),"Prenez la troisième rue à droite, puis prenez la prochaine rue à gauche.",Dispatcher (calm),72,seq.street.right.troisieme+puis+street.left.prochaine
+538,Intermediate and up,Two steps (puis),"Prenez la troisième rue à droite, puis tournez à droite.",Dispatcher (calm),56,seq.street.right.troisieme+puis+turn.right
+539,Intermediate and up,Two steps (puis),"Prenez la troisième rue à droite, puis tournez à gauche.",Dispatcher (calm),56,seq.street.right.troisieme+puis+turn.left
+540,Intermediate and up,Two steps (puis),"Prenez la troisième rue à droite, puis, au rond-point, prenez la deuxième sortie.",Dispatcher (calm),81,seq.street.right.troisieme+puis+roundabout.deuxieme
+541,Intermediate and up,Two steps (puis),"Prenez la troisième rue à droite, puis, au rond-point, prenez la première sortie.",Dispatcher (calm),81,seq.street.right.troisieme+puis+roundabout.premiere
+542,Intermediate and up,Two steps (puis),"Prenez la troisième rue à droite, puis, au rond-point, prenez la troisième sortie.",Dispatcher (calm),82,seq.street.right.troisieme+puis+roundabout.troisieme
+543,Intermediate and up,Count the streets,Prenez la troisième rue à droite.,Dispatcher (calm),33,dir.street.right.troisieme
+544,Intermediate and up,Two steps (puis),"Prenez la troisième rue à gauche, puis prenez la deuxième rue à droite.",Dispatcher (calm),71,seq.street.left.troisieme+puis+street.right.deuxieme
+545,Intermediate and up,Two steps (puis),"Prenez la troisième rue à gauche, puis prenez la deuxième rue à gauche.",Dispatcher (calm),71,seq.street.left.troisieme+puis+street.left.deuxieme
+546,Intermediate and up,Two steps (puis),"Prenez la troisième rue à gauche, puis prenez la première rue à droite.",Dispatcher (calm),71,seq.street.left.troisieme+puis+street.right.premiere
+547,Intermediate and up,Two steps (puis),"Prenez la troisième rue à gauche, puis prenez la première rue à gauche.",Dispatcher (calm),71,seq.street.left.troisieme+puis+street.left.premiere
+548,Intermediate and up,Two steps (puis),"Prenez la troisième rue à gauche, puis prenez la prochaine rue à droite.",Dispatcher (calm),72,seq.street.left.troisieme+puis+street.right.prochaine
+549,Intermediate and up,Two steps (puis),"Prenez la troisième rue à gauche, puis prenez la prochaine rue à gauche.",Dispatcher (calm),72,seq.street.left.troisieme+puis+street.left.prochaine
+550,Intermediate and up,Two steps (puis),"Prenez la troisième rue à gauche, puis tournez à droite.",Dispatcher (calm),56,seq.street.left.troisieme+puis+turn.right
+551,Intermediate and up,Two steps (puis),"Prenez la troisième rue à gauche, puis tournez à gauche.",Dispatcher (calm),56,seq.street.left.troisieme+puis+turn.left
+552,Intermediate and up,Two steps (puis),"Prenez la troisième rue à gauche, puis, au rond-point, prenez la deuxième sortie.",Dispatcher (calm),81,seq.street.left.troisieme+puis+roundabout.deuxieme
+553,Intermediate and up,Two steps (puis),"Prenez la troisième rue à gauche, puis, au rond-point, prenez la première sortie.",Dispatcher (calm),81,seq.street.left.troisieme+puis+roundabout.premiere
+554,Intermediate and up,Two steps (puis),"Prenez la troisième rue à gauche, puis, au rond-point, prenez la troisième sortie.",Dispatcher (calm),82,seq.street.left.troisieme+puis+roundabout.troisieme
+555,Intermediate and up,Count the streets,Prenez la troisième rue à gauche.,Dispatcher (calm),33,dir.street.left.troisieme
+556,Hard and up,DIRECTION,Puis prenez la deuxième rue à droite.,Dispatcher (calm),37,link.puis.street.right.deuxieme
+557,Hard and up,DIRECTION,Puis prenez la deuxième rue à gauche.,Dispatcher (calm),37,link.puis.street.left.deuxieme
+558,Hard and up,DIRECTION,Puis prenez la première rue à droite.,Dispatcher (calm),37,link.puis.street.right.premiere
+559,Hard and up,DIRECTION,Puis prenez la première rue à gauche.,Dispatcher (calm),37,link.puis.street.left.premiere
+560,Hard and up,DIRECTION,Puis prenez la prochaine rue à droite.,Dispatcher (calm),38,link.puis.street.right.prochaine
+561,Hard and up,DIRECTION,Puis prenez la prochaine rue à gauche.,Dispatcher (calm),38,link.puis.street.left.prochaine
+562,Hard and up,DIRECTION,Puis tournez à droite.,Dispatcher (calm),22,link.puis.turn.right
+563,Hard and up,DIRECTION,Puis tournez à gauche.,Dispatcher (calm),22,link.puis.turn.left
+564,Hard and up,DIRECTION,"Puis, au rond-point, prenez la deuxième sortie.",Dispatcher (calm),47,link.puis.roundabout.deuxieme
+565,Hard and up,DIRECTION,"Puis, au rond-point, prenez la première sortie.",Dispatcher (calm),47,link.puis.roundabout.premiere
+566,Hard and up,DIRECTION,"Puis, au rond-point, prenez la troisième sortie.",Dispatcher (calm),48,link.puis.roundabout.troisieme
+567,All levels,Turn at / after a place,Tournez à droite après l'arrêt de bus.,Dispatcher (calm),38,dir.turn.right.apres.bus_stop
+568,All levels,Turn at / after a place,Tournez à droite après l'école.,Dispatcher (calm),31,dir.turn.right.apres.school
+569,All levels,Turn at / after a place,Tournez à droite après l'hôpital.,Dispatcher (calm),33,dir.turn.right.apres.hospital
+570,All levels,Turn at / after a place,Tournez à droite après la banque.,Dispatcher (calm),33,dir.turn.right.apres.bank
+571,All levels,Turn at / after a place,Tournez à droite après la bibliothèque.,Dispatcher (calm),39,dir.turn.right.apres.library
+572,All levels,Turn at / after a place,Tournez à droite après la boulangerie.,Dispatcher (calm),38,dir.turn.right.apres.bakery
+573,All levels,Turn at / after a place,Tournez à droite après la gare routière.,Dispatcher (calm),40,dir.turn.right.apres.bus_station
+574,All levels,Turn at / after a place,Tournez à droite après la librairie.,Dispatcher (calm),36,dir.turn.right.apres.bookshop
+575,All levels,Turn at / after a place,Tournez à droite après la mairie.,Dispatcher (calm),33,dir.turn.right.apres.town_hall
+576,All levels,Turn at / after a place,Tournez à droite après la pharmacie.,Dispatcher (calm),36,dir.turn.right.apres.pharmacy
+577,All levels,Turn at / after a place,Tournez à droite après la poste.,Dispatcher (calm),32,dir.turn.right.apres.post_office
+578,All levels,Turn at / after a place,Tournez à droite après la station-service.,Dispatcher (calm),42,dir.turn.right.apres.gas_station
+579,All levels,Turn at / after a place,Tournez à droite après le café.,Dispatcher (calm),31,dir.turn.right.apres.cafe
+580,All levels,Turn at / after a place,Tournez à droite après le centre commercial.,Dispatcher (calm),44,dir.turn.right.apres.shopping_centre
+581,All levels,Turn at / after a place,Tournez à droite après le commissariat de police.,Dispatcher (calm),49,dir.turn.right.apres.police_station
+582,All levels,Turn at / after a place,Tournez à droite après le magasin.,Dispatcher (calm),34,dir.turn.right.apres.shop
+583,All levels,Turn at / after a place,Tournez à droite après le marché.,Dispatcher (calm),33,dir.turn.right.apres.market
+584,All levels,Turn at / after a place,Tournez à droite après le musée.,Dispatcher (calm),32,dir.turn.right.apres.museum
+585,All levels,Turn at / after a place,Tournez à droite après le parking.,Dispatcher (calm),34,dir.turn.right.apres.car_park
+586,All levels,Turn at / after a place,Tournez à droite après le restaurant.,Dispatcher (calm),37,dir.turn.right.apres.restaurant
+587,All levels,Turn at / after a place,Tournez à droite après le supermarché.,Dispatcher (calm),38,dir.turn.right.apres.supermarket
+588,All levels,Turn at / after a place,Tournez à droite après le théâtre.,Dispatcher (calm),34,dir.turn.right.apres.theatre
+589,Intermediate and up,Turn before a place,Tournez à droite avant l'arrêt de bus.,Dispatcher (calm),38,dir.turn.right.avant.bus_stop
+590,Intermediate and up,Turn before a place,Tournez à droite avant l'hôtel.,Dispatcher (calm),31,dir.turn.right.avant.hotel
+591,Intermediate and up,Turn before a place,Tournez à droite avant la gare routière.,Dispatcher (calm),40,dir.turn.right.avant.bus_station
+592,Intermediate and up,Turn before a place,Tournez à droite avant la piscine.,Dispatcher (calm),34,dir.turn.right.avant.swimming_pool
+593,Intermediate and up,Turn before a place,Tournez à droite avant le cinéma.,Dispatcher (calm),33,dir.turn.right.avant.cinema
+594,Intermediate and up,Turn before a place,Tournez à droite avant le marché.,Dispatcher (calm),33,dir.turn.right.avant.market
+595,Intermediate and up,Turn before a place,Tournez à droite avant le parking.,Dispatcher (calm),34,dir.turn.right.avant.car_park
+596,Intermediate and up,Turn before a place,Tournez à droite avant le stade.,Dispatcher (calm),32,dir.turn.right.avant.stadium
+597,Intermediate and up,Turn before a place,Tournez à droite avant le supermarché.,Dispatcher (calm),38,dir.turn.right.avant.supermarket
+598,All levels,Turn at / after a place,Tournez à droite devant l'école.,Dispatcher (calm),32,dir.turn.right.devant.school
+599,All levels,Turn at / after a place,Tournez à droite devant l'hôpital.,Dispatcher (calm),34,dir.turn.right.devant.hospital
+600,All levels,Turn at / after a place,Tournez à droite devant l'hôtel.,Dispatcher (calm),32,dir.turn.right.devant.hotel
+601,All levels,Turn at / after a place,Tournez à droite devant la banque.,Dispatcher (calm),34,dir.turn.right.devant.bank
+602,All levels,Turn at / after a place,Tournez à droite devant la bibliothèque.,Dispatcher (calm),40,dir.turn.right.devant.library
+603,All levels,Turn at / after a place,Tournez à droite devant la boulangerie.,Dispatcher (calm),39,dir.turn.right.devant.bakery
+604,All levels,Turn at / after a place,Tournez à droite devant la gare routière.,Dispatcher (calm),41,dir.turn.right.devant.bus_station
+605,All levels,Turn at / after a place,Tournez à droite devant la gare.,Dispatcher (calm),32,dir.turn.right.devant.train_station
+606,All levels,Turn at / after a place,Tournez à droite devant la librairie.,Dispatcher (calm),37,dir.turn.right.devant.bookshop
+607,All levels,Turn at / after a place,Tournez à droite devant la mairie.,Dispatcher (calm),34,dir.turn.right.devant.town_hall
+608,All levels,Turn at / after a place,Tournez à droite devant la pharmacie.,Dispatcher (calm),37,dir.turn.right.devant.pharmacy
+609,All levels,Turn at / after a place,Tournez à droite devant la piscine.,Dispatcher (calm),35,dir.turn.right.devant.swimming_pool
+610,All levels,Turn at / after a place,Tournez à droite devant la place.,Dispatcher (calm),33,dir.turn.right.devant.square
+611,All levels,Turn at / after a place,Tournez à droite devant la plage.,Dispatcher (calm),33,dir.turn.right.devant.beach
+612,All levels,Turn at / after a place,Tournez à droite devant la poste.,Dispatcher (calm),33,dir.turn.right.devant.post_office
+613,All levels,Turn at / after a place,Tournez à droite devant la station-service.,Dispatcher (calm),43,dir.turn.right.devant.gas_station
+614,All levels,Turn at / after a place,Tournez à droite devant le café.,Dispatcher (calm),32,dir.turn.right.devant.cafe
+615,All levels,Turn at / after a place,Tournez à droite devant le centre commercial.,Dispatcher (calm),45,dir.turn.right.devant.shopping_centre
+616,All levels,Turn at / after a place,Tournez à droite devant le cinéma.,Dispatcher (calm),34,dir.turn.right.devant.cinema
+617,All levels,Turn at / after a place,Tournez à droite devant le commissariat de police.,Dispatcher (calm),50,dir.turn.right.devant.police_station
+618,All levels,Turn at / after a place,Tournez à droite devant le magasin.,Dispatcher (calm),35,dir.turn.right.devant.shop
+619,All levels,Turn at / after a place,Tournez à droite devant le marché.,Dispatcher (calm),34,dir.turn.right.devant.market
+620,All levels,Turn at / after a place,Tournez à droite devant le musée.,Dispatcher (calm),33,dir.turn.right.devant.museum
+621,All levels,Turn at / after a place,Tournez à droite devant le parc.,Dispatcher (calm),32,dir.turn.right.devant.park
+622,All levels,Turn at / after a place,Tournez à droite devant le parking.,Dispatcher (calm),35,dir.turn.right.devant.car_park
+623,All levels,Turn at / after a place,Tournez à droite devant le restaurant.,Dispatcher (calm),38,dir.turn.right.devant.restaurant
+624,All levels,Turn at / after a place,Tournez à droite devant le stade.,Dispatcher (calm),33,dir.turn.right.devant.stadium
+625,All levels,Turn at / after a place,Tournez à droite devant le supermarché.,Dispatcher (calm),39,dir.turn.right.devant.supermarket
+626,All levels,Turn at / after a place,Tournez à droite devant le théâtre.,Dispatcher (calm),35,dir.turn.right.devant.theatre
+627,Intermediate and up,Two steps (puis),"Tournez à droite, puis prenez la deuxième rue à droite.",Dispatcher (calm),55,seq.turn.right+puis+street.right.deuxieme
+628,Intermediate and up,Two steps (puis),"Tournez à droite, puis prenez la deuxième rue à gauche.",Dispatcher (calm),55,seq.turn.right+puis+street.left.deuxieme
+629,Intermediate and up,Two steps (puis),"Tournez à droite, puis prenez la première rue à droite.",Dispatcher (calm),55,seq.turn.right+puis+street.right.premiere
+630,Intermediate and up,Two steps (puis),"Tournez à droite, puis prenez la première rue à gauche.",Dispatcher (calm),55,seq.turn.right+puis+street.left.premiere
+631,Intermediate and up,Two steps (puis),"Tournez à droite, puis prenez la prochaine rue à droite.",Dispatcher (calm),56,seq.turn.right+puis+street.right.prochaine
+632,Intermediate and up,Two steps (puis),"Tournez à droite, puis prenez la prochaine rue à gauche.",Dispatcher (calm),56,seq.turn.right+puis+street.left.prochaine
+633,Intermediate and up,Two steps (puis),"Tournez à droite, puis tournez à droite.",Dispatcher (calm),40,seq.turn.right+puis+turn.right
+634,Intermediate and up,Two steps (puis),"Tournez à droite, puis tournez à gauche.",Dispatcher (calm),40,seq.turn.right+puis+turn.left
+635,Intermediate and up,Two steps (puis),"Tournez à droite, puis, au rond-point, prenez la deuxième sortie.",Dispatcher (calm),65,seq.turn.right+puis+roundabout.deuxieme
+636,Intermediate and up,Two steps (puis),"Tournez à droite, puis, au rond-point, prenez la première sortie.",Dispatcher (calm),65,seq.turn.right+puis+roundabout.premiere
+637,Intermediate and up,Two steps (puis),"Tournez à droite, puis, au rond-point, prenez la troisième sortie.",Dispatcher (calm),66,seq.turn.right+puis+roundabout.troisieme
+638,All levels,Simple direction,Tournez à droite.,Dispatcher (calm),17,dir.turn.right
+639,All levels,Turn at / after a place,Tournez à gauche après l'arrêt de bus.,Dispatcher (calm),38,dir.turn.left.apres.bus_stop
+640,All levels,Turn at / after a place,Tournez à gauche après l'école.,Dispatcher (calm),31,dir.turn.left.apres.school
+641,All levels,Turn at / after a place,Tournez à gauche après l'hôpital.,Dispatcher (calm),33,dir.turn.left.apres.hospital
+642,All levels,Turn at / after a place,Tournez à gauche après l'hôtel.,Dispatcher (calm),31,dir.turn.left.apres.hotel
+643,All levels,Turn at / after a place,Tournez à gauche après la banque.,Dispatcher (calm),33,dir.turn.left.apres.bank
+644,All levels,Turn at / after a place,Tournez à gauche après la bibliothèque.,Dispatcher (calm),39,dir.turn.left.apres.library
+645,All levels,Turn at / after a place,Tournez à gauche après la boulangerie.,Dispatcher (calm),38,dir.turn.left.apres.bakery
+646,All levels,Turn at / after a place,Tournez à gauche après la gare routière.,Dispatcher (calm),40,dir.turn.left.apres.bus_station
+647,All levels,Turn at / after a place,Tournez à gauche après la librairie.,Dispatcher (calm),36,dir.turn.left.apres.bookshop
+648,All levels,Turn at / after a place,Tournez à gauche après la mairie.,Dispatcher (calm),33,dir.turn.left.apres.town_hall
+649,All levels,Turn at / after a place,Tournez à gauche après la pharmacie.,Dispatcher (calm),36,dir.turn.left.apres.pharmacy
+650,All levels,Turn at / after a place,Tournez à gauche après la piscine.,Dispatcher (calm),34,dir.turn.left.apres.swimming_pool
+651,All levels,Turn at / after a place,Tournez à gauche après la poste.,Dispatcher (calm),32,dir.turn.left.apres.post_office
+652,All levels,Turn at / after a place,Tournez à gauche après la station-service.,Dispatcher (calm),42,dir.turn.left.apres.gas_station
+653,All levels,Turn at / after a place,Tournez à gauche après le café.,Dispatcher (calm),31,dir.turn.left.apres.cafe
+654,All levels,Turn at / after a place,Tournez à gauche après le centre commercial.,Dispatcher (calm),44,dir.turn.left.apres.shopping_centre
+655,All levels,Turn at / after a place,Tournez à gauche après le cinéma.,Dispatcher (calm),33,dir.turn.left.apres.cinema
+656,All levels,Turn at / after a place,Tournez à gauche après le commissariat de police.,Dispatcher (calm),49,dir.turn.left.apres.police_station
+657,All levels,Turn at / after a place,Tournez à gauche après le magasin.,Dispatcher (calm),34,dir.turn.left.apres.shop
+658,All levels,Turn at / after a place,Tournez à gauche après le marché.,Dispatcher (calm),33,dir.turn.left.apres.market
+659,All levels,Turn at / after a place,Tournez à gauche après le parking.,Dispatcher (calm),34,dir.turn.left.apres.car_park
+660,All levels,Turn at / after a place,Tournez à gauche après le restaurant.,Dispatcher (calm),37,dir.turn.left.apres.restaurant
+661,All levels,Turn at / after a place,Tournez à gauche après le stade.,Dispatcher (calm),32,dir.turn.left.apres.stadium
+662,All levels,Turn at / after a place,Tournez à gauche après le supermarché.,Dispatcher (calm),38,dir.turn.left.apres.supermarket
+663,All levels,Turn at / after a place,Tournez à gauche après le théâtre.,Dispatcher (calm),34,dir.turn.left.apres.theatre
+664,Intermediate and up,Turn before a place,Tournez à gauche avant l'arrêt de bus.,Dispatcher (calm),38,dir.turn.left.avant.bus_stop
+665,Intermediate and up,Turn before a place,Tournez à gauche avant l'école.,Dispatcher (calm),31,dir.turn.left.avant.school
+666,Intermediate and up,Turn before a place,Tournez à gauche avant l'hôpital.,Dispatcher (calm),33,dir.turn.left.avant.hospital
+667,Intermediate and up,Turn before a place,Tournez à gauche avant la gare routière.,Dispatcher (calm),40,dir.turn.left.avant.bus_station
+668,Intermediate and up,Turn before a place,Tournez à gauche avant le musée.,Dispatcher (calm),32,dir.turn.left.avant.museum
+669,Intermediate and up,Turn before a place,Tournez à gauche avant le parking.,Dispatcher (calm),34,dir.turn.left.avant.car_park
+670,Intermediate and up,Turn before a place,Tournez à gauche avant le supermarché.,Dispatcher (calm),38,dir.turn.left.avant.supermarket
+671,All levels,Turn at / after a place,Tournez à gauche devant l'école.,Dispatcher (calm),32,dir.turn.left.devant.school
+672,All levels,Turn at / after a place,Tournez à gauche devant l'hôpital.,Dispatcher (calm),34,dir.turn.left.devant.hospital
+673,All levels,Turn at / after a place,Tournez à gauche devant l'hôtel.,Dispatcher (calm),32,dir.turn.left.devant.hotel
+674,All levels,Turn at / after a place,Tournez à gauche devant la banque.,Dispatcher (calm),34,dir.turn.left.devant.bank
+675,All levels,Turn at / after a place,Tournez à gauche devant la bibliothèque.,Dispatcher (calm),40,dir.turn.left.devant.library
+676,All levels,Turn at / after a place,Tournez à gauche devant la boulangerie.,Dispatcher (calm),39,dir.turn.left.devant.bakery
+677,All levels,Turn at / after a place,Tournez à gauche devant la gare routière.,Dispatcher (calm),41,dir.turn.left.devant.bus_station
+678,All levels,Turn at / after a place,Tournez à gauche devant la gare.,Dispatcher (calm),32,dir.turn.left.devant.train_station
+679,All levels,Turn at / after a place,Tournez à gauche devant la librairie.,Dispatcher (calm),37,dir.turn.left.devant.bookshop
+680,All levels,Turn at / after a place,Tournez à gauche devant la mairie.,Dispatcher (calm),34,dir.turn.left.devant.town_hall
+681,All levels,Turn at / after a place,Tournez à gauche devant la pharmacie.,Dispatcher (calm),37,dir.turn.left.devant.pharmacy
+682,All levels,Turn at / after a place,Tournez à gauche devant la piscine.,Dispatcher (calm),35,dir.turn.left.devant.swimming_pool
+683,All levels,Turn at / after a place,Tournez à gauche devant la place.,Dispatcher (calm),33,dir.turn.left.devant.square
+684,All levels,Turn at / after a place,Tournez à gauche devant la plage.,Dispatcher (calm),33,dir.turn.left.devant.beach
+685,All levels,Turn at / after a place,Tournez à gauche devant la poste.,Dispatcher (calm),33,dir.turn.left.devant.post_office
+686,All levels,Turn at / after a place,Tournez à gauche devant la station-service.,Dispatcher (calm),43,dir.turn.left.devant.gas_station
+687,All levels,Turn at / after a place,Tournez à gauche devant le café.,Dispatcher (calm),32,dir.turn.left.devant.cafe
+688,All levels,Turn at / after a place,Tournez à gauche devant le centre commercial.,Dispatcher (calm),45,dir.turn.left.devant.shopping_centre
+689,All levels,Turn at / after a place,Tournez à gauche devant le cinéma.,Dispatcher (calm),34,dir.turn.left.devant.cinema
+690,All levels,Turn at / after a place,Tournez à gauche devant le commissariat de police.,Dispatcher (calm),50,dir.turn.left.devant.police_station
+691,All levels,Turn at / after a place,Tournez à gauche devant le magasin.,Dispatcher (calm),35,dir.turn.left.devant.shop
+692,All levels,Turn at / after a place,Tournez à gauche devant le marché.,Dispatcher (calm),34,dir.turn.left.devant.market
+693,All levels,Turn at / after a place,Tournez à gauche devant le musée.,Dispatcher (calm),33,dir.turn.left.devant.museum
+694,All levels,Turn at / after a place,Tournez à gauche devant le parc.,Dispatcher (calm),32,dir.turn.left.devant.park
+695,All levels,Turn at / after a place,Tournez à gauche devant le parking.,Dispatcher (calm),35,dir.turn.left.devant.car_park
+696,All levels,Turn at / after a place,Tournez à gauche devant le restaurant.,Dispatcher (calm),38,dir.turn.left.devant.restaurant
+697,All levels,Turn at / after a place,Tournez à gauche devant le stade.,Dispatcher (calm),33,dir.turn.left.devant.stadium
+698,All levels,Turn at / after a place,Tournez à gauche devant le supermarché.,Dispatcher (calm),39,dir.turn.left.devant.supermarket
+699,All levels,Turn at / after a place,Tournez à gauche devant le théâtre.,Dispatcher (calm),35,dir.turn.left.devant.theatre
+700,Intermediate and up,Two steps (puis),"Tournez à gauche, puis prenez la deuxième rue à droite.",Dispatcher (calm),55,seq.turn.left+puis+street.right.deuxieme
+701,Intermediate and up,Two steps (puis),"Tournez à gauche, puis prenez la deuxième rue à gauche.",Dispatcher (calm),55,seq.turn.left+puis+street.left.deuxieme
+702,Intermediate and up,Two steps (puis),"Tournez à gauche, puis prenez la première rue à droite.",Dispatcher (calm),55,seq.turn.left+puis+street.right.premiere
+703,Intermediate and up,Two steps (puis),"Tournez à gauche, puis prenez la première rue à gauche.",Dispatcher (calm),55,seq.turn.left+puis+street.left.premiere
+704,Intermediate and up,Two steps (puis),"Tournez à gauche, puis prenez la prochaine rue à droite.",Dispatcher (calm),56,seq.turn.left+puis+street.right.prochaine
+705,Intermediate and up,Two steps (puis),"Tournez à gauche, puis prenez la prochaine rue à gauche.",Dispatcher (calm),56,seq.turn.left+puis+street.left.prochaine
+706,Intermediate and up,Two steps (puis),"Tournez à gauche, puis tournez à droite.",Dispatcher (calm),40,seq.turn.left+puis+turn.right
+707,Intermediate and up,Two steps (puis),"Tournez à gauche, puis tournez à gauche.",Dispatcher (calm),40,seq.turn.left+puis+turn.left
+708,Intermediate and up,Two steps (puis),"Tournez à gauche, puis, au rond-point, prenez la deuxième sortie.",Dispatcher (calm),65,seq.turn.left+puis+roundabout.deuxieme
+709,Intermediate and up,Two steps (puis),"Tournez à gauche, puis, au rond-point, prenez la première sortie.",Dispatcher (calm),65,seq.turn.left+puis+roundabout.premiere
+710,Intermediate and up,Two steps (puis),"Tournez à gauche, puis, au rond-point, prenez la troisième sortie.",Dispatcher (calm),66,seq.turn.left+puis+roundabout.troisieme
+711,All levels,Simple direction,Tournez à gauche.,Dispatcher (calm),17,dir.turn.left
+712,All levels,Wrong-turn correction,Ce n'est pas la bonne rue.,Dispatcher (calm),26,dir.wrong_street
+713,All levels,Wrong-turn correction,Faites demi-tour.,Dispatcher (calm),17,dir.u_turn
+714,Intermediate and up,EVENT,Descendez de la voiture !,Dispatcher (calm),25,event.get_out
+715,Intermediate and up,EVENT,Il est à pied !,Dispatcher (calm),15,event.on_foot
+716,Hard and up,EVENT,Il monte dans une voiture !,Dispatcher (calm),27,event.suspect_boards
+717,Intermediate and up,EVENT,Le suspect est sorti de la voiture.,Dispatcher (calm),35,event.suspect_left_car
+718,Hard and up,EVENT,Montez dans la voiture !,Dispatcher (calm),24,event.get_in
+719,All levels,Officer asks for a repeat,"Pouvez-vous répéter, s'il vous plaît ?",Officer (urgent),38,repeat.calm
+720,All levels,Officer asks for a repeat,Répétez ! Vite !,Officer (urgent),16,repeat.frantic
+721,All levels,Officer asks for a repeat,"Répétez, s'il vous plaît !",Officer (urgent),26,repeat.urgent
+722,All levels,End of chase,Le suspect est arrêté !,Dispatcher (calm),23,outcome.captured
+723,All levels,End of chase,Le suspect s'éloigne.,Dispatcher (calm),21,event.moving_away
+724,All levels,End of chase,Le suspect s'est échappé.,Dispatcher (calm),25,outcome.escaped

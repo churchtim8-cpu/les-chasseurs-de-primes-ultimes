@@ -55,9 +55,23 @@ The weights, stage lengths and timings live in `src/engine/chase/settings.ts`. W
 
 ## French audio
 
-The scanner plays pre-recorded ElevenLabs clips. `npm run audio:script` writes every line the game can say to `docs/audio/script.csv` for review. Recordings go in `public/audio/dispatcher/` and `public/audio/officer/`, named by audio ID (for example `dir.turn.left.mp3`); `npm run audio:manifest` then lists them in `public/audio/manifest.json`. Until a line is recorded it is shown as text, with the radio beep and static. Add `?radio=0` to hear the clips without the radio filter. `audio/review.html` on the site lists every recording with a play button, for checking pronunciation.
+The scanner plays pre-recorded ElevenLabs clips. `npm run audio:script` writes every line the game can say to `docs/audio/script.csv` for review. Recordings go in `public/audio/dispatcher/` and `public/audio/officer/`, named by audio ID (for example `dir.turn.left.mp3`); `npm run audio:manifest` then lists them in `public/audio/manifest.json`. Once the library has any clips, the scanner only chooses directions whose clips are all recorded, so new sentence types appear in play as soon as their clips are added. Event lines with no recording yet are shown as text, with the radio beep and static. Add `?radio=0` to hear the clips without the radio filter. `audio/review.html` on the site lists every recording with a play button, for checking pronunciation.
 
-The current library (334 lines) was recorded with ElevenLabs Eleven v4: Christophe for the dispatcher and Alain for the officer. The 8 lines added for transport changes and three on-foot sentences are not recorded yet, so they show as text. New lines must use the same model and voices. The clips keep ElevenLabs' content-credential tag.
+The current library (334 lines) was recorded with ElevenLabs Eleven v4: Christophe for the dispatcher and Alain for the officer. Not recorded yet: the 8 lines for transport changes and on-foot sentences, and the 382 clause clips for Hard and Expert (see below). Alain (male) and Geneviève (female) are the chosen dispatcher voices and will replace Christophe; new recordings go to them. The clips keep ElevenLabs' content-credential tag.
+
+### Hard and Expert instructions
+
+Longer instructions are built from recordings that already exist plus whole clauses recorded with their linking word, played back to back (never single words):
+
+| Template | Example | Clips |
+|---|---|---|
+| H1 / H2 | Tournez à gauche devant la banque. Puis prenez la deuxième rue à gauche. | landmark sentence + "Puis …" |
+| H3 | Tournez à gauche, puis tournez à droite. Ensuite, prenez la deuxième rue à gauche. | "…, puis …" sentence + "Ensuite, …" |
+| H4 | Prenez la troisième rue à droite. | one sentence |
+| X1 | D'abord, tournez à gauche. Ensuite, prenez la première rue à droite. Enfin, … | "D'abord, …" + "Ensuite, …" (+ "Enfin, …") |
+| X2 | D'abord, tournez à gauche devant la banque. Ensuite, tournez à droite après le cinéma. | the same, with two or more landmarks |
+
+Each clause is checked from just after the turn before it, so the whole call is true and unambiguous. Weights and distances are in `src/engine/language/settings.ts`. X3 (corrections) comes with the chase events.
 
 ## Debug mode
 

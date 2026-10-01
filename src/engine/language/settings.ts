@@ -3,8 +3,9 @@ import type { Relation, TemplateId } from './instructions';
 
 /**
  * Which instruction templates each difficulty uses (blueprint sections 10 and
- * 12), and how often. Provisional: tune in playtesting. Hard and Expert reuse
- * the Intermediate set until their own templates (H1–H4, X1–X3) arrive in M6.
+ * 12), and how often. Provisional: tune in playtesting. Hard adds longer
+ * sentences (H1–H4); Expert adds "D'abord … Ensuite … Enfin" sequences (X1,
+ * X2). Difficulty comes from length and memory, never faster speech.
  */
 export interface LanguageSettings {
   /** Relative weight of each template when several valid ones exist; missing = not used. */
@@ -17,6 +18,8 @@ export interface LanguageSettings {
   maxRoundaboutOrdinal: number;
   /** Two actions closer together than this (metres) may be given as one "…, puis …" instruction. */
   pairWithin: number;
+  /** Three actions within this distance (metres, first to last) may be given in one transmission (H3, X1, X2). 0 = never. */
+  tripleWithin: number;
   /** How long the French text stays on screen, in seconds. */
   textSeconds: number;
 }
@@ -27,6 +30,7 @@ const INTERMEDIATE: LanguageSettings = {
   maxStreetOrdinal: 3,
   maxRoundaboutOrdinal: 3,
   pairWithin: 420,
+  tripleWithin: 0,
   textSeconds: 4,
 };
 
@@ -38,9 +42,20 @@ export const LANGUAGE_SETTINGS: Record<Difficulty, LanguageSettings> = {
     // "troisième" is used from Intermediate upwards (Mr Henry, 2026-09-30).
     maxRoundaboutOrdinal: 2,
     pairWithin: 0,
+    tripleWithin: 0,
     textSeconds: 6,
   },
   INTERMEDIATE,
-  HARD: { ...INTERMEDIATE, textSeconds: 3 },
-  EXPERT: { ...INTERMEDIATE, textSeconds: 3 },
+  HARD: {
+    ...INTERMEDIATE,
+    weights: { E1: 0.4, E2: 1, I1: 1, I2: 1, I3: 1.5, H1: 2, H2: 2, H3: 3, H4: 2.5, RB: 1 },
+    tripleWithin: 650,
+    textSeconds: 3,
+  },
+  EXPERT: {
+    ...INTERMEDIATE,
+    weights: { E1: 0.3, E2: 1, I1: 0.8, I2: 0.8, I3: 0.8, H1: 1, H2: 1, H4: 1.5, X1: 3, X2: 3, RB: 1 },
+    tripleWithin: 900,
+    textSeconds: 3,
+  },
 };

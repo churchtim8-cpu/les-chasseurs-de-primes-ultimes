@@ -13,9 +13,19 @@
 import { CHASE_TYPE_MODES, CHASE_TYPE_WEIGHTS, CHASE_TYPES, type ChaseType } from '../chase/settings';
 import { DIFFICULTIES, type Difficulty } from '../difficulty';
 import { isDecision, scanAhead } from '../language/analysis';
-import { describe, positionLeaving, readsAs } from '../language/generate';
-import { makeInstruction, type Clause, type TemplateId } from '../language/instructions';
+import { describe, positionLeaving, readsAs, weightOf } from '../language/generate';
+import {
+  linkedClip,
+  linkWords,
+  makeInstruction,
+  templateFor,
+  type Clause,
+  type Form,
+  type LinkWord,
+  type TemplateId,
+} from '../language/instructions';
 import { LANGUAGE_SETTINGS } from '../language/settings';
+import type { MoverStart } from '../movement/mover';
 import { canTravel, type TownGraph, type TravelMode } from '../world/graph';
 
 /** Two voices (blueprint section 17): the calm dispatcher and the officer in the car. */
@@ -84,20 +94,51 @@ function addLine(out: Collected, line: Omit<ScriptLine, 'levels'>, level: Diffic
   out.set(line.audioId, { ...line, levels: [level] });
 }
 
-function addClauses(out: Collected, clauses: Clause[], level: Difficulty): void {
-  const instruction = makeInstruction(clauses, level);
-  if ((LANGUAGE_SETTINGS[level].weights[instruction.template] ?? 0) <= 0 && instruction.template !== 'R') return;
-  addLine(
-    out,
-    {
-      audioId: instruction.audioId,
-      text: instruction.text,
-      voice: 'DISPATCHER',
-      category: instruction.template === 'R' ? 'RECOVERY' : 'DIRECTION',
-      template: instruction.template,
-    },
-    level,
-  );
+function addClauses(out: Collected, clauses: Clause[], level: Difficulty, form: Form = 'SENTENCE'): void {
+  const template = templateFor(clauses, level, form);
+  if (!template || (template !== 'R' && weightOf(clauses, level, form) <= 0)) return;
+  const instruction = makeInstruction(clauses, level, [], form);
+  for (const clip of instruction.clips) {
+    addLine(
+      out,
+      {
+        audioId: clip.audioId,
+        text: clip.text,
+        voice: 'DISPATCHER',
+        category: template === 'R' ? 'RECOVERY' : 'DIRECTION',
+        // A clause clip ("Ensuite, …") can be shared by several multi-step templates.
+        template: instruction.clips.length === 1 ? template : null,
+      },
+      level,
+    );
+  }
+}
+
+/** Adds the clips of every multi-step instruction whose clauses come from these per-step choices. */
+function addSteps(out: Collected, steps: Clause[][], level: Difficulty, form: Form): void {
+  if (form === 'SENTENCE') {
+    for (const combo of product(steps)) addClauses(out, combo, level, form);
+    return;
+  }
+  // Linked clips hold one clause each, and X1/X2 accept any two or three clauses:
+  // record each step's clauses once with that step's linking word.
+  const weights = LANGUAGE_SETTINGS[level].weights;
+  if ((weights.X1 ?? 0) <= 0 && (weights.X2 ?? 0) <= 0) return;
+  const words = linkWords(steps.length);
+  for (const [k, choices] of steps.entries()) {
+    for (const c of choices) {
+      addLine(out, { ...linkedClip(words[k] as LinkWord, c), voice: 'DISPATCHER', category: 'DIRECTION', template: null }, level);
+    }
+  }
+}
+
+function* product(steps: Clause[][]): Generator<Clause[]> {
+  if (steps.length === 0) {
+    yield [];
+    return;
+  }
+  const [head, ...rest] = steps as [Clause[], ...Clause[][]];
+  for (const c of head) for (const tail of product(rest)) yield [c, ...tail];
 }
 
 /** Every directed road start: a position just after leaving each node along each legal edge. */
@@ -110,35 +151,51 @@ function starts(graph: TownGraph, mode: TravelMode): { from: string; to: string 
   return out;
 }
 
-/** Direction sentences the generator can produce and accept anywhere on the map, for one level. */
+/**
+ * Direction lines the generator can produce and accept anywhere on the map,
+ * for one level: single sentences, and the multi-step instructions it can
+ * build from two or three actions close together (each clause valid from
+ * just after the turn before it, exactly as `instructionFor` checks).
+ */
 function directionLines(graph: TownGraph, level: Difficulty, out: Collected, mode: TravelMode): void {
   const settings = LANGUAGE_SETTINGS[level];
-  for (const start of starts(graph, mode)) {
-    const pos = positionLeaving(graph, start.from, start.to, mode);
-    const ahead = scanAhead(graph, pos, mode);
-    for (const node of ahead.nodes.filter(isDecision)) {
+  const memo = new Map<string, Clause[]>();
+  const validAt = (pos: MoverStart, node: string, to: string): Clause[] => {
+    const key = `${pos.edgeId}|${pos.towards}|${node}|${to}`;
+    let found = memo.get(key);
+    if (!found) {
+      found = describe(graph, pos, node, to, level, false).filter((c) => readsAs(graph, pos, c, node, to));
+      memo.set(key, found);
+    }
+    return found;
+  };
+  /** Turns (node, exit, clauses) reachable straight on from `pos` within `within` metres. */
+  const turnsAhead = (pos: MoverStart, within: number) => {
+    const out2: { node: string; to: string; s: number; clauses: Clause[] }[] = [];
+    for (const node of scanAhead(graph, pos, mode, within).nodes.filter(isDecision)) {
+      if (node.s > within) break;
       for (const exit of node.exits) {
         if (exit.kind !== 'LEFT' && exit.kind !== 'RIGHT') continue;
-        const valid = describe(graph, pos, node.node, exit.step.to, level, false).filter((c) =>
-          readsAs(graph, pos, c, node.node, exit.step.to),
-        );
-        for (const clause of valid) addClauses(out, [clause], level);
+        const clauses = validAt(pos, node.node, exit.step.to);
+        if (clauses.length > 0) out2.push({ node: node.node, to: exit.step.to, s: node.s, clauses });
+      }
+    }
+    return out2;
+  };
 
-        // "…, puis …" pairs: a second action shortly after this one.
-        if ((settings.weights.I3 ?? 0) <= 0) continue;
-        const firsts = valid.filter((c) => !('landmark' in c && c.landmark));
-        if (firsts.length === 0) continue;
-        const pos2 = positionLeaving(graph, node.node, exit.step.to, mode);
-        const ahead2 = scanAhead(graph, pos2, mode, settings.pairWithin);
-        for (const node2 of ahead2.nodes.filter(isDecision)) {
-          if (node2.s > settings.pairWithin) break;
-          for (const exit2 of node2.exits) {
-            if (exit2.kind !== 'LEFT' && exit2.kind !== 'RIGHT') continue;
-            const seconds = describe(graph, pos2, node2.node, exit2.step.to, level, true).filter((c) =>
-              readsAs(graph, pos2, c, node2.node, exit2.step.to),
-            );
-            for (const c1 of firsts) for (const c2 of seconds) addClauses(out, [c1, c2], level);
-          }
+  const forms: Form[] = ['SENTENCE', 'LINKED'];
+  for (const start of starts(graph, mode)) {
+    const pos = positionLeaving(graph, start.from, start.to, mode);
+    for (const first of turnsAhead(pos, Infinity)) {
+      for (const clause of first.clauses) addClauses(out, [clause], level);
+      if (settings.pairWithin <= 0) continue;
+      const pos1 = positionLeaving(graph, first.node, first.to, mode);
+      for (const second of turnsAhead(pos1, settings.pairWithin)) {
+        for (const form of forms) addSteps(out, [first.clauses, second.clauses], level, form);
+        if (second.s >= settings.tripleWithin) continue;
+        const pos2 = positionLeaving(graph, second.node, second.to, mode);
+        for (const third of turnsAhead(pos2, settings.tripleWithin - second.s)) {
+          for (const form of forms) addSteps(out, [first.clauses, second.clauses, third.clauses], level, form);
         }
       }
     }

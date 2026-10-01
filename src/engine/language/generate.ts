@@ -16,7 +16,7 @@ import type { Rng } from '../rng/prng';
 import type { TownGraph, TravelMode } from '../world/graph';
 import { isAt, opensOn, passPoint, scanAhead } from './analysis';
 import { interpret } from './interpret';
-import { makeInstruction, ordinalWord, templateFor, type Clause, type Instruction } from './instructions';
+import { makeInstruction, ordinalWord, templateFor, type Clause, type Form, type Instruction } from './instructions';
 import { LANGUAGE_SETTINGS } from './settings';
 
 export interface Guided {
@@ -79,7 +79,7 @@ export function describable(graph: TownGraph, nodes: readonly string[], mode: Tr
   const max = LANGUAGE_SETTINGS[difficulty].maxRoundaboutOrdinal;
   if (!roundaboutExits(graph, nodes, mode).every((n) => n <= max)) return false;
   const settings = LANGUAGE_SETTINGS[difficulty];
-  const allowed = (c: Clause) => (settings.weights[templateFor([c], difficulty)] ?? 0) > 0;
+  const allowed = (c: Clause) => weightOf([c], difficulty, 'SENTENCE') > 0;
   const actions = actionIndices(graph, nodes, mode);
   for (const [k, a] of actions.entries()) {
     const node = nodes[a] as string;
@@ -92,6 +92,12 @@ export function describable(graph: TownGraph, nodes: readonly string[], mode: Tr
     if (!found) return false;
   }
   return true;
+}
+
+/** How often the level uses this shape of instruction (0 = never). */
+export function weightOf(clauses: readonly Clause[], difficulty: Difficulty, form: Form): number {
+  const template = templateFor(clauses, difficulty, form);
+  return template ? (LANGUAGE_SETTINGS[difficulty].weights[template] ?? 0) : 0;
 }
 
 /** True when the interpreter's only reading of the clause is this junction and this exit. */
@@ -168,55 +174,81 @@ function between(graph: TownGraph, guide: readonly string[], a: number, b: numbe
 /**
  * An instruction for the action at `guide[a]`, heard at position `from`, or
  * null if no approved sentence is both true and unambiguous from here yet.
- * `nextAction` (if any) is the action after it, for "…, puis …" pairs.
+ * `next` holds the actions after it (up to two), so close actions can be
+ * given together: "…, puis …" (I3, H1, H2), a third step with "Ensuite"
+ * (H3), or Expert's "D'abord … Ensuite … Enfin" (X1, X2). Each clause is
+ * checked from where it applies: just after the turn before it.
  */
 export function instructionFor(
   graph: TownGraph,
   from: MoverStart,
   guide: readonly string[],
   a: number,
-  nextAction: number | undefined,
+  next: readonly number[],
   difficulty: Difficulty,
   rng: Rng,
   hasAudio: AudioCheck = ANY_AUDIO,
 ): Guided | null {
   const settings = LANGUAGE_SETTINGS[difficulty];
-  const node = guide[a] as string;
-  const to = guide[a + 1] as string;
-  const allowed = (clauses: Clause[]) => (settings.weights[templateFor(clauses, difficulty)] ?? 0) > 0;
-  const add = (guided: Guided) => {
-    if (hasAudio(guided.instruction.audioId)) options.push(guided);
+  const options: Guided[] = [];
+  const add = (clauses: Clause[], form: Form, covers: number[]) => {
+    if (weightOf(clauses, difficulty, form) <= 0) return;
+    const instruction = makeInstruction(clauses, difficulty, covers.map((i) => guide[i] as string), form);
+    if (instruction.clips.every((c) => hasAudio(c.audioId))) options.push({ instruction, covers });
   };
 
-  const options: Guided[] = [];
-  const singles = describe(graph, from, node, to, difficulty, false).filter((c) => readsAs(graph, from, c, node, to));
-  for (const clause of singles) {
-    if (allowed([clause])) add({ instruction: makeInstruction([clause], difficulty, [node]), covers: [a] });
+  const steps = [a, ...next];
+  const valid: Clause[][] = [];
+  const clausesAt = (k: number): Clause[] => {
+    if (valid[k]) return valid[k];
+    const i = steps[k] as number;
+    const node = guide[i] as string;
+    const to = guide[i + 1] as string;
+    const prev = steps[k - 1];
+    const at = k === 0 || prev === undefined ? from : positionLeaving(graph, guide[prev] as string, guide[prev + 1] as string, from.mode);
+    valid[k] = describe(graph, at, node, to, difficulty, false).filter((c) => readsAs(graph, at, c, node, to));
+    return valid[k];
+  };
+
+  for (const clause of clausesAt(0)) add([clause], 'SENTENCE', [a]);
+
+  const second = next[0];
+  if (second !== undefined && between(graph, guide, a, second) <= settings.pairWithin) {
+    for (const c1 of clausesAt(0)) {
+      for (const c2 of clausesAt(1)) {
+        add([c1, c2], 'SENTENCE', [a, second]);
+        add([c1, c2], 'LINKED', [a, second]);
+      }
+    }
   }
 
-  // Two actions close together: one "…, puis …" sentence (I3), each clause checked from where it applies.
+  const third = next[1];
+  // The first two steps of a three-step instruction are close enough for a "…, puis …" pair.
   if (
-    nextAction !== undefined &&
-    (settings.weights.I3 ?? 0) > 0 &&
-    between(graph, guide, a, nextAction) <= settings.pairWithin
+    second !== undefined &&
+    third !== undefined &&
+    between(graph, guide, a, second) <= settings.pairWithin &&
+    between(graph, guide, a, third) <= settings.tripleWithin
   ) {
-    const node2 = guide[nextAction] as string;
-    const to2 = guide[nextAction + 1] as string;
-    const from2 = positionLeaving(graph, node, to, from.mode);
-    const firsts = describe(graph, from, node, to, difficulty, true).filter((c) => readsAs(graph, from, c, node, to));
-    const seconds = describe(graph, from2, node2, to2, difficulty, true).filter((c) =>
-      readsAs(graph, from2, c, node2, to2),
-    );
-    for (const c1 of firsts) {
-      for (const c2 of seconds) {
-        add({ instruction: makeInstruction([c1, c2], difficulty, [node, node2]), covers: [a, nextAction] });
+    for (const c1 of clausesAt(0)) {
+      for (const c2 of clausesAt(1)) {
+        for (const c3 of clausesAt(2)) {
+          add([c1, c2, c3], 'SENTENCE', [a, second, third]);
+          add([c1, c2, c3], 'LINKED', [a, second, third]);
+        }
       }
     }
   }
 
   if (options.length === 0) return null;
-  const weights = options.map((o) => settings.weights[o.instruction.template] ?? 0);
-  return rng.weighted(options, weights);
+  // Pick the template by its weight first, then one of its sentences, so a template
+  // with many possible sentences (long sequences) does not crowd out the others.
+  const templates = [...new Set(options.map((o) => o.instruction.template))];
+  const template = rng.weighted(
+    templates,
+    templates.map((t) => settings.weights[t] ?? 0),
+  );
+  return rng.pick(options.filter((o) => o.instruction.template === template));
 }
 
 /** "Continuez tout droit." when it is true: the route carries straight on at the next junction. */

@@ -81,6 +81,55 @@ describe('French sentences', () => {
     ).toBe('Tournez à droite, puis, au rond-point, prenez la deuxième sortie.');
   });
 
+  it('builds the Hard shapes from recorded sentences and "Puis / Ensuite" clauses (H1–H4)', () => {
+    const left: Clause = { action: 'TURN', side: 'LEFT' };
+    const right: Clause = { action: 'TURN', side: 'RIGHT' };
+    const street2: Clause = { action: 'TAKE_STREET', side: 'LEFT', ordinal: 2, word: 'DEUXIEME' };
+    const h1 = makeInstruction([{ action: 'TURN', side: 'LEFT', landmark: 'BANK', relation: 'DEVANT' }, street2], 'HARD');
+    expect(h1.template).toBe('H1');
+    expect(h1.text).toBe('Tournez à gauche devant la banque. Puis prenez la deuxième rue à gauche.');
+    expect(h1.clips.map((c) => c.audioId)).toEqual(['dir.turn.left.devant.bank', 'link.puis.street.left.deuxieme']);
+    const h2 = makeInstruction([{ action: 'TURN', side: 'RIGHT', landmark: 'CINEMA', relation: 'APRES' }, left], 'HARD');
+    expect(h2.template).toBe('H2');
+    expect(h2.text).toBe('Tournez à droite après le cinéma. Puis tournez à gauche.');
+    const h3 = makeInstruction([left, right, street2], 'HARD');
+    expect(h3.template).toBe('H3');
+    expect(h3.text).toBe('Tournez à gauche, puis tournez à droite. Ensuite, prenez la deuxième rue à gauche.');
+    expect(h3.clips.map((c) => c.audioId)).toEqual(['seq.turn.left+puis+turn.right', 'link.ensuite.street.left.deuxieme']);
+    const third: Clause = { action: 'TAKE_STREET', side: 'RIGHT', ordinal: 3, word: 'TROISIEME' };
+    expect(makeInstruction([third], 'HARD').template).toBe('H4');
+    expect(makeInstruction([third], 'INTERMEDIATE').template).toBe('I2');
+  });
+
+  it('builds Expert sequences with "D\'abord, Ensuite, Enfin" (X1, X2)', () => {
+    const x1 = makeInstruction(
+      [
+        { action: 'TURN', side: 'LEFT' },
+        { action: 'TAKE_STREET', side: 'RIGHT', ordinal: 1, word: 'PREMIERE' },
+        { action: 'ROUNDABOUT_EXIT', ordinal: 2, word: 'DEUXIEME' },
+      ],
+      'EXPERT',
+      [],
+      'LINKED',
+    );
+    expect(x1.template).toBe('X1');
+    expect(x1.text).toBe(
+      "D'abord, tournez à gauche. Ensuite, prenez la première rue à droite. Enfin, au rond-point, prenez la deuxième sortie.",
+    );
+    const x2 = makeInstruction(
+      [
+        { action: 'TURN', side: 'LEFT', landmark: 'BANK', relation: 'DEVANT' },
+        { action: 'TURN', side: 'RIGHT', landmark: 'CINEMA', relation: 'APRES' },
+      ],
+      'EXPERT',
+      [],
+      'LINKED',
+    );
+    expect(x2.template).toBe('X2');
+    expect(x2.text).toBe("D'abord, tournez à gauche devant la banque. Ensuite, tournez à droite après le cinéma.");
+    expect(x2.clips.map((c) => c.audioId)).toEqual(['link.dabord.turn.left.devant.bank', 'link.ensuite.turn.right.apres.cinema']);
+  });
+
   it('gives every sentence one stable audio ID', () => {
     const a = makeInstruction([{ action: 'TURN', side: 'RIGHT', landmark: 'BANK', relation: 'APRES' }], 'EASY');
     expect(a.audioId).toBe('dir.turn.right.apres.bank');
@@ -169,6 +218,8 @@ describe('scanner instructions in real chases', () => {
       for (const t of used) expect(allowed, `${difficulty} used ${t}`).toContain(t);
       if (difficulty === 'EASY') expect([...used]).toEqual(expect.arrayContaining(['E1', 'E3']));
       if (difficulty === 'INTERMEDIATE') expect([...used]).toEqual(expect.arrayContaining(['I1', 'I2', 'I3']));
+      if (difficulty === 'HARD') expect([...used]).toEqual(expect.arrayContaining(['H1', 'H3', 'H4']));
+      if (difficulty === 'EXPERT') expect([...used]).toEqual(expect.arrayContaining(['X1', 'X2']));
     }
   });
 
