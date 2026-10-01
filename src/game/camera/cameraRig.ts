@@ -17,7 +17,7 @@ export interface CameraProfile {
 }
 
 export const CAMERA_PROFILES: Record<TravelMode, CameraProfile> = {
-  CAR: { viewWidth: 1100, lookAhead: 140, follow: 3.5 },
+  CAR: { viewWidth: 880, lookAhead: 140, follow: 3.5 },
   FOOT: { viewWidth: 480, lookAhead: 35, follow: 6 },
 };
 

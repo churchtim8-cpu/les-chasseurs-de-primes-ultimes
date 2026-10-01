@@ -70,8 +70,11 @@ export function planSightings(
   vehicles: readonly (Vehicle | null)[],
   difficulty: Difficulty,
   suspectStartsAt: number,
+  /** At least this many (debug and tests force sightings on even where the level has none). */
+  atLeast = 0,
 ): Sighting[] {
-  const { count, cards } = CHASE_SETTINGS[difficulty].sightings;
+  const { cards } = CHASE_SETTINGS[difficulty].sightings;
+  const count = Math.max(CHASE_SETTINGS[difficulty].sightings.count, atLeast);
   const candidates: { stage: number; at: number; s: number; place: string }[] = [];
   for (const [stage, { route, length }] of stages.entries()) {
     const earliest = (stage === 0 ? suspectStartsAt : 0) + SIGHTING.minFromStart;

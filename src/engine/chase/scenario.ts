@@ -90,7 +90,7 @@ export interface ScenarioOptions {
   chaseType?: ChaseType;
   /** Debug and tests: force a change of direction on (if the route allows one) or off. */
   turnOff?: boolean;
-  /** Debug and tests: force sightings on (the level's number) or off. */
+  /** Debug and tests: force sightings on (at least one) or off. */
   sightings?: boolean;
   /** Debug and tests: force a lost signal on or off. */
   lostSignal?: boolean;
@@ -144,7 +144,7 @@ export function generateScenario(graph: TownGraph, seedCode: string, options: Sc
   const sightings =
     options.sightings === false
       ? []
-      : planSightings(graph, sightingRng, stages, vehicles, difficulty, PLAYER_OFFSET + headStart);
+      : planSightings(graph, sightingRng, stages, vehicles, difficulty, PLAYER_OFFSET + headStart, options.sightings ? 1 : 0);
   const lostSignal = options.lostSignal ?? rng.fork('lost-signal').chance(settings.lostSignal);
 
   const scenario: ChaseScenario = {
@@ -228,11 +228,17 @@ function planTurnOff(
   const stage = stages.length - 1;
   const { route, mode, length } = stages[stage] as ChaseStage;
   const earliest = (stage === 0 ? suspectStartsAt : 0) + TURN_OFF.minFromStart;
+  const latest = Math.max(
+    stage === 0
+      ? suspectStartsAt + TURN_OFF.beforeCatchShare * suspectRoadBeforeCatch(difficulty, mode)
+      : TURN_OFF.laterStageShare * length,
+    earliest + TURN_OFF.minWindow,
+  );
   const candidates: number[] = [];
   let s = 0;
   for (let i = 1; i < route.length - 1; i++) {
     s += pathLength(graph, [route[i - 1] as string, route[i] as string]);
-    if (s >= earliest && length - s >= length * TURN_OFF.minRemainingShare) candidates.push(i);
+    if (s >= earliest && s <= latest && length - s >= length * TURN_OFF.minRemainingShare) candidates.push(i);
   }
   const used = new Set(stages.flatMap((st) => st.route));
   for (const at of rng.shuffle(candidates)) {
@@ -257,6 +263,16 @@ function planTurnOff(
     }
   }
   return null;
+}
+
+/**
+ * Road the suspect covers before a player who follows every direction at
+ * cruising speed catches it: the gap closes at (1 - suspectSpeed) of the
+ * player's speed, while the suspect drives on at suspectSpeed.
+ */
+function suspectRoadBeforeCatch(difficulty: Difficulty, mode: TravelMode): number {
+  const { headStart, suspectSpeed } = CHASE_SETTINGS[difficulty];
+  return (headStart[mode] * suspectSpeed) / (1 - suspectSpeed);
 }
 
 /** A predicted route that differs from the real one at once, and that the scanner can describe from the stage start. */

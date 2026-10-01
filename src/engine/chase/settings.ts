@@ -42,6 +42,13 @@ export const TRANSFER = {
   pickupWithin: 160,
   /** Extra time on the clock for each change of transport (getting out, catching up on foot is slow). */
   extraSeconds: 12,
+  /**
+   * Suspect speed (fraction of the player's cruising speed) before its last
+   * stage: it keeps pace with the police, so the chase reaches every change of
+   * transport and a wrong turn still costs ground. The police close in on the
+   * last stage, at the level's `suspectSpeed`.
+   */
+  suspectSpeedBeforeLastStage: 1,
 } as const;
 
 /**
@@ -57,17 +64,14 @@ export interface ChaseSettings {
   stageLength: Record<TravelMode, [number, number]>;
   /** How far ahead of the player the suspect starts, by starting mode. */
   headStart: Record<TravelMode, number>;
-  /** Suspect speed as a fraction of the player's cruising speed. */
-  suspectSpeed: number;
   /**
-   * Suspect speed when the player is close. Close to the player's own speed, so
-   * a player who follows correctly closes in steadily and usually makes the
-   * arrest near the end of the route, after several instructions.
+   * Suspect speed as a fraction of the player's cruising speed. The suspect
+   * never stops or waits: the police are only slightly faster, so a player
+   * who follows the directions closes in steadily, and every wrong turn lets
+   * it get further away. If it reaches its destination first, it escapes.
    */
-  suspectFleeSpeed: number;
-  /** Distance under which the suspect starts fleeing faster. */
-  fleeDistance: number;
-  /** Distance at which the suspect is visible on the map (a sighting). */
+  suspectSpeed: number;
+  /** Distance at which the suspect is visible on the map: only when very close. */
   sightingDistance: number;
   /** Capture when this close... */
   captureDistance: number;
@@ -89,6 +93,8 @@ export interface ChaseSettings {
    * Sightings (blueprint section 18): the scanner reports the suspect near a
    * place ("La voiture verte est près de la bibliothèque.") and the player
    * picks the matching suspect from `cards` choices within `pickSeconds`.
+   * Off (count 0) at every level since the 2026-10-01 playtest: the owner
+   * found the pop-up questions interrupting. `?sightings=1` still forces one.
    */
   sightings: { count: number; cards: number; pickSeconds: number };
   /**
@@ -136,6 +142,16 @@ export const TURN_OFF = {
   minFromStart: 120,
   /** ...and with at least this share of the stage still to go, so there is a chase left to run. */
   minRemainingShare: 0.3,
+  /**
+   * In a one-stage chase, the turn-off comes before the suspect has covered this
+   * share of the road it would cover before a player who follows every
+   * direction catches it, so the change of direction happens during the chase.
+   */
+  beforeCatchShare: 0.6,
+  /** After a change of transport the police are close behind, so the turn-off comes within this share of the stage... */
+  laterStageShare: 0.35,
+  /** ...or, either way, within this many metres of the earliest point. */
+  minWindow: 170,
   /** Length of the route the scanner wrongly predicted, from the turn-off point (metres). */
   decoyLength: [250, 700] as [number, number],
   /**
@@ -149,75 +165,67 @@ export const TURN_OFF = {
 
 export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
   EASY: {
-    routeLength: [1300, 2200],
+    routeLength: [2000, 2800],
     footRouteLength: [600, 950],
     stageLength: { CAR: [1000, 1500], FOOT: [250, 400] },
-    headStart: { CAR: 220, FOOT: 90 },
-    suspectSpeed: 0.78,
-    suspectFleeSpeed: 0.97,
-    fleeDistance: 160,
-    sightingDistance: 170,
+    headStart: { CAR: 200, FOOT: 75 },
+    suspectSpeed: 0.8,
+    sightingDistance: 80,
     captureDistance: 28,
     captureHold: 0.6,
     warningDistance: 600,
     escapeDistance: 850,
     escapeHold: 4,
     directionChange: 0,
-    sightings: { count: 1, cards: 2, pickSeconds: 12 },
+    sightings: { count: 0, cards: 2, pickSeconds: 12 },
     lostSignal: 0,
   },
   INTERMEDIATE: {
-    routeLength: [1700, 2700],
+    routeLength: [2200, 3100],
     footRouteLength: [650, 1000],
-    stageLength: { CAR: [1000, 1600], FOOT: [250, 420] },
-    headStart: { CAR: 240, FOOT: 95 },
-    suspectSpeed: 0.8,
-    suspectFleeSpeed: 0.97,
-    fleeDistance: 160,
-    sightingDistance: 150,
+    stageLength: { CAR: [1000, 1600], FOOT: [300, 440] },
+    headStart: { CAR: 210, FOOT: 80 },
+    suspectSpeed: 0.84,
+    sightingDistance: 70,
     captureDistance: 28,
     captureHold: 0.7,
     warningDistance: 550,
     escapeDistance: 800,
     escapeHold: 3.5,
     directionChange: 0.3,
-    sightings: { count: 1, cards: 3, pickSeconds: 10 },
+    sightings: { count: 0, cards: 3, pickSeconds: 10 },
     lostSignal: 0,
   },
   HARD: {
-    routeLength: [2100, 3300],
+    routeLength: [2800, 3800],
     footRouteLength: [700, 1050],
-    stageLength: { CAR: [1100, 1700], FOOT: [260, 440] },
-    headStart: { CAR: 260, FOOT: 100 },
-    suspectSpeed: 0.82,
-    suspectFleeSpeed: 0.97,
-    fleeDistance: 160,
-    sightingDistance: 130,
+    stageLength: { CAR: [1500, 2100], FOOT: [320, 460] },
+    headStart: { CAR: 230, FOOT: 85 },
+    suspectSpeed: 0.86,
+    sightingDistance: 60,
     captureDistance: 26,
     captureHold: 0.8,
     warningDistance: 500,
     escapeDistance: 750,
     escapeHold: 3,
     directionChange: 0.5,
-    sightings: { count: 2, cards: 3, pickSeconds: 9 },
+    sightings: { count: 0, cards: 3, pickSeconds: 9 },
     lostSignal: 0,
   },
   EXPERT: {
-    routeLength: [2400, 3800],
+    routeLength: [3400, 4500],
     footRouteLength: [700, 1100],
-    stageLength: { CAR: [1000, 1600], FOOT: [250, 420] },
-    headStart: { CAR: 280, FOOT: 105 },
-    suspectSpeed: 0.85,
-    suspectFleeSpeed: 0.97,
-    fleeDistance: 160,
-    sightingDistance: 110,
+    stageLength: { CAR: [1800, 2400], FOOT: [330, 480] },
+    headStart: { CAR: 230, FOOT: 85 },
+    suspectSpeed: 0.88,
+    sightingDistance: 50,
     captureDistance: 25,
     captureHold: 0.9,
     warningDistance: 480,
     escapeDistance: 700,
     escapeHold: 2.5,
     directionChange: 0.7,
-    sightings: { count: 2, cards: 3, pickSeconds: 9 },
+    sightings: { count: 0, cards: 3, pickSeconds: 9 },
     lostSignal: 0.9,
   },
 };

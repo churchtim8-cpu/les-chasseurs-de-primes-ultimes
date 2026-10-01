@@ -58,7 +58,7 @@ export type ModeChangeResult = { ok: true } | { ok: false; reason: 'NO_CAR' | 'T
 
 export type ChasePhase = 'PURSUIT' | 'CAPTURED' | 'ESCAPED';
 export type Proximity = 'CLOSE' | 'NEAR' | 'FAR' | 'LOSING';
-export type EscapeReason = 'DISTANCE' | 'TIME';
+export type EscapeReason = 'DISTANCE' | 'TIME' | 'ARRIVED';
 
 export type ChaseEvent =
   | { type: 'CAPTURED' }
@@ -196,9 +196,14 @@ export class Chase {
     this.player = new Mover(graph, scenario.playerStart);
     this.suspect = new Mover(graph, scenario.suspectStart);
     this.suspect.followPlan(scenario.suspectPlan);
-    this.suspect.speedFactor = this.settings.suspectSpeed;
+    this.suspect.speedFactor = this.suspectSpeedFor(0);
     this.navigator = this.navigatorFor(0);
     this.distance = this.measure();
+  }
+
+  /** The suspect keeps pace until its last stage, where the police slowly close in. */
+  private suspectSpeedFor(stage: number): number {
+    return stage === this.lastStage ? this.settings.suspectSpeed : TRANSFER.suspectSpeedBeforeLastStage;
   }
 
   private get lastStage(): number {
@@ -300,8 +305,6 @@ export class Chase {
     this.elapsed += dt;
     this.timeLeft = Math.max(0, this.timeLeft - dt);
     this.player.update(dt);
-    this.suspect.speedFactor =
-      this.distance < this.settings.fleeDistance ? this.settings.suspectFleeSpeed : this.settings.suspectSpeed;
     this.suspect.update(dt);
     if (!this.suspectArrived && this.suspect.snapshot().waiting === 'ARRIVED') {
       if (this.suspectStage < this.lastStage) this.changeSuspectTransport(events);
@@ -310,6 +313,7 @@ export class Chase {
         events.push({ type: 'SUSPECT_ARRIVED' });
       }
     }
+
     this.checkTurnOff(events);
     this.orderGetOut(events);
     if (this.autoStage !== null && this.player.snapshot().waiting === 'ARRIVED') this.beginStage(this.autoStage, events);
@@ -342,8 +346,8 @@ export class Chase {
       events.push({ type: 'WARNING', on: warning });
     }
 
-    // A moving car cannot be caught on foot, nor a runner from the car; a stopped suspect can.
-    const stopped = this.suspectArrived || this.transferUntil !== null;
+    // A moving car cannot be caught on foot, nor a runner from the car; a suspect changing transport can.
+    const stopped = this.transferUntil !== null;
     const canCapture = this.player.mode === this.suspect.mode || stopped;
     this.closeFor = this.distance <= s.captureDistance && canCapture ? this.closeFor + dt : 0;
     // No escape while the scanner is silent: the player cannot be warned.
@@ -351,10 +355,15 @@ export class Chase {
 
     // A stopped suspect is caught as soon as the player reaches it: an auto-driving
     // car would otherwise roll straight past before the hold time is up.
-    const hold = stopped ? 0 : s.captureHold;
+    const hold = stopped || this.suspectArrived ? 0 : s.captureHold;
     if (this.closeFor > 0 && this.closeFor >= hold) {
       this.phase = 'CAPTURED';
       events.push({ type: 'CAPTURED' });
+    } else if (this.suspectArrived) {
+      // The suspect never waits for the player: reaching its destination first, it gets away.
+      this.phase = 'ESCAPED';
+      this.escapeReason = 'ARRIVED';
+      events.push({ type: 'ESCAPED', reason: 'ARRIVED' });
     } else if (this.farFor >= s.escapeHold || this.timeLeft <= 0) {
       this.phase = 'ESCAPED';
       this.escapeReason = this.timeLeft <= 0 ? 'TIME' : 'DISTANCE';
@@ -382,7 +391,7 @@ export class Chase {
     const placed = placeOnRoute(this.graph, stage.route, 2, stage.mode);
     this.suspect = new Mover(this.graph, placed.start);
     this.suspect.followPlan(placed.plan);
-    this.suspect.speedFactor = this.settings.suspectSpeed;
+    this.suspect.speedFactor = this.suspectSpeedFor(this.suspectStage);
     events.push({ type: 'SUSPECT_MODE', mode: stage.mode });
 
     const lines: SpokenText[] =
@@ -621,6 +630,8 @@ export class Chase {
     // A car on a one-way street faces the legal way.
     if (mode === 'CAR' && edge.oneWay && at.towards !== edge.to) start.towards = edge.to;
     this.player = new Mover(this.graph, start);
+    // Stay on the suspect's tail through the next junctions until the capture completes.
+    if (start.towards === at.towards) this.player.followPlan(this.suspect.remainingPlan());
     this.player.setSpeed(this.suspect.snapshot().speed);
     this.distance = this.measure();
   }

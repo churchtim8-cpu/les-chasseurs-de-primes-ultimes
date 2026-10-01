@@ -62,7 +62,7 @@ describe('the suspect changes direction', () => {
   }, 60_000);
 
   it.each(LEVELS)('a student who follows the correction still catches the suspect (%s)', (difficulty) => {
-    const runs = seeds(difficulty, 60, 'follow').map((s) => listen(s, { turnOff: true }));
+    const runs = seeds(difficulty, 90, 'follow').map((s) => listen(s, { turnOff: true }));
     const changed = runs.filter((r) => r.heard.includes(EVENT_LINES.CHANGED_DIRECTION.audioId));
     expect(changed.length).toBeGreaterThan(20);
     const captured = changed.filter((r) => r.chase.status.phase === 'CAPTURED').length;
