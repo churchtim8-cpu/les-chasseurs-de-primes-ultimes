@@ -221,13 +221,16 @@ function sightingPlaces(graph: TownGraph): string[] {
   return [...places].sort();
 }
 
-/** "Le suspect est dans une voiture verte." and the sightings a level can use. */
+/**
+ * "Le suspect est dans une voiture verte." (said at every driving stage) and
+ * the sightings a level can use (none while sightings are off).
+ */
 function sightingLines(graph: TownGraph, level: Difficulty, types: readonly ChaseType[], out: Collected): void {
-  if (CHASE_SETTINGS[level].sightings.count === 0) return;
   const drives = types.some((t) => CHASE_TYPE_MODES[t].includes('CAR'));
   const walks = types.some((t) => CHASE_TYPE_MODES[t].includes('FOOT'));
   const event = { voice: 'DISPATCHER', category: 'EVENT', template: null } as const;
   if (drives) for (const vehicle of VEHICLES) addLine(out, { ...vehicleLine(vehicle), ...event }, level);
+  if (CHASE_SETTINGS[level].sightings.count === 0) return;
   for (const place of sightingPlaces(graph)) {
     // Expert never names the vehicle in a sighting: the player remembers it.
     if (drives && level !== 'EXPERT') for (const vehicle of VEHICLES) addLine(out, { ...sightingLine(vehicle, place), ...event }, level);

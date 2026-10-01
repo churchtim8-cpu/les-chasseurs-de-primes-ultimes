@@ -41,6 +41,10 @@ The police car drives forward on its own; you choose where it goes. Choices are 
 
 Touch buttons appear on touch screens (or add `?touch=1` to the address). The title screen has a level picker (Facile, Intermédiaire, Difficile, Expert); the level is remembered for the next chase and the next visit.
 
+## The pursuit
+
+The suspect never stops or waits. The police are only slightly faster (the suspect drives at 80% of the player's cruising speed at Easy, 84% at Intermediate, 86% at Hard and 88% at Expert), so a player who follows the directions closes in steadily and every wrong turn lets the suspect pull away. If it reaches its destination first, it escapes ("Il est arrivé avant vous."). In a chase with changes of transport it keeps pace with the police until its last stage, and the police close in on that one. The suspect only shows on the map when very close (80 m at Easy down to 50 m at Expert). The listener bot, which hears only the French, still catches it in at least 95% of chases at every level and chase type.
+
 ## Chase types
 
 A chase can change transport, as in the blueprint: the suspect drives or runs, and may get out of a car (or into one) mid-chase. The scanner says so ("Le suspect est sorti de la voiture. Il est à pied !", "Il monte dans une voiture !"); the player is told "Descendez de la voiture !" on reaching the spot, or "Montez dans la voiture !" when a colleague brings the police car to the nearest road. After changing, the player follows the suspect's tracks to where it changed, and directions start again from there. Each change adds 12 s to the clock.
@@ -60,7 +64,7 @@ From Intermediate up (30% of chases at Intermediate, 50% at Hard, 70% at Expert)
 
 ### Sightings
 
-The scanner names the suspect's vehicle when a driving stage starts ("Le suspect est dans une voiture verte."): a blue, black, white or green car, a taxi, or a van (never the van, nor the car it left, when it gets into one mid-chase). As the suspect passes a place, the scanner reports it ("La voiture verte est près de la bibliothèque.", or "Le suspect est près de …" on foot) and the chase pauses while the player picks the matching card, each a vehicle and a place (click, tap, or 1 to 4). The question sits in a strip at the top so the car stays in view; R repeats the call. From Intermediate up one card is the right vehicle at the wrong place and another the wrong vehicle at the right place, so both must be understood. At Expert the sighting only says "Le suspect est près de …": the player has to remember the vehicle. The right card adds 4 seconds and shows the suspect on the map for a moment; a wrong card, or none in time, costs 6 seconds. Easy and Intermediate have one sighting per chase, Hard and Expert two. `?sightings=0` turns them off.
+The scanner names the suspect's vehicle when a driving stage starts ("Le suspect est dans une voiture verte."): a blue, black, white or green car, a taxi, or a van (never the van, nor the car it left, when it gets into one mid-chase). As the suspect passes a place, the scanner reports it ("La voiture verte est près de la bibliothèque.", or "Le suspect est près de …" on foot) and the chase pauses while the player picks the matching card, each a vehicle and a place (click, tap, or 1 to 4). The question sits in a strip at the top so the car stays in view; R repeats the call. From Intermediate up one card is the right vehicle at the wrong place and another the wrong vehicle at the right place, so both must be understood. At Expert the sighting only says "Le suspect est près de …": the player has to remember the vehicle. The right card adds 4 seconds and shows the suspect on the map for a moment; a wrong card, or none in time, costs 6 seconds. Sightings are off at every level since the 2026-10-01 playtest (the questions interrupted the chase); `?sightings=1` still forces one for testing. The vehicle line is still said when a driving stage starts.
 
 ### Lost signal
 

@@ -42,12 +42,19 @@ describe('suspect sightings', () => {
     expect(sightingLine(null, 'SCHOOL').text).toBe("Le suspect est près de l'école.");
   });
 
+  it('are off by default since the 2026-10-01 playtest', () => {
+    for (const d of DIFFICULTIES) {
+      expect(CHASE_SETTINGS[d].sightings.count).toBe(0);
+      for (const seed of seeds(d, 10, 'off')) expect(generateScenario(graph, seed).sightings).toEqual([]);
+    }
+  });
+
   it.each(DIFFICULTIES)('plans true sightings with exactly one right choice (%s)', (difficulty) => {
-    const { count, cards } = CHASE_SETTINGS[difficulty].sightings;
+    const { cards } = CHASE_SETTINGS[difficulty].sightings;
     let planned = 0;
     const list = seeds(difficulty, 60, 'plan');
     for (const seed of list) {
-      const scenario = generateScenario(graph, seed);
+      const scenario = generateScenario(graph, seed, { sightings: true });
       expect(validateScenario(graph, scenario), seed).toEqual([]);
       planned += scenario.sightings.length;
       for (const s of scenario.sightings) {
@@ -66,7 +73,7 @@ describe('suspect sightings', () => {
         else expect(s.named).toBe(own);
       }
     }
-    expect(planned / list.length).toBeGreaterThan(count * 0.8);
+    expect(planned / list.length).toBeGreaterThan(0.8);
   });
 
   it('gives each driving stage its own car, never the van mid-chase', () => {
@@ -82,9 +89,10 @@ describe('suspect sightings', () => {
   });
 
   it.each(DIFFICULTIES)('a student who understands the French answers every sighting (%s)', (difficulty) => {
-    const runs = seeds(difficulty, 40, 'answer').map((s) => listen(s));
+    const runs = seeds(difficulty, 40, 'answer').map((s) => listen(s, { sightings: true }));
     const asked = runs.reduce((n, r) => n + r.chase.status.sightingsAsked, 0);
-    expect(asked).toBeGreaterThan(runs.length * 0.6);
+    // Off by default now; when forced, a careful player often catches the suspect before the sighting point.
+    expect(asked).toBeGreaterThan(runs.length * 0.2);
     expect(runs.reduce((n, r) => n + r.chase.status.sightingsRight, 0)).toBe(asked);
     expect(runs.flatMap((r) => r.bot.unsure)).toEqual([]);
     const captured = runs.filter((r) => r.chase.status.phase === 'CAPTURED').length;
@@ -93,7 +101,7 @@ describe('suspect sightings', () => {
 
   it('says which vehicle to look for before the first sighting of a driving stage', () => {
     for (const seed of seeds('HARD', 30, 'told')) {
-      const { chase, events } = listen(seed);
+      const { chase, events } = listen(seed, { sightings: true });
       const firstSighting = events.findIndex((e) => e.type === 'SIGHTING');
       if (firstSighting === -1) continue;
       const s = chase.scenario.sightings[0]!;
@@ -106,9 +114,9 @@ describe('suspect sightings', () => {
   });
 
   it('pauses the chase for the answer, then rewards or costs time', () => {
-    const seed = seeds('INTERMEDIATE', 40, 'pause').find((s) => generateScenario(graph, s, { chaseType: 'CAR_CAR' }).sightings.length > 0)!;
+    const seed = seeds('INTERMEDIATE', 40, 'pause').find((s) => generateScenario(graph, s, { chaseType: 'CAR_CAR', sightings: true }).sightings.length > 0)!;
     const run = (pick: 'RIGHT' | 'WRONG') => {
-      const chase = new Chase(graph, generateScenario(graph, seed, { chaseType: 'CAR_CAR', turnOff: false }));
+      const chase = new Chase(graph, generateScenario(graph, seed, { chaseType: 'CAR_CAR', turnOff: false, sightings: true }));
       chase.player.followPlan(chase.scenario.route.slice(1));
       for (let t = 0; t < 400 && chase.status.phase === 'PURSUIT'; t += 0.05) {
         const question = chase.update(0.05).find((e) => e.type === 'SIGHTING');
@@ -134,8 +142,8 @@ describe('suspect sightings', () => {
   });
 
   it('counts no answer as a wrong one when the time runs out', () => {
-    const seed = seeds('HARD', 40, 'timeout').find((s) => generateScenario(graph, s).sightings.length > 0)!;
-    const chase = new Chase(graph, generateScenario(graph, seed, { turnOff: false, lostSignal: false }));
+    const seed = seeds('HARD', 40, 'timeout').find((s) => generateScenario(graph, s, { sightings: true }).sightings.length > 0)!;
+    const chase = new Chase(graph, generateScenario(graph, seed, { turnOff: false, lostSignal: false, sightings: true }));
     chase.player.followPlan(chase.scenario.route.slice(1));
     let result: ChaseEvent | undefined;
     for (let t = 0; t < 400 && chase.status.phase === 'PURSUIT' && !result; t += 0.05) {

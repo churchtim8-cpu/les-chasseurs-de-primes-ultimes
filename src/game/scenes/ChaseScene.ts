@@ -401,7 +401,9 @@ export class ChaseScene extends Phaser.Scene {
       ? `Temps : ${status.elapsed.toFixed(1)} s`
       : status.escapeReason === 'TIME'
         ? 'Le temps est écoulé.'
-        : 'Vous avez perdu le suspect.';
+        : status.escapeReason === 'ARRIVED'
+          ? 'Il est arrivé avant vous.'
+          : 'Vous avez perdu le suspect.';
     const { width, height } = this.scale;
     const panel = this.add
       .text(width / 2, height / 2, `${title}\n\n${detail}\nPoursuite ${this.seed}\n\nENTRÉE : nouvelle poursuite   ·   R : rejouer`, {
@@ -513,7 +515,7 @@ export class ChaseScene extends Phaser.Scene {
 
 /**
  * Debug and tests: `?type=CAR_FOOT` forces a chase type; `?turnoff=1` (or 0) a
- * change of direction, `?sightings=0` no sightings, `?lost=1` a lost signal.
+ * change of direction, `?sightings=1` a sighting (off by default), `?lost=1` a lost signal.
  * (`?life=0` turns off the town's traffic and other movement.)
  */
 function scenarioOptionsFromAddress(): ScenarioOptions {

@@ -132,7 +132,7 @@ test('the suspect changes direction: the scanner says so and corrects the direct
 
 test('a sighting pauses the chase until the player picks the suspect', async ({ page }) => {
   const errors = watchErrors(page);
-  await page.goto('./?debug=1&type=CAR_CAR&turnoff=0&seed=BV-H-YMQE-YSS0');
+  await page.goto('./?debug=1&type=CAR_CAR&turnoff=0&sightings=1&seed=BV-H-YMQE-YSS0');
   await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Title']));
   await page.keyboard.press('Enter');
   await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Chase']));
