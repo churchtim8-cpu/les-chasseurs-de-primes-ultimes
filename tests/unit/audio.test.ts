@@ -42,10 +42,10 @@ describe('recording script', () => {
   });
 
   it('stays a manageable size for recording', () => {
-    // Multi-step instructions reuse recorded sentences plus one clip per linked clause,
-    // so the script grows by hundreds of lines, not by every combination.
-    expect(script.length).toBeLessThan(800);
-    expect(script.reduce((n, l) => n + l.text.length, 0)).toBeLessThan(36_000);
+    // Two-step Hard sentences are recorded whole (only the pairs the map can produce);
+    // three-step and Expert calls reuse one clip per linked clause.
+    expect(script.length).toBeLessThan(1_700);
+    expect(script.reduce((n, l) => n + l.text.length, 0)).toBeLessThan(100_000);
   });
 
   it.each(DIFFICULTIES)('chases work using only recorded sentences (%s)', (difficulty) => {

@@ -65,11 +65,11 @@ The current library (334 lines) was recorded with ElevenLabs Eleven v4: Christop
 
 ### Hard and Expert instructions
 
-Longer instructions are built from recordings that already exist plus whole clauses recorded with their linking word, played back to back (never single words):
+Two-step instructions are recorded as full sentences. Three-step and Expert instructions are whole clauses recorded with their linking word, played back to back (never single words):
 
 | Template | Example | Clips |
 |---|---|---|
-| H1 / H2 | Tournez à gauche devant la banque. Puis prenez la deuxième rue à gauche. | landmark sentence + "Puis …" |
+| H1 / H2 | Tournez à gauche devant la banque, puis prenez la deuxième rue à gauche. | one full sentence |
 | H3 | Tournez à gauche, puis tournez à droite. Ensuite, prenez la deuxième rue à gauche. | "…, puis …" sentence + "Ensuite, …" |
 | H4 | Prenez la troisième rue à droite. | one sentence |
 | X1 | D'abord, tournez à gauche. Ensuite, prenez la première rue à droite. Enfin, … | "D'abord, …" + "Ensuite, …" (+ "Enfin, …") |
