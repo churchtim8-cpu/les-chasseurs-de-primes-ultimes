@@ -45,11 +45,15 @@ export function createPoliceCar(scene: Phaser.Scene): Phaser.GameObjects.Contain
   g.fillStyle(0x1f4e9c).fillRect(-9, -1.4, 18, 2.8); // blue stripe
   g.fillStyle(0x27323a).fillRoundedRect(1.5, -3.8, 3.5, 7.6, 1); // windscreen
   g.fillStyle(0x27323a).fillRoundedRect(-6.5, -3.6, 2.5, 7.2, 1); // rear window
+  // Siren: the light bar flashes red and blue, and throws a coloured glow on the road.
+  const glowRed = scene.add.circle(-1, -6, 11, 0xe0463a, 0.22);
+  const glowBlue = scene.add.circle(-1, 6, 11, 0x2f7de1, 0.22).setAlpha(0);
   const lightRed = scene.add.rectangle(-1, -2, 2, 2, 0xe0463a);
-  const lightBlue = scene.add.rectangle(-1, 2, 2, 2, 0x2f7de1);
-  scene.tweens.add({ targets: [lightRed, lightBlue], alpha: 0.2, duration: 260, yoyo: true, repeat: -1 });
+  const lightBlue = scene.add.rectangle(-1, 2, 2, 2, 0x2f7de1).setAlpha(0.2);
+  scene.tweens.add({ targets: [lightRed, glowRed], alpha: 0.15, duration: 230, yoyo: true, repeat: -1 });
+  scene.tweens.add({ targets: [lightBlue, glowBlue], alpha: 1, duration: 230, yoyo: true, repeat: -1 });
   // Drawn slightly larger than life so the player's car is easy to find on screen.
-  return scene.add.container(0, 0, [g, lightRed, lightBlue]).setDepth(30).setScale(1.3);
+  return scene.add.container(0, 0, [glowRed, glowBlue, g, lightRed, lightBlue]).setDepth(30).setScale(1.3);
 }
 
 /** The suspect's vehicle (the one the scanner names), drawn facing east. */
@@ -59,15 +63,34 @@ export function createSuspectCar(scene: Phaser.Scene, vehicle: Vehicle): Phaser.
   return scene.add.container(0, 0, [g]).setDepth(29).setScale(1.3);
 }
 
-/** Placeholder police officer on foot, seen from above. */
+/**
+ * Placeholder police officer on foot, seen from above. Its feet and arms are
+ * separate children (named) so the scene can swing them while running.
+ */
 export function createOfficer(scene: Phaser.Scene): Phaser.GameObjects.Container {
+  const parts = [
+    scene.add.ellipse(0, -1.6, 2.6, 1.6, 0x16233d).setName('footL'),
+    scene.add.ellipse(0, 1.6, 2.6, 1.6, 0x16233d).setName('footR'),
+    scene.add.ellipse(0, -3.2, 2.2, 1.4, 0x1f4e9c).setName('armL'),
+    scene.add.ellipse(0, 3.2, 2.2, 1.4, 0x1f4e9c).setName('armR'),
+  ];
   const g = scene.add.graphics();
   g.fillStyle(0x000000, 0.25).fillEllipse(0.8, 1.2, 7, 6);
   g.fillStyle(0x1f4e9c).fillEllipse(0, 0, 5.5, 7); // shoulders
   g.fillStyle(0x16233d).fillCircle(0.4, 0, 2.2); // cap
   g.fillStyle(0xe8c547).fillCircle(1.6, 0, 0.7); // badge on the cap peak
   // Much larger than life: on foot the player should be big and easy to follow.
-  return scene.add.container(0, 0, [g]).setDepth(31).setScale(2);
+  return scene.add.container(0, 0, [...parts, g]).setDepth(31).setScale(2);
+}
+
+/** Swing the officer's feet and arms; `stride` advances with distance run (radians). */
+export function animateOfficer(officer: Phaser.GameObjects.Container, stride: number, moving: boolean): void {
+  const swing = moving ? Math.sin(stride) * 2.4 : 0;
+  const part = (name: string) => officer.getByName(name) as Phaser.GameObjects.Ellipse | null;
+  part('footL')?.setX(swing);
+  part('footR')?.setX(-swing);
+  part('armL')?.setX(-swing * 0.6);
+  part('armR')?.setX(swing * 0.6);
 }
 
 /** Placeholder suspect on foot, seen from above. */

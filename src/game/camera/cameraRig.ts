@@ -22,6 +22,9 @@ export const CAMERA_PROFILES: Record<TravelMode, CameraProfile> = {
 };
 
 const TRANSITION_MS = 900;
+/** On foot the view bobs with the officer's stride (metres of sway, strides per metre run). */
+const BOB_METRES = 1.1;
+const STRIDES_PER_METRE = 0.12;
 
 export class CameraRig {
   private mode: TravelMode;
@@ -29,6 +32,8 @@ export class CameraRig {
   private zoomTween?: Phaser.Tweens.Tween;
   private readonly aim = new Phaser.Math.Vector2();
   private initialised = false;
+  /** Running bob on foot (the view jogs a little with each stride). */
+  private stride = 0;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -57,7 +62,7 @@ export class CameraRig {
   }
 
   /** Call every frame with the player's position and heading. */
-  update(target: { x: number; y: number; heading: number }, deltaMs: number): void {
+  update(target: { x: number; y: number; heading: number; speed?: number }, deltaMs: number): void {
     const profile = CAMERA_PROFILES[this.mode];
     const goalX = this.overview ? this.world.width / 2 : target.x + Math.cos(target.heading) * profile.lookAhead;
     const goalY = this.overview ? this.world.height / 2 : target.y + Math.sin(target.heading) * profile.lookAhead;
@@ -68,7 +73,17 @@ export class CameraRig {
     const k = 1 - Math.exp((-profile.follow * deltaMs) / 1000);
     this.aim.x += (goalX - this.aim.x) * k;
     this.aim.y += (goalY - this.aim.y) * k;
-    this.camera.centerOn(this.aim.x, this.aim.y);
+    let bobX = 0;
+    let bobY = 0;
+    if (this.mode === 'FOOT' && !this.overview && (target.speed ?? 0) > 2) {
+      this.stride += (deltaMs / 1000) * (target.speed ?? 0) * STRIDES_PER_METRE * Math.PI * 2;
+      // Up-down with every step, side to side with every second step, across the running direction.
+      const side = Math.sin(this.stride / 2) * BOB_METRES * 0.6;
+      const up = Math.abs(Math.sin(this.stride)) * BOB_METRES;
+      bobX = -Math.sin(target.heading) * side + Math.cos(target.heading) * up;
+      bobY = Math.cos(target.heading) * side + Math.sin(target.heading) * up;
+    }
+    this.camera.centerOn(this.aim.x + bobX, this.aim.y + bobY);
   }
 
   private zoomFor(mode: TravelMode): number {

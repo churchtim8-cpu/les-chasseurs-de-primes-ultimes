@@ -65,12 +65,14 @@ export interface ChaseSettings {
   /** How far ahead of the player the suspect starts, by starting mode. */
   headStart: Record<TravelMode, number>;
   /**
-   * Suspect speed as a fraction of the player's cruising speed. The suspect
-   * never stops or waits: the police are only slightly faster, so a player
-   * who follows the directions closes in steadily, and every wrong turn lets
-   * it get further away. If it reaches its destination first, it escapes.
+   * Suspect speed as a fraction of the player's cruising speed, by mode. The
+   * suspect never stops or waits: the police are only slightly faster in a
+   * car, so a player who follows the directions closes in steadily, and every
+   * wrong turn lets it get further away. On foot the officer is fitter, so a
+   * foot chase is a short sprint that closes faster. If the suspect reaches
+   * its destination first, it escapes.
    */
-  suspectSpeed: number;
+  suspectSpeed: Record<TravelMode, number>;
   /** Distance at which the suspect is visible on the map: only when very close. */
   sightingDistance: number;
   /** Capture when this close... */
@@ -165,12 +167,12 @@ export const TURN_OFF = {
 
 export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
   EASY: {
-    routeLength: [2000, 2800],
-    footRouteLength: [600, 950],
-    stageLength: { CAR: [1000, 1500], FOOT: [250, 400] },
-    headStart: { CAR: 200, FOOT: 75 },
-    suspectSpeed: 0.8,
-    sightingDistance: 80,
+    routeLength: [2400, 3300],
+    footRouteLength: [650, 950],
+    stageLength: { CAR: [1000, 1500], FOOT: [600, 850] },
+    headStart: { CAR: 400, FOOT: 130 },
+    suspectSpeed: { CAR: 0.74, FOOT: 0.70 },
+    sightingDistance: 45,
     captureDistance: 28,
     captureHold: 0.6,
     warningDistance: 600,
@@ -181,12 +183,12 @@ export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
     lostSignal: 0,
   },
   INTERMEDIATE: {
-    routeLength: [2200, 3100],
-    footRouteLength: [650, 1000],
-    stageLength: { CAR: [1000, 1600], FOOT: [300, 440] },
-    headStart: { CAR: 210, FOOT: 80 },
-    suspectSpeed: 0.84,
-    sightingDistance: 70,
+    routeLength: [2800, 3800],
+    footRouteLength: [800, 1100],
+    stageLength: { CAR: [1000, 1600], FOOT: [750, 1000] },
+    headStart: { CAR: 450, FOOT: 150 },
+    suspectSpeed: { CAR: 0.80, FOOT: 0.72 },
+    sightingDistance: 40,
     captureDistance: 28,
     captureHold: 0.7,
     warningDistance: 550,
@@ -197,12 +199,12 @@ export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
     lostSignal: 0,
   },
   HARD: {
-    routeLength: [2800, 3800],
-    footRouteLength: [700, 1050],
-    stageLength: { CAR: [1500, 2100], FOOT: [320, 460] },
-    headStart: { CAR: 230, FOOT: 85 },
-    suspectSpeed: 0.86,
-    sightingDistance: 60,
+    routeLength: [3300, 4400],
+    footRouteLength: [900, 1250],
+    stageLength: { CAR: [1500, 2100], FOOT: [850, 1100] },
+    headStart: { CAR: 500, FOOT: 165 },
+    suspectSpeed: { CAR: 0.82, FOOT: 0.74 },
+    sightingDistance: 35,
     captureDistance: 26,
     captureHold: 0.8,
     warningDistance: 500,
@@ -213,12 +215,12 @@ export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
     lostSignal: 0,
   },
   EXPERT: {
-    routeLength: [3400, 4500],
-    footRouteLength: [700, 1100],
-    stageLength: { CAR: [1800, 2400], FOOT: [330, 480] },
-    headStart: { CAR: 230, FOOT: 85 },
-    suspectSpeed: 0.88,
-    sightingDistance: 50,
+    routeLength: [3900, 5000],
+    footRouteLength: [1000, 1350],
+    stageLength: { CAR: [1800, 2400], FOOT: [950, 1250] },
+    headStart: { CAR: 550, FOOT: 180 },
+    suspectSpeed: { CAR: 0.84, FOOT: 0.76 },
+    sightingDistance: 30,
     captureDistance: 25,
     captureHold: 0.9,
     warningDistance: 480,

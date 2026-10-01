@@ -37,13 +37,20 @@ The police car drives forward on its own; you choose where it goes. Choices are 
 | R | ⟳ RÉPÉTER | Play the last scanner call again straight away; the officer's "Répétez, s'il vous plaît !" shows as text only (after a chase: replay the same chase). Easy: unlimited; Intermediate: 3 per chase; Hard: costs 5 s; Expert: once. |
 | 1 to 4 | Tap a card | Answer a sighting (on the title screen: choose the level) |
 | M | | Whole-town overview (debug mode) |
+| B | ♪ MUSIQUE | Music on or off |
 | Esc | | Back to the title screen |
 
 Touch buttons appear on touch screens (or add `?touch=1` to the address). The title screen has a level picker (Facile, Intermédiaire, Difficile, Expert); the level is remembered for the next chase and the next visit.
 
 ## The pursuit
 
-The suspect never stops or waits. The police are only slightly faster (the suspect drives at 80% of the player's cruising speed at Easy, 84% at Intermediate, 86% at Hard and 88% at Expert), so a player who follows the directions closes in steadily and every wrong turn lets the suspect pull away. If it reaches its destination first, it escapes ("Il est arrivé avant vous."). In a chase with changes of transport it keeps pace with the police until its last stage, and the police close in on that one. The suspect only shows on the map when very close (80 m at Easy down to 50 m at Expert). The listener bot, which hears only the French, still catches it in at least 95% of chases at every level and chase type.
+The suspect starts well ahead (400 m at Easy up to 550 m at Expert in a car; 130 to 180 m on foot) and never stops or waits. The police car is only slightly faster (the suspect drives at 74% of the player's cruising speed at Easy, 80% at Intermediate, 82% at Hard and 84% at Expert), so a player who follows the directions closes in steadily and every wrong turn lets the suspect pull away. On foot the officer is fitter (the suspect runs at 70% to 76%), so a foot chase is a short sprint. If the suspect reaches its destination first, it escapes ("Il est arrivé avant vous."). In a chase with changes of transport it keeps pace with the police until its last stage, and the police close in on that one. The suspect only shows on the map when very close (45 m at Easy down to 30 m at Expert). The listener bot, which hears only the French, still catches it in at least 95% of chases at every level and chase type.
+
+Driving and running look and sound different: the car has a flashing siren glow and speed streaks and a wide view; on foot the view is close, the officer's arms and legs swing and the view jogs with each stride. "À PIED !" or "EN VOITURE !" flashes when the player changes.
+
+### Music
+
+Dramatic chase music is made live in the browser with Web Audio (no audio files, no ElevenLabs credits): a driving D minor groove with drums and string stabs in the car, a faster, lighter heartbeat-and-shaker groove on foot. It gets brighter and busier as the player closes in, and drops right down whenever the French is spoken. B or the ♪ MUSIQUE button turns it off (remembered on this device); `?music=0` starts with it off.
 
 ## Chase types
 

@@ -21,6 +21,7 @@ export class Hud {
   private readonly banner: Phaser.GameObjects.Text;
   private readonly scanner: Phaser.GameObjects.Text;
   private readonly repeat: Phaser.GameObjects.Text;
+  private readonly music: Phaser.GameObjects.Text;
   private readonly sighting: SightingPanel;
 
   constructor(
@@ -69,6 +70,18 @@ export class Hud {
         color: toCss(PALETTE.cream),
         backgroundColor: 'rgba(22, 50, 61, 0.85)',
         padding: { x: 10, y: 7 },
+      }),
+    ).setInteractive({ useHandCursor: true });
+
+    // Background music on or off; B on the keyboard.
+    this.music = this.add(
+      scene.add.text(16, 146, '', {
+        fontFamily: FONT_FAMILY,
+        fontSize: '15px',
+        fontStyle: 'bold',
+        color: toCss(PALETTE.cream),
+        backgroundColor: 'rgba(22, 50, 61, 0.85)',
+        padding: { x: 10, y: 6 },
       }),
     ).setInteractive({ useHandCursor: true });
 
@@ -142,6 +155,18 @@ export class Hud {
       event.stopPropagation();
       listener();
     });
+  }
+
+  /** Called when the music button is clicked or tapped. */
+  onMusic(listener: () => void): void {
+    this.music.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
+      event.stopPropagation();
+      listener();
+    });
+  }
+
+  setMusic(on: boolean): void {
+    this.music.setText(on ? '♪ MUSIQUE (B)' : '♪ MUSIQUE (B) · NON').setAlpha(on ? 1 : 0.6);
   }
 
   showToast(message: string, ms = 1600): void {

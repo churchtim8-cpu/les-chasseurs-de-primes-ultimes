@@ -272,7 +272,7 @@ function planTurnOff(
  */
 function suspectRoadBeforeCatch(difficulty: Difficulty, mode: TravelMode): number {
   const { headStart, suspectSpeed } = CHASE_SETTINGS[difficulty];
-  return (headStart[mode] * suspectSpeed) / (1 - suspectSpeed);
+  return (headStart[mode] * suspectSpeed[mode]) / (1 - suspectSpeed[mode]);
 }
 
 /** A predicted route that differs from the real one at once, and that the scanner can describe from the stage start. */
