@@ -91,13 +91,14 @@ test('the suspect gets out and runs: the scanner orders the player out, and the 
   expect(await info(page, 'chase')).toBe('CAR_FOOT');
   await expect.poll(async () => Number(await info(page, 'speed')), SLOW).toBeGreaterThan(10);
 
-  // Drive the suspect's route (the French is tested elsewhere), keeping back so the suspect gets out first.
+  // Drive the suspect's route (the French is tested elsewhere), a little slower than the suspect (which keeps
+  // pace until its last stage) so it gets out first without pulling out of range.
   await page.evaluate(() => {
     const scene = window.__bellevue!.game.scene.getScene('Chase') as unknown as {
       chase: { player: { followPlan(n: string[]): void; speedFactor: number }; scenario: { route: string[] } };
     };
     scene.chase.player.followPlan(scene.chase.scenario.route.slice(1));
-    scene.chase.player.speedFactor = 0.6;
+    scene.chase.player.speedFactor = 0.9;
   });
   await expect.poll(() => info(page, 'scanner'), { timeout: 90_000 }).toBe('EVENT: event.get_out');
   expect(await info(page, 'stage')).toBe('suspect 2, player 1');
