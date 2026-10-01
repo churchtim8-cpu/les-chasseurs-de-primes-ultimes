@@ -29,7 +29,7 @@ The police car drives forward on its own; you choose where it goes. Choices are 
 
 | Keyboard | Touch | Action |
 |---|---|---|
-| ← / A, → / D | ◀ ▶ | Turn left / right at the next junction |
+| ← / A, → / D | ◀ ▶ | Turn left / right at the next junction. At a roundabout the exits are numbered on the map (1 = la première sortie): ◀ ▶ choose the exit and the car goes round and takes it |
 | ↑ / W | ▲ | Straight on at the next junction; hold to speed up |
 | ↓ / S (hold) | ▼ | Slow down and stop |
 | Space / U | ⟲ | Turn around (faire demi-tour) |
@@ -60,7 +60,7 @@ From Intermediate up (30% of chases at Intermediate, 50% at Hard, 70% at Expert)
 
 ### Sightings
 
-The scanner names the suspect's vehicle when a driving stage starts ("Le suspect est dans une voiture verte."): a blue, black, white or green car, a taxi, or a van (never the van, nor the car it left, when it gets into one mid-chase). As the suspect passes a place, the scanner reports it ("La voiture verte est près de la bibliothèque.", or "Le suspect est près de …" on foot) and the chase pauses while the player picks the matching card, each a vehicle and a place (click, tap, or 1 to 4). From Intermediate up one card is the right vehicle at the wrong place and another the wrong vehicle at the right place, so both must be understood. At Expert the sighting only says "Le suspect est près de …": the player has to remember the vehicle. The right card adds 4 seconds and shows the suspect on the map for a moment; a wrong card, or none in time, costs 6 seconds. Easy and Intermediate have one sighting per chase, Hard and Expert two. `?sightings=0` turns them off.
+The scanner names the suspect's vehicle when a driving stage starts ("Le suspect est dans une voiture verte."): a blue, black, white or green car, a taxi, or a van (never the van, nor the car it left, when it gets into one mid-chase). As the suspect passes a place, the scanner reports it ("La voiture verte est près de la bibliothèque.", or "Le suspect est près de …" on foot) and the chase pauses while the player picks the matching card, each a vehicle and a place (click, tap, or 1 to 4). The question sits in a strip at the top so the car stays in view; R repeats the call. From Intermediate up one card is the right vehicle at the wrong place and another the wrong vehicle at the right place, so both must be understood. At Expert the sighting only says "Le suspect est près de …": the player has to remember the vehicle. The right card adds 4 seconds and shows the suspect on the map for a moment; a wrong card, or none in time, costs 6 seconds. Easy and Intermediate have one sighting per chase, Hard and Expert two. `?sightings=0` turns them off.
 
 ### Lost signal
 

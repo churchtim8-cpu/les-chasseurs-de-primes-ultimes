@@ -25,6 +25,7 @@ import {
   createSuspectCar,
   createSuspectRunner,
 } from '../render/actors';
+import { RoundaboutGuide } from '../render/roundaboutGuide';
 import { drawTown, type TownLayers } from '../render/townRenderer';
 
 export interface ChaseSceneData {
@@ -61,6 +62,9 @@ export class ChaseScene extends Phaser.Scene {
   private abandonedCar!: Phaser.GameObjects.Container;
   private routeOverlay!: Phaser.GameObjects.Graphics;
   private badge!: ReturnType<typeof createIntentBadge>;
+  private roundabout!: RoundaboutGuide;
+  /** The sighting call being answered, for R (repeat) while the question is open. */
+  private sightingLine: SpokenText | null = null;
   private cameraMode: TravelMode = 'CAR';
   private displayHeading = 0;
   private suspectHeading = 0;
@@ -102,6 +106,9 @@ export class ChaseScene extends Phaser.Scene {
     this.car = createPoliceCar(this);
     this.officer = createOfficer(this).setVisible(false);
     this.badge = createIntentBadge(this);
+    this.roundabout = new RoundaboutGuide(this, this.graph, () =>
+      this.hud.showToast('Rond-point : ◀ ▶ pour choisir la sortie', 2600),
+    );
     const me = this.chase.player.snapshot();
     this.displayHeading = me.heading;
     this.suspectHeading = this.chase.suspect.snapshot().heading;
@@ -211,14 +218,14 @@ export class ChaseScene extends Phaser.Scene {
           this.askSighting(event.line, event.cards, event.seconds);
           break;
         case 'SIGHTING_RESULT':
-          this.hud.resolveSighting(event.answer, event.chosen);
-          this.hud.showToast(
+          this.hud.resolveSighting(
+            event.answer,
+            event.chosen,
             event.correct
               ? `Bravo ! (+${SIGHTING.bonusSeconds} s)`
               : event.chosen === null
                 ? `Trop tard ! (−${SIGHTING.penaltySeconds} s)`
                 : `Ce n’est pas le suspect. (−${SIGHTING.penaltySeconds} s)`,
-            2200,
           );
           break;
         case 'SIGNAL':
@@ -237,10 +244,8 @@ export class ChaseScene extends Phaser.Scene {
    */
   private announce(lines: SpokenText[]): void {
     const difficulty = this.chase.scenario.difficulty;
-    const voiced = lines.every((l) => scannerAudio.has(l.audioId));
-    const audioOnly = DIFFICULTY_SETTINGS[difficulty].textDisplay === 'AUDIO_ONLY' && voiced;
     const text = lines.map((l) => l.text).join(' ');
-    this.hud.showScanner(text, audioOnly ? 0 : Math.max(LANGUAGE_SETTINGS[difficulty].textSeconds, 4));
+    this.hud.showScanner(text, this.showsText(lines) ? Math.max(LANGUAGE_SETTINGS[difficulty].textSeconds, 4) : 0);
     void scannerAudio.play(lines.map((l) => ({ audioId: l.audioId, radio: true })));
     this.orderToasts(lines);
     debugState.info.set('scanner', `EVENT: ${lines.map((l) => l.audioId).join(' + ')}`);
@@ -251,10 +256,20 @@ export class ChaseScene extends Phaser.Scene {
    * while the player picks the matching card (click, tap, or keys 1 to 4).
    */
   private askSighting(line: SpokenText, cards: readonly SightingCard[], seconds: number): void {
-    this.announce([line]);
-    this.hud.showSighting(cards, seconds, (index) => this.handleEvents(this.chase.answerSighting(index)));
+    this.sightingLine = line;
+    void scannerAudio.play([{ audioId: line.audioId, radio: true }]);
+    debugState.info.set('scanner', `EVENT: ${line.audioId}`);
+    // The call is shown in the question strip (not the scanner bar below) when the level shows text.
+    const call = this.showsText([line]) ? line.text : '';
+    this.hud.showSighting(cards, seconds, call, (index) => this.handleEvents(this.chase.answerSighting(index)));
     const answer = this.chase.scenario.sightings.find((s) => s.cards === cards)?.answer;
     debugState.info.set('sighting', `answer ${answer === undefined ? '?' : answer + 1}`);
+  }
+
+  /** Text is shown unless the level is audio only and every line is recorded. */
+  private showsText(lines: SpokenText[]): boolean {
+    const voiced = lines.every((l) => scannerAudio.has(l.audioId));
+    return DIFFICULTY_SETTINGS[this.chase.scenario.difficulty].textDisplay !== 'AUDIO_ONLY' || !voiced;
   }
 
   /** An order also shows which button to press. */
@@ -298,7 +313,12 @@ export class ChaseScene extends Phaser.Scene {
     const player = this.chase.player;
     switch (action) {
       case 'LEFT':
-      case 'RIGHT':
+      case 'RIGHT': {
+        // At a roundabout the arrows choose the numbered exit instead.
+        const by = action === 'RIGHT' ? 1 : -1;
+        if (!this.roundabout.step(player, by, this.roundabout.firstAvailable(player))) player.queue(action);
+        break;
+      }
       case 'STRAIGHT':
         player.queue(action);
         break;
@@ -335,6 +355,8 @@ export class ChaseScene extends Phaser.Scene {
     this.placeParked(this.abandonedCar, this.chase.abandonedCar, false);
     this.badge.container.setPosition(me.x, me.y - (me.mode === 'CAR' ? 16 : 10));
     this.badge.show(this.stage === 'PURSUIT' ? me.queued : null);
+    const status = this.chase.status;
+    this.roundabout.update(this.chase.player, this.stage === 'PURSUIT' && !status.followingTracks);
 
     const suspect = this.chase.suspect.snapshot();
     this.suspectHeading += Phaser.Math.Angle.Wrap(suspect.heading - this.suspectHeading) * Math.min(1, delta / 90);
@@ -424,6 +446,14 @@ export class ChaseScene extends Phaser.Scene {
     if (this.stage !== 'PURSUIT') return;
     if (this.chase.status.signalLost) {
       this.hud.showToast('Pas de signal !');
+      return;
+    }
+    // While a sighting question is open, R repeats that call (free: the chase is paused).
+    if (this.chase.status.sighting && this.sightingLine) {
+      void scannerAudio.play([
+        { audioId: REPEAT_LINES.CALM.audioId, radio: false },
+        { audioId: this.sightingLine.audioId, radio: true },
+      ]);
       return;
     }
     const last = this.chase.navigator.last;

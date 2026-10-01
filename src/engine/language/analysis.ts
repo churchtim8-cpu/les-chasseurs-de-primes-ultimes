@@ -134,3 +134,41 @@ export function passPoint(ahead: Ahead, location: MapLocation): number | undefin
   }
   return best;
 }
+
+/** A roundabout's exits are shown and chosen from this far before it (metres). */
+export const ROUNDABOUT_WITHIN = 160;
+
+/** One way off a roundabout, numbered as the scanner counts them: "la deuxième sortie" = 2. */
+export interface RoundaboutExit {
+  number: number;
+  /** The ring node where the exit leaves, and the first node beyond it. */
+  node: string;
+  to: string;
+}
+
+/**
+ * The roundabout a driver is on, or is about to reach with no other choice
+ * first, and its exits in the order the driver meets them. Counted exactly as
+ * the interpreter counts "Prenez la … sortie" from here.
+ */
+export function roundaboutAhead(
+  graph: TownGraph,
+  from: MoverStart,
+  mode: TravelMode,
+  within = ROUNDABOUT_WITHIN,
+): { roundaboutId: string; exits: RoundaboutExit[] } | null {
+  if (mode !== 'CAR') return null;
+  const ahead = scanAhead(graph, from, mode);
+  const first = ahead.nodes.findIndex((n) => n.onRing);
+  const entry = ahead.nodes[first];
+  if (!entry || entry.s > within) return null;
+  if (ahead.nodes.slice(0, first).some(isDecision)) return null;
+  const roundaboutId = graph.node(entry.node).roundaboutId as string;
+  const exits: RoundaboutExit[] = [];
+  for (const n of ahead.nodes.slice(first)) {
+    if (!n.onRing || graph.node(n.node).roundaboutId !== roundaboutId) break;
+    const exit = n.exits.find((e) => e.kind === 'RIGHT');
+    if (exit && !exits.some((e) => e.node === n.node)) exits.push({ number: exits.length + 1, node: n.node, to: exit.step.to });
+  }
+  return exits.length > 0 ? { roundaboutId, exits } : null;
+}
