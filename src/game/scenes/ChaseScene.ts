@@ -5,7 +5,8 @@ import { EVENT_LINES, OUTCOME_LINES, REPEAT_LINES, TRANSPORT_LINES } from '../..
 import { DIFFICULTY_SETTINGS } from '../../engine/difficulty';
 import { Chase, pointOf, type ChaseEvent, type SpokenText } from '../../engine/chase/chase';
 import { generateScenario, type ScenarioOptions } from '../../engine/chase/scenario';
-import { CHASE_TYPES, type ChaseType } from '../../engine/chase/settings';
+import { CHASE_TYPES, SIGHTING, type ChaseType } from '../../engine/chase/settings';
+import type { SightingCard } from '../../engine/chase/sightings';
 import type { Transmission } from '../../engine/language/navigator';
 import { LANGUAGE_SETTINGS } from '../../engine/language/settings';
 import { LOCATION_WORD_BY_ID, withArticle } from '../../engine/language/locations';
@@ -54,7 +55,8 @@ export class ChaseScene extends Phaser.Scene {
   private hud!: Hud;
   private car!: Phaser.GameObjects.Container;
   private officer!: Phaser.GameObjects.Container;
-  private suspectCar!: Phaser.GameObjects.Container;
+  /** The suspect's vehicle in each stage (null on foot). */
+  private suspectCars: (Phaser.GameObjects.Container | null)[] = [];
   private suspectRunner!: Phaser.GameObjects.Container;
   private abandonedCar!: Phaser.GameObjects.Container;
   private routeOverlay!: Phaser.GameObjects.Graphics;
@@ -92,8 +94,10 @@ export class ChaseScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => scannerAudio.stop());
     this.layers = drawTown(this, this.graph);
     this.routeOverlay = this.drawRoute();
-    this.abandonedCar = createSuspectCar(this).setVisible(false);
-    this.suspectCar = createSuspectCar(this).setAlpha(0);
+    // A suspect only ever leaves its first car behind (a later car stage is the last).
+    const vehicles = this.chase.scenario.vehicles;
+    this.abandonedCar = createSuspectCar(this, vehicles.find((v) => v !== null) ?? 'BLUE').setVisible(false);
+    this.suspectCars = vehicles.map((v) => (v ? createSuspectCar(this, v).setAlpha(0) : null));
     this.suspectRunner = createSuspectRunner(this).setAlpha(0);
     this.car = createPoliceCar(this);
     this.officer = createOfficer(this).setVisible(false);
@@ -155,6 +159,7 @@ export class ChaseScene extends Phaser.Scene {
       debugState.info.set('zoom', this.cameras.main.zoom.toFixed(3));
       debugState.info.set('repeats', `${status.repeatsUsed} used, ${status.repeatsLeft ?? 'unlimited'} left`);
       debugState.info.set('stage', `suspect ${this.chase.suspectStage + 1}, player ${this.chase.playerStage + 1}`);
+      debugState.info.set('sightings', `${status.sightingsRight} / ${status.sightingsAsked}`);
     }
   }
 
@@ -188,14 +193,36 @@ export class ChaseScene extends Phaser.Scene {
           break;
         case 'TRANSMISSION': {
           // An announcement just before it ("Attention ! Le suspect a changé de direction.")
-          // is spoken first, in the same call, so neither cuts the other off.
+          // is spoken first, and one marked `after` ("Nous avons perdu le signal.") straight
+          // after, in the same call, so none cuts another off.
           const previous = events[i - 1];
-          const lead = previous?.type === 'ANNOUNCE' ? previous.lines : [];
-          this.showTransmission(event.transmission, [], lead);
+          const next = events[i + 1];
+          const lead = previous?.type === 'ANNOUNCE' && !previous.after ? previous.lines : [];
+          const tail = next?.type === 'ANNOUNCE' && next.after ? next.lines : [];
+          this.showTransmission(event.transmission, [], lead, tail);
           break;
         }
-        case 'ANNOUNCE':
-          if (events[i + 1]?.type !== 'TRANSMISSION') this.announce(event.lines);
+        case 'ANNOUNCE': {
+          const joined = event.after ? events[i - 1]?.type === 'TRANSMISSION' : events[i + 1]?.type === 'TRANSMISSION';
+          if (!joined) this.announce(event.lines);
+          break;
+        }
+        case 'SIGHTING':
+          this.askSighting(event.line, event.cards, event.seconds);
+          break;
+        case 'SIGHTING_RESULT':
+          this.hud.resolveSighting(event.answer, event.chosen);
+          this.hud.showToast(
+            event.correct
+              ? `Bravo ! (+${SIGHTING.bonusSeconds} s)`
+              : event.chosen === null
+                ? `Trop tard ! (−${SIGHTING.penaltySeconds} s)`
+                : `Ce n’est pas le suspect. (−${SIGHTING.penaltySeconds} s)`,
+            2200,
+          );
+          break;
+        case 'SIGNAL':
+          this.hud.showToast(event.lost ? 'SIGNAL PERDU' : 'SIGNAL RÉTABLI', 2000);
           break;
         case 'SUSPECT_MODE':
           break;
@@ -219,6 +246,17 @@ export class ChaseScene extends Phaser.Scene {
     debugState.info.set('scanner', `EVENT: ${lines.map((l) => l.audioId).join(' + ')}`);
   }
 
+  /**
+   * A sighting: the scanner says where the suspect is and the chase pauses
+   * while the player picks the matching card (click, tap, or keys 1 to 4).
+   */
+  private askSighting(line: SpokenText, cards: readonly SightingCard[], seconds: number): void {
+    this.announce([line]);
+    this.hud.showSighting(cards, seconds, (index) => this.handleEvents(this.chase.answerSighting(index)));
+    const answer = this.chase.scenario.sightings.find((s) => s.cards === cards)?.answer;
+    debugState.info.set('sighting', `answer ${answer === undefined ? '?' : answer + 1}`);
+  }
+
   /** An order also shows which button to press. */
   private orderToasts(lines: SpokenText[]): void {
     const ids = lines.map((l) => l.audioId);
@@ -232,9 +270,14 @@ export class ChaseScene extends Phaser.Scene {
    * `before` is spoken first (the officer asking for a repeat); `lead` is an
    * announcement the dispatcher makes just before the call.
    */
-  private showTransmission(transmission: Transmission, before: SpokenLine[] = [], lead: SpokenText[] = []): void {
+  private showTransmission(
+    transmission: Transmission,
+    before: SpokenLine[] = [],
+    lead: SpokenText[] = [],
+    tail: SpokenText[] = [],
+  ): void {
     const difficulty = this.chase.scenario.difficulty;
-    const clips = [...lead, ...transmission.instructions.flatMap((i) => i.clips)];
+    const clips = [...lead, ...transmission.instructions.flatMap((i) => i.clips), ...tail];
     const voiced = clips.every((c) => scannerAudio.has(c.audioId));
     const audioOnly = DIFFICULTY_SETTINGS[difficulty].textDisplay === 'AUDIO_ONLY' && voiced;
     // A multi-part call stays up longer: two more seconds for each extra clip.
@@ -242,7 +285,11 @@ export class ChaseScene extends Phaser.Scene {
     this.hud.showScanner(clips.map((c) => c.text).join(' '), audioOnly ? 0 : seconds);
     this.orderToasts(lead);
     void scannerAudio.play([...before, ...clips.map((c) => ({ audioId: c.audioId, radio: true }))]);
-    const detail = [...lead.map((l) => l.audioId), ...transmission.instructions.map((i) => `${i.template} ${i.audioId}`)].join(' + ');
+    const detail = [
+      ...lead.map((l) => l.audioId),
+      ...transmission.instructions.map((i) => `${i.template} ${i.audioId}`),
+      ...tail.map((l) => l.audioId),
+    ].join(' + ');
     debugState.info.set('scanner', `${transmission.kind}: ${detail}`);
   }
 
@@ -293,9 +340,8 @@ export class ChaseScene extends Phaser.Scene {
     this.suspectHeading += Phaser.Math.Angle.Wrap(suspect.heading - this.suspectHeading) * Math.min(1, delta / 90);
     // The suspect is only on the map when close (a sighting) or at the end; debug always shows it.
     const visible = debugState.isEnabled || this.chase.status.suspectVisible || this.stage === 'RESULTS';
-    const shown = suspect.mode === 'CAR' ? this.suspectCar : this.suspectRunner;
-    const hidden = suspect.mode === 'CAR' ? this.suspectRunner : this.suspectCar;
-    hidden.setAlpha(0);
+    const shown = this.suspectCars[this.chase.suspectStage] ?? this.suspectRunner;
+    for (const sprite of [...this.suspectCars, this.suspectRunner]) if (sprite && sprite !== shown) sprite.setAlpha(0);
     shown.setPosition(suspect.x, suspect.y).setRotation(this.suspectHeading);
     const alpha = shown.alpha + ((visible ? 1 : 0) - shown.alpha) * Math.min(1, delta / 250);
     shown.setAlpha(alpha);
@@ -365,11 +411,21 @@ export class ChaseScene extends Phaser.Scene {
       if (debugState.isEnabled && this.stage === 'PURSUIT') this.handleEvents(this.chase.forceOutcome('ESCAPED'));
     });
     keyboard.on('keydown-N', () => debugState.isEnabled && this.nextChase());
+    // Sighting answers.
+    ['ONE', 'TWO', 'THREE', 'FOUR'].forEach((key, i) => {
+      const answer = () => this.stage === 'PURSUIT' && this.handleEvents(this.chase.answerSighting(i));
+      keyboard.on(`keydown-${key}`, answer);
+      keyboard.on(`keydown-NUMPAD_${key}`, answer);
+    });
   }
 
   /** The officer asks the dispatcher to repeat, then the last call plays again, unchanged. */
   private repeat(): void {
     if (this.stage !== 'PURSUIT') return;
+    if (this.chase.status.signalLost) {
+      this.hud.showToast('Pas de signal !');
+      return;
+    }
     const last = this.chase.navigator.last;
     const result = this.chase.requestRepeat();
     if (!result || !last) return;
@@ -419,14 +475,24 @@ export class ChaseScene extends Phaser.Scene {
   }
 }
 
-/** Debug and testing: `?type=CAR_FOOT` forces a chase type. */
-/** Debug and tests: `?type=CAR_FOOT` forces a chase type, `?turnoff=1` (or 0) a change of direction. */
+/**
+ * Debug and tests: `?type=CAR_FOOT` forces a chase type; `?turnoff=1` (or 0) a
+ * change of direction, `?sightings=0` no sightings, `?lost=1` a lost signal.
+ */
 function scenarioOptionsFromAddress(): ScenarioOptions {
   const params = new URLSearchParams(window.location.search);
   const type = params.get('type');
-  const turnOff = params.get('turnoff');
+  const flag = (name: string) => {
+    const value = params.get(name);
+    return value === '1' || value === '0' ? value === '1' : undefined;
+  };
+  const turnOff = flag('turnoff');
+  const sightings = flag('sightings');
+  const lostSignal = flag('lost');
   return {
     ...(type && (CHASE_TYPES as readonly string[]).includes(type) ? { chaseType: type as ChaseType } : {}),
-    ...(turnOff === '1' || turnOff === '0' ? { turnOff: turnOff === '1' } : {}),
+    ...(turnOff !== undefined ? { turnOff } : {}),
+    ...(sightings !== undefined ? { sightings } : {}),
+    ...(lostSignal !== undefined ? { lostSignal } : {}),
   };
 }

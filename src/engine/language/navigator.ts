@@ -56,6 +56,8 @@ export class Navigator {
   private stuckOn: string | null = null;
   private nextId = 1;
   readonly history: Transmission[] = [];
+  /** Prefer calls with at least this many turns, when the map allows (the chase is about to lose the signal). */
+  preferSteps = 0;
 
   constructor(
     private readonly graph: TownGraph,
@@ -100,6 +102,36 @@ export class Navigator {
     if (this.justPastEnd(player)) return out;
     if (this.stuckOn === player.edgeId) return out;
     this.recover(player, suspectRoute, out);
+    return out;
+  }
+
+  /**
+   * While the signal is lost: follow where the player goes without saying
+   * anything. Returns true while the player is still on the guide.
+   */
+  track(player: MoverStart): boolean {
+    return this.onGuide(player);
+  }
+
+  /**
+   * Would the scanner have something new to say here: the player is off the
+   * guide, or the next junction has not been covered by a call yet?
+   */
+  hasNews(player: MoverStart): boolean {
+    if (!this.onGuide(player)) return true;
+    const next = this.actions.find((a) => a > this.progress);
+    return next === undefined ? !this.finalDone && this.destination !== null : !this.covered.has(next);
+  }
+
+  /** The signal is back: say what the player needs now (the next direction, or a way back). */
+  resume(player: MoverStart, suspectRoute: readonly string[]): Transmission[] {
+    const out: Transmission[] = [];
+    if (this.onGuide(player)) {
+      this.awaiting = null;
+      this.schedule(player, out);
+    } else if (!this.justPastEnd(player)) {
+      this.recover(player, suspectRoute, out);
+    }
     return out;
   }
 
@@ -148,6 +180,7 @@ export class Navigator {
       this.difficulty,
       this.rng,
       this.hasAudio,
+      this.preferSteps,
     );
     if (guided) {
       for (const c of guided.covers) this.covered.add(c);

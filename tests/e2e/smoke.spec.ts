@@ -84,7 +84,8 @@ test('a seed in the address replays that exact chase, and debug capture ends it'
 test('the suspect gets out and runs: the scanner orders the player out, and the chase goes on on foot', async ({ page }) => {
   test.setTimeout(240_000);
   const errors = watchErrors(page);
-  await page.goto('./?debug=1&type=CAR_FOOT&turnoff=0&seed=BV-I-NW3A-HRZZ');
+  await page.goto('./?debug=1&type=CAR_FOOT&turnoff=0&sightings=0&seed=BV-I-NW3A-HRZZ');
+  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Title']));
   await page.keyboard.press('Enter');
   await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Chase']));
   expect(await info(page, 'chase')).toBe('CAR_FOOT');
@@ -112,7 +113,8 @@ test('the suspect gets out and runs: the scanner orders the player out, and the 
 
 test('the suspect changes direction: the scanner says so and corrects the directions', async ({ page }) => {
   const errors = watchErrors(page);
-  await page.goto('./?debug=1&type=CAR_CAR&turnoff=1&seed=BV-H-K7EP-VHKY');
+  await page.goto('./?debug=1&type=CAR_CAR&turnoff=1&sightings=0&seed=BV-H-K7EP-VHKY');
+  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Title']));
   await page.keyboard.press('Enter');
   await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Chase']));
   await expect.poll(async () => Number(await info(page, 'speed')), SLOW).toBeGreaterThan(10);
@@ -125,5 +127,20 @@ test('the suspect changes direction: the scanner says so and corrects the direct
   await expect
     .poll(() => info(page, 'scanner'), { timeout: 60_000 })
     .toMatch(/^(DIRECTION|FILLER|CORRECTION): event\.attention \+ event\.changed_direction \+ /);
+  expect(errors).toEqual([]);
+});
+
+test('a sighting pauses the chase until the player picks the suspect', async ({ page }) => {
+  const errors = watchErrors(page);
+  await page.goto('./?debug=1&type=CAR_CAR&turnoff=0&seed=BV-H-YMQE-YSS0');
+  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Title']));
+  await page.keyboard.press('Enter');
+  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Chase']));
+  // "La voiture … est près du …": the debug panel shows which card is right.
+  await expect.poll(() => info(page, 'scanner'), { timeout: 60_000 }).toMatch(/^EVENT: event\.sighting\./);
+  const answer = String(await info(page, 'sighting')).replace('answer ', '');
+  expect(answer).toMatch(/^[1-3]$/);
+  await page.keyboard.press(answer);
+  await expect.poll(() => info(page, 'sightings')).toBe('1 / 1');
   expect(errors).toEqual([]);
 });

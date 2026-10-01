@@ -10,7 +10,8 @@
  * never chosen (see `AudioCheck`).
  */
 
-import { CHASE_SETTINGS, CHASE_TYPE_MODES, CHASE_TYPE_WEIGHTS, CHASE_TYPES, type ChaseType } from '../chase/settings';
+import { CHASE_SETTINGS, CHASE_TYPE_MODES, CHASE_TYPE_WEIGHTS, CHASE_TYPES, VEHICLES, type ChaseType } from '../chase/settings';
+import { nearestPlace } from '../chase/sightings';
 import { DIFFICULTIES, type Difficulty } from '../difficulty';
 import { isDecision, scanAhead } from '../language/analysis';
 import { describe, positionLeaving, readsAs, weightOf } from '../language/generate';
@@ -25,6 +26,7 @@ import {
   type TemplateId,
 } from '../language/instructions';
 import { LANGUAGE_SETTINGS } from '../language/settings';
+import { sightingLine, vehicleLine } from '../language/sightings';
 import type { MoverStart } from '../movement/mover';
 import { canTravel, type TownGraph, type TravelMode } from '../world/graph';
 
@@ -76,6 +78,7 @@ export const TRANSPORT_LINES = {
 export const EVENT_LINES = {
   ATTENTION: { audioId: 'event.attention', text: 'Attention !' },
   CHANGED_DIRECTION: { audioId: 'event.changed_direction', text: 'Le suspect a changé de direction.' },
+  LOST_SIGNAL: { audioId: 'event.lost_signal', text: 'Nous avons perdu le signal.' },
 } as const;
 
 /** The transport lines a chase type can need. */
@@ -208,6 +211,30 @@ function directionLines(graph: TownGraph, level: Difficulty, out: Collected, mod
   }
 }
 
+/** Places the suspect can be seen near: the nearest named place to some junction. */
+function sightingPlaces(graph: TownGraph): string[] {
+  const places = new Set<string>();
+  for (const node of graph.map.nodes) {
+    const place = nearestPlace(graph, node);
+    if (place) places.add(place);
+  }
+  return [...places].sort();
+}
+
+/** "Le suspect est dans une voiture verte." and the sightings a level can use. */
+function sightingLines(graph: TownGraph, level: Difficulty, types: readonly ChaseType[], out: Collected): void {
+  if (CHASE_SETTINGS[level].sightings.count === 0) return;
+  const drives = types.some((t) => CHASE_TYPE_MODES[t].includes('CAR'));
+  const walks = types.some((t) => CHASE_TYPE_MODES[t].includes('FOOT'));
+  const event = { voice: 'DISPATCHER', category: 'EVENT', template: null } as const;
+  if (drives) for (const vehicle of VEHICLES) addLine(out, { ...vehicleLine(vehicle), ...event }, level);
+  for (const place of sightingPlaces(graph)) {
+    // Expert never names the vehicle in a sighting: the player remembers it.
+    if (drives && level !== 'EXPERT') for (const vehicle of VEHICLES) addLine(out, { ...sightingLine(vehicle, place), ...event }, level);
+    if (walks || (drives && level === 'EXPERT')) addLine(out, { ...sightingLine(null, place), ...event }, level);
+  }
+}
+
 /** The complete recording script (driving and on foot), sorted by category then text. */
 export function buildScript(graph: TownGraph, modes: readonly TravelMode[] = ['CAR', 'FOOT']): ScriptLine[] {
   const out: Collected = new Map();
@@ -232,7 +259,11 @@ export function buildScript(graph: TownGraph, modes: readonly TravelMode[] = ['C
         addLine(out, { ...line, voice: 'DISPATCHER', category: 'EVENT', template: null }, level);
       }
     }
+    if (CHASE_SETTINGS[level].lostSignal > 0) {
+      addLine(out, { ...EVENT_LINES.LOST_SIGNAL, voice: 'DISPATCHER', category: 'EVENT', template: null }, level);
+    }
     const types = CHASE_TYPES.filter((t) => (CHASE_TYPE_WEIGHTS[level][t] ?? 0) > 0);
+    sightingLines(graph, level, types, out);
     for (const key of new Set(types.flatMap(transportLinesFor))) {
       addLine(out, { ...TRANSPORT_LINES[key], voice: 'DISPATCHER', category: 'EVENT', template: null }, level);
     }

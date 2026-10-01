@@ -188,9 +188,11 @@ export function instructionFor(
   difficulty: Difficulty,
   rng: Rng,
   hasAudio: AudioCheck = ANY_AUDIO,
+  /** Prefer calls covering at least this many turns when there are any (before a lost signal). */
+  preferSteps = 0,
 ): Guided | null {
   const settings = LANGUAGE_SETTINGS[difficulty];
-  const options: Guided[] = [];
+  let options: Guided[] = [];
   const add = (clauses: Clause[], form: Form, covers: number[]) => {
     if (weightOf(clauses, difficulty, form) <= 0) return;
     const instruction = makeInstruction(clauses, difficulty, covers.map((i) => guide[i] as string), form);
@@ -241,6 +243,9 @@ export function instructionFor(
   }
 
   if (options.length === 0) return null;
+  if (preferSteps > 1 && options.some((o) => o.covers.length >= preferSteps)) {
+    options = options.filter((o) => o.covers.length >= preferSteps);
+  }
   // Pick the template by its weight first, then one of its sentences, so a template
   // with many possible sentences (long sequences) does not crowd out the others.
   const templates = [...new Set(options.map((o) => o.instruction.template))];
