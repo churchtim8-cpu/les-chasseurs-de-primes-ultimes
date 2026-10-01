@@ -140,7 +140,7 @@ export class Navigator {
       pos,
       this.guide,
       a,
-      this.actions[nextIndex + 1],
+      this.actions.slice(nextIndex + 1, nextIndex + 3),
       this.difficulty,
       this.rng,
       this.hasAudio,

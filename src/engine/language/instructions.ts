@@ -36,15 +36,43 @@ export type Clause =
 /**
  * Template families from blueprint section 12, plus RB (roundabout exits with
  * "la sortie", approved) and R (recovery lines).
+ *
+ *   H1  Tournez à gauche devant la banque, puis prenez la première rue à droite.
+ *   H2  Tournez à droite après le cinéma, puis tournez à gauche.
+ *   H3  Tournez à gauche, puis tournez à droite. Ensuite, prenez la deuxième rue à gauche.
+ *   H4  Prenez la troisième rue à droite. (third street, Hard and Expert)
+ *   X1  D'abord, tournez à gauche. Ensuite, … Enfin, …
+ *   X2  The same with more than one landmark in the one transmission.
  */
-export type TemplateId = 'E1' | 'E2' | 'E3' | 'I1' | 'I2' | 'I3' | 'RB' | 'R';
+export type TemplateId = 'E1' | 'E2' | 'E3' | 'I1' | 'I2' | 'I3' | 'H1' | 'H2' | 'H3' | 'H4' | 'X1' | 'X2' | 'RB' | 'R';
+
+/**
+ * How several clauses are spoken. SENTENCE: "…, puis …" (plus "Ensuite, …"
+ * for a third step at Hard). LINKED: Expert's "D'abord, … Ensuite, … Enfin, …".
+ */
+export type Form = 'SENTENCE' | 'LINKED';
+
+/**
+ * One recording. Single steps and plain "…, puis …" pairs are single
+ * sentence clips. Longer instructions add whole clauses recorded with their
+ * linking word ("Puis tournez à droite.", "Ensuite, tournez à gauche.") and
+ * played back to back (approved Decision 1), so no new combinations of
+ * landmarks and turns need recording.
+ */
+export interface Clip {
+  audioId: string;
+  text: string;
+}
 
 export interface Instruction {
   template: TemplateId;
+  form: Form;
   clauses: Clause[];
-  /** The full French sentence, exactly as it will be recorded. */
+  /** The full French, exactly as it will be heard. */
   text: string;
-  /** One recording per sentence (the approved hybrid audio plan for 1- and 2-step instructions). */
+  /** The recordings played in order. */
+  clips: Clip[];
+  /** One stable ID for the whole instruction (the clip's own ID when there is one clip). */
   audioId: string;
   /** For route instructions: the junctions (node IDs) the clauses refer to, in order. For debug and tests. */
   atNodes: string[];
@@ -121,20 +149,68 @@ export function sentence(clauses: readonly Clause[]): string {
     const joined = second.startsWith('Au ') ? `puis, ${lowerFirst(second)}` : `puis ${lowerFirst(second)}`;
     return `${clauseText(clauses[0] as Clause)}, ${joined}.`;
   }
-  throw new Error('Instructions have one or two clauses in this milestone');
+  throw new Error('A sentence has one or two clauses; longer instructions are linked clauses');
 }
 
 function lowerFirst(text: string): string {
   return text.charAt(0).toLowerCase() + text.slice(1);
 }
 
+export type LinkWord = 'PUIS' | 'DABORD' | 'ENSUITE' | 'ENFIN';
+const LINK_FR: Record<LinkWord, string> = { PUIS: 'Puis', DABORD: "D'abord,", ENSUITE: 'Ensuite,', ENFIN: 'Enfin,' };
+
+/** A clause recorded with its linking word: "Ensuite, prenez la deuxième rue à gauche." / "Puis tournez à droite." */
+export function linkedClip(word: LinkWord, clause: Clause): Clip {
+  const text = lowerFirst(clauseText(clause));
+  // As in the "…, puis …" sentences: "Puis, au rond-point, prenez la deuxième sortie."
+  const link = word === 'PUIS' && text.startsWith('au ') ? 'Puis,' : LINK_FR[word];
+  return { audioId: `link.${word.toLowerCase()}.${clauseKey(clause)}`, text: `${link} ${text}.` };
+}
+
+function sentenceClip(clauses: readonly Clause[]): Clip {
+  return { audioId: audioIdFor(clauses), text: sentence(clauses) };
+}
+
 export function audioIdFor(clauses: readonly Clause[]): string {
   return clauses.length === 1 ? `dir.${clauseKey(clauses[0] as Clause)}` : `seq.${clauses.map(clauseKey).join('+puis+')}`;
 }
 
-/** The template a clause (or pair of clauses) belongs to at a given difficulty. */
-export function templateFor(clauses: readonly Clause[], difficulty: Difficulty): TemplateId {
-  if (clauses.length === 2) return 'I3';
+/** The linking words for a linked instruction of n clauses: D'abord, Ensuite, (Enfin). */
+export function linkWords(n: number): LinkWord[] {
+  if (n === 2) return ['DABORD', 'ENSUITE'];
+  if (n === 3) return ['DABORD', 'ENSUITE', 'ENFIN'];
+  throw new Error('Linked instructions have two or three clauses');
+}
+
+const hasLandmark = (c: Clause) => c.action === 'TURN' && c.landmark !== undefined;
+
+/** The recordings for these clauses spoken in this form. */
+export function clipsFor(clauses: readonly Clause[], form: Form): Clip[] {
+  if (form === 'LINKED') return linkWords(clauses.length).map((w, i) => linkedClip(w, clauses[i] as Clause));
+  const [first, second, third] = clauses as [Clause, Clause?, Clause?];
+  if (!second) return [sentenceClip(clauses)];
+  // H1, H2: the landmark sentence already recorded, then "Puis …" (one clip per simple action).
+  if (hasLandmark(first)) return [sentenceClip([first]), linkedClip('PUIS', second)];
+  if (!third) return [sentenceClip(clauses)];
+  // H3: the "…, puis …" sentence for the first two steps, then "Ensuite, …".
+  return [sentenceClip([first, second]), linkedClip('ENSUITE', third)];
+}
+
+/** The template a set of clauses belongs to at a level, or null if no template has that shape. */
+export function templateFor(clauses: readonly Clause[], difficulty: Difficulty, form: Form = 'SENTENCE'): TemplateId | null {
+  const landmarks = clauses.filter(hasLandmark).length;
+  if (form === 'LINKED') {
+    if (clauses.length < 2 || clauses.length > 3) return null;
+    return landmarks >= 2 ? 'X2' : 'X1';
+  }
+  if (clauses.length === 3) return landmarks === 0 ? 'H3' : null;
+  if (clauses.length === 2) {
+    if (landmarks === 0) return 'I3';
+    const [first, second] = clauses as [Clause, Clause];
+    if (hasLandmark(second) || first.action !== 'TURN') return null;
+    // Action + landmark, then an action (H1: "devant"); action + relation + place, then an action (H2).
+    return first.relation === 'DEVANT' ? 'H1' : 'H2';
+  }
   const c = clauses[0] as Clause;
   switch (c.action) {
     case 'TURN':
@@ -146,7 +222,8 @@ export function templateFor(clauses: readonly Clause[], difficulty: Difficulty):
     case 'CONTINUE_UNTIL':
       return 'E2';
     case 'TAKE_STREET':
-      return 'I2';
+      // "la troisième rue" is a Hard construction (H4); Intermediate may use it too (Mr Henry).
+      return c.ordinal === 3 && (difficulty === 'HARD' || difficulty === 'EXPERT') ? 'H4' : 'I2';
     case 'ROUNDABOUT_EXIT':
       return 'RB';
     case 'WRONG_STREET':
@@ -155,12 +232,22 @@ export function templateFor(clauses: readonly Clause[], difficulty: Difficulty):
   }
 }
 
-export function makeInstruction(clauses: Clause[], difficulty: Difficulty, atNodes: string[] = []): Instruction {
+export function makeInstruction(
+  clauses: Clause[],
+  difficulty: Difficulty,
+  atNodes: string[] = [],
+  form: Form = 'SENTENCE',
+): Instruction {
+  const template = templateFor(clauses, difficulty, form);
+  if (!template) throw new Error(`No template for ${clauses.map(clauseKey).join(', ')} (${form})`);
+  const clips = clipsFor(clauses, form);
   return {
-    template: templateFor(clauses, difficulty),
+    template,
+    form,
     clauses,
-    text: sentence(clauses),
-    audioId: audioIdFor(clauses),
+    text: clips.map((c) => c.text).join(' '),
+    clips,
+    audioId: clips.map((c) => c.audioId).join(' '),
     atNodes,
   };
 }

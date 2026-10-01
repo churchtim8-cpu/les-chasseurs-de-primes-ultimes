@@ -218,10 +218,13 @@ export class ChaseScene extends Phaser.Scene {
    */
   private showTransmission(transmission: Transmission, before: SpokenLine[] = []): void {
     const difficulty = this.chase.scenario.difficulty;
-    const voiced = transmission.instructions.every((i) => scannerAudio.has(i.audioId));
+    const clips = transmission.instructions.flatMap((i) => i.clips);
+    const voiced = clips.every((c) => scannerAudio.has(c.audioId));
     const audioOnly = DIFFICULTY_SETTINGS[difficulty].textDisplay === 'AUDIO_ONLY' && voiced;
-    this.hud.showScanner(transmission.text, audioOnly ? 0 : LANGUAGE_SETTINGS[difficulty].textSeconds);
-    void scannerAudio.play([...before, ...transmission.instructions.map((i) => ({ audioId: i.audioId, radio: true }))]);
+    // A multi-step call stays up longer: two more seconds for each extra clause clip.
+    const seconds = LANGUAGE_SETTINGS[difficulty].textSeconds + 2 * (clips.length - 1);
+    this.hud.showScanner(transmission.text, audioOnly ? 0 : seconds);
+    void scannerAudio.play([...before, ...clips.map((c) => ({ audioId: c.audioId, radio: true }))]);
     const detail = transmission.instructions.map((i) => `${i.template} ${i.audioId}`).join(' + ');
     debugState.info.set('scanner', `${transmission.kind}: ${detail}`);
   }

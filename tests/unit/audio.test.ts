@@ -42,8 +42,10 @@ describe('recording script', () => {
   });
 
   it('stays a manageable size for recording', () => {
-    expect(script.length).toBeLessThan(500);
-    expect(script.reduce((n, l) => n + l.text.length, 0)).toBeLessThan(25_000);
+    // Multi-step instructions reuse recorded sentences plus one clip per linked clause,
+    // so the script grows by hundreds of lines, not by every combination.
+    expect(script.length).toBeLessThan(800);
+    expect(script.reduce((n, l) => n + l.text.length, 0)).toBeLessThan(36_000);
   });
 
   it.each(DIFFICULTIES)('chases work using only recorded sentences (%s)', (difficulty) => {
@@ -55,7 +57,9 @@ describe('recording script', () => {
       const bot = new ListenerBot(graph);
       for (let t = 0; t < 400 && chase.status.phase === 'PURSUIT'; t += 0.05) bot.step(chase, 0.05);
       expect(bot.log.length, seed).toBeGreaterThan(0);
-      for (const t of bot.log) for (const i of t.instructions) expect(recorded, `${seed}: ${i.text}`).toContain(i.audioId);
+      for (const t of bot.log) {
+        for (const i of t.instructions) for (const c of i.clips) expect(recorded, `${seed}: ${i.text}`).toContain(c.audioId);
+      }
       expect(bot.log.filter((t) => t.kind === 'RECOVERY'), seed).toEqual([]);
       if (chase.status.phase === 'CAPTURED') captured++;
     }
