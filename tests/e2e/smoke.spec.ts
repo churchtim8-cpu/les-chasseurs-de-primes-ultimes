@@ -52,7 +52,7 @@ test('title screen starts a chase; drive, get out and debug toggle work', async 
 test('a seed in the address replays that exact chase, and debug capture ends it', async ({ page }) => {
   const errors = watchErrors(page);
   const seed = 'BV-I-NW3A-HRZZ';
-  await page.goto(`./?debug=1&type=CAR_CAR&seed=${seed}`);
+  await page.goto(`./?debug=1&type=CAR_CAR&turnoff=0&seed=${seed}`);
   await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Title']));
   await page.keyboard.press('Enter');
   await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Chase']));
@@ -84,7 +84,7 @@ test('a seed in the address replays that exact chase, and debug capture ends it'
 test('the suspect gets out and runs: the scanner orders the player out, and the chase goes on on foot', async ({ page }) => {
   test.setTimeout(240_000);
   const errors = watchErrors(page);
-  await page.goto('./?debug=1&type=CAR_FOOT&seed=BV-I-NW3A-HRZZ');
+  await page.goto('./?debug=1&type=CAR_FOOT&turnoff=0&seed=BV-I-NW3A-HRZZ');
   await page.keyboard.press('Enter');
   await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Chase']));
   expect(await info(page, 'chase')).toBe('CAR_FOOT');
@@ -107,5 +107,23 @@ test('the suspect gets out and runs: the scanner orders the player out, and the 
   await expect.poll(() => info(page, 'stage'), { timeout: 60_000 }).toBe('suspect 2, player 2');
   await expect.poll(() => info(page, 'scanner'), SLOW).toMatch(/^(DIRECTION|FILLER|FINAL): /);
 
+  expect(errors).toEqual([]);
+});
+
+test('the suspect changes direction: the scanner says so and corrects the directions', async ({ page }) => {
+  const errors = watchErrors(page);
+  await page.goto('./?debug=1&type=CAR_CAR&turnoff=1&seed=BV-H-K7EP-VHKY');
+  await page.keyboard.press('Enter');
+  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Chase']));
+  await expect.poll(async () => Number(await info(page, 'speed')), SLOW).toBeGreaterThan(10);
+  await page.evaluate(() => {
+    const scene = window.__bellevue!.game.scene.getScene('Chase') as unknown as {
+      chase: { player: { followPlan(n: string[]): void }; scenario: { route: string[] } };
+    };
+    scene.chase.player.followPlan(scene.chase.scenario.route.slice(1));
+  });
+  await expect
+    .poll(() => info(page, 'scanner'), { timeout: 60_000 })
+    .toMatch(/^(DIRECTION|FILLER|CORRECTION): event\.attention \+ event\.changed_direction \+ /);
   expect(errors).toEqual([]);
 });

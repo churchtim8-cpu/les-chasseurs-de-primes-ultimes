@@ -24,7 +24,8 @@ import { followProblem, pathLength } from '../chase/route';
 import { actionIndices, describable, finalInstruction, instructionFor, straightOn, type AudioCheck } from './generate';
 import { makeInstruction, type Instruction } from './instructions';
 
-export type TransmissionKind = 'DIRECTION' | 'FILLER' | 'RECOVERY' | 'FINAL';
+/** RECOVERY answers a wrong turn; CORRECTION follows the suspect changing direction ("Faites demi-tour."). */
+export type TransmissionKind = 'DIRECTION' | 'FILLER' | 'RECOVERY' | 'CORRECTION' | 'FINAL';
 
 export interface Transmission {
   id: number;
@@ -51,6 +52,8 @@ export class Navigator {
   private started = false;
   /** Set after "Faites demi-tour": the position the player is expected to turn round from. */
   private awaiting: { edgeId: string; towards: string } | null = null;
+  /** An edge where no way back could be planned: wait until the player leaves it before trying again. */
+  private stuckOn: string | null = null;
   private nextId = 1;
   readonly history: Transmission[] = [];
 
@@ -60,7 +63,7 @@ export class Navigator {
     private readonly rng: Rng,
     route: readonly string[],
     /** Where the suspect is heading, or null when this stage ends at a change of transport (no final line). */
-    private readonly destination: string | null,
+    private destination: string | null,
     mode: TravelMode = 'CAR',
     /** Only sentences with a recording may be used (all, until audio is loaded). */
     private readonly hasAudio: AudioCheck = () => true,
@@ -95,6 +98,7 @@ export class Navigator {
     }
     if (this.awaiting && this.awaiting.edgeId === player.edgeId && this.awaiting.towards === player.towards) return out;
     if (this.justPastEnd(player)) return out;
+    if (this.stuckOn === player.edgeId) return out;
     this.recover(player, suspectRoute, out);
     return out;
   }
@@ -172,8 +176,33 @@ export class Navigator {
     if (wrongStreet) lines.push(makeInstruction([{ action: 'WRONG_STREET' }], this.difficulty));
     if (plan?.uTurn) lines.push(makeInstruction([{ action: 'U_TURN' }], this.difficulty));
     if (lines.length > 0) this.emit('RECOVERY', lines, out);
+    this.stuckOn = plan ? null : player.edgeId;
     if (!plan) return;
+    this.useGuide(plan, player, out);
+  }
 
+  /**
+   * The suspect has changed direction (template X3): forget the predicted
+   * route, plan a new guide from the player onto the suspect's real one, and
+   * give the first corrected direction ("Faites demi-tour." first if needed).
+   */
+  redirect(
+    player: MoverStart,
+    suspectRoute: readonly string[],
+    destination: string | null,
+    /** The new guide, when the player is still on it (starting with the edge they are on). */
+    guide?: readonly string[],
+  ): Transmission[] {
+    const out: Transmission[] = [];
+    this.destination = destination;
+    const plan = guide ? { guide: [...guide], uTurn: false } : this.replan(player, suspectRoute);
+    if (!plan) return out; // off the guide now: the usual recovery takes over
+    if (plan.uTurn) this.emit('CORRECTION', [makeInstruction([{ action: 'U_TURN' }], this.difficulty)], out);
+    this.useGuide(plan, player, out);
+    return out;
+  }
+
+  private useGuide(plan: { guide: string[]; uTurn: boolean }, player: MoverStart, out: Transmission[]): void {
     this.guide = plan.guide;
     this.progress = 0;
     this.actions = actionIndices(this.graph, this.guide, player.mode);

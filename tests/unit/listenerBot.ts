@@ -4,10 +4,11 @@
  * student would. It acts on each clause live, counting streets and watching
  * for landmarks as it drives, so it checks the generator independently.
  * It gets out of the car on "Descendez de la voiture !" and back in on
- * "Montez dans la voiture !".
+ * "Montez dans la voiture !", and drops the directions it was following on
+ * "Le suspect a changé de direction."
  */
 
-import { TRANSPORT_LINES } from '../../src/engine/audio/script';
+import { EVENT_LINES, TRANSPORT_LINES } from '../../src/engine/audio/script';
 import type { Chase, ChaseEvent } from '../../src/engine/chase/chase';
 import { isAt, isDecision, locationById, opensOn, passPoint, scanAhead } from '../../src/engine/language/analysis';
 import type { Clause } from '../../src/engine/language/instructions';
@@ -26,6 +27,8 @@ interface Task {
 export class ListenerBot {
   private heard: { at: number; transmission: Transmission }[] = [];
   private orders: { at: number; audioId: string }[] = [];
+  /** Times at which the bot has understood that the suspect changed direction. */
+  private changes: number[] = [];
   /** Mode changes that failed (for example, the car out of reach). */
   readonly failedOrders: string[] = [];
   private tasks: Task[] = [];
@@ -51,6 +54,7 @@ export class ListenerBot {
           if (line.audioId === TRANSPORT_LINES.GET_OUT.audioId || line.audioId === TRANSPORT_LINES.GET_IN.audioId) {
             this.orders.push({ at: this.time + this.reaction, audioId: line.audioId });
           }
+          if (line.audioId === EVENT_LINES.CHANGED_DIRECTION.audioId) this.changes.push(this.time + this.reaction);
         }
       }
     }
@@ -68,6 +72,12 @@ export class ListenerBot {
       this.hear(events);
     }
     const player = chase.player;
+    while (this.changes.length > 0 && (this.changes[0] ?? Infinity) <= this.time) {
+      // The directions it was following no longer apply; the corrected ones are already queued.
+      this.changes.shift();
+      this.tasks = [];
+      player.clearQueue();
+    }
     while (this.heard.length > 0 && (this.heard[0]?.at ?? Infinity) <= this.time) {
       const { transmission } = this.heard.shift()!;
       for (const instruction of transmission.instructions) {

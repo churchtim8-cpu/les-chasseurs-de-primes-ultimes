@@ -2,6 +2,11 @@
  * The running chase: moves the suspect along its route, measures the road
  * distance to the player, and decides capture and escape.
  *
+ * Changes of direction: at higher levels the scanner first guides the player
+ * along the route it predicts; when the suspect turns off it, the scanner
+ * says "Attention ! Le suspect a changé de direction." and gives corrected
+ * directions from where the player is (template X3).
+ *
  * Changes of transport: when the suspect reaches the end of a stage it gets
  * out of (or into) a car and carries on. The scanner says so; the player is
  * told "Descendez de la voiture !" on reaching that spot, or "Montez dans la
@@ -15,7 +20,7 @@
  *   close enough for long enough → capture (no need to ram the suspect)
  */
 
-import { TRANSPORT_LINES } from '../audio/script';
+import { EVENT_LINES, TRANSPORT_LINES } from '../audio/script';
 import { DIFFICULTY_SETTINGS } from '../difficulty';
 import type { AudioCheck } from '../language/generate';
 import { Navigator, type Transmission } from '../language/navigator';
@@ -28,7 +33,8 @@ import { roadDistance } from './distance';
 import { placeOnRoute } from './route';
 import type { ChaseScenario } from './scenario';
 import { RepeatCounter, type RepeatResult } from '../audio/repeat';
-import { CHASE_SETTINGS, TRANSFER, type ChaseSettings } from './settings';
+import { CHASE_SETTINGS, TRANSFER, TURN_OFF, type ChaseSettings } from './settings';
+import { isDecision, scanAhead } from '../language/analysis';
 
 /** A fixed scanner line (not a route instruction): an event or an order. */
 export interface SpokenText {
@@ -131,6 +137,8 @@ export class Chase {
   /** Set while the player is being taken to the start of this stage. */
   private autoStage: number | null = null;
   private escapeReason?: EscapeReason;
+  /** The change of direction is still to come (it is dropped if the player is not on that stage yet). */
+  private turnOffPending: boolean;
   private readonly hasAudio: AudioCheck | undefined;
 
   constructor(
@@ -143,11 +151,12 @@ export class Chase {
     this.timeLeft =
       DIFFICULTY_SETTINGS[scenario.difficulty].timeLimitSeconds + (scenario.stages.length - 1) * TRANSFER.extraSeconds;
     this.repeats = new RepeatCounter(DIFFICULTY_SETTINGS[scenario.difficulty].repeat);
+    this.turnOffPending = scenario.turnOff !== null;
     this.player = new Mover(graph, scenario.playerStart);
     this.suspect = new Mover(graph, scenario.suspectStart);
     this.suspect.followPlan(scenario.suspectPlan);
     this.suspect.speedFactor = this.settings.suspectSpeed;
-    this.navigator = this.navigatorFor(0, scenario.route);
+    this.navigator = this.navigatorFor(0);
     this.distance = this.measure();
   }
 
@@ -155,18 +164,73 @@ export class Chase {
     return this.scenario.stages.length - 1;
   }
 
-  /** Directions for one stage. The first stage keeps the original language stream. */
-  private navigatorFor(stage: number, guide: readonly string[]): Navigator {
+  /**
+   * Directions for one stage. The first stage keeps the original language
+   * stream. Before a change of direction, the scanner guides along the route
+   * it predicts.
+   */
+  private navigatorFor(stage: number): Navigator {
     const { scenario } = this;
+    const route = scenario.stages[stage]?.route ?? scenario.route;
+    const turnOff = this.turnOffPending && scenario.turnOff?.stage === stage ? scenario.turnOff : null;
     return new Navigator(
       this.graph,
       scenario.difficulty,
       Rng.fromSeed(scenario.seed).fork(stage === 0 ? 'language' : `language-${stage}`),
-      guide,
-      stage === this.lastStage ? scenario.destination : null,
+      turnOff ? [...route.slice(0, turnOff.at), ...turnOff.decoy] : route,
+      turnOff ? turnOff.decoyDestination : stage === this.lastStage ? scenario.destination : null,
       scenario.stages[stage]?.mode ?? 'CAR',
       this.hasAudio,
     );
+  }
+
+  /**
+   * The suspect has turned off the predicted route: announce it and correct
+   * the directions from where the player is. Dropped if the player has not
+   * reached that stage yet (its directions will follow the real route).
+   */
+  private checkTurnOff(events: ChaseEvent[]): void {
+    const turnOff = this.scenario.turnOff;
+    if (!this.turnOffPending || !turnOff || this.suspectStage !== turnOff.stage) return;
+    const route = this.scenario.stages[turnOff.stage]!.route;
+    const junction = route[turnOff.at] as string;
+    const plan = this.suspect.remainingPlan();
+    // Seen turning off: about to reach the junction, or past it.
+    const seen =
+      !plan.includes(junction) ||
+      (plan[0] === junction &&
+        distance(this.suspect.snapshot(), this.graph.node(junction)) <= TURN_OFF.seenWithin[this.suspect.mode]);
+    if (!seen) return;
+    if (this.playerStage !== turnOff.stage || this.pending || this.autoStage !== null) {
+      this.turnOffPending = false;
+      return;
+    }
+    if (!this.clearOfJunctions()) return; // wait until there is time to take the correction in
+    this.turnOffPending = false;
+    events.push({ type: 'ANNOUNCE', lines: [EVENT_LINES.ATTENTION, EVENT_LINES.CHANGED_DIRECTION] });
+    // Still on the shared part of the route: the real route from here. Otherwise a way onto it.
+    const here = this.player.location();
+    const i = route.findIndex(
+      (n, k) =>
+        k < turnOff.at &&
+        here.towards === route[k + 1] &&
+        this.graph.edgeBetween(n, route[k + 1] as string)?.id === here.edgeId,
+    );
+    const transmissions =
+      i === -1
+        ? this.navigator.redirect(here, plan, this.scenario.destination)
+        : this.navigator.redirect(here, plan, this.scenario.destination, route.slice(i));
+    for (const transmission of transmissions) events.push({ type: 'TRANSMISSION', transmission });
+  }
+
+  /** Is the player stopped, or far enough (in seconds) from the next junction to act on new directions? */
+  private clearOfJunctions(): boolean {
+    const me = this.player.snapshot();
+    if (me.waiting) return true;
+    const here = this.player.location();
+    if (this.graph.edge(here.edgeId).kind === 'ROUNDABOUT_RING') return false;
+    const next = scanAhead(this.graph, here, me.mode).nodes.find(isDecision);
+    return !next || next.s >= TURN_OFF.clearSeconds * Math.max(me.speed, 1);
   }
 
   /** Where the suspect changes transport at the end of the player's current stage. */
@@ -193,6 +257,7 @@ export class Chase {
         events.push({ type: 'SUSPECT_ARRIVED' });
       }
     }
+    this.checkTurnOff(events);
     this.orderGetOut(events);
     if (this.autoStage !== null && this.player.snapshot().waiting === 'ARRIVED') this.beginStage(this.autoStage, events);
 
@@ -337,7 +402,7 @@ export class Chase {
     const speed = this.player.snapshot().speed;
     this.player = new Mover(this.graph, placeOnRoute(this.graph, route, 1, mode).start);
     this.player.setSpeed(speed);
-    this.navigator = this.navigatorFor(stage, route);
+    this.navigator = this.navigatorFor(stage);
     for (const transmission of this.navigator.update(this.player.location(), this.suspect.remainingPlan())) {
       events.push({ type: 'TRANSMISSION', transmission });
     }

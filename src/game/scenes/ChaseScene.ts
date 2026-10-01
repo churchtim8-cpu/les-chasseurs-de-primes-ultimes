@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { BELLEVUE } from '../../content/map/bellevue';
 import { audioCheck } from '../../engine/audio/manifest';
-import { OUTCOME_LINES, REPEAT_LINES, TRANSPORT_LINES } from '../../engine/audio/script';
+import { EVENT_LINES, OUTCOME_LINES, REPEAT_LINES, TRANSPORT_LINES } from '../../engine/audio/script';
 import { DIFFICULTY_SETTINGS } from '../../engine/difficulty';
 import { Chase, pointOf, type ChaseEvent, type SpokenText } from '../../engine/chase/chase';
 import { generateScenario, type ScenarioOptions } from '../../engine/chase/scenario';
@@ -76,11 +76,16 @@ export class ChaseScene extends Phaser.Scene {
 
   create(): void {
     this.graph = new TownGraph(BELLEVUE);
-    this.chase = new Chase(this.graph, generateScenario(this.graph, this.seed, chaseTypeFromAddress()), {
+    this.chase = new Chase(this.graph, generateScenario(this.graph, this.seed, scenarioOptionsFromAddress()), {
       hasAudio: audioCheck(scannerAudio.library),
     });
     scannerAudio.preload(
-      [...Object.values(REPEAT_LINES), ...Object.values(OUTCOME_LINES), ...Object.values(TRANSPORT_LINES)].map(
+      [
+        ...Object.values(REPEAT_LINES),
+        ...Object.values(OUTCOME_LINES),
+        ...Object.values(TRANSPORT_LINES),
+        ...Object.values(EVENT_LINES),
+      ].map(
         (l) => l.audioId,
       ),
     );
@@ -161,7 +166,7 @@ export class ChaseScene extends Phaser.Scene {
   }
 
   private handleEvents(events: ChaseEvent[]): void {
-    for (const event of events) {
+    for (const [i, event] of events.entries()) {
       switch (event.type) {
         case 'SIGHTED':
           if (event.on) this.hud.showToast('Suspect en vue !');
@@ -181,11 +186,16 @@ export class ChaseScene extends Phaser.Scene {
         }
         case 'SUSPECT_ARRIVED':
           break;
-        case 'TRANSMISSION':
-          this.showTransmission(event.transmission);
+        case 'TRANSMISSION': {
+          // An announcement just before it ("Attention ! Le suspect a changé de direction.")
+          // is spoken first, in the same call, so neither cuts the other off.
+          const previous = events[i - 1];
+          const lead = previous?.type === 'ANNOUNCE' ? previous.lines : [];
+          this.showTransmission(event.transmission, [], lead);
           break;
+        }
         case 'ANNOUNCE':
-          this.announce(event.lines);
+          if (events[i + 1]?.type !== 'TRANSMISSION') this.announce(event.lines);
           break;
         case 'SUSPECT_MODE':
           break;
@@ -205,27 +215,34 @@ export class ChaseScene extends Phaser.Scene {
     const text = lines.map((l) => l.text).join(' ');
     this.hud.showScanner(text, audioOnly ? 0 : Math.max(LANGUAGE_SETTINGS[difficulty].textSeconds, 4));
     void scannerAudio.play(lines.map((l) => ({ audioId: l.audioId, radio: true })));
+    this.orderToasts(lines);
+    debugState.info.set('scanner', `EVENT: ${lines.map((l) => l.audioId).join(' + ')}`);
+  }
+
+  /** An order also shows which button to press. */
+  private orderToasts(lines: SpokenText[]): void {
     const ids = lines.map((l) => l.audioId);
     if (ids.includes(TRANSPORT_LINES.GET_OUT.audioId)) this.hud.showToast('⇄ (E) : descendre de la voiture', 3500);
     if (ids.includes(TRANSPORT_LINES.GET_IN.audioId)) this.hud.showToast('⇄ (E) : monter dans la voiture', 3500);
-    debugState.info.set('scanner', `EVENT: ${ids.join(' + ')}`);
   }
 
   /**
    * Speak a scanner call and show its text as the level allows: Hard and
    * Expert are audio only, but a line with no recording yet is always shown.
-   * `before` is spoken first (the officer asking for a repeat).
+   * `before` is spoken first (the officer asking for a repeat); `lead` is an
+   * announcement the dispatcher makes just before the call.
    */
-  private showTransmission(transmission: Transmission, before: SpokenLine[] = []): void {
+  private showTransmission(transmission: Transmission, before: SpokenLine[] = [], lead: SpokenText[] = []): void {
     const difficulty = this.chase.scenario.difficulty;
-    const clips = transmission.instructions.flatMap((i) => i.clips);
+    const clips = [...lead, ...transmission.instructions.flatMap((i) => i.clips)];
     const voiced = clips.every((c) => scannerAudio.has(c.audioId));
     const audioOnly = DIFFICULTY_SETTINGS[difficulty].textDisplay === 'AUDIO_ONLY' && voiced;
-    // A multi-step call stays up longer: two more seconds for each extra clause clip.
+    // A multi-part call stays up longer: two more seconds for each extra clip.
     const seconds = LANGUAGE_SETTINGS[difficulty].textSeconds + 2 * (clips.length - 1);
-    this.hud.showScanner(transmission.text, audioOnly ? 0 : seconds);
+    this.hud.showScanner(clips.map((c) => c.text).join(' '), audioOnly ? 0 : seconds);
+    this.orderToasts(lead);
     void scannerAudio.play([...before, ...clips.map((c) => ({ audioId: c.audioId, radio: true }))]);
-    const detail = transmission.instructions.map((i) => `${i.template} ${i.audioId}`).join(' + ');
+    const detail = [...lead.map((l) => l.audioId), ...transmission.instructions.map((i) => `${i.template} ${i.audioId}`)].join(' + ');
     debugState.info.set('scanner', `${transmission.kind}: ${detail}`);
   }
 
@@ -403,7 +420,13 @@ export class ChaseScene extends Phaser.Scene {
 }
 
 /** Debug and testing: `?type=CAR_FOOT` forces a chase type. */
-function chaseTypeFromAddress(): ScenarioOptions {
-  const type = new URLSearchParams(window.location.search).get('type');
-  return type && (CHASE_TYPES as readonly string[]).includes(type) ? { chaseType: type as ChaseType } : {};
+/** Debug and tests: `?type=CAR_FOOT` forces a chase type, `?turnoff=1` (or 0) a change of direction. */
+function scenarioOptionsFromAddress(): ScenarioOptions {
+  const params = new URLSearchParams(window.location.search);
+  const type = params.get('type');
+  const turnOff = params.get('turnoff');
+  return {
+    ...(type && (CHASE_TYPES as readonly string[]).includes(type) ? { chaseType: type as ChaseType } : {}),
+    ...(turnOff === '1' || turnOff === '0' ? { turnOff: turnOff === '1' } : {}),
+  };
 }

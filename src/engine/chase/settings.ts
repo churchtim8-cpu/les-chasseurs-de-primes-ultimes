@@ -79,7 +79,30 @@ export interface ChaseSettings {
   escapeDistance: number;
   /** ...for this many seconds (the player gets a chance to recover first). */
   escapeHold: number;
+  /**
+   * Chance that the suspect changes direction mid-chase, away from the route
+   * the scanner predicted: "Attention ! Le suspect a changé de direction."
+   * followed by corrected directions (X3). Blueprint: few route changes at Easy.
+   */
+  directionChange: number;
 }
+
+/** Direction-change tuning, shared by all levels (provisional). */
+export const TURN_OFF = {
+  /** The suspect turns off at least this far (metres) beyond where it starts the stage. */
+  minFromStart: 120,
+  /** ...and with at least this share of the stage still to go, so there is a chase left to run. */
+  minRemainingShare: 0.3,
+  /** Length of the route the scanner wrongly predicted, from the turn-off point (metres). */
+  decoyLength: [250, 700] as [number, number],
+  /**
+   * The correction is given only when the player is at least this many seconds
+   * from the next junction (or stopped), so there is time to take it in.
+   */
+  clearSeconds: 2,
+  /** The scanner sees the suspect turning off when it is this close to the junction (metres, by mode). */
+  seenWithin: { CAR: 60, FOOT: 20 } as Record<TravelMode, number>,
+} as const;
 
 export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
   EASY: {
@@ -96,6 +119,7 @@ export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
     warningDistance: 600,
     escapeDistance: 850,
     escapeHold: 4,
+    directionChange: 0,
   },
   INTERMEDIATE: {
     routeLength: [1700, 2700],
@@ -111,6 +135,7 @@ export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
     warningDistance: 550,
     escapeDistance: 800,
     escapeHold: 3.5,
+    directionChange: 0.3,
   },
   HARD: {
     routeLength: [2100, 3300],
@@ -126,6 +151,7 @@ export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
     warningDistance: 500,
     escapeDistance: 750,
     escapeHold: 3,
+    directionChange: 0.5,
   },
   EXPERT: {
     routeLength: [2400, 3800],
@@ -141,5 +167,6 @@ export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
     warningDistance: 480,
     escapeDistance: 700,
     escapeHold: 2.5,
+    directionChange: 0.7,
   },
 };
