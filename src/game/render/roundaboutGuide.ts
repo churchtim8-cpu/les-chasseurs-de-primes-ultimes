@@ -43,6 +43,11 @@ export class RoundaboutGuide {
     return this.badges.flatMap((b) => [b.circle, b.label]);
   }
 
+  /** Turn the exit numbers to stay readable on a turned map. */
+  setUpright(rotation: number): void {
+    for (const b of this.badges) b.label.setRotation(rotation);
+  }
+
   /** True while a roundabout's exits are on show (◀ ▶ then choose an exit). */
   get active(): boolean {
     return this.current !== null;

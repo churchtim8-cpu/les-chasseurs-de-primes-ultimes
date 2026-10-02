@@ -3,7 +3,7 @@ import { LOCATION_WORD_BY_ID, withArticle } from '../../engine/language/location
 import { Rng } from '../../engine/rng/prng';
 import { HALF_WIDTH, PAVEMENT, pointInPolygon, pointInRect, pointSegmentDistance } from '../../engine/world/geometry';
 import type { TownGraph } from '../../engine/world/graph';
-import type { EdgeKind, MapEdge, Rect, RegionKind } from '../../engine/world/types';
+import type { EdgeKind, MapEdge, Rect, Region, RegionKind } from '../../engine/world/types';
 import { FONT_FAMILY, PALETTE, toCss } from '../palette';
 import { building, palm, tree } from './art';
 import { LANDMARKS, type SignText } from './landmarks';
@@ -43,6 +43,7 @@ export interface TownLayers {
 
 export function drawTown(scene: Phaser.Scene, graph: TownGraph): TownLayers {
   const map = graph.map;
+  drawSurroundings(scene, map.width, map.height, map.regions.find((r) => r.kind === 'SEA'));
   const g = scene.add.graphics();
 
   // Ground, regions.
@@ -116,6 +117,24 @@ export function drawTown(scene: Phaser.Scene, graph: TownGraph): TownLayers {
   });
 
   return { labels, debug: drawDebugGraph(scene, graph) };
+}
+
+/** How far beyond the town's edge the countryside and sea are drawn (metres). */
+const SURROUND = 1200;
+
+/**
+ * Countryside around the town and the sea beyond the beach, seen when the map
+ * turns with the player near the edge (an upright view stops at the edge).
+ */
+function drawSurroundings(scene: Phaser.Scene, width: number, height: number, sea: Region | undefined) {
+  const seaTop = sea ? Math.min(...sea.points.map(([, y]) => y)) : height;
+  scene.add
+    .graphics()
+    .setDepth(-1)
+    .fillStyle(0xd3d9b4)
+    .fillRect(-SURROUND, -SURROUND, width + 2 * SURROUND, seaTop + SURROUND)
+    .fillStyle(PALETTE.sea)
+    .fillRect(-SURROUND, seaTop, width + 2 * SURROUND, height - seaTop + SURROUND);
 }
 
 /** Pixels per metre in the baked town tiles: sharp in car view, close to it on foot. */
