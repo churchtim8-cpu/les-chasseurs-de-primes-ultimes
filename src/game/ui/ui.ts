@@ -4,7 +4,6 @@ import { FONT_FAMILY, PALETTE, toCss } from '../palette';
 
 /** Screen pictures made in Canva for M8 (public/images/m8). */
 export const SCREEN_PICTURES = {
-  loading: 'm8-loading',
   briefing: 'm8-briefing',
   captured: 'm8-captured',
   escaped: 'm8-escaped',
@@ -12,7 +11,6 @@ export const SCREEN_PICTURES = {
 } as const;
 
 const SCREEN_FILES: Record<string, string> = {
-  'm8-loading': 'loading.jpg',
   'm8-briefing': 'briefing.jpg',
   'm8-captured': 'captured.jpg',
   'm8-escaped': 'escaped.jpg',
