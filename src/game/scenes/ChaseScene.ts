@@ -30,6 +30,7 @@ import {
   createSuspectRunner,
 } from '../render/actors';
 import { RoundaboutGuide } from '../render/roundaboutGuide';
+import { preloadCanvaArt } from '../render/canvaArt';
 import { drawTown, type TownLayers } from '../render/townRenderer';
 import { TownLife } from '../render/townLife';
 
@@ -93,6 +94,10 @@ export class ChaseScene extends Phaser.Scene {
   init(data: ChaseSceneData): void {
     this.seed = data.seed;
     this.stage = 'COUNTDOWN';
+  }
+
+  preload(): void {
+    preloadCanvaArt(this);
   }
 
   create(): void {
