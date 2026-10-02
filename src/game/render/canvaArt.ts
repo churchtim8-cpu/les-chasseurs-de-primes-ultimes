@@ -14,9 +14,10 @@ const LANDMARK_PICTURES: Record<string, string> = {
   CAFE: 'cafe.jpg',
   TOWN_HALL: 'town-hall.jpg',
 };
-const HOUSE_PICTURE = 'house.jpg';
+/** Five different roofs, mixed along the streets so neighbours rarely match. */
+const HOUSE_PICTURES = ['house.jpg', 'house-red.jpg', 'house-slate.jpg', 'house-green.jpg', 'house-skylight.jpg'];
 
-/** A few gentle colour washes so a street of identical roofs does not look copied. */
+/** A few gentle colour washes so two houses with the same roof still differ a little. */
 const HOUSE_TINTS = [0xffffff, 0xfff1e6, 0xf2e6e0, 0xffe9d6, 0xe9e2dc];
 
 const key = (file: string): string => `canva-${file}`;
@@ -27,7 +28,7 @@ export function canvaLookOn(): boolean {
 
 export function preloadCanvaArt(scene: Phaser.Scene): void {
   if (!canvaLookOn()) return;
-  for (const file of [...Object.values(LANDMARK_PICTURES), HOUSE_PICTURE]) {
+  for (const file of [...Object.values(LANDMARK_PICTURES), ...HOUSE_PICTURES]) {
     if (!scene.textures.exists(key(file))) scene.load.image(key(file), `${import.meta.env.BASE_URL}images/canva/${file}`);
   }
 }
@@ -59,8 +60,9 @@ export function placeCanvaArt(
     if (file) place(file, loc.footprint);
   }
   houses.forEach((r, i) => {
-    place(HOUSE_PICTURE, r)
+    // Stepping by 3 through five roofs keeps side-by-side houses different.
+    place(HOUSE_PICTURES[(i * 3) % HOUSE_PICTURES.length] as string, r)
       .setFlip(i % 2 === 1, i % 3 === 1)
-      .setTint(HOUSE_TINTS[i % HOUSE_TINTS.length] as number);
+      .setTint(HOUSE_TINTS[(i * 2) % HOUSE_TINTS.length] as number);
   });
 }
