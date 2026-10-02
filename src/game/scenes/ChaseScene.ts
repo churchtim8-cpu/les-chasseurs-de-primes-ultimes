@@ -15,7 +15,7 @@ import { TownGraph, type TravelMode } from '../../engine/world/graph';
 import { ChaseMusic } from '../audio/ChaseMusic';
 import { DrivingSounds } from '../audio/DrivingSounds';
 import { scannerAudio, type SpokenLine } from '../audio/ScannerAudio';
-import { CameraRig } from '../camera/cameraRig';
+import { CameraRig, MAP_FACINGS, type MapFacing } from '../camera/cameraRig';
 import { debugState } from '../debug/debugState';
 import { Hud } from '../hud/Hud';
 import { Controls, type ControlAction } from '../input/controls';
@@ -140,12 +140,15 @@ export class ChaseScene extends Phaser.Scene {
     const worldObjects = [...this.children.list];
 
     this.rig = new CameraRig(this, this.cameras.main, BELLEVUE, me.mode);
+    this.rig.setFacing(loadFacing());
     this.controls = new Controls(this);
     this.controls.onAction((action) => this.handleAction(action));
     this.hud = new Hud(this, { number: 1, total: 8 });
     this.hud.onRepeat(() => this.repeat());
     this.hud.onMusic(() => this.toggleMusic());
     this.hud.setMusic(!this.music.isMuted);
+    this.hud.onFacing(() => this.cycleFacing());
+    this.hud.setFacing(loadFacing());
 
     const ui = this.cameras.add(0, 0, this.scale.width, this.scale.height);
     ui.ignore(worldObjects);
@@ -386,7 +389,10 @@ export class ChaseScene extends Phaser.Scene {
     this.driving.update({ driving: me.mode === 'CAR' && this.stage === 'PURSUIT', speed: me.speed, heading: me.heading }, delta);
     this.placeParked(this.car, me.mode === 'CAR' ? null : this.chase.parkedCar, me.mode === 'CAR');
     this.placeParked(this.abandonedCar, this.chase.abandonedCar, false);
-    this.badge.container.setPosition(me.x, me.y - (me.mode === 'CAR' ? 16 : 10));
+    // Above the player on screen, whichever way the map is turned.
+    const lift = me.mode === 'CAR' ? 16 : 10;
+    const turned = this.rig.rotation;
+    this.badge.container.setPosition(me.x - lift * Math.sin(turned), me.y - lift * Math.cos(turned));
     this.badge.show(this.stage === 'PURSUIT' ? me.queued : null, this.displayHeading);
     const status = this.chase.status;
     this.music.setIntensity(status.signal);
@@ -404,6 +410,7 @@ export class ChaseScene extends Phaser.Scene {
 
     this.rig.update(me, delta);
     this.scaleLabels();
+    this.keepUpright();
   }
 
   /** Light streaks behind the police car at speed: driving feels fast, running does not leave them. */
@@ -435,6 +442,19 @@ export class ChaseScene extends Phaser.Scene {
     this.hud.showBanner(mode === 'FOOT' ? 'À PIED !' : 'EN VOITURE !');
     this.time.delayedCall(1100, () => this.stage === 'PURSUIT' && this.hud.showBanner(''));
     this.cameras.main.flash(180, 255, 255, 255, false);
+  }
+
+  /** V or the CARTE button: map turns on foot, always, or never (remembered on this device). */
+  private cycleFacing(): void {
+    const facing = MAP_FACINGS[(MAP_FACINGS.indexOf(loadFacing()) + 1) % MAP_FACINGS.length] as MapFacing;
+    try {
+      window.localStorage.setItem(FACING_KEY, facing);
+    } catch {
+      // storage unavailable: the choice lasts for this chase only
+    }
+    chosenFacing = facing;
+    this.rig.setFacing(facing);
+    this.hud.setFacing(facing);
   }
 
   private toggleMusic(): void {
@@ -507,6 +527,7 @@ export class ChaseScene extends Phaser.Scene {
     });
     keyboard.on('keydown-N', () => debugState.isEnabled && this.nextChase());
     keyboard.on('keydown-B', () => this.toggleMusic());
+    keyboard.on('keydown-V', () => this.cycleFacing());
     // Sighting answers.
     ['ONE', 'TWO', 'THREE', 'FOUR'].forEach((key, i) => {
       const answer = () => this.stage === 'PURSUIT' && this.handleEvents(this.chase.answerSighting(i));
@@ -563,6 +584,13 @@ export class ChaseScene extends Phaser.Scene {
     return g;
   }
 
+  /** Place names and exit numbers stay readable when the map turns. */
+  private keepUpright(): void {
+    const upright = -this.rig.rotation;
+    for (const { text } of this.layers?.labels ?? []) text.setRotation(upright);
+    this.roundabout.setUpright(upright);
+  }
+
   private scaleLabels(): void {
     const zoom = this.cameras.main.zoom;
     const scale = Phaser.Math.Clamp(0.8 / zoom, 0.35, 2);
@@ -585,6 +613,24 @@ export class ChaseScene extends Phaser.Scene {
  * change of direction, `?sightings=1` a sighting (off by default), `?lost=1` a lost signal.
  * (`?life=0` turns off the town's traffic and other movement.)
  */
+const FACING_KEY = 'chasseurs.mapFacing';
+/** Set when the player changes the facing during this visit. */
+let chosenFacing: MapFacing | null = null;
+
+/** The map facing: the player's latest choice, else `?facing=north` (or foot, always), else remembered. */
+function loadFacing(): MapFacing {
+  if (chosenFacing) return chosenFacing;
+  const fromAddress = new URLSearchParams(window.location.search).get('facing')?.toUpperCase();
+  if (MAP_FACINGS.includes(fromAddress as MapFacing)) return fromAddress as MapFacing;
+  try {
+    const stored = window.localStorage.getItem(FACING_KEY);
+    if (MAP_FACINGS.includes(stored as MapFacing)) return stored as MapFacing;
+  } catch {
+    // storage unavailable
+  }
+  return 'FOOT';
+}
+
 function scenarioOptionsFromAddress(): ScenarioOptions {
   const params = new URLSearchParams(window.location.search);
   const type = params.get('type');

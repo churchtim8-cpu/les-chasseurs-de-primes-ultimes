@@ -22,6 +22,7 @@ export class Hud {
   private readonly scanner: Phaser.GameObjects.Text;
   private readonly repeat: Phaser.GameObjects.Text;
   private readonly music: Phaser.GameObjects.Text;
+  private readonly facing: Phaser.GameObjects.Text;
   private readonly sighting: SightingPanel;
 
   constructor(
@@ -76,6 +77,18 @@ export class Hud {
     // Background music on or off; B on the keyboard.
     this.music = this.add(
       scene.add.text(16, 146, '', {
+        fontFamily: FONT_FAMILY,
+        fontSize: '15px',
+        fontStyle: 'bold',
+        color: toCss(PALETTE.cream),
+        backgroundColor: 'rgba(22, 50, 61, 0.85)',
+        padding: { x: 10, y: 6 },
+      }),
+    ).setInteractive({ useHandCursor: true });
+
+    // Which way the map faces; V on the keyboard.
+    this.facing = this.add(
+      scene.add.text(16, 184, '', {
         fontFamily: FONT_FAMILY,
         fontSize: '15px',
         fontStyle: 'bold',
@@ -163,6 +176,19 @@ export class Hud {
       event.stopPropagation();
       listener();
     });
+  }
+
+  /** Called when the map facing button is clicked or tapped. */
+  onFacing(listener: () => void): void {
+    this.facing.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
+      event.stopPropagation();
+      listener();
+    });
+  }
+
+  setFacing(facing: 'FOOT' | 'ALWAYS' | 'NORTH'): void {
+    const label = { FOOT: 'TOURNE À PIED', ALWAYS: 'TOURNE TOUJOURS', NORTH: 'FIXE' }[facing];
+    this.facing.setText(`🧭 CARTE (V) · ${label}`);
   }
 
   setMusic(on: boolean): void {

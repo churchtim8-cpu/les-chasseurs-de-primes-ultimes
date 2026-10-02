@@ -38,6 +38,7 @@ The police car drives forward on its own; you choose where it goes. Choices are 
 | 1 to 4 | Tap a card | Answer a sighting (on the title screen: choose the level) |
 | M | | Whole-town overview (debug mode) |
 | B | ♪ MUSIQUE | Music on or off |
+| V | 🧭 CARTE | Which way the map faces: TOURNE À PIED (default: on foot the map turns so the officer always runs up the screen and "à gauche" is the screen's left; in the car north stays up), TOURNE TOUJOURS (turns in the car too) or FIXE (north always up). Remembered on this device; `?facing=north` (or `foot`, `always`) in the address sets it |
 | Esc | | Back to the title screen |
 
 Touch buttons appear on touch screens (or add `?touch=1` to the address). The title screen has a level picker (Facile, Intermédiaire, Difficile, Expert); the level is remembered for the next chase and the next visit.
@@ -47,6 +48,8 @@ Touch buttons appear on touch screens (or add `?touch=1` to the address). The ti
 The suspect starts well ahead (400 m at Easy up to 550 m at Expert in a car; 130 to 180 m on foot) and never stops or waits. The police car is only slightly faster (the suspect drives at 74% of the player's cruising speed at Easy, 80% at Intermediate, 82% at Hard and 84% at Expert), so a player who follows the directions closes in steadily and every wrong turn lets the suspect pull away. On foot the officer is fitter (the suspect runs at 70% to 76%), so a foot chase is a short sprint. If the suspect reaches its destination first, it escapes ("Il est arrivé avant vous."). In a chase with changes of transport it keeps pace with the police until its last stage, and the police close in on that one. The suspect only shows on the map when very close (45 m at Easy down to 30 m at Expert). The listener bot, which hears only the French, still catches it in at least 95% of chases at every level and chase type.
 
 Driving and running look and sound different: the car has a flashing siren glow, speed streaks, a wide view, an engine hum that rises with speed and a tyre screech on sharp corners; on foot the view is close and steady (no camera shake), and the officer, drawn smaller than a passing car, runs with arms and legs swinging. "À PIED !" or "EN VOITURE !" flashes when the player changes.
+
+On foot the map turns with the officer (heading-up view), the way ahead fills the screen and place names stay upright; past the town's edge there is countryside and sea.
 
 On foot the suspect takes shortcuts a car cannot: paths through the park and the square, the two alleys (Passage du Marché, Passage des Rails), the Passerelle du Port footbridge over the canal, and the seafront promenade. Before running to a car it sticks to streets, so the police car is never left far behind.
 

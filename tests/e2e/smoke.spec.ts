@@ -41,6 +41,17 @@ test('title screen starts a chase; drive, get out and debug toggle work', async 
   await page.keyboard.press('e');
   await expect.poll(() => info(page, 'mode')).toBe('FOOT');
   await expect.poll(async () => Number(await info(page, 'zoom')), SLOW).toBeGreaterThan(carZoom * 1.5);
+  // On foot the map turns so the officer faces up the screen (a screen angle of -90°).
+  const facingUp = () =>
+    page.evaluate(() => {
+      const scene = window.__bellevue?.game.scene.getScene('Chase') as unknown as {
+        cameras: { main: { rotation: number } };
+        chase: { player: { snapshot: () => { heading: number } } };
+      };
+      const off = scene.cameras.main.rotation + Math.PI / 2 + scene.chase.player.snapshot().heading;
+      return Math.abs(Math.atan2(Math.sin(off), Math.cos(off)));
+    });
+  await expect.poll(facingUp, SLOW).toBeLessThan(0.15);
 
   // Debug mode toggles off with the backtick key.
   await page.keyboard.press('Backquote');
