@@ -13,6 +13,7 @@ import { LOCATION_WORD_BY_ID, withArticle } from '../../engine/language/location
 import type { MoverStart } from '../../engine/movement/mover';
 import { TownGraph, type TravelMode } from '../../engine/world/graph';
 import { ChaseMusic } from '../audio/ChaseMusic';
+import { DrivingSounds } from '../audio/DrivingSounds';
 import { scannerAudio, type SpokenLine } from '../audio/ScannerAudio';
 import { CameraRig } from '../camera/cameraRig';
 import { debugState } from '../debug/debugState';
@@ -61,6 +62,7 @@ export class ChaseScene extends Phaser.Scene {
   private car!: Phaser.GameObjects.Container;
   private officer!: Phaser.GameObjects.Container;
   private music!: ChaseMusic;
+  private driving!: DrivingSounds;
   /** Speed streaks behind the police car. */
   private trail!: Phaser.GameObjects.Graphics;
   private trailPoints: { x: number; y: number; heading: number }[] = [];
@@ -106,9 +108,11 @@ export class ChaseScene extends Phaser.Scene {
     this.music = new ChaseMusic(scannerAudio);
     this.music.setMode(this.chase.player.mode);
     this.music.start();
+    this.driving = new DrivingSounds(scannerAudio);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       scannerAudio.stop();
       this.music.stop();
+      this.driving.stop();
     });
     this.layers = drawTown(this, this.graph);
     if (new URLSearchParams(window.location.search).get('life') !== '0') {
@@ -375,9 +379,11 @@ export class ChaseScene extends Phaser.Scene {
     const avatar = me.mode === 'CAR' ? this.car : this.officer;
     avatar.setPosition(me.x, me.y).setRotation(this.displayHeading);
     this.officer.setVisible(me.mode === 'FOOT');
-    this.stride += (delta / 1000) * me.speed * 0.45;
+    // About three strides a second at running speed.
+    this.stride += (delta / 1000) * me.speed * 0.75;
     if (me.mode === 'FOOT') animateOfficer(this.officer, this.stride, me.speed > 1);
     this.drawTrail(me);
+    this.driving.update({ driving: me.mode === 'CAR' && this.stage === 'PURSUIT', speed: me.speed, heading: me.heading }, delta);
     this.placeParked(this.car, me.mode === 'CAR' ? null : this.chase.parkedCar, me.mode === 'CAR');
     this.placeParked(this.abandonedCar, this.chase.abandonedCar, false);
     this.badge.container.setPosition(me.x, me.y - (me.mode === 'CAR' ? 16 : 10));

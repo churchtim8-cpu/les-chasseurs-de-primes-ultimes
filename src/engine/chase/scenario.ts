@@ -121,22 +121,31 @@ export function generateScenario(graph: TownGraph, seedCode: string, options: Sc
   const modes = CHASE_TYPE_MODES[chaseType];
   const routeRng = rng.fork('route');
 
+  const eventsRng = rng.fork('events');
+  const wantTurnOff = options.turnOff ?? eventsRng.chance(settings.directionChange);
+
   // A later stage can be impossible from where an earlier one ended: start the chase again.
+  // A chase that should change direction also tries a few more routes (foot routes through
+  // the park and alleys have fewer junctions to turn off at).
   let planned: { stages: ChaseStage[]; destination: string } | null = null;
-  for (let attempt = 0; attempt < 40 && !planned; attempt++) {
-    planned = planStages(graph, routeRng, settings, modes, difficulty);
+  let turnOff: TurnOff | null = null;
+  let headStart = 0;
+  for (let attempt = 0, withTurnOff = 0; attempt < 40; attempt++) {
+    const candidate = planStages(graph, routeRng, settings, modes, difficulty);
+    if (!candidate) continue;
+    planned = candidate;
+    const first = candidate.stages[0] as ChaseStage;
+    headStart = Math.min(settings.headStart[first.mode], first.length - PLAYER_OFFSET - 20);
+    if (!wantTurnOff) break;
+    turnOff = planTurnOff(graph, eventsRng, candidate.stages, difficulty, PLAYER_OFFSET + headStart);
+    if (turnOff || ++withTurnOff >= TURN_OFF.routeTries) break;
   }
   if (!planned) throw new Error(`No valid ${chaseType} chase for ${code}`);
   const { stages, destination } = planned;
 
   const first = stages[0] as ChaseStage;
   const player = placeOnRoute(graph, first.route, PLAYER_OFFSET, first.mode);
-  const headStart = Math.min(settings.headStart[first.mode], first.length - PLAYER_OFFSET - 20);
   const suspect = placeOnRoute(graph, first.route, PLAYER_OFFSET + headStart, first.mode);
-
-  const eventsRng = rng.fork('events');
-  const wantTurnOff = options.turnOff ?? eventsRng.chance(settings.directionChange);
-  const turnOff = wantTurnOff ? planTurnOff(graph, eventsRng, stages, difficulty, PLAYER_OFFSET + headStart) : null;
 
   // Their own streams, so adding these events reshuffles nothing above.
   const sightingRng = rng.fork('sightings');
