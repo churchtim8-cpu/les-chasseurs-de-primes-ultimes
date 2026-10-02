@@ -67,7 +67,8 @@ export class ResultsScene extends Phaser.Scene {
     }
 
     backdrop(this, captured ? SCREEN_PICTURES.captured : SCREEN_PICTURES.escaped);
-    const x = 650;
+    // Clear of the full-screen button in the top-right corner.
+    const x = 628;
     paper(this, x, 30, 600, 600, 0.95);
     const left = x + 32;
     text(this, left, 50, mission === null ? 'ENTRAÎNEMENT' : `MISSION ${mission + 1} / ${MISSION_COUNT}`, 22, {

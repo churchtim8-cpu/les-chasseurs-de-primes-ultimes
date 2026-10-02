@@ -36,10 +36,10 @@ export class DriftEffects {
   private nextPuff = 0;
   private puffIndex = 0;
   private segments: Mark[] = [];
-  private lastWheels: { x: number; y: number }[] | null = null;
+  private lastWheels = new Map<string, { x: number; y: number }[]>();
+  private puffClocks = new Map<string, number>();
   private drift: { dir: number; t: number } | null = null;
   private lastHeading: number | null = null;
-  private puffClock = 0;
 
   constructor(private readonly scene: Phaser.Scene) {
     this.marks = scene.add.graphics().setDepth(27);
@@ -70,7 +70,7 @@ export class DriftEffects {
     if (!car.driving) {
       this.lastHeading = null;
       this.drift = null;
-      this.lastWheels = null;
+      this.lift('player');
       return { swing: 0, dx: 0, dy: 0 };
     }
     if (this.lastHeading !== null) {
@@ -79,7 +79,7 @@ export class DriftEffects {
     }
     this.lastHeading = car.heading;
     if (!this.drift) {
-      this.lastWheels = null;
+      this.lift('player');
       return { swing: 0, dx: 0, dy: 0 };
     }
 
@@ -87,7 +87,7 @@ export class DriftEffects {
     const share = this.drift.t / DRIFT.seconds;
     if (share >= 1) {
       this.drift = null;
-      this.lastWheels = null;
+      this.lift('player');
       return { swing: 0, dx: 0, dy: 0 };
     }
     // Swings in fast, then straightens out slowly.
@@ -99,41 +99,62 @@ export class DriftEffects {
     const dx = Math.cos(out) * slide;
     const dy = Math.sin(out) * slide;
 
-    const body = shownHeading + swing;
-    const wheels = [-1, 1].map((side) => ({
-      x: car.x + dx - Math.cos(body) * DRIFT.rear - Math.sin(body) * (side * DRIFT.track),
-      y: car.y + dy - Math.sin(body) * DRIFT.rear + Math.cos(body) * (side * DRIFT.track),
-    }));
-    if (this.lastWheels) {
-      wheels.forEach((w, i) => {
-        const prev = this.lastWheels![i]!;
-        this.segments.push({ ax: prev.x, ay: prev.y, bx: w.x, by: w.y, age: 0 });
-      });
-      if (this.segments.length > 600) this.segments.splice(0, this.segments.length - 600);
-    }
-    this.lastWheels = wheels;
-
-    this.puffClock += dt;
-    while (this.puffClock >= DRIFT.puffEvery) {
-      this.puffClock -= DRIFT.puffEvery;
-      const w = wheels[this.nextPuff++ % 2]!;
-      this.puff(w.x, w.y, shape);
-    }
+    this.tyres('player', car.x + dx, car.y + dy, shownHeading + swing, shape, dt);
     return { swing, dx, dy };
   }
 
-  private puff(x: number, y: number, strength: number): void {
+  /**
+   * Lays skid marks behind a car's rear tyres and puffs tyre smoke (any car:
+   * the player's drift, or the suspect braking hard). Call every frame while
+   * it skids; `id` keeps each car's marks joined up.
+   */
+  tyres(id: string, x: number, y: number, body: number, strength: number, dt: number): void {
+    const wheels = [-1, 1].map((side) => ({
+      x: x - Math.cos(body) * DRIFT.rear - Math.sin(body) * (side * DRIFT.track),
+      y: y - Math.sin(body) * DRIFT.rear + Math.cos(body) * (side * DRIFT.track),
+    }));
+    const last = this.lastWheels.get(id);
+    if (last) {
+      wheels.forEach((w, i) => this.segments.push({ ax: last[i]!.x, ay: last[i]!.y, bx: w.x, by: w.y, age: 0 }));
+      if (this.segments.length > 600) this.segments.splice(0, this.segments.length - 600);
+    }
+    this.lastWheels.set(id, wheels);
+    const clock = (this.puffClocks.get(id) ?? 0) + dt;
+    let left = clock;
+    while (left >= DRIFT.puffEvery) {
+      left -= DRIFT.puffEvery;
+      const w = wheels[this.nextPuff++ % 2]!;
+      this.puff(w.x, w.y, strength);
+    }
+    this.puffClocks.set(id, left);
+  }
+
+  /** The car has stopped skidding: its next marks start a new line. */
+  lift(id: string): void {
+    this.lastWheels.delete(id);
+  }
+
+  /** A burst of dust where someone hits the ground (a tackle, a fall). */
+  dust(x: number, y: number, count = 8): void {
+    for (let i = 0; i < count; i++) {
+      const a = (i / count) * Math.PI * 2;
+      this.puff(x + Math.cos(a) * 1.5, y + Math.sin(a) * 1.5, 0.4, 0xc9b08a, 0.35);
+    }
+  }
+
+  private puff(x: number, y: number, strength: number, colour = 0xd2d2d2, size = 1): void {
     const p = this.puffs[this.puffIndex++ % this.puffs.length]!;
     this.scene.tweens.killTweensOf(p);
+    p.setFillStyle(colour);
     p.setPosition(x + Phaser.Math.FloatBetween(-1, 1), y + Phaser.Math.FloatBetween(-1, 1))
-      .setScale(0.7)
+      .setScale(0.7 * size)
       .setAlpha(0.6 + 0.3 * strength);
     this.scene.tweens.add({
       targets: p,
-      scale: Phaser.Math.FloatBetween(2.6, 3.8),
+      scale: Phaser.Math.FloatBetween(2.6, 3.8) * size,
       alpha: 0,
-      x: p.x + Phaser.Math.FloatBetween(-4, 4),
-      y: p.y + Phaser.Math.FloatBetween(-4, 4),
+      x: p.x + Phaser.Math.FloatBetween(-4, 4) * size,
+      y: p.y + Phaser.Math.FloatBetween(-4, 4) * size,
       duration: Phaser.Math.Between(900, 1300),
       ease: 'Quad.easeOut',
     });

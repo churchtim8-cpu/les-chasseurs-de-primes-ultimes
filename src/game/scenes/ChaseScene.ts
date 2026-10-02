@@ -35,6 +35,7 @@ import {
   createSuspectCar,
   createSuspectRunner,
 } from '../render/actors';
+import { arrestKind, playArrest } from '../render/arrest';
 import { DriftEffects } from '../render/drift';
 import { RoundaboutGuide } from '../render/roundaboutGuide';
 import { preloadCanvaArt } from '../render/canvaArt';
@@ -47,7 +48,7 @@ export interface ChaseSceneData {
   mission?: number;
 }
 
-type Stage = 'COUNTDOWN' | 'PURSUIT' | 'RESULTS';
+type Stage = 'COUNTDOWN' | 'PURSUIT' | 'ARREST' | 'RESULTS';
 
 /** When the results screen opens after "Le suspect est arrêté" / "s'est échappé" (ms). */
 const RESULTS_DELAY = { minMs: 1800, afterLineMs: 600, maxMs: 9000 } as const;
@@ -82,6 +83,8 @@ export class ChaseScene extends Phaser.Scene {
   private trail!: Phaser.GameObjects.Graphics;
   private trailPoints: { x: number; y: number; heading: number }[] = [];
   private drift!: DriftEffects;
+  /** The arrest scene has taken over the police and suspect drawings. */
+  private staged = false;
   private stride = 0;
   private suspectStride = 0;
   /** Smoothed sideways shift that puts runners on the pavement (see onPavement). */
@@ -110,6 +113,7 @@ export class ChaseScene extends Phaser.Scene {
     this.seed = data.seed;
     this.mission = typeof data.mission === 'number' ? data.mission : null;
     this.stage = 'COUNTDOWN';
+    this.staged = false;
   }
 
   preload(): void {
@@ -248,11 +252,11 @@ export class ChaseScene extends Phaser.Scene {
           }
           break;
         case 'CAPTURED':
-        case 'ESCAPED': {
-          const line = event.type === 'CAPTURED' ? OUTCOME_LINES.CAPTURED : OUTCOME_LINES.ESCAPED;
-          this.showResults(scannerAudio.play([{ audioId: line.audioId, radio: true }]));
+          this.arrest();
           break;
-        }
+        case 'ESCAPED':
+          this.showResults(scannerAudio.play([{ audioId: OUTCOME_LINES.ESCAPED.audioId, radio: true }]));
+          break;
         case 'SUSPECT_ARRIVED':
           break;
         case 'TRANSMISSION': {
@@ -415,11 +419,13 @@ export class ChaseScene extends Phaser.Scene {
       this.displayHeading,
       delta,
     );
-    avatar.setPosition(me.x + mine.x + drift.dx, me.y + mine.y + drift.dy).setRotation(this.displayHeading + drift.swing);
+    if (!this.staged) {
+      avatar.setPosition(me.x + mine.x + drift.dx, me.y + mine.y + drift.dy).setRotation(this.displayHeading + drift.swing);
+      // About three strides a second at running speed.
+      this.stride += (delta / 1000) * me.speed * 0.75;
+      if (me.mode === 'FOOT') animateRunner(this.officer, this.stride, me.speed > 1);
+    }
     this.officer.setVisible(me.mode === 'FOOT');
-    // About three strides a second at running speed.
-    this.stride += (delta / 1000) * me.speed * 0.75;
-    if (me.mode === 'FOOT') animateRunner(this.officer, this.stride, me.speed > 1);
     this.drawTrail(me);
     this.driving.update({ driving: me.mode === 'CAR' && this.stage === 'PURSUIT', speed: me.speed, heading: me.heading }, delta);
     this.footsteps.update({ running: me.mode === 'FOOT' && this.stage === 'PURSUIT', speed: me.speed, stride: this.stride }, delta);
@@ -441,15 +447,19 @@ export class ChaseScene extends Phaser.Scene {
     const shown = this.suspectCars[this.chase.suspectStage] ?? this.suspectRunner;
     for (const sprite of [...this.suspectCars, this.suspectRunner]) if (sprite && sprite !== shown) sprite.setAlpha(0);
     const theirs = this.onPavement(suspect, this.pavement.suspect, delta);
-    shown.setPosition(suspect.x + theirs.x, suspect.y + theirs.y).setRotation(this.suspectHeading);
-    if (shown === this.suspectRunner) {
-      this.suspectStride += (delta / 1000) * suspect.speed * 0.75;
-      animateRunner(this.suspectRunner, this.suspectStride, suspect.speed > 1);
+    if (!this.staged) {
+      shown.setPosition(suspect.x + theirs.x, suspect.y + theirs.y).setRotation(this.suspectHeading);
+      if (shown === this.suspectRunner) {
+        this.suspectStride += (delta / 1000) * suspect.speed * 0.75;
+        animateRunner(this.suspectRunner, this.suspectStride, suspect.speed > 1);
+      }
+      const alpha = shown.alpha + ((visible ? 1 : 0) - shown.alpha) * Math.min(1, delta / 250);
+      shown.setAlpha(alpha);
     }
-    const alpha = shown.alpha + ((visible ? 1 : 0) - shown.alpha) * Math.min(1, delta / 250);
-    shown.setAlpha(alpha);
 
-    this.rig.update(me, delta);
+    // During the arrest the camera frames both of them.
+    const framed = this.staged ? this.suspectCars[this.chase.suspectStage] ?? this.suspectRunner : null;
+    this.rig.update(framed ? { x: (avatar.x + framed.x) / 2, y: (avatar.y + framed.y) / 2, heading: this.suspectHeading } : me, delta);
     this.scaleLabels();
     this.keepUpright();
   }
@@ -581,6 +591,30 @@ export class ChaseScene extends Phaser.Scene {
     this.time.delayedCall(RESULTS_DELAY.maxMs, go);
     this.input.once('pointerdown', go);
     this.input.keyboard?.once('keydown-ENTER', go);
+  }
+
+  /**
+   * Caught: the arrest plays out on the map (the police car blocks the
+   * suspect's car, or the officer tackles the suspect), then the scanner says
+   * "Le suspect est arrêté !" and the results follow.
+   */
+  private arrest(): void {
+    if (this.stage === 'ARREST' || this.stage === 'RESULTS') return;
+    this.stage = 'ARREST';
+    this.staged = true;
+    const me = this.chase.player.snapshot();
+    const suspectCar = this.suspectCars[this.chase.suspectStage] ?? null;
+    this.rig.closeUp();
+    void playArrest(this, this.drift, {
+      police: me.mode === 'CAR' ? this.car : this.officer,
+      suspect: suspectCar ?? this.suspectRunner,
+      policeHeading: this.displayHeading,
+      suspectHeading: this.suspectHeading,
+      suspectSpeed: this.chase.suspect.snapshot().speed,
+      kind: arrestKind(me.mode, suspectCar !== null),
+    }).then(() => {
+      if (this.scene.isActive()) this.showResults(scannerAudio.play([{ audioId: OUTCOME_LINES.CAPTURED.audioId, radio: true }]));
+    });
   }
 
   private nextChase(): void {

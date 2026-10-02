@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { scannerAudio } from './game/audio/ScannerAudio';
 import { DebugOverlayScene } from './game/debug/DebugOverlayScene';
+import { FullscreenScene } from './game/scenes/FullscreenScene';
 import { debugState } from './game/debug/debugState';
 import { GAME_HEIGHT, GAME_WIDTH } from './game/layout';
 import { BootScene } from './game/scenes/BootScene';
@@ -23,12 +24,14 @@ const game = new Phaser.Game({
   // the default (120 frames) makes the chase crawl for seconds on slow school computers.
   fps: { panicMax: 20 },
   // Boot (the loading screen) runs first, then the title screen.
-  scene: [BootScene, TitleScene, CampaignScene, BriefingScene, PracticeScene, ChaseScene, ResultsScene, CaseClosedScene, DebugOverlayScene],
+  scene: [BootScene, TitleScene, CampaignScene, BriefingScene, PracticeScene, ChaseScene, ResultsScene, CaseClosedScene, FullscreenScene, DebugOverlayScene],
 });
 
 // The overlay runs on top of every other scene.
 game.events.once(Phaser.Core.Events.READY, () => {
+  game.scene.start(FullscreenScene.KEY);
   game.scene.start(DebugOverlayScene.KEY);
+  game.scene.bringToTop(FullscreenScene.KEY);
   game.scene.bringToTop(DebugOverlayScene.KEY);
 });
 
