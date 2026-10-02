@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
-// Headless Chromium renders in software at a low frame rate, so game time runs slowly here.
+// Headless Chromium renders in software at a low frame rate, so game time runs slowly here
+// (menu buttons also show their press briefly, in game time, before the next screen opens).
 test.setTimeout(120_000);
 const SLOW = { timeout: 30_000 };
 
@@ -21,13 +22,13 @@ test('title screen starts a chase; drive, get out and debug toggle work', async 
   const errors = watchErrors(page);
   await page.goto('./?debug=1&type=CAR_CAR');
   await expect(page.locator('#game canvas')).toBeVisible();
-  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Title', 'DebugOverlay']));
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Title', 'DebugOverlay']));
 
   // Practice: starting creates a valid Easy seed code and opens the chase.
   await page.keyboard.press('p');
-  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Practice']));
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Practice']));
   await page.keyboard.press('Enter');
-  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Chase', 'DebugOverlay']));
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Chase', 'DebugOverlay']));
   expect(await info(page, 'seed')).toMatch(/^BV-E-[0-9A-Z]{4}-[0-9A-Z]{4}$/);
 
   // After the countdown the police car drives off on its own.
@@ -66,9 +67,9 @@ test('a seed in the address replays that exact chase, and debug capture ends it'
   const errors = watchErrors(page);
   const seed = 'BV-I-NW3A-HRZZ';
   await page.goto(`./?debug=1&type=CAR_CAR&turnoff=0&seed=${seed}`);
-  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Title']));
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Title']));
   await page.keyboard.press('Enter');
-  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Chase']));
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Chase']));
   expect(await info(page, 'seed')).toBe(seed);
   expect(await info(page, 'difficulty')).toBe('INTERMEDIATE');
   const route = await info(page, 'route');
@@ -100,9 +101,9 @@ test('the suspect gets out and runs: the scanner orders the player out, and the 
   test.setTimeout(240_000);
   const errors = watchErrors(page);
   await page.goto('./?debug=1&type=CAR_FOOT&turnoff=0&sightings=0&seed=BV-I-NW3A-HRZZ');
-  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Title']));
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Title']));
   await page.keyboard.press('Enter');
-  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Chase']));
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Chase']));
   expect(await info(page, 'chase')).toBe('CAR_FOOT');
   await expect.poll(async () => Number(await info(page, 'speed')), SLOW).toBeGreaterThan(10);
 
@@ -130,9 +131,9 @@ test('the suspect gets out and runs: the scanner orders the player out, and the 
 test('the suspect changes direction: the scanner says so and corrects the directions', async ({ page }) => {
   const errors = watchErrors(page);
   await page.goto('./?debug=1&type=CAR_CAR&turnoff=1&sightings=0&seed=BV-H-K7EP-VHKY');
-  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Title']));
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Title']));
   await page.keyboard.press('Enter');
-  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Chase']));
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Chase']));
   await expect.poll(async () => Number(await info(page, 'speed')), SLOW).toBeGreaterThan(10);
   await page.evaluate(() => {
     const scene = window.__bellevue!.game.scene.getScene('Chase') as unknown as {
@@ -149,9 +150,9 @@ test('the suspect changes direction: the scanner says so and corrects the direct
 test('a sighting pauses the chase until the player picks the suspect', async ({ page }) => {
   const errors = watchErrors(page);
   await page.goto('./?debug=1&type=CAR_CAR&turnoff=0&sightings=1&seed=BV-H-YMQE-YSS0');
-  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Title']));
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Title']));
   await page.keyboard.press('Enter');
-  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Chase']));
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Chase']));
   // "La voiture … est près du …": the debug panel shows which card is right.
   await expect.poll(() => info(page, 'scanner'), { timeout: 60_000 }).toMatch(/^EVENT: event\.sighting\./);
   const answer = String(await info(page, 'sighting')).replace('answer ', '');
@@ -164,18 +165,18 @@ test('a sighting pauses the chase until the player picks the suspect', async ({ 
 test('campaign: case folder, briefing, mission, results, and on to the next suspect', async ({ page }) => {
   const errors = watchErrors(page);
   await page.goto('./?debug=1&type=CAR_CAR&turnoff=0&sightings=0');
-  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Title']));
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Title']));
   await page.keyboard.press('c');
-  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Campaign']));
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Campaign']));
   await page.keyboard.press('Enter');
-  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Briefing']));
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Briefing']));
   expect(await info(page, 'mission')).toBe('1 / 8');
   const seed = await info(page, 'seed');
   expect(seed).toMatch(/^BV-E-/);
 
   // The briefing describes the chase that follows.
   await page.keyboard.press('Enter');
-  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Chase']));
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Chase']));
   expect(await info(page, 'seed')).toBe(seed);
   await expect.poll(async () => Number(await info(page, 'speed')), SLOW).toBeGreaterThan(10);
 
@@ -189,7 +190,7 @@ test('campaign: case folder, briefing, mission, results, and on to the next susp
 
   // Next mission: the second suspect's briefing.
   await page.keyboard.press('Enter');
-  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Briefing']));
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Briefing']));
   expect(await info(page, 'mission')).toBe('2 / 8');
 
   expect(errors).toEqual([]);

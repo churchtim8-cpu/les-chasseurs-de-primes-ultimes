@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { menuMusic } from '../audio/Jingles';
 import { DIFFICULTY_SETTINGS, type RepeatRule, type TextDisplay } from '../../engine';
 import { TRANSPORT_LINES } from '../../engine/audio/script';
 import { MISSION_COUNT, MISSIONS } from '../../engine/campaign/campaign';
@@ -51,6 +52,7 @@ export class BriefingScene extends Phaser.Scene {
 
   create(): void {
     const mission = MISSIONS[this.mission]!;
+    menuMusic.start();
     const settings = DIFFICULTY_SETTINGS[mission.difficulty];
     const seed = newSeed(mission.difficulty);
     const scenario = generateScenario(new TownGraph(BELLEVUE), seed.code, scenarioOptionsFromAddress());

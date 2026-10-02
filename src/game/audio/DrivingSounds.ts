@@ -2,8 +2,9 @@ import type { ScannerAudio } from './ScannerAudio';
 
 /**
  * Car sounds, synthesised live with Web Audio: an engine hum whose pitch
- * follows the speed, a tyre screech on sharp turns at speed, and the police
- * siren (the French two-tone "pin-pon") while the chase is on. They play on
+ * follows the speed, a long tyre screech as the car drifts round a corner,
+ * and a classic American police siren (the rising and falling "wail") while
+ * the chase is on. They play on
  * the music bus, so they drop right down while the French is spoken. Silent
  * on foot. Sound design only (game code, not the engine).
  */
@@ -18,15 +19,15 @@ const ENGINE = {
 };
 
 const SCREECH = {
-  level: 0.22,
+  level: 0.26,
   /** Screech when turning faster than this (radians per second)... */
   turnRate: 0.9,
   /** ...above this speed. */
   minSpeed: 20,
-  /** A short squeal at every corner. */
-  seconds: 0.32,
+  /** A squeal that lasts the whole drift round the corner. */
+  seconds: 0.7,
   /** No new screech for this long after one. */
-  cooldown: 0.6,
+  cooldown: 0.8,
   /** Pitch of the tyre whine (Hz), with a fast wobble. */
   whineHz: 1150,
   wobbleHz: 28,
@@ -35,11 +36,12 @@ const SCREECH = {
 
 const SIREN = {
   /** Siren level while driving (below the engine's share of the mix once it ducks). */
-  level: 0.045,
-  /** The two notes (Hz) and how long each lasts (s). */
-  lowHz: 435,
-  highHz: 580,
-  noteSeconds: 0.55,
+  level: 0.04,
+  /** The wail sweeps smoothly between these pitches (Hz)... */
+  lowHz: 650,
+  highHz: 1350,
+  /** ...rising and falling once every this many seconds. */
+  sweepSeconds: 3.6,
 };
 
 export class DrivingSounds {
@@ -125,38 +127,37 @@ export class DrivingSounds {
   }
 
   /**
-   * Two-tone siren: a slow square wave flips the pitch between the two notes,
-   * and a gentle filter keeps it from sounding harsh.
+   * American "wail" siren: one horn-like voice whose pitch glides smoothly up
+   * and down between the two pitches, driven by a slow triangle wave, with a
+   * second voice an octave below for body and a filter to keep it from
+   * sounding harsh.
    */
   private connectSiren(ctx: AudioContext, bus: GainNode): { siren: GainNode; nodes: OscillatorNode[] } {
     const siren = ctx.createGain();
     siren.gain.value = 0;
     const soften = ctx.createBiquadFilter();
     soften.type = 'lowpass';
-    soften.frequency.value = 1800;
+    soften.frequency.value = 2600;
     soften.connect(siren).connect(bus);
-    const voice = ctx.createOscillator();
-    voice.type = 'triangle';
-    voice.frequency.value = (SIREN.lowHz + SIREN.highHz) / 2;
-    const flip = ctx.createOscillator();
-    flip.type = 'square';
-    flip.frequency.value = 1 / (2 * SIREN.noteSeconds);
-    const depth = ctx.createGain();
-    depth.gain.value = (SIREN.highHz - SIREN.lowHz) / 2;
-    flip.connect(depth).connect(voice.frequency);
-    // A touch of the octave above gives the horn its edge.
-    const edge = ctx.createOscillator();
-    edge.type = 'square';
-    edge.frequency.value = SIREN.lowHz + SIREN.highHz;
-    const edgeDepth = ctx.createGain();
-    edgeDepth.gain.value = SIREN.highHz - SIREN.lowHz;
-    flip.connect(edgeDepth).connect(edge.frequency);
-    const edgeLevel = ctx.createGain();
-    edgeLevel.gain.value = 0.18;
-    voice.connect(soften);
-    edge.connect(edgeLevel).connect(soften);
-    for (const osc of [voice, flip, edge]) osc.start();
-    return { siren, nodes: [voice, flip, edge] };
+    const middle = (SIREN.lowHz + SIREN.highHz) / 2;
+    const sweep = ctx.createOscillator();
+    sweep.type = 'triangle';
+    sweep.frequency.value = 1 / SIREN.sweepSeconds;
+    const voices = (['square', 'triangle'] as OscillatorType[]).map((type, i) => {
+      const voice = ctx.createOscillator();
+      voice.type = type;
+      const octave = i === 0 ? 1 : 0.5;
+      voice.frequency.value = middle * octave;
+      const depth = ctx.createGain();
+      depth.gain.value = ((SIREN.highHz - SIREN.lowHz) / 2) * octave;
+      sweep.connect(depth).connect(voice.frequency);
+      const level = ctx.createGain();
+      level.gain.value = i === 0 ? 0.35 : 1;
+      voice.connect(level).connect(soften);
+      return voice;
+    });
+    for (const osc of [sweep, ...voices]) osc.start();
+    return { siren, nodes: [sweep, ...voices] };
   }
 
   /** Tyre squeal: a wobbling whine over a band of hiss, sliding down in pitch. */

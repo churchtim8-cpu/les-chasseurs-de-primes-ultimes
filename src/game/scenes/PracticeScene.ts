@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { jingles, menuMusic } from '../audio/Jingles';
 import { DIFFICULTIES, DIFFICULTY_SETTINGS, type ChaseSeed, type Difficulty } from '../../engine';
 import { debugState } from '../debug/debugState';
 import { FONT_FAMILY, PALETTE, toCss } from '../palette';
@@ -42,12 +43,15 @@ export class PracticeScene extends Phaser.Scene {
   }
 
   private autostart = false;
+  private starting = false;
 
   init(data?: { autostart?: boolean }): void {
     this.autostart = data?.autostart === true;
+    this.starting = false;
   }
 
   create(): void {
+    menuMusic.start();
     if (this.autostart) {
       this.start();
       return;
@@ -140,6 +144,7 @@ export class PracticeScene extends Phaser.Scene {
   }
 
   private select(level: Difficulty): void {
+    if (this.levelButtons.length > 0 && level !== PracticeScene.level) jingles.move();
     PracticeScene.level = level;
     for (const button of this.levelButtons) {
       const on = button.level === level;
@@ -154,7 +159,22 @@ export class PracticeScene extends Phaser.Scene {
     saveLevel(this.seed.difficulty);
     debugState.info.set('seed', this.seed.code);
     debugState.info.set('difficulty', DIFFICULTY_SETTINGS[this.seed.difficulty].label.en);
-    this.scene.start('Chase', { seed: this.seed.code });
+    const code = this.seed.code;
+    if (this.autostart) {
+      this.scene.start('Chase', { seed: code });
+      return;
+    }
+    // The chosen level button presses in and flashes, with a blip, before the chase opens.
+    if (this.starting) return;
+    this.starting = true;
+    jingles.select();
+    const button = this.levelButtons.find((b) => b.level === PracticeScene.currentLevel);
+    if (button) {
+      button.box.setFillStyle(PALETTE.paleYellow);
+      button.label.setColor(toCss(PALETTE.ink));
+      this.tweens.add({ targets: [button.box, button.label], scale: 0.92, duration: 80, yoyo: true });
+    }
+    this.time.delayedCall(160, () => this.scene.start('Chase', { seed: code }));
   }
 
   /** The title picture behind a soft panel that keeps the words easy to read. */

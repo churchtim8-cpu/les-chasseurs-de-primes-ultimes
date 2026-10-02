@@ -95,6 +95,17 @@ export class ScannerAudio {
     return { ctx: this.ctx, bus: this.buses.music };
   }
 
+  /** Where short interface sounds play: the effects bus (it does not duck). Null until sound is allowed. */
+  effectsOutput(): { ctx: AudioContext; bus: GainNode } | null {
+    if (!this.ctx || !this.buses || this.ctx.state !== 'running') return null;
+    return { ctx: this.ctx, bus: this.buses.effects };
+  }
+
+  /** True once the browser lets the game make sound. */
+  get running(): boolean {
+    return this.ctx?.state === 'running';
+  }
+
   /** Stop everything now (leaving the chase). */
   stop(): void {
     this.generation++;

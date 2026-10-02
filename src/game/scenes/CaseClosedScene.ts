@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { menuMusic } from '../audio/Jingles';
 import {
   capturedCount,
   isLiveryUnlocked,
@@ -29,6 +30,7 @@ export class CaseClosedScene extends Phaser.Scene {
   create(): void {
     this.resetArmed = false;
     const progress = loadProgress();
+    menuMusic.start();
     const { width } = this.scale;
     backdrop(this, SCREEN_PICTURES.caseClosed, 0.15);
     this.confetti();

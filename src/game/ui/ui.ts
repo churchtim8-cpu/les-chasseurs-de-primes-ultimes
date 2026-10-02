@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { jingles, menuMusic } from '../audio/Jingles';
 import { FONT_FAMILY, PALETTE, toCss } from '../palette';
 
 /** Screen pictures made in Canva for M8 (public/images/m8). */
@@ -72,16 +73,23 @@ export interface Button {
   activate(): void;
 }
 
+/** How long a pressed button shows it was pressed before its screen opens (ms). */
+const PRESS_MS = 160;
+
 /**
  * A row or column of buttons worked by mouse, touch or keyboard: arrow keys
  * move, ENTRÉE or ESPACE presses, and a key can be bound to each button.
+ * Highlighting ticks; pressing blips and the button visibly presses in and
+ * flashes before its action runs. B turns the menu music off or on.
  */
 export class Menu {
   readonly buttons: Button[] = [];
   private selected = 0;
+  private pressing = false;
 
   constructor(private readonly scene: Phaser.Scene) {
     const keyboard = scene.input.keyboard;
+    keyboard?.on('keydown-B', () => menuMusic.toggleMute());
     keyboard?.on('keydown-LEFT', () => this.move(-1));
     keyboard?.on('keydown-UP', () => this.move(-1));
     keyboard?.on('keydown-RIGHT', () => this.move(1));
@@ -124,7 +132,18 @@ export class Menu {
         text.setColor(toCss(on ? PALETTE.cream : PALETTE.ink));
       },
       activate: () => {
-        if (button.enabled) onPress();
+        if (!button.enabled || this.pressing) return;
+        this.pressing = true;
+        this.select(index, false);
+        jingles.select();
+        box.setFillStyle(PALETTE.paleYellow);
+        text.setColor(toCss(PALETTE.ink));
+        this.scene.tweens.add({ targets: [box, text], scale: 0.92, duration: PRESS_MS / 2, yoyo: true, ease: 'Quad.easeOut' });
+        this.scene.time.delayedCall(PRESS_MS, () => {
+          this.pressing = false;
+          button.setSelected(this.buttons[this.selected] === button);
+          onPress();
+        });
       },
     };
     if (enabled) {
@@ -134,13 +153,14 @@ export class Menu {
     }
     if (options.key) this.scene.input.keyboard?.on(`keydown-${options.key}`, () => button.activate());
     this.buttons.push(button);
-    if (this.buttons.length === 1) this.select(0);
+    if (this.buttons.length === 1) this.select(0, false);
     else button.setSelected(false);
     return button;
   }
 
-  select(index: number): void {
-    if (!this.buttons[index]?.enabled) return;
+  select(index: number, sound = true): void {
+    if (!this.buttons[index]?.enabled || this.pressing) return;
+    if (sound && index !== this.selected) jingles.move();
     this.selected = index;
     this.buttons.forEach((b, i) => b.setSelected(i === index));
   }

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { jingles, menuMusic } from '../audio/Jingles';
 import { isComplete, MISSION_COUNT, MISSIONS, newlyUnlocked, recordMission } from '../../engine/campaign/campaign';
 import { scoreMission, type MissionStats, type ScoreLine } from '../../engine/campaign/scoring';
 import type { EscapeReason } from '../../engine/chase/chase';
@@ -47,6 +48,9 @@ export class ResultsScene extends Phaser.Scene {
     const { stats, mission } = this.result;
     const score = scoreMission(stats);
     const captured = stats.captured;
+    menuMusic.stop(0.2);
+    if (captured) jingles.victory();
+    else jingles.defeat();
     debugState.info.set('score', String(score.total));
     debugState.info.set('medal', score.medal ?? '-');
 

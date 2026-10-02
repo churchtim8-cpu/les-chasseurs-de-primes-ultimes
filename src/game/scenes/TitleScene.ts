@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { menuMusic } from '../audio/Jingles';
 import { parseSeed, type ChaseSeed } from '../../engine';
 import type { AudioManifest } from '../../engine/audio/manifest';
 import { capturedCount, isComplete, MISSION_COUNT } from '../../engine/campaign/campaign';
@@ -26,6 +27,7 @@ export class TitleScene extends Phaser.Scene {
 
   create(): void {
     scannerAudio.setManifest(this.cache.json.get('audio-manifest') as AudioManifest | undefined);
+    menuMusic.start();
     if (this.textures.exists(TITLE_PICTURE)) {
       this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, TITLE_PICTURE).setDisplaySize(GAME_WIDTH, GAME_HEIGHT);
     } else {

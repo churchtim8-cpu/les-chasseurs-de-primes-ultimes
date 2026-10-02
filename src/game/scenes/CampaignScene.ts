@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { menuMusic } from '../audio/Jingles';
 import { DIFFICULTY_SETTINGS } from '../../engine';
 import {
   capturedCount,
@@ -34,6 +35,7 @@ export class CampaignScene extends Phaser.Scene {
   create(): void {
     this.resetArmed = false;
     const progress = loadProgress();
+    menuMusic.start();
     const { width } = this.scale;
     backdrop(this, SCREEN_PICTURES.briefing, 0.45);
 
