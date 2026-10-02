@@ -5,6 +5,7 @@ import { LOCATION_WORD_BY_ID, withArticle } from '../../engine/language/location
 import { drawRunner, drawVehicle } from '../render/actors';
 import type { TravelMode } from '../../engine/world/graph';
 import { FONT_FAMILY, PALETTE, toCss } from '../palette';
+import { FULLSCREEN_BUTTON } from '../layout';
 
 /**
  * Chase HUD (blueprint section 19): mission number, timer, signal strength,
@@ -47,7 +48,8 @@ export class Hud {
 
     panel(16, 16, missionLabel, [0, 0]);
     this.timer = panel(width / 2, 16, '0:00', [0.5, 0], 26);
-    this.mode = panel(width - 16, 16, '', [1, 0]);
+    // Left of the full-screen button.
+    this.mode = panel(width - FULLSCREEN_BUTTON.size - 28, 16, '', [1, 0]);
 
     this.signalLabel = this.add(
       scene.add.text(16, 62, 'SIGNAL', {
