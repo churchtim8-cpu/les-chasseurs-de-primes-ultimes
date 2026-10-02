@@ -66,6 +66,19 @@ export const FOOT_ROUTES = {
 } as const;
 
 /**
+ * How long the suspect may go straight through junctions without turning
+ * (playtest 2026-10-02: "Sometimes the suspect goes straight for too long").
+ * Between two turns (or the start or end of a route) a route passes at most
+ * `maxJunctions` junctions straight on, and the last of them is at most
+ * `maxMetres` after the previous turn. A long street with no side roads is
+ * fine: only junctions passed straight through count.
+ */
+export const STRAIGHT_RUNS: Record<TravelMode, { maxJunctions: number; maxMetres: number }> = {
+  CAR: { maxJunctions: 2, maxMetres: 700 },
+  FOOT: { maxJunctions: 2, maxMetres: 400 },
+};
+
+/**
  * Chase tuning per difficulty (provisional; tune in playtesting).
  * Distances are metres measured along roads, not straight lines.
  */
