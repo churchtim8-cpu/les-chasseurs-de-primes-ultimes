@@ -37,7 +37,7 @@ import { DIFFICULTY_SETTINGS } from '../difficulty';
 import type { AudioCheck } from '../language/generate';
 import { Navigator, type Transmission } from '../language/navigator';
 import { Mover, type MoverStart } from '../movement/mover';
-import { BOARDING_DISTANCE } from '../movement/settings';
+import { BOARDING_DISTANCE, MOVEMENT } from '../movement/settings';
 import { Rng } from '../rng/prng';
 import { distance, lerp, type Point } from '../world/geometry';
 import { canTravel, type TownGraph, type TravelMode } from '../world/graph';
@@ -45,7 +45,7 @@ import { roadDistance } from './distance';
 import { placeOnRoute } from './route';
 import type { ChaseScenario } from './scenario';
 import { RepeatCounter, type RepeatResult } from '../audio/repeat';
-import { CHASE_SETTINGS, LOST_SIGNAL, SIGHTING, TRANSFER, TURN_OFF, type ChaseSettings, type Vehicle } from './settings';
+import { CALL_TIMING, CHASE_SETTINGS, LOST_SIGNAL, SIGHTING, TRANSFER, TURN_OFF, type ChaseSettings, type Vehicle } from './settings';
 import { isDecision, scanAhead } from '../language/analysis';
 
 /** A fixed scanner line (not a route instruction): an event or an order. */
@@ -180,6 +180,8 @@ export class Chase {
   private lostSignalPending: boolean;
   /** Elapsed time when the signal was lost, while it is. */
   private lostSince: number | null = null;
+  /** The latest direction: its junction and when it finishes being spoken (elapsed seconds). */
+  private call: { at: string; spokenBy: number } | null = null;
 
   constructor(
     private readonly graph: TownGraph,
@@ -303,8 +305,11 @@ export class Chase {
       if (vehicle) events.push({ type: 'ANNOUNCE', lines: [vehicleLine(vehicle)] });
     }
 
+    const pace = this.callPace();
+    this.player.callAssist = pace;
+    this.suspect.callAssist = pace;
     this.elapsed += dt;
-    this.timeLeft = Math.max(0, this.timeLeft - dt);
+    this.timeLeft = Math.max(0, this.timeLeft - dt * pace);
     this.player.update(dt);
     this.suspect.update(dt);
     if (!this.suspectArrived && this.suspect.snapshot().waiting === 'ARRIVED') {
@@ -327,8 +332,12 @@ export class Chase {
       if (this.lostSince !== null) this.whileSignalLost(here, ahead, events);
       else {
         this.navigator.preferSteps = this.lostSignalSteps;
+        const foot = here.mode === 'FOOT';
+        this.navigator.leadDistance = foot ? CALL_TIMING.footLeadSeconds[this.scenario.difficulty] * MOVEMENT.FOOT.cruise : Infinity;
+        this.navigator.minLeadDistance = foot ? CALL_TIMING.footMinLeadSeconds * MOVEMENT.FOOT.cruise : 0;
         const transmissions = this.navigator.update(here, ahead);
         for (const transmission of transmissions) events.push({ type: 'TRANSMISSION', transmission });
+        this.noteCall(transmissions);
         this.maybeLoseSignal(transmissions, events);
       }
     }
@@ -413,6 +422,35 @@ export class Chase {
       lines.push(TRANSPORT_LINES.GET_IN);
     }
     events.push({ type: 'ANNOUNCE', lines });
+  }
+
+  /** Remember the junction a new direction is about, and roughly when it will have been heard. */
+  private noteCall(transmissions: Transmission[]): void {
+    for (const t of transmissions) {
+      if (t.kind !== 'DIRECTION' || !t.at) continue;
+      // Only the first step has to be heard before the first junction ("…, puis …" and
+      // "D'abord … Ensuite …" calls go on while the player drives).
+      const firstStep = t.text.split(/(?<=\.)\s|,\s*puis\s/)[0] ?? t.text;
+      const speech = CALL_TIMING.speechBaseSeconds + firstStep.length / CALL_TIMING.speechCharsPerSecond;
+      this.call = { at: t.at, spokenBy: this.elapsed + speech };
+    }
+  }
+
+  /**
+   * Slow the chase just enough to hear the latest direction out and react
+   * before its junction (CALL_TIMING); 1 when there is time, or no call.
+   */
+  private callPace(): number {
+    if (!this.call || this.phase !== 'PURSUIT') return 1;
+    const here = this.player.location();
+    const toJunction = this.navigator.distanceTo(here, this.call.at);
+    if (!Number.isFinite(toJunction)) {
+      this.call = null;
+      return 1;
+    }
+    const needed = Math.max(0, this.call.spokenBy - this.elapsed) + CALL_TIMING.reactSeconds;
+    const cruise = MOVEMENT[here.mode].cruise * this.player.speedFactor;
+    return Math.min(1, Math.max(CALL_TIMING.minPace, toJunction / needed / cruise));
   }
 
   /**

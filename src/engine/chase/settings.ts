@@ -153,6 +153,29 @@ export const LOST_SIGNAL = {
 } as const;
 
 /** Direction-change tuning, shared by all levels (provisional). */
+/**
+ * When directions are spoken. On foot each call waits until the runner is
+ * about `footLeadSeconds` from the junction it is about, so it comes close to
+ * the turn instead of a whole street early (longer at the levels with longer
+ * sentences). Calls still come only just after a node, never mid-street. The car is fast, so its calls come as soon as possible. If a
+ * call still comes late (two junctions close together, or a long sentence),
+ * the whole chase slows a little, police and suspect alike and the clock too,
+ * so the player can hear it out and react before the junction without losing
+ * ground. The same at every level: difficulty never comes from rushed timing.
+ */
+export const CALL_TIMING = {
+  footLeadSeconds: { EASY: 6, INTERMEDIATE: 6.5, HARD: 8, EXPERT: 9.5 } as Record<Difficulty, number>,
+  /** A foot call that would come later than this before its junction comes a node earlier instead. */
+  footMinLeadSeconds: 4,
+  /** Time to react after the call ends, before the junction. */
+  reactSeconds: 1,
+  /** The chase never runs slower than this share of its usual pace. */
+  minPace: 0.4,
+  /** Speech length estimate for a call (slow, clear French). */
+  speechBaseSeconds: 0.6,
+  speechCharsPerSecond: 13,
+};
+
 export const TURN_OFF = {
   /** The suspect turns off at least this far (metres) beyond where it starts the stage. */
   minFromStart: 120,
