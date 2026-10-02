@@ -89,8 +89,9 @@ test('a seed in the address replays that exact chase, and debug capture ends it'
   await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Results']));
   expect(Number(await info(page, 'score'))).toBeGreaterThan(0);
   await page.keyboard.press('r');
+  // Wait for the new chase itself: the old chase's readings linger until it starts.
+  await expect.poll(() => info(page, 'phase'), SLOW).toBe('PURSUIT');
   await expect.poll(async () => Number(await info(page, 'speed')), SLOW).toBeGreaterThan(10);
-  expect(await info(page, 'phase')).toBe('PURSUIT');
   expect(await info(page, 'seed')).toBe(seed);
   expect(await info(page, 'route')).toBe(route);
 

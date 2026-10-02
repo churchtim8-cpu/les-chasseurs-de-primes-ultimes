@@ -3,10 +3,11 @@ import { MISSIONS } from '../../engine/campaign/campaign';
 import { scannerAudio } from '../audio/ScannerAudio';
 import { preloadCanvaArt } from '../render/canvaArt';
 import { FONT_FAMILY, PALETTE, toCss } from '../palette';
-import { backdrop, preloadScreenPictures, SCREEN_PICTURES } from '../ui/ui';
+import { TITLE_PICTURE } from '../layout';
+import { backdrop, preloadScreenPictures } from '../ui/ui';
 
 /**
- * Loading screen: shows the Canva loading picture with a progress bar while
+ * Loading screen: shows the title picture with a progress bar while
  * the town pictures, screen pictures and the list of French recordings load,
  * then opens the title screen. Anything that fails to load falls back to the
  * drawn look, so a slow or broken connection never stops the game.
@@ -19,12 +20,12 @@ export class BootScene extends Phaser.Scene {
   }
 
   preload(): void {
-    this.load.image(SCREEN_PICTURES.loading, `${import.meta.env.BASE_URL}images/m8/loading.jpg`);
+    this.load.image(TITLE_PICTURE, `${import.meta.env.BASE_URL}images/title.jpg`);
   }
 
   create(): void {
     const { width, height } = this.scale;
-    backdrop(this, SCREEN_PICTURES.loading);
+    backdrop(this, TITLE_PICTURE);
     this.add.rectangle(width / 2, height - 92, 760, 104, PALETTE.cream, 0.9).setStrokeStyle(3, PALETTE.ink, 0.6);
     const title = this.add
       .text(width / 2, height - 122, 'Chargement…', {
@@ -41,7 +42,6 @@ export class BootScene extends Phaser.Scene {
 
     // Which French recordings exist (public/audio/manifest.json). Missing is fine: text only.
     if (!this.cache.json.exists('audio-manifest')) this.load.json('audio-manifest', `${import.meta.env.BASE_URL}audio/manifest.json`);
-    if (!this.textures.exists('title-picture')) this.load.image('title-picture', `${import.meta.env.BASE_URL}images/title.jpg`);
     preloadScreenPictures(this, MISSIONS.map((m) => m.picture));
     preloadCanvaArt(this);
     this.load.once(Phaser.Loader.Events.COMPLETE, () => {
