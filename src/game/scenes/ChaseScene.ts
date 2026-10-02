@@ -18,6 +18,7 @@ import { HALF_WIDTH, PAVEMENT } from '../../engine/world/geometry';
 import { ChaseMusic } from '../audio/ChaseMusic';
 import { DrivingSounds } from '../audio/DrivingSounds';
 import { FootSounds } from '../audio/FootSounds';
+import { menuMusic } from '../audio/Jingles';
 import { loadProgress } from '../campaignStore';
 import { scenarioOptionsFromAddress } from '../scenarioOptions';
 import type { ResultsData } from './ResultsScene';
@@ -34,6 +35,7 @@ import {
   createSuspectCar,
   createSuspectRunner,
 } from '../render/actors';
+import { DriftEffects } from '../render/drift';
 import { RoundaboutGuide } from '../render/roundaboutGuide';
 import { preloadCanvaArt } from '../render/canvaArt';
 import { drawTown, type TownLayers } from '../render/townRenderer';
@@ -46,6 +48,9 @@ export interface ChaseSceneData {
 }
 
 type Stage = 'COUNTDOWN' | 'PURSUIT' | 'RESULTS';
+
+/** When the results screen opens after "Le suspect est arrêté" / "s'est échappé" (ms). */
+const RESULTS_DELAY = { minMs: 1800, afterLineMs: 600, maxMs: 9000 } as const;
 
 /**
  * One chase: the suspect travels its generated route (driving, on foot, or
@@ -76,6 +81,7 @@ export class ChaseScene extends Phaser.Scene {
   /** Speed streaks behind the police car. */
   private trail!: Phaser.GameObjects.Graphics;
   private trailPoints: { x: number; y: number; heading: number }[] = [];
+  private drift!: DriftEffects;
   private stride = 0;
   private suspectStride = 0;
   /** Smoothed sideways shift that puts runners on the pavement (see onPavement). */
@@ -124,6 +130,7 @@ export class ChaseScene extends Phaser.Scene {
         (l) => l.audioId,
       ),
     );
+    menuMusic.stop();
     this.music = new ChaseMusic(scannerAudio);
     this.music.setMode(this.chase.player.mode);
     this.music.start();
@@ -146,6 +153,7 @@ export class ChaseScene extends Phaser.Scene {
     this.suspectCars = vehicles.map((v) => (v ? createSuspectCar(this, v).setAlpha(0) : null));
     this.suspectRunner = createSuspectRunner(this).setAlpha(0);
     this.trail = this.add.graphics().setDepth(28);
+    this.drift = new DriftEffects(this);
     const colours = livery(loadProgress().livery);
     this.car = createPoliceCar(this, colours);
     this.officer = createOfficer(this, colours).setVisible(false);
@@ -242,8 +250,7 @@ export class ChaseScene extends Phaser.Scene {
         case 'CAPTURED':
         case 'ESCAPED': {
           const line = event.type === 'CAPTURED' ? OUTCOME_LINES.CAPTURED : OUTCOME_LINES.ESCAPED;
-          void scannerAudio.play([{ audioId: line.audioId, radio: true }]);
-          this.showResults();
+          this.showResults(scannerAudio.play([{ audioId: line.audioId, radio: true }]));
           break;
         }
         case 'SUSPECT_ARRIVED':
@@ -403,7 +410,12 @@ export class ChaseScene extends Phaser.Scene {
     this.displayHeading += Phaser.Math.Angle.Wrap(me.heading - this.displayHeading) * Math.min(1, delta / 90);
     const avatar = me.mode === 'CAR' ? this.car : this.officer;
     const mine = this.onPavement(me, this.pavement.me, delta);
-    avatar.setPosition(me.x + mine.x, me.y + mine.y).setRotation(this.displayHeading);
+    const drift = this.drift.update(
+      { x: me.x, y: me.y, heading: me.heading, speed: me.speed, driving: me.mode === 'CAR' && this.stage === 'PURSUIT' },
+      this.displayHeading,
+      delta,
+    );
+    avatar.setPosition(me.x + mine.x + drift.dx, me.y + mine.y + drift.dy).setRotation(this.displayHeading + drift.swing);
     this.officer.setVisible(me.mode === 'FOOT');
     // About three strides a second at running speed.
     this.stride += (delta / 1000) * me.speed * 0.75;
@@ -525,11 +537,12 @@ export class ChaseScene extends Phaser.Scene {
   }
 
   /**
-   * The chase is over: the outcome shows as a banner over the map for a
-   * moment (while the scanner says it), then the results screen opens.
-   * ENTRÉE or a tap goes there at once.
+   * The chase is over: the outcome shows as a banner over the map while the
+   * scanner says it, and the results screen opens once the line has been
+   * heard in full (never sooner than RESULTS_DELAY.minMs, never later than
+   * RESULTS_DELAY.maxMs). ENTRÉE or a tap goes there at once.
    */
-  private showResults(): void {
+  private showResults(said: Promise<void>): void {
     if (this.stage === 'RESULTS') return;
     this.stage = 'RESULTS';
     this.music.stop();
@@ -555,10 +568,17 @@ export class ChaseScene extends Phaser.Scene {
       ...(status.escapeReason ? { escapeReason: status.escapeReason } : {}),
     };
     debugState.info.set('wrong turns', String(stats.wrongTurns));
+    let left = false;
     const go = () => {
-      if (this.scene.isActive()) this.scene.start('Results', data);
+      if (left || !this.scene.isActive()) return;
+      left = true;
+      this.scene.start('Results', data);
     };
-    this.time.delayedCall(2600, go);
+    const minWait = new Promise<void>((resolve) => this.time.delayedCall(RESULTS_DELAY.minMs, () => resolve()));
+    void Promise.all([said, minWait]).then(() => {
+      if (this.scene.isActive()) this.time.delayedCall(RESULTS_DELAY.afterLineMs, go);
+    });
+    this.time.delayedCall(RESULTS_DELAY.maxMs, go);
     this.input.once('pointerdown', go);
     this.input.keyboard?.once('keydown-ENTER', go);
   }
