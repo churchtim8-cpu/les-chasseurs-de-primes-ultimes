@@ -27,7 +27,8 @@ export class Hud {
 
   constructor(
     private readonly scene: Phaser.Scene,
-    mission: { number: number; total: number },
+    /** Top-left label, e.g. "MISSION 4 / 8" (or "ENTRAÎNEMENT" in practice). */
+    missionLabel: string,
   ) {
     const { width } = scene.scale;
     const panel = (x: number, y: number, text: string, origin: [number, number], size = 20) =>
@@ -44,7 +45,7 @@ export class Hud {
           .setOrigin(...origin),
       );
 
-    panel(16, 16, `MISSION ${mission.number} / ${mission.total}`, [0, 0]);
+    panel(16, 16, missionLabel, [0, 0]);
     this.timer = panel(width / 2, 16, '0:00', [0.5, 0], 26);
     this.mode = panel(width - 16, 16, '', [1, 0]);
 

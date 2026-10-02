@@ -37,12 +37,21 @@ export function drawRunner(g: Phaser.GameObjects.Graphics, colour = 0xc0392b): v
   g.lineStyle(0.6, 0xffffff, 0.6).strokeEllipse(0, 0, 5.5, 7);
 }
 
+/** Police car and uniform colours (the campaign's unlockable liveries). */
+export interface PoliceColours {
+  body: number;
+  stripe: number;
+  uniform: number;
+}
+
+export const CLASSIC_COLOURS: PoliceColours = { body: 0xf7f7f2, stripe: 0x1f4e9c, uniform: 0x1f4e9c };
+
 /** Placeholder police car, drawn facing east (heading 0). Sizes in metres. */
-export function createPoliceCar(scene: Phaser.Scene): Phaser.GameObjects.Container {
+export function createPoliceCar(scene: Phaser.Scene, colours: PoliceColours = CLASSIC_COLOURS): Phaser.GameObjects.Container {
   const g = scene.add.graphics();
   g.fillStyle(0x000000, 0.25).fillRoundedRect(-9 + 1.5, -4.8 + 2, 18, 9.6, 2.5);
-  g.fillStyle(0xf7f7f2).fillRoundedRect(-9, -4.8, 18, 9.6, 2.5);
-  g.fillStyle(0x1f4e9c).fillRect(-9, -1.4, 18, 2.8); // blue stripe
+  g.fillStyle(colours.body).fillRoundedRect(-9, -4.8, 18, 9.6, 2.5);
+  g.fillStyle(colours.stripe).fillRect(-9, -1.4, 18, 2.8); // stripe
   g.fillStyle(0x27323a).fillRoundedRect(1.5, -3.8, 3.5, 7.6, 1); // windscreen
   g.fillStyle(0x27323a).fillRoundedRect(-6.5, -3.6, 2.5, 7.2, 1); // rear window
   // Siren: the light bar flashes red and blue, and throws a coloured glow on the road.
@@ -67,21 +76,22 @@ export function createSuspectCar(scene: Phaser.Scene, vehicle: Vehicle): Phaser.
  * Placeholder police officer on foot, seen from above. Its feet and arms are
  * separate children (named) so the scene can swing them while running.
  */
-export function createOfficer(scene: Phaser.Scene): Phaser.GameObjects.Container {
+export function createOfficer(scene: Phaser.Scene, colours: PoliceColours = CLASSIC_COLOURS): Phaser.GameObjects.Container {
+  const uniform = colours.uniform;
   const parts = [
     scene.add.ellipse(0, -1.6, 2.6, 1.6, 0x16233d).setName('footL'),
     scene.add.ellipse(0, 1.6, 2.6, 1.6, 0x16233d).setName('footR'),
-    scene.add.ellipse(0, -3.2, 2.2, 1.4, 0x1f4e9c).setName('armL'),
-    scene.add.ellipse(0, 3.2, 2.2, 1.4, 0x1f4e9c).setName('armR'),
+    scene.add.ellipse(0, -3.2, 2.2, 1.4, uniform).setName('armL'),
+    scene.add.ellipse(0, 3.2, 2.2, 1.4, uniform).setName('armR'),
   ];
   const g = scene.add.graphics();
   g.fillStyle(0x000000, 0.25).fillEllipse(0.8, 1.2, 7, 6);
-  g.fillStyle(0x1f4e9c).fillEllipse(0, 0, 5.5, 7); // shoulders
+  g.fillStyle(uniform).fillEllipse(0, 0, 5.5, 7); // shoulders
   g.fillStyle(0x16233d).fillCircle(0.4, 0, 2.2); // cap
   g.fillStyle(0xe8c547).fillCircle(1.6, 0, 0.7); // badge on the cap peak
   // About the size of the people walking in town (a car is three times as long); a soft
   // ring underneath keeps the player easy to find.
-  const ring = scene.add.circle(0, 0, 6.5, 0xffffff, 0.22).setStrokeStyle(0.8, 0x1f4e9c, 0.8).setName('ring');
+  const ring = scene.add.circle(0, 0, 6.5, 0xffffff, 0.22).setStrokeStyle(0.8, uniform, 0.8).setName('ring');
   return scene.add.container(0, 0, [ring, ...parts, g]).setDepth(31).setScale(OFFICER_SCALE);
 }
 

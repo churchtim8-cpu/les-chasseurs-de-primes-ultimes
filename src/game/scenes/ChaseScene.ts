@@ -4,8 +4,10 @@ import { audioCheck } from '../../engine/audio/manifest';
 import { EVENT_LINES, OUTCOME_LINES, REPEAT_LINES, TRANSPORT_LINES } from '../../engine/audio/script';
 import { DIFFICULTY_SETTINGS } from '../../engine/difficulty';
 import { Chase, pointOf, type ChaseEvent, type SpokenText } from '../../engine/chase/chase';
-import { generateScenario, type ScenarioOptions } from '../../engine/chase/scenario';
-import { CHASE_TYPES, SIGHTING, type ChaseType } from '../../engine/chase/settings';
+import { generateScenario } from '../../engine/chase/scenario';
+import { SIGHTING } from '../../engine/chase/settings';
+import { livery, MISSION_COUNT } from '../../engine/campaign/campaign';
+import type { MissionStats } from '../../engine/campaign/scoring';
 import type { SightingCard } from '../../engine/chase/sightings';
 import type { Transmission } from '../../engine/language/navigator';
 import { LANGUAGE_SETTINGS } from '../../engine/language/settings';
@@ -15,12 +17,15 @@ import { TownGraph, type TravelMode } from '../../engine/world/graph';
 import { HALF_WIDTH, PAVEMENT } from '../../engine/world/geometry';
 import { ChaseMusic } from '../audio/ChaseMusic';
 import { DrivingSounds } from '../audio/DrivingSounds';
+import { FootSounds } from '../audio/FootSounds';
+import { loadProgress } from '../campaignStore';
+import { scenarioOptionsFromAddress } from '../scenarioOptions';
+import type { ResultsData } from './ResultsScene';
 import { scannerAudio, type SpokenLine } from '../audio/ScannerAudio';
 import { CameraRig, MAP_FACINGS, type MapFacing } from '../camera/cameraRig';
 import { debugState } from '../debug/debugState';
 import { Hud } from '../hud/Hud';
 import { Controls, type ControlAction } from '../input/controls';
-import { FONT_FAMILY, PALETTE, toCss } from '../palette';
 import {
   animateRunner,
   createIntentBadge,
@@ -36,6 +41,8 @@ import { TownLife } from '../render/townLife';
 
 export interface ChaseSceneData {
   seed: string;
+  /** Campaign mission (0-based); absent for a practice chase. */
+  mission?: number;
 }
 
 type Stage = 'COUNTDOWN' | 'PURSUIT' | 'RESULTS';
@@ -49,7 +56,7 @@ type Stage = 'COUNTDOWN' | 'PURSUIT' | 'RESULTS';
  * of the car or back in.
  *
  * Debug keys (debug mode only): C = jump onto the suspect (test capture),
- * X = force escape, N = next chase. `?type=CAR_FOOT` (with `?seed=`) forces a
+ * K = skip the mission (counts as a capture), X = force escape, N = next chase. `?type=CAR_FOOT` (with `?seed=`) forces a
  * chase type.
  */
 export class ChaseScene extends Phaser.Scene {
@@ -65,6 +72,7 @@ export class ChaseScene extends Phaser.Scene {
   private officer!: Phaser.GameObjects.Container;
   private music!: ChaseMusic;
   private driving!: DrivingSounds;
+  private footsteps!: FootSounds;
   /** Speed streaks behind the police car. */
   private trail!: Phaser.GameObjects.Graphics;
   private trailPoints: { x: number; y: number; heading: number }[] = [];
@@ -86,6 +94,7 @@ export class ChaseScene extends Phaser.Scene {
   private suspectHeading = 0;
   private stage: Stage = 'COUNTDOWN';
   private seed = '';
+  private mission: number | null = null;
 
   constructor() {
     super(ChaseScene.KEY);
@@ -93,6 +102,7 @@ export class ChaseScene extends Phaser.Scene {
 
   init(data: ChaseSceneData): void {
     this.seed = data.seed;
+    this.mission = typeof data.mission === 'number' ? data.mission : null;
     this.stage = 'COUNTDOWN';
   }
 
@@ -118,10 +128,12 @@ export class ChaseScene extends Phaser.Scene {
     this.music.setMode(this.chase.player.mode);
     this.music.start();
     this.driving = new DrivingSounds(scannerAudio);
+    this.footsteps = new FootSounds(scannerAudio);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       scannerAudio.stop();
       this.music.stop();
       this.driving.stop();
+      this.footsteps.stop();
     });
     this.layers = drawTown(this, this.graph);
     if (new URLSearchParams(window.location.search).get('life') !== '0') {
@@ -134,8 +146,9 @@ export class ChaseScene extends Phaser.Scene {
     this.suspectCars = vehicles.map((v) => (v ? createSuspectCar(this, v).setAlpha(0) : null));
     this.suspectRunner = createSuspectRunner(this).setAlpha(0);
     this.trail = this.add.graphics().setDepth(28);
-    this.car = createPoliceCar(this);
-    this.officer = createOfficer(this).setVisible(false);
+    const colours = livery(loadProgress().livery);
+    this.car = createPoliceCar(this, colours);
+    this.officer = createOfficer(this, colours).setVisible(false);
     this.badge = createIntentBadge(this);
     this.roundabout = new RoundaboutGuide(this, this.graph, () =>
       this.hud.showToast('Rond-point : ◀ ▶ pour choisir la sortie', 2600),
@@ -152,7 +165,7 @@ export class ChaseScene extends Phaser.Scene {
     this.rig.setFacing(loadFacing());
     this.controls = new Controls(this);
     this.controls.onAction((action) => this.handleAction(action));
-    this.hud = new Hud(this, { number: 1, total: 8 });
+    this.hud = new Hud(this, this.mission === null ? 'ENTRAÎNEMENT' : `MISSION ${this.mission + 1} / ${MISSION_COUNT}`);
     this.hud.onRepeat(() => this.repeat());
     this.hud.onMusic(() => this.toggleMusic());
     this.hud.setMusic(!this.music.isMuted);
@@ -397,6 +410,7 @@ export class ChaseScene extends Phaser.Scene {
     if (me.mode === 'FOOT') animateRunner(this.officer, this.stride, me.speed > 1);
     this.drawTrail(me);
     this.driving.update({ driving: me.mode === 'CAR' && this.stage === 'PURSUIT', speed: me.speed, heading: me.heading }, delta);
+    this.footsteps.update({ running: me.mode === 'FOOT' && this.stage === 'PURSUIT', speed: me.speed, stride: this.stride }, delta);
     this.placeParked(this.car, me.mode === 'CAR' ? null : this.chase.parkedCar, me.mode === 'CAR');
     this.placeParked(this.abandonedCar, this.chase.abandonedCar, false);
     // Above the player on screen, whichever way the map is turned.
@@ -510,50 +524,59 @@ export class ChaseScene extends Phaser.Scene {
     sprite.setPosition(p.x, p.y).setRotation(Math.atan2(to.y - from.y, to.x - from.x));
   }
 
+  /**
+   * The chase is over: the outcome shows as a banner over the map for a
+   * moment (while the scanner says it), then the results screen opens.
+   * ENTRÉE or a tap goes there at once.
+   */
   private showResults(): void {
+    if (this.stage === 'RESULTS') return;
     this.stage = 'RESULTS';
     this.music.stop();
     const status = this.chase.status;
     const captured = status.phase === 'CAPTURED';
-    const title = captured ? 'Le suspect est arrêté !' : 'Le suspect s’est échappé.';
-    const detail = captured
-      ? `Temps : ${status.elapsed.toFixed(1)} s`
-      : status.escapeReason === 'TIME'
-        ? 'Le temps est écoulé.'
-        : status.escapeReason === 'ARRIVED'
-          ? 'Il est arrivé avant vous.'
-          : 'Vous avez perdu le suspect.';
-    const { width, height } = this.scale;
-    const panel = this.add
-      .text(width / 2, height / 2, `${title}\n\n${detail}\nPoursuite ${this.seed}\n\nENTRÉE : nouvelle poursuite   ·   R : rejouer`, {
-        fontFamily: FONT_FAMILY,
-        fontSize: '26px',
-        color: toCss(PALETTE.ink),
-        align: 'center',
-        backgroundColor: 'rgba(246, 236, 210, 0.96)',
-        padding: { x: 36, y: 26 },
-      })
-      .setOrigin(0.5)
-      .setDepth(300);
-    this.cameras.main.ignore(panel);
-    panel.setInteractive().on('pointerdown', () => this.nextChase());
+    this.hud.showBanner(captured ? 'Le suspect est arrêté !' : 'Le suspect s’est échappé.');
+    const history = this.chase.navigator.history;
+    const stats: MissionStats = {
+      difficulty: this.chase.scenario.difficulty,
+      captured,
+      timeLeft: status.timeLeft,
+      directions: history.filter((t) => t.kind === 'DIRECTION' || t.kind === 'FINAL').length,
+      wrongTurns: history.filter((t) => t.kind === 'RECOVERY').length,
+      repeatsUsed: status.repeatsUsed,
+      sightingsAsked: status.sightingsAsked,
+      sightingsRight: status.sightingsRight,
+      transportChanges: this.chase.playerStage,
+    };
+    const data: ResultsData = {
+      seed: this.seed,
+      mission: this.mission,
+      stats,
+      ...(status.escapeReason ? { escapeReason: status.escapeReason } : {}),
+    };
+    debugState.info.set('wrong turns', String(stats.wrongTurns));
+    const go = () => {
+      if (this.scene.isActive()) this.scene.start('Results', data);
+    };
+    this.time.delayedCall(2600, go);
+    this.input.once('pointerdown', go);
+    this.input.keyboard?.once('keydown-ENTER', go);
   }
 
   private nextChase(): void {
-    this.scene.start('Title', { autostart: true });
+    this.scene.start('Practice', { autostart: true });
   }
 
   private bindKeys(): void {
     const keyboard = this.input.keyboard;
     if (!keyboard) return;
-    keyboard.on('keydown-ESC', () => this.scene.start('Title'));
-    keyboard.on('keydown-ENTER', () => this.stage === 'RESULTS' && this.nextChase());
-    keyboard.on('keydown-R', () => {
-      if (this.stage === 'RESULTS') this.scene.restart({ seed: this.seed });
-      else this.repeat();
-    });
+    keyboard.on('keydown-ESC', () => this.scene.start(this.mission === null ? 'Title' : 'Campaign'));
+    keyboard.on('keydown-R', () => this.repeat());
     keyboard.on('keydown-C', () => {
       if (debugState.isEnabled && this.stage === 'PURSUIT') this.chase.teleportPlayerToSuspect();
+    });
+    keyboard.on('keydown-K', () => {
+      if (debugState.isEnabled && this.stage === 'PURSUIT') this.handleEvents(this.chase.forceOutcome('CAPTURED'));
     });
     keyboard.on('keydown-X', () => {
       if (debugState.isEnabled && this.stage === 'PURSUIT') this.handleEvents(this.chase.forceOutcome('ESCAPED'));
@@ -641,11 +664,6 @@ export class ChaseScene extends Phaser.Scene {
   }
 }
 
-/**
- * Debug and tests: `?type=CAR_FOOT` forces a chase type; `?turnoff=1` (or 0) a
- * change of direction, `?sightings=1` a sighting (off by default), `?lost=1` a lost signal.
- * (`?life=0` turns off the town's traffic and other movement.)
- */
 const FACING_KEY = 'chasseurs.mapFacing';
 /** Set when the player changes the facing during this visit. */
 let chosenFacing: MapFacing | null = null;
@@ -662,22 +680,4 @@ function loadFacing(): MapFacing {
     // storage unavailable
   }
   return 'FOOT';
-}
-
-function scenarioOptionsFromAddress(): ScenarioOptions {
-  const params = new URLSearchParams(window.location.search);
-  const type = params.get('type');
-  const flag = (name: string) => {
-    const value = params.get(name);
-    return value === '1' || value === '0' ? value === '1' : undefined;
-  };
-  const turnOff = flag('turnoff');
-  const sightings = flag('sightings');
-  const lostSignal = flag('lost');
-  return {
-    ...(type && (CHASE_TYPES as readonly string[]).includes(type) ? { chaseType: type as ChaseType } : {}),
-    ...(turnOff !== undefined ? { turnOff } : {}),
-    ...(sightings !== undefined ? { sightings } : {}),
-    ...(lostSignal !== undefined ? { lostSignal } : {}),
-  };
 }
