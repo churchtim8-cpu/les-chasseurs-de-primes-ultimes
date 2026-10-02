@@ -8,6 +8,7 @@ import { newSeed } from '../seedSource';
 
 export const GAME_WIDTH = 1280;
 export const GAME_HEIGHT = 720;
+const TITLE_PICTURE = 'title-picture';
 
 const LEVEL_KEY = 'chasseurs.level';
 
@@ -53,6 +54,8 @@ export class TitleScene extends Phaser.Scene {
   preload(): void {
     // Which French recordings exist (public/audio/manifest.json). Missing is fine: text only.
     if (!this.cache.json.exists('audio-manifest')) this.load.json('audio-manifest', `${import.meta.env.BASE_URL}audio/manifest.json`);
+    // The title picture (AI-generated, 155 KB). If it fails to load the drawn backdrop shows instead.
+    if (!this.textures.exists(TITLE_PICTURE)) this.load.image(TITLE_PICTURE, `${import.meta.env.BASE_URL}images/title.jpg`);
   }
 
   create(): void {
@@ -176,8 +179,18 @@ export class TitleScene extends Phaser.Scene {
     return parsed.ok ? parsed.seed : undefined;
   }
 
-  /** A simple top-down coastline: town blocks, a promenade, sand and sea. */
+  /** The title picture behind a soft panel that keeps the words easy to read. */
   private drawBackdrop(): void {
+    if (!this.textures.exists(TITLE_PICTURE)) {
+      this.drawPlainBackdrop();
+      return;
+    }
+    this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, TITLE_PICTURE).setDisplaySize(GAME_WIDTH, GAME_HEIGHT);
+    this.add.rectangle(GAME_WIDTH / 2, 336, 1180, 360, PALETTE.cream, 0.75).setStrokeStyle(3, PALETTE.ink, 0.5);
+  }
+
+  /** A simple top-down coastline: town blocks, a promenade, sand and sea. */
+  private drawPlainBackdrop(): void {
     const g = this.add.graphics();
     g.fillStyle(PALETTE.cream).fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 

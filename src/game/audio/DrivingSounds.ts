@@ -17,14 +17,19 @@ const ENGINE = {
 };
 
 const SCREECH = {
-  level: 0.11,
+  level: 0.22,
   /** Screech when turning faster than this (radians per second)... */
-  turnRate: 1.6,
+  turnRate: 0.9,
   /** ...above this speed. */
-  minSpeed: 35,
-  seconds: 0.45,
+  minSpeed: 20,
+  /** A short squeal at every corner. */
+  seconds: 0.32,
   /** No new screech for this long after one. */
-  cooldown: 0.9,
+  cooldown: 0.6,
+  /** Pitch of the tyre whine (Hz), with a fast wobble. */
+  whineHz: 1150,
+  wobbleHz: 28,
+  wobbleDepth: 70,
 };
 
 export class DrivingSounds {
@@ -104,23 +109,47 @@ export class DrivingSounds {
     return this.out;
   }
 
-  /** Tyre squeal: narrow-band noise that slides down in pitch. */
+  /** Tyre squeal: a wobbling whine over a band of hiss, sliding down in pitch. */
   private screech(t: number, strength: number): void {
     const { ctx, noise, bus } = this.out!;
-    const source = ctx.createBufferSource();
-    source.buffer = noise;
-    const band = ctx.createBiquadFilter();
-    band.type = 'bandpass';
-    band.Q.value = 18;
-    band.frequency.setValueAtTime(2600, t);
-    band.frequency.linearRampToValueAtTime(1900, t + SCREECH.seconds);
+    const end = t + SCREECH.seconds;
     const gain = ctx.createGain();
     const peak = SCREECH.level * (0.6 + 0.4 * strength);
     gain.gain.setValueAtTime(0.0001, t);
-    gain.gain.exponentialRampToValueAtTime(peak, t + 0.04);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + SCREECH.seconds);
-    source.connect(band).connect(gain).connect(bus);
-    source.start(t);
-    source.stop(t + SCREECH.seconds + 0.05);
+    gain.gain.exponentialRampToValueAtTime(peak, t + 0.03);
+    gain.gain.setValueAtTime(peak, end - 0.12);
+    gain.gain.exponentialRampToValueAtTime(0.0001, end);
+    gain.connect(bus);
+
+    const whine = ctx.createOscillator();
+    whine.type = 'sawtooth';
+    whine.frequency.setValueAtTime(SCREECH.whineHz, t);
+    whine.frequency.linearRampToValueAtTime(SCREECH.whineHz * 0.8, end);
+    const wobble = ctx.createOscillator();
+    wobble.frequency.value = SCREECH.wobbleHz;
+    const depth = ctx.createGain();
+    depth.gain.value = SCREECH.wobbleDepth;
+    wobble.connect(depth).connect(whine.frequency);
+    const whineBand = ctx.createBiquadFilter();
+    whineBand.type = 'bandpass';
+    whineBand.frequency.value = SCREECH.whineHz;
+    whineBand.Q.value = 3;
+    const whineLevel = ctx.createGain();
+    whineLevel.gain.value = 0.35;
+    whine.connect(whineBand).connect(whineLevel).connect(gain);
+
+    const hiss = ctx.createBufferSource();
+    hiss.buffer = noise;
+    const hissBand = ctx.createBiquadFilter();
+    hissBand.type = 'bandpass';
+    hissBand.Q.value = 5;
+    hissBand.frequency.setValueAtTime(2400, t);
+    hissBand.frequency.linearRampToValueAtTime(1800, end);
+    hiss.connect(hissBand).connect(gain);
+
+    for (const source of [whine, wobble, hiss]) {
+      source.start(t);
+      source.stop(end + 0.05);
+    }
   }
 }

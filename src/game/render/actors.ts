@@ -92,23 +92,32 @@ const OFFICER_SCALE = 0.95;
  * Running: long strides, arms pumping against the legs, and a bounce with
  * every step. `stride` advances with distance run (radians).
  */
-export function animateOfficer(officer: Phaser.GameObjects.Container, stride: number, moving: boolean): void {
+export function animateRunner(runner: Phaser.GameObjects.Container, stride: number, moving: boolean): void {
   const swing = moving ? Math.sin(stride) * 3.4 : 0;
-  const part = (name: string) => officer.getByName(name) as Phaser.GameObjects.Ellipse | null;
+  const part = (name: string) => runner.getByName(name) as Phaser.GameObjects.Ellipse | null;
   part('footL')?.setX(swing);
   part('footR')?.setX(-swing);
   part('armL')?.setX(-swing * 0.8);
   part('armR')?.setX(swing * 0.8);
   const bounce = moving ? Math.abs(Math.sin(stride)) * 0.08 : 0;
-  officer.setScale(OFFICER_SCALE * (1 + bounce));
+  runner.setScale(OFFICER_SCALE * (1 + bounce));
   part('ring')?.setScale(1 - bounce);
 }
 
-/** Placeholder suspect on foot, seen from above. */
+/**
+ * The suspect on foot: built like the officer (legs, pumping arms) so both
+ * run the same way, in a red hoodie with no cap.
+ */
 export function createSuspectRunner(scene: Phaser.Scene): Phaser.GameObjects.Container {
+  const parts = [
+    scene.add.ellipse(0, -1.6, 2.6, 1.6, 0x2a2a2a).setName('footL'),
+    scene.add.ellipse(0, 1.6, 2.6, 1.6, 0x2a2a2a).setName('footR'),
+    scene.add.ellipse(0, -3.2, 2.2, 1.4, 0xc0392b).setName('armL'),
+    scene.add.ellipse(0, 3.2, 2.2, 1.4, 0xc0392b).setName('armR'),
+  ];
   const g = scene.add.graphics();
   drawRunner(g);
-  return scene.add.container(0, 0, [g]).setDepth(29).setScale(OFFICER_SCALE);
+  return scene.add.container(0, 0, [...parts, g]).setDepth(29).setScale(OFFICER_SCALE);
 }
 
 /**

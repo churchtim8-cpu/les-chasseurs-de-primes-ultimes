@@ -12,6 +12,7 @@ import { LANGUAGE_SETTINGS } from '../../engine/language/settings';
 import { LOCATION_WORD_BY_ID, withArticle } from '../../engine/language/locations';
 import type { MoverStart } from '../../engine/movement/mover';
 import { TownGraph, type TravelMode } from '../../engine/world/graph';
+import { HALF_WIDTH, PAVEMENT } from '../../engine/world/geometry';
 import { ChaseMusic } from '../audio/ChaseMusic';
 import { DrivingSounds } from '../audio/DrivingSounds';
 import { scannerAudio, type SpokenLine } from '../audio/ScannerAudio';
@@ -21,7 +22,7 @@ import { Hud } from '../hud/Hud';
 import { Controls, type ControlAction } from '../input/controls';
 import { FONT_FAMILY, PALETTE, toCss } from '../palette';
 import {
-  animateOfficer,
+  animateRunner,
   createIntentBadge,
   createOfficer,
   createPoliceCar,
@@ -67,6 +68,9 @@ export class ChaseScene extends Phaser.Scene {
   private trail!: Phaser.GameObjects.Graphics;
   private trailPoints: { x: number; y: number; heading: number }[] = [];
   private stride = 0;
+  private suspectStride = 0;
+  /** Smoothed sideways shift that puts runners on the pavement (see onPavement). */
+  private readonly pavement = { me: { x: 0, y: 0 }, suspect: { x: 0, y: 0 } };
   /** The suspect's vehicle in each stage (null on foot). */
   private suspectCars: (Phaser.GameObjects.Container | null)[] = [];
   private suspectRunner!: Phaser.GameObjects.Container;
@@ -380,11 +384,12 @@ export class ChaseScene extends Phaser.Scene {
     }
     this.displayHeading += Phaser.Math.Angle.Wrap(me.heading - this.displayHeading) * Math.min(1, delta / 90);
     const avatar = me.mode === 'CAR' ? this.car : this.officer;
-    avatar.setPosition(me.x, me.y).setRotation(this.displayHeading);
+    const mine = this.onPavement(me, this.pavement.me, delta);
+    avatar.setPosition(me.x + mine.x, me.y + mine.y).setRotation(this.displayHeading);
     this.officer.setVisible(me.mode === 'FOOT');
     // About three strides a second at running speed.
     this.stride += (delta / 1000) * me.speed * 0.75;
-    if (me.mode === 'FOOT') animateOfficer(this.officer, this.stride, me.speed > 1);
+    if (me.mode === 'FOOT') animateRunner(this.officer, this.stride, me.speed > 1);
     this.drawTrail(me);
     this.driving.update({ driving: me.mode === 'CAR' && this.stage === 'PURSUIT', speed: me.speed, heading: me.heading }, delta);
     this.placeParked(this.car, me.mode === 'CAR' ? null : this.chase.parkedCar, me.mode === 'CAR');
@@ -392,7 +397,7 @@ export class ChaseScene extends Phaser.Scene {
     // Above the player on screen, whichever way the map is turned.
     const lift = me.mode === 'CAR' ? 16 : 10;
     const turned = this.rig.rotation;
-    this.badge.container.setPosition(me.x - lift * Math.sin(turned), me.y - lift * Math.cos(turned));
+    this.badge.container.setPosition(me.x + mine.x - lift * Math.sin(turned), me.y + mine.y - lift * Math.cos(turned));
     this.badge.show(this.stage === 'PURSUIT' ? me.queued : null, this.displayHeading);
     const status = this.chase.status;
     this.music.setIntensity(status.signal);
@@ -404,13 +409,36 @@ export class ChaseScene extends Phaser.Scene {
     const visible = debugState.isEnabled || this.chase.status.suspectVisible || this.stage === 'RESULTS';
     const shown = this.suspectCars[this.chase.suspectStage] ?? this.suspectRunner;
     for (const sprite of [...this.suspectCars, this.suspectRunner]) if (sprite && sprite !== shown) sprite.setAlpha(0);
-    shown.setPosition(suspect.x, suspect.y).setRotation(this.suspectHeading);
+    const theirs = this.onPavement(suspect, this.pavement.suspect, delta);
+    shown.setPosition(suspect.x + theirs.x, suspect.y + theirs.y).setRotation(this.suspectHeading);
+    if (shown === this.suspectRunner) {
+      this.suspectStride += (delta / 1000) * suspect.speed * 0.75;
+      animateRunner(this.suspectRunner, this.suspectStride, suspect.speed > 1);
+    }
     const alpha = shown.alpha + ((visible ? 1 : 0) - shown.alpha) * Math.min(1, delta / 250);
     shown.setAlpha(alpha);
 
     this.rig.update(me, delta);
     this.scaleLabels();
     this.keepUpright();
+  }
+
+  /**
+   * On foot along a road, runners keep to the pavement on their right instead of
+   * the middle of the road (drawing only: the chase still measures the road's centre).
+   * The shift eases in and out so it never jumps at junctions or footpaths.
+   */
+  private onPavement(
+    who: { heading: number; mode: TravelMode; edgeId: string },
+    shift: { x: number; y: number },
+    delta: number,
+  ): { x: number; y: number } {
+    const edge = this.graph.edge(who.edgeId);
+    const side = who.mode === 'FOOT' && edge.car ? HALF_WIDTH[edge.kind] + PAVEMENT / 2 : 0;
+    const k = Math.min(1, delta / 220);
+    shift.x += (-Math.sin(who.heading) * side - shift.x) * k;
+    shift.y += (Math.cos(who.heading) * side - shift.y) * k;
+    return shift;
   }
 
   /** Light streaks behind the police car at speed: driving feels fast, running does not leave them. */
