@@ -52,6 +52,8 @@ Driving and running look and sound different: the car has a flashing siren glow,
 
 On foot the map turns with the officer (heading-up view), the way ahead fills the screen and place names stay upright; past the town's edge there is countryside and sea.
 
+Directions come in time to act on them. In the car each call comes as soon as the last turn is passed; if it still comes late (two junctions close together, or a long sentence), the whole chase, police, suspect and clock, slows a little until the call has been heard, so the player can react before the junction without losing ground. On foot, where running is slow, each call waits until the runner is a few seconds from the turn (6 s at Easy up to 9.5 s at Expert), so there is no long wait after "Prenez la troisième rue", and calls only ever come just after a junction, never mid-street. Settings: `CALL_TIMING` in `src/engine/chase/settings.ts`.
+
 On foot the suspect takes shortcuts a car cannot: paths through the park and the square, the two alleys (Passage du Marché, Passage des Rails), the Passerelle du Port footbridge over the canal, and the seafront promenade. Before running to a car it sticks to streets, so the police car is never left far behind.
 
 ### Music

@@ -210,6 +210,39 @@ describe('scanner instructions in real chases', () => {
     }
   });
 
+  it.each(DIFFICULTIES)('directions leave time to hear them before the junction (%s)', (difficulty) => {
+    // Time from a call to the player reaching its junction, against how long its first step takes to say.
+    let calls = 0;
+    let late = 0;
+    for (const chaseType of ['CAR_CAR', 'FOOT_FOOT'] as const) {
+      for (const seed of seeds(difficulty, 30, 'call-time')) {
+        const chase = new Chase(graph, generateScenario(graph, seed, { chaseType }));
+        const bot = new ListenerBot(graph, 1.2);
+        const waiting: { at: string; time: number; speech: number }[] = [];
+        let time = 0;
+        let from = '';
+        for (; time < 400 && chase.status.phase === 'PURSUIT'; time += 0.05) {
+          for (const e of bot.step(chase, 0.05)) {
+            if (e.type !== 'TRANSMISSION' || e.transmission.kind !== 'DIRECTION' || !e.transmission.at) continue;
+            const firstStep = e.transmission.text.split(/(?<=\.)\s|,\s*puis\s/)[0] ?? '';
+            waiting.push({ at: e.transmission.at, time, speech: 0.6 + firstStep.length / 13 });
+          }
+          const here = chase.player.location();
+          const origin = graph.other(graph.edge(here.edgeId), here.towards);
+          if (origin === from) continue;
+          from = origin;
+          for (const w of waiting.filter((w) => w.at === origin)) {
+            calls++;
+            if (time - w.time < w.speech + 1) late++;
+            waiting.splice(waiting.indexOf(w), 1);
+          }
+        }
+      }
+    }
+    expect(calls).toBeGreaterThan(50);
+    expect(late / calls).toBeLessThan(0.15);
+  });
+
   it('uses only the templates allowed at each difficulty', () => {
     for (const difficulty of DIFFICULTIES) {
       const used = new Set<TemplateId>();

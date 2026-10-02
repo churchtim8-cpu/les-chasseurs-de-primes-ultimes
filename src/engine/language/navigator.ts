@@ -33,6 +33,8 @@ export interface Transmission {
   /** One or more instructions played back to back in one radio call. */
   instructions: Instruction[];
   text: string;
+  /** For a direction: the junction it is about (the first turn it covers). */
+  at?: string;
 }
 
 /** Driving this far past the end of the route (where the suspect stops) counts as overshooting. */
@@ -58,6 +60,16 @@ export class Navigator {
   readonly history: Transmission[] = [];
   /** Prefer calls with at least this many turns, when the map allows (the chase is about to lose the signal). */
   preferSteps = 0;
+  /**
+   * Directions wait until the player is this close (metres) to the junction,
+   * set each frame by the chase. They are only ever given just after passing a
+   * node, never mid-street (a call just before a side street would make
+   * "la deuxième rue" unclear); one that would otherwise come later than
+   * `minLeadDistance` before the junction is given a node early.
+   */
+  leadDistance = Infinity;
+  minLeadDistance = 0;
+  private spoken = false;
 
   constructor(
     private readonly graph: TownGraph,
@@ -135,6 +147,20 @@ export class Navigator {
     return out;
   }
 
+  /**
+   * Road distance from the player to a junction ahead on the guide (by guide
+   * index, or node ID), or Infinity when it is not ahead on the guide.
+   */
+  distanceTo(player: MoverStart, target: number | string): number {
+    const index = typeof target === 'number' ? target : this.guide.indexOf(target, this.progress + 1);
+    if (index <= this.progress) return Infinity;
+    const edge = this.graph.edge(player.edgeId);
+    if (player.towards !== this.guide[this.progress + 1]) return Infinity;
+    const along = player.towards === edge.to ? player.t : 1 - player.t;
+    const rest = (1 - along) * this.graph.edgeLength(edge);
+    return rest + pathLength(this.graph, this.guide.slice(this.progress + 1, index + 1));
+  }
+
   /** Is the player where the guide expects (moving forward along it)? Advances `progress` if so. */
   private onGuide(player: MoverStart): boolean {
     const last = Math.min(this.progress + 4, this.guide.length - 2);
@@ -171,6 +197,7 @@ export class Navigator {
     }
     const a = this.actions[nextIndex] as number;
     if (this.covered.has(a)) return;
+    if (this.spoken && this.tooEarly(pos, a)) return;
     const guided = instructionFor(
       this.graph,
       pos,
@@ -184,7 +211,7 @@ export class Navigator {
     );
     if (guided) {
       for (const c of guided.covers) this.covered.add(c);
-      this.emit('DIRECTION', [guided.instruction], out);
+      this.emit('DIRECTION', [guided.instruction], out, this.guide[a]);
       return;
     }
     if (this.fillerFor !== a) {
@@ -254,14 +281,25 @@ export class Navigator {
     return planGuide(this.graph, player, suspectRoute, this.difficulty);
   }
 
-  private emit(kind: TransmissionKind, instructions: Instruction[], out: Transmission[]): void {
+  /** Is it too early for the direction about action `a` (see leadDistance)? The next node will do. */
+  private tooEarly(player: MoverStart, a: number): boolean {
+    const toJunction = this.distanceTo(player, a);
+    if (toJunction <= this.leadDistance) return false;
+    if (this.progress + 1 >= a) return false;
+    const fromNext = toJunction - this.distanceTo(player, this.progress + 1);
+    return fromNext >= this.minLeadDistance;
+  }
+
+  private emit(kind: TransmissionKind, instructions: Instruction[], out: Transmission[], at?: string): void {
     const transmission: Transmission = {
       id: this.nextId++,
       kind,
       instructions,
       text: instructions.map((i) => i.text).join(' '),
+      ...(at ? { at } : {}),
     };
     this.history.push(transmission);
+    this.spoken = true;
     out.push(transmission);
   }
 }
