@@ -14,6 +14,7 @@ import {
   parkedCar,
   plaque,
   shade,
+  SHADOW,
   tree,
   WHITE,
 } from './art';
@@ -40,7 +41,7 @@ function columns(g: G, x: number, y: number, w: number, count: number, height: n
   const gap = w / count;
   for (let i = 0; i < count; i++) {
     g.fillStyle(WHITE).fillRect(x + gap * i + gap / 2 - 1.5, y, 3, height);
-    g.fillStyle(0x000000, 0.12).fillRect(x + gap * i + gap / 2 + 1.5, y, 1, height);
+    g.fillStyle(SHADOW, 0.12).fillRect(x + gap * i + gap / 2 + 1.5, y, 1, height);
   }
 }
 
@@ -228,7 +229,7 @@ export const LANDMARKS: Record<string, Drawer> = {
       for (let x = r.x + 6; x + 26 <= r.x + r.w - 4; x += 32) {
         const [a, b] = colours[k++ % colours.length] as readonly [number, number];
         const y = r.y + row * rowH + 8;
-        g.fillStyle(0x000000, 0.15).fillRect(x + 2, y + 3, 26, rowH - 18);
+        g.fillStyle(SHADOW, 0.15).fillRect(x + 2, y + 3, 26, rowH - 18);
         awning(g, x, y, 26, rowH - 22, a, b);
         for (let i = 0; i < 4; i++) {
           const fruit = [0xe0463a, 0xf2a93b, 0x6fb24a, 0x8e4f9e][(i + k) % 4] as number;
@@ -301,7 +302,7 @@ export const LANDMARKS: Record<string, Drawer> = {
     // A dome over the main hall, and a columned portico at the front.
     const x = cx(roof);
     const y = cy(roof);
-    g.fillStyle(0x000000, 0.15).fillCircle(x + 3, y + 4, 34);
+    g.fillStyle(SHADOW, 0.15).fillCircle(x + 3, y + 4, 34);
     g.fillStyle(0x6c9a93).fillCircle(x, y, 34);
     g.fillStyle(0x86b5ad).fillCircle(x - 6, y - 7, 22);
     g.lineStyle(1, shade(0x6c9a93, -25), 0.7);
@@ -362,7 +363,7 @@ export const LANDMARKS: Record<string, Drawer> = {
     const hall: Rect = { x: r.x + r.w * 0.2, y: r.y + r.h * 0.5, w: r.w * 0.6, h: r.h * 0.5 };
     const shed: Rect = { x: r.x, y: r.y, w: r.w, h: r.h * 0.48 };
     g.fillStyle(C.stone).fillRect(shed.x, shed.y, shed.w, shed.h);
-    g.fillStyle(0x000000, 0.12).fillRect(shed.x + 3, shed.y + 4, shed.w, shed.h);
+    g.fillStyle(SHADOW, 0.12).fillRect(shed.x + 3, shed.y + 4, shed.w, shed.h);
     g.fillStyle(0xbfdbe6, 0.95).fillRect(shed.x, shed.y, shed.w, shed.h);
     g.lineStyle(1, WHITE, 0.95);
     for (let x = shed.x + 10; x < shed.x + shed.w; x += 10) g.lineBetween(x, shed.y, x, shed.y + shed.h);
@@ -381,7 +382,7 @@ export const LANDMARKS: Record<string, Drawer> = {
     // Bus bays under a canopy, with buses parked at an angle.
     g.fillStyle(C.road).fillRect(r.x, r.y, r.w, r.h);
     const canopy: Rect = { x: r.x + 6, y: r.y + 6, w: r.w - 12, h: 18 };
-    g.fillStyle(0x000000, 0.14).fillRect(canopy.x + 2, canopy.y + 3, canopy.w, canopy.h);
+    g.fillStyle(SHADOW, 0.14).fillRect(canopy.x + 2, canopy.y + 3, canopy.w, canopy.h);
     flatRoof(g, canopy, 0x6f8fa6, false);
     g.lineStyle(1, WHITE, 0.9);
     for (let i = 0; i < 5; i++) {
@@ -390,7 +391,7 @@ export const LANDMARKS: Record<string, Drawer> = {
       g.lineBetween(x - 8, r.y + 28, x + 8, r.y + r.h - 8);
       const bx = x + 8;
       const by = r.y + 62;
-      g.fillStyle(0x000000, 0.18).fillRoundedRect(bx - 3.5 + 1, by - 13 + 1.5, 7, 26, 1.5);
+      g.fillStyle(SHADOW, 0.18).fillRoundedRect(bx - 3.5 + 1, by - 13 + 1.5, 7, 26, 1.5);
       g.fillStyle(i % 2 === 0 ? C.yellow : 0x3fa37a).fillRoundedRect(bx - 3.5, by - 13, 7, 26, 1.5);
       g.fillStyle(WHITE, 0.85).fillRect(bx - 2.5, by - 11, 5, 3);
     }
@@ -401,7 +402,7 @@ export const LANDMARKS: Record<string, Drawer> = {
     // Shop at the back, canopy over two pump islands, and the price pole.
     building(g, { x: r.x + 6, y: r.y + 6, w: r.w * 0.45, h: 36 }, { roof: 0xe8e2d6, wall: C.red, wallHeight: 6, roofKind: 'flat' });
     const canopy: Rect = { x: r.x + 18, y: r.y + 56, w: r.w - 36, h: 46 };
-    g.fillStyle(0x000000, 0.16).fillRect(canopy.x + 4, canopy.y + 5, canopy.w, canopy.h);
+    g.fillStyle(SHADOW, 0.16).fillRect(canopy.x + 4, canopy.y + 5, canopy.w, canopy.h);
     g.fillStyle(WHITE).fillRect(canopy.x, canopy.y, canopy.w, canopy.h);
     g.fillStyle(C.red).fillRect(canopy.x, canopy.y, canopy.w, 4).fillRect(canopy.x, canopy.y + canopy.h - 4, canopy.w, 4);
     for (const fx of [0.3, 0.7]) {
@@ -419,7 +420,7 @@ export const LANDMARKS: Record<string, Drawer> = {
 
   BUS_STOP: (g, r, sign) => {
     // A glass shelter and the bus stop sign.
-    g.fillStyle(0x000000, 0.16).fillRect(r.x + 2, r.y + 2, r.w * 0.6, r.h);
+    g.fillStyle(SHADOW, 0.16).fillRect(r.x + 2, r.y + 2, r.w * 0.6, r.h);
     g.fillStyle(0x6f8fa6).fillRect(r.x, r.y, r.w * 0.6, r.h);
     g.fillStyle(GLASS, 0.9).fillRect(r.x + 1.5, r.y + 1.5, r.w * 0.6 - 3, r.h - 3);
     plaque(g, r.x + r.w - 8, r.y + r.h / 2, 6, C.blue);
@@ -459,7 +460,7 @@ export const LANDMARKS: Record<string, Drawer> = {
 
   STADIUM: (g, r) => {
     // Stands round a pitch, with floodlights at the corners.
-    g.fillStyle(0x000000, 0.16).fillRoundedRect(r.x + 6, r.y + 8, r.w, r.h, 40);
+    g.fillStyle(SHADOW, 0.16).fillRoundedRect(r.x + 6, r.y + 8, r.w, r.h, 40);
     g.fillStyle(0xbfc4c8).fillRoundedRect(r.x, r.y, r.w, r.h, 40);
     g.fillStyle(0x9aa1a8).fillRoundedRect(r.x + 8, r.y + 8, r.w - 16, r.h - 16, 34);
     g.lineStyle(1, 0xd64b3c, 0.5);
@@ -546,7 +547,7 @@ export const LANDMARKS: Record<string, Drawer> = {
       g.fillStyle([0xe86a8a, 0x5bb6cc, 0xf2c94c, 0xffffff][k % 4] as number).fillRect(x + 8, y - 2, 4, 9);
     }
     const lx = r.x + r.w * 0.45;
-    g.fillStyle(0x000000, 0.15).fillRect(lx + 2, r.y + 24, 10, 12);
+    g.fillStyle(SHADOW, 0.15).fillRect(lx + 2, r.y + 24, 10, 12);
     g.fillStyle(WHITE).fillRect(lx, r.y + 20, 10, 12);
     g.fillStyle(C.red).fillRect(lx, r.y + 20, 10, 4);
     for (let x = r.x + 60; x < r.x + r.w; x += 210) palm(g, x, r.y + 12, 9);

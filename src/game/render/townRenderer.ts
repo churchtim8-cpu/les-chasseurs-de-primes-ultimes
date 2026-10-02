@@ -5,7 +5,7 @@ import { HALF_WIDTH, PAVEMENT, pointInPolygon, pointInRect, pointSegmentDistance
 import type { TownGraph } from '../../engine/world/graph';
 import type { EdgeKind, MapEdge, Rect, Region, RegionKind } from '../../engine/world/types';
 import { FONT_FAMILY, PALETTE, toCss } from '../palette';
-import { building, palm, tree } from './art';
+import { building, palm, shade, SHADOW, tree } from './art';
 import { LANDMARKS, type SignText } from './landmarks';
 
 /**
@@ -23,6 +23,12 @@ const REGION_COLOUR: Record<RegionKind, number> = {
   PLAZA: PALETTE.stone,
   RAILWAY: 0xb9aea0,
 };
+
+/** Open ground: a light lawn green, the same as the countryside around the town. */
+const GROUND = 0xd3d9b4;
+/** A faint golden wash over the whole town, for late-afternoon light like the title picture. */
+const SUNLIGHT = { colour: 0xffb84d, alpha: 0.07 } as const;
+const KERB = shade(PALETTE.stone, -16);
 
 const ROOF_VARIANTS = [0xc8674a, 0xb65c43, 0x9c6b5a, 0xd98c75, 0x8a6f63, 0xc47a52];
 
@@ -47,10 +53,13 @@ export function drawTown(scene: Phaser.Scene, graph: TownGraph): TownLayers {
   const g = scene.add.graphics();
 
   // Ground, regions.
-  g.fillStyle(0xe9e2cf).fillRect(0, 0, map.width, map.height);
+  g.fillStyle(GROUND).fillRect(0, 0, map.width, map.height);
+  drawGroundTexture(g, map.width, map.height, map.id);
   for (const region of map.regions) {
     g.fillStyle(REGION_COLOUR[region.kind]);
     g.fillPoints(region.points.map(([x, y]) => new Phaser.Math.Vector2(x, y)), true);
+    if (region.kind === 'PARK') drawMownStripes(g, region.points);
+    if (region.kind === 'PLAZA') drawPaving(g, region.points);
   }
   drawRailway(g, map.regions.find((r) => r.kind === 'RAILWAY')?.points);
 
@@ -67,7 +76,9 @@ export function drawTown(scene: Phaser.Scene, graph: TownGraph): TownLayers {
 
   // Pavements, then asphalt, drawn as thick strokes with round joints at nodes.
   for (const e of carEdges) strokeEdge(g, graph, e, HALF_WIDTH[e.kind] + PAVEMENT, PALETTE.stone);
+  for (const e of carEdges) drawPavingJoints(g, graph, e);
   drawRoundabout(g, graph, true);
+  for (const e of carEdges) strokeEdge(g, graph, e, HALF_WIDTH[e.kind] + 0.6, KERB);
   for (const e of carEdges) strokeEdge(g, graph, e, HALF_WIDTH[e.kind], PALETTE.road);
   drawRoundabout(g, graph, false);
   for (const e of carEdges) if (e.bridge) drawBridge(g, graph, e);
@@ -93,6 +104,7 @@ export function drawTown(scene: Phaser.Scene, graph: TownGraph): TownLayers {
       .setDepth(1);
   };
   for (const loc of map.locations) LANDMARKS[loc.id]?.(g, loc.footprint, sign);
+  g.fillStyle(SUNLIGHT.colour, SUNLIGHT.alpha).fillRect(0, 0, map.width, map.height);
   bake(scene, g, map.width, map.height);
 
   // French labels for every location.
@@ -131,10 +143,12 @@ function drawSurroundings(scene: Phaser.Scene, width: number, height: number, se
   scene.add
     .graphics()
     .setDepth(-1)
-    .fillStyle(0xd3d9b4)
+    .fillStyle(GROUND)
     .fillRect(-SURROUND, -SURROUND, width + 2 * SURROUND, seaTop + SURROUND)
     .fillStyle(PALETTE.sea)
-    .fillRect(-SURROUND, seaTop, width + 2 * SURROUND, height - seaTop + SURROUND);
+    .fillRect(-SURROUND, seaTop, width + 2 * SURROUND, height - seaTop + SURROUND)
+    .fillStyle(SUNLIGHT.colour, SUNLIGHT.alpha)
+    .fillRect(-SURROUND, -SURROUND, width + 2 * SURROUND, height + 2 * SURROUND);
 }
 
 /** Pixels per metre in the baked town tiles: sharp in car view, close to it on foot. */
@@ -187,6 +201,8 @@ function drawRoundabout(g: Phaser.GameObjects.Graphics, graph: TownGraph, paveme
     g.lineStyle(half * 2, pavement ? PALETTE.stone : PALETTE.road);
     g.strokeCircle(cx, cy, r);
     if (!pavement) {
+      g.lineStyle(half * 2 + 1.2, KERB).strokeCircle(cx, cy, r);
+      g.lineStyle(half * 2, PALETTE.road).strokeCircle(cx, cy, r);
       g.fillStyle(PALETTE.stone).fillCircle(cx, cy, r - HALF_WIDTH.ROUNDABOUT_RING);
       g.fillStyle(PALETTE.green).fillCircle(cx, cy, r - HALF_WIDTH.ROUNDABOUT_RING - 3);
       g.fillStyle(0xe8c547).fillCircle(cx, cy, 6);
@@ -263,8 +279,67 @@ function drawHouse(g: Phaser.GameObjects.Graphics, r: Rect, i: number) {
     wallHeight: 5,
     door: r.w > 18,
   });
-  if (i % 3 === 0 && roof.w > 14 && roof.h > 12) {
-    g.fillStyle(0x7a5546).fillRect(roof.x + roof.w * 0.72, roof.y + 3, 4, 4);
+  if (i % 2 === 0 && roof.w > 14 && roof.h > 12) {
+    const cx = roof.x + roof.w * (i % 4 === 0 ? 0.72 : 0.22);
+    const cy = roof.y + 2.5;
+    g.fillStyle(SHADOW, 0.2).fillRect(cx + 1.5, cy + 1, 5, 3.5);
+    g.fillStyle(0x8a5e4b).fillRect(cx, cy, 4, 4);
+    g.fillStyle(0x5a3e33).fillRect(cx + 0.8, cy + 0.8, 2.4, 1.6);
+  }
+}
+
+/** Soft lighter and darker patches so the open ground reads as grass, not paper. */
+function drawGroundTexture(g: Phaser.GameObjects.Graphics, width: number, height: number, mapId: string) {
+  const rng = Rng.fromSeed(`${mapId}-ground`);
+  const step = 22;
+  for (let y = 0; y < height; y += step) {
+    for (let x = 0; x < width; x += step) {
+      const light = rng.next() < 0.5;
+      g.fillStyle(shade(GROUND, light ? 3 : -3), 0.45);
+      g.fillEllipse(x + rng.range(0, step), y + rng.range(0, step), rng.range(18, 34), rng.range(12, 22));
+    }
+  }
+}
+
+/** Mown stripes on park lawns, alternating light and dark bands. */
+function drawMownStripes(g: Phaser.GameObjects.Graphics, points: [number, number][]) {
+  const xs = points.map((p) => p[0]);
+  const ys = points.map((p) => p[1]);
+  const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+  const band = 7;
+  const cell = 3.5;
+  g.fillStyle(shade(PALETTE.green, 6), 0.6);
+  for (let x = x0; x < x1; x += band * 2) {
+    for (let y = y0; y < y1; y += cell) {
+      if (pointInPolygon({ x: x + band / 2, y: y + cell / 2 }, points)) g.fillRect(x, y, Math.min(band, x1 - x), cell);
+    }
+  }
+}
+
+/** Square paving slabs on the town squares. */
+function drawPaving(g: Phaser.GameObjects.Graphics, points: [number, number][]) {
+  const xs = points.map((p) => p[0]);
+  const ys = points.map((p) => p[1]);
+  const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+  const slab = 4;
+  g.lineStyle(0.3, shade(PALETTE.stone, -10), 0.8);
+  for (let x = x0 + slab; x < x1; x += slab) g.lineBetween(x, y0, x, y1);
+  for (let y = y0 + slab; y < y1; y += slab) g.lineBetween(x0, y, x1, y);
+}
+
+/** Joints across the pavement every few metres (the road is drawn over the middle). */
+function drawPavingJoints(g: Phaser.GameObjects.Graphics, graph: TownGraph, e: MapEdge) {
+  const a = graph.node(e.from);
+  const b = graph.node(e.to);
+  const length = Math.hypot(b.x - a.x, b.y - a.y);
+  const ux = (b.x - a.x) / length;
+  const uy = (b.y - a.y) / length;
+  const reach = HALF_WIDTH[e.kind] + PAVEMENT - 0.2;
+  g.lineStyle(0.3, shade(PALETTE.stone, -12), 0.9);
+  for (let d = 2.5; d < length; d += 2.5) {
+    const cx = a.x + ux * d;
+    const cy = a.y + uy * d;
+    g.lineBetween(cx - uy * reach, cy + ux * reach, cx + uy * reach, cy - ux * reach);
   }
 }
 

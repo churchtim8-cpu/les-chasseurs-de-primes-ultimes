@@ -20,6 +20,8 @@ export const WHITE = 0xfbf7ee;
 export const GLASS = 0x9fd0e6;
 export const DARK = 0x2e3a40;
 export const LEAF = 0x5f9e4f;
+/** Warm shadow colour: late-afternoon sun from the west-north-west, like the title picture. */
+export const SHADOW = 0x3d2614;
 
 export interface BuildingStyle {
   roof: number;
@@ -41,7 +43,9 @@ export function building(g: G, r: Rect, style: BuildingStyle): Rect {
   const wallHeight = style.wallHeight ?? 6;
   const wall = style.wall ?? shade(style.roof, -30);
   const roof: Rect = { x: r.x, y: r.y, w: r.w, h: r.h - wallHeight };
-  g.fillStyle(0x000000, 0.14).fillRect(r.x + wallHeight * 0.7, r.y + wallHeight * 0.9, r.w, r.h);
+  const cast = wallHeight * 1.6;
+  g.fillStyle(SHADOW, 0.08).fillRect(r.x + cast * 1.15, r.y + cast * 0.65, r.w, r.h);
+  g.fillStyle(SHADOW, 0.13).fillRect(r.x + cast, r.y + cast * 0.55, r.w, r.h);
   g.fillStyle(wall).fillRect(r.x, roof.y + roof.h, r.w, wallHeight);
   if (style.windows !== false) {
     const glass = shade(GLASS, -10);
@@ -62,14 +66,24 @@ export function building(g: G, r: Rect, style: BuildingStyle): Rect {
 
 /** Pitched roof: lit northern slope, shaded southern slope, ridge along the long side. */
 export function gableRoof(g: G, r: Rect, colour: number): void {
+  const lit = shade(colour, 10);
+  const dim = shade(colour, -14);
+  // Rows of tiles run along the ridge, about every 1.6 m.
+  const row = 1.6;
   if (r.w >= r.h) {
-    g.fillStyle(shade(colour, 8)).fillRect(r.x, r.y, r.w, r.h / 2);
-    g.fillStyle(shade(colour, -12)).fillRect(r.x, r.y + r.h / 2, r.w, r.h / 2);
-    g.lineStyle(1.2, shade(colour, -30), 0.9).lineBetween(r.x + 1, r.y + r.h / 2, r.x + r.w - 1, r.y + r.h / 2);
+    g.fillStyle(lit).fillRect(r.x, r.y, r.w, r.h / 2);
+    g.fillStyle(dim).fillRect(r.x, r.y + r.h / 2, r.w, r.h / 2);
+    g.lineStyle(0.45, shade(colour, -24), 0.7);
+    for (let y = r.y + row; y < r.y + r.h - 0.5; y += row) if (Math.abs(y - r.y - r.h / 2) > 0.6) g.lineBetween(r.x + 0.5, y, r.x + r.w - 0.5, y);
+    g.lineStyle(1.4, shade(colour, 28), 0.9).lineBetween(r.x + 1, r.y + r.h / 2 - 0.4, r.x + r.w - 1, r.y + r.h / 2 - 0.4);
+    g.lineStyle(0.8, shade(colour, -34), 0.9).lineBetween(r.x + 1, r.y + r.h / 2 + 0.6, r.x + r.w - 1, r.y + r.h / 2 + 0.6);
   } else {
-    g.fillStyle(shade(colour, 8)).fillRect(r.x, r.y, r.w / 2, r.h);
-    g.fillStyle(shade(colour, -12)).fillRect(r.x + r.w / 2, r.y, r.w / 2, r.h);
-    g.lineStyle(1.2, shade(colour, -30), 0.9).lineBetween(r.x + r.w / 2, r.y + 1, r.x + r.w / 2, r.y + r.h - 1);
+    g.fillStyle(lit).fillRect(r.x, r.y, r.w / 2, r.h);
+    g.fillStyle(dim).fillRect(r.x + r.w / 2, r.y, r.w / 2, r.h);
+    g.lineStyle(0.45, shade(colour, -24), 0.7);
+    for (let x = r.x + row; x < r.x + r.w - 0.5; x += row) if (Math.abs(x - r.x - r.w / 2) > 0.6) g.lineBetween(x, r.y + 0.5, x, r.y + r.h - 0.5);
+    g.lineStyle(1.4, shade(colour, 28), 0.9).lineBetween(r.x + r.w / 2 - 0.4, r.y + 1, r.x + r.w / 2 - 0.4, r.y + r.h - 1);
+    g.lineStyle(0.8, shade(colour, -34), 0.9).lineBetween(r.x + r.w / 2 + 0.6, r.y + 1, r.x + r.w / 2 + 0.6, r.y + r.h - 1);
   }
   g.lineStyle(1, shade(colour, -35), 0.6).strokeRect(r.x, r.y, r.w, r.h);
 }
@@ -98,7 +112,7 @@ export function awning(g: G, x: number, y: number, w: number, depth: number, a: 
 
 /** Round plaque for an icon. */
 export function plaque(g: G, x: number, y: number, radius: number, colour: number): void {
-  g.fillStyle(0x000000, 0.18).fillCircle(x + 1.2, y + 1.6, radius);
+  g.fillStyle(SHADOW, 0.18).fillCircle(x + 1.2, y + 1.6, radius);
   g.fillStyle(colour).fillCircle(x, y, radius);
   g.lineStyle(1.4, WHITE, 0.95).strokeCircle(x, y, radius - 1.2);
 }
@@ -109,14 +123,14 @@ export function cross(g: G, x: number, y: number, size: number, colour: number):
 }
 
 export function tree(g: G, x: number, y: number, radius: number, leaf: number = LEAF): void {
-  g.fillStyle(0x000000, 0.16).fillEllipse(x + radius * 0.45, y + radius * 0.6, radius * 2.1, radius * 1.7);
+  g.fillStyle(SHADOW, 0.17).fillEllipse(x + radius * 0.9, y + radius * 0.55, radius * 2.6, radius * 1.6);
   g.fillStyle(shade(leaf, -18)).fillCircle(x, y, radius);
   g.fillStyle(leaf).fillCircle(x - radius * 0.2, y - radius * 0.25, radius * 0.75);
   g.fillStyle(shade(leaf, 18)).fillCircle(x - radius * 0.35, y - radius * 0.4, radius * 0.35);
 }
 
 export function palm(g: G, x: number, y: number, radius: number): void {
-  g.fillStyle(0x000000, 0.14).fillEllipse(x + radius * 0.5, y + radius * 0.7, radius * 1.8, radius * 1.2);
+  g.fillStyle(SHADOW, 0.15).fillEllipse(x + radius * 0.9, y + radius * 0.6, radius * 2.1, radius * 1.1);
   const leaf = 0x4f9a52;
   g.lineStyle(radius * 0.32, leaf);
   for (let i = 0; i < 7; i++) {
@@ -129,7 +143,7 @@ export function palm(g: G, x: number, y: number, radius: number): void {
 /** Parked car seen from above, the same size as the cars driving through town. */
 export function parkedCar(g: G, x: number, y: number, colour: number, vertical = false): void {
   const [w, h] = vertical ? [4.6, 8.8] : [8.8, 4.6];
-  g.fillStyle(0x000000, 0.18).fillRect(x - w / 2 + 1, y - h / 2 + 1.4, w, h);
+  g.fillStyle(SHADOW, 0.18).fillRect(x - w / 2 + 1, y - h / 2 + 1.4, w, h);
   g.fillStyle(colour).fillRoundedRect(x - w / 2, y - h / 2, w, h, 1.6);
   g.fillStyle(DARK, 0.55);
   if (vertical) g.fillRect(x - w / 2 + 0.8, y - h / 2 + 1.8, w - 1.6, 2.2).fillRect(x - w / 2 + 0.8, y + h / 2 - 2.8, w - 1.6, 1.4);
@@ -138,7 +152,7 @@ export function parkedCar(g: G, x: number, y: number, colour: number, vertical =
 
 /** Parasol from above: coloured segments around a white centre. */
 export function parasol(g: G, x: number, y: number, radius: number, a: number, b: number): void {
-  g.fillStyle(0x000000, 0.14).fillCircle(x + radius * 0.35, y + radius * 0.45, radius);
+  g.fillStyle(SHADOW, 0.14).fillCircle(x + radius * 0.35, y + radius * 0.45, radius);
   for (let i = 0; i < 8; i++) {
     const a0 = (i / 8) * Math.PI * 2;
     const a1 = ((i + 1) / 8) * Math.PI * 2;
