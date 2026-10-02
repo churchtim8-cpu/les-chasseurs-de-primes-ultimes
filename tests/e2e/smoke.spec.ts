@@ -23,7 +23,9 @@ test('title screen starts a chase; drive, get out and debug toggle work', async 
   await expect(page.locator('#game canvas')).toBeVisible();
   await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Title', 'DebugOverlay']));
 
-  // Starting creates a valid Easy seed code and opens the chase.
+  // Practice: starting creates a valid Easy seed code and opens the chase.
+  await page.keyboard.press('p');
+  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Practice']));
   await page.keyboard.press('Enter');
   await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Chase', 'DebugOverlay']));
   expect(await info(page, 'seed')).toMatch(/^BV-E-[0-9A-Z]{4}-[0-9A-Z]{4}$/);
@@ -82,7 +84,9 @@ test('a seed in the address replays that exact chase, and debug capture ends it'
   await page.keyboard.press('c');
   await expect.poll(() => info(page, 'phase'), SLOW).toBe('CAPTURED');
 
-  // R replays the same chase.
+  // The results screen follows; R replays the same chase.
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Results']));
+  expect(Number(await info(page, 'score'))).toBeGreaterThan(0);
   await page.keyboard.press('r');
   await expect.poll(async () => Number(await info(page, 'speed')), SLOW).toBeGreaterThan(10);
   expect(await info(page, 'phase')).toBe('PURSUIT');
@@ -154,5 +158,39 @@ test('a sighting pauses the chase until the player picks the suspect', async ({ 
   expect(answer).toMatch(/^[1-3]$/);
   await page.keyboard.press(answer);
   await expect.poll(() => info(page, 'sightings')).toBe('1 / 1');
+  expect(errors).toEqual([]);
+});
+
+test('campaign: case folder, briefing, mission, results, and on to the next suspect', async ({ page }) => {
+  const errors = watchErrors(page);
+  await page.goto('./?debug=1&type=CAR_CAR&turnoff=0&sightings=0');
+  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Title']));
+  await page.keyboard.press('c');
+  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Campaign']));
+  await page.keyboard.press('Enter');
+  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Briefing']));
+  expect(await info(page, 'mission')).toBe('1 / 8');
+  const seed = await info(page, 'seed');
+  expect(seed).toMatch(/^BV-E-/);
+
+  // The briefing describes the chase that follows.
+  await page.keyboard.press('Enter');
+  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Chase']));
+  expect(await info(page, 'seed')).toBe(seed);
+  await expect.poll(async () => Number(await info(page, 'speed')), SLOW).toBeGreaterThan(10);
+
+  // Debug K skips the mission as a capture: results, then the progress is saved.
+  await page.keyboard.press('k');
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Results']));
+  expect(await info(page, 'medal')).not.toBe('-');
+  const saved = await page.evaluate(() => JSON.parse(window.localStorage.getItem('chasseurs.campaign') ?? '{}'));
+  expect(saved.current).toBe(1);
+  expect(saved.missions[0].captured).toBe(true);
+
+  // Next mission: the second suspect's briefing.
+  await page.keyboard.press('Enter');
+  await expect.poll(() => activeScenes(page)).toEqual(expect.arrayContaining(['Briefing']));
+  expect(await info(page, 'mission')).toBe('2 / 8');
+
   expect(errors).toEqual([]);
 });

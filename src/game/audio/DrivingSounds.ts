@@ -2,7 +2,8 @@ import type { ScannerAudio } from './ScannerAudio';
 
 /**
  * Car sounds, synthesised live with Web Audio: an engine hum whose pitch
- * follows the speed, and a tyre screech on sharp turns at speed. They play on
+ * follows the speed, a tyre screech on sharp turns at speed, and the police
+ * siren (the French two-tone "pin-pon") while the chase is on. They play on
  * the music bus, so they drop right down while the French is spoken. Silent
  * on foot. Sound design only (game code, not the engine).
  */
@@ -32,6 +33,15 @@ const SCREECH = {
   wobbleDepth: 70,
 };
 
+const SIREN = {
+  /** Siren level while driving (below the engine's share of the mix once it ducks). */
+  level: 0.045,
+  /** The two notes (Hz) and how long each lasts (s). */
+  lowHz: 435,
+  highHz: 580,
+  noteSeconds: 0.55,
+};
+
 export class DrivingSounds {
   private out: {
     ctx: AudioContext;
@@ -40,6 +50,8 @@ export class DrivingSounds {
     tone: BiquadFilterNode;
     noise: AudioBuffer;
     bus: GainNode;
+    siren: GainNode;
+    sirenNodes: OscillatorNode[];
   } | null = null;
   private lastHeading: number | null = null;
   private lastScreech = -Infinity;
@@ -59,6 +71,7 @@ export class DrivingSounds {
     engine[0]!.frequency.setTargetAtTime(hz, now, 0.12);
     engine[1]!.frequency.setTargetAtTime(hz * 2.01, now, 0.12);
     tone.frequency.setTargetAtTime(300 + share * 900, now, 0.2);
+    out.siren.gain.setTargetAtTime(state.driving ? SIREN.level : 0, now, 0.25);
 
     if (this.lastHeading !== null && state.driving && deltaMs > 0) {
       let turn = state.heading - this.lastHeading;
@@ -74,9 +87,10 @@ export class DrivingSounds {
 
   stop(): void {
     if (!this.out) return;
-    const { ctx, gain, engine } = this.out;
+    const { ctx, gain, engine, siren, sirenNodes } = this.out;
     gain.gain.setTargetAtTime(0, ctx.currentTime, 0.1);
-    for (const osc of engine) osc.stop(ctx.currentTime + 0.6);
+    siren.gain.setTargetAtTime(0, ctx.currentTime, 0.1);
+    for (const osc of [...engine, ...sirenNodes]) osc.stop(ctx.currentTime + 0.6);
     this.out = null;
   }
 
@@ -105,8 +119,44 @@ export class DrivingSounds {
     const noise = ctx.createBuffer(1, frames, ctx.sampleRate);
     const data = noise.getChannelData(0);
     for (let i = 0; i < frames; i++) data[i] = Math.random() * 2 - 1;
-    this.out = { ctx, gain, engine, tone, noise, bus };
+    const { siren, nodes: sirenNodes } = this.connectSiren(ctx, bus);
+    this.out = { ctx, gain, engine, tone, noise, bus, siren, sirenNodes };
     return this.out;
+  }
+
+  /**
+   * Two-tone siren: a slow square wave flips the pitch between the two notes,
+   * and a gentle filter keeps it from sounding harsh.
+   */
+  private connectSiren(ctx: AudioContext, bus: GainNode): { siren: GainNode; nodes: OscillatorNode[] } {
+    const siren = ctx.createGain();
+    siren.gain.value = 0;
+    const soften = ctx.createBiquadFilter();
+    soften.type = 'lowpass';
+    soften.frequency.value = 1800;
+    soften.connect(siren).connect(bus);
+    const voice = ctx.createOscillator();
+    voice.type = 'triangle';
+    voice.frequency.value = (SIREN.lowHz + SIREN.highHz) / 2;
+    const flip = ctx.createOscillator();
+    flip.type = 'square';
+    flip.frequency.value = 1 / (2 * SIREN.noteSeconds);
+    const depth = ctx.createGain();
+    depth.gain.value = (SIREN.highHz - SIREN.lowHz) / 2;
+    flip.connect(depth).connect(voice.frequency);
+    // A touch of the octave above gives the horn its edge.
+    const edge = ctx.createOscillator();
+    edge.type = 'square';
+    edge.frequency.value = SIREN.lowHz + SIREN.highHz;
+    const edgeDepth = ctx.createGain();
+    edgeDepth.gain.value = SIREN.highHz - SIREN.lowHz;
+    flip.connect(edgeDepth).connect(edge.frequency);
+    const edgeLevel = ctx.createGain();
+    edgeLevel.gain.value = 0.18;
+    voice.connect(soften);
+    edge.connect(edgeLevel).connect(soften);
+    for (const osc of [voice, flip, edge]) osc.start();
+    return { siren, nodes: [voice, flip, edge] };
   }
 
   /** Tyre squeal: a wobbling whine over a band of hiss, sliding down in pitch. */
