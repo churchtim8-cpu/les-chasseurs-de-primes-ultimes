@@ -46,11 +46,13 @@ Touch buttons appear on touch screens (or add `?touch=1` to the address). The ti
 
 The suspect starts well ahead (400 m at Easy up to 550 m at Expert in a car; 130 to 180 m on foot) and never stops or waits. The police car is only slightly faster (the suspect drives at 74% of the player's cruising speed at Easy, 80% at Intermediate, 82% at Hard and 84% at Expert), so a player who follows the directions closes in steadily and every wrong turn lets the suspect pull away. On foot the officer is fitter (the suspect runs at 70% to 76%), so a foot chase is a short sprint. If the suspect reaches its destination first, it escapes ("Il est arrivé avant vous."). In a chase with changes of transport it keeps pace with the police until its last stage, and the police close in on that one. The suspect only shows on the map when very close (45 m at Easy down to 30 m at Expert). The listener bot, which hears only the French, still catches it in at least 95% of chases at every level and chase type.
 
-Driving and running look and sound different: the car has a flashing siren glow and speed streaks and a wide view; on foot the view is close, the officer's arms and legs swing and the view jogs with each stride. "À PIED !" or "EN VOITURE !" flashes when the player changes.
+Driving and running look and sound different: the car has a flashing siren glow, speed streaks, a wide view, an engine hum that rises with speed and a tyre screech on sharp corners; on foot the view is close and steady (no camera shake), and the officer, drawn smaller than a passing car, runs with arms and legs swinging. "À PIED !" or "EN VOITURE !" flashes when the player changes.
+
+On foot the suspect takes shortcuts a car cannot: paths through the park and the square, the two alleys (Passage du Marché, Passage des Rails), the Passerelle du Port footbridge over the canal, and the seafront promenade. Before running to a car it sticks to streets, so the police car is never left far behind.
 
 ### Music
 
-Dramatic chase music is made live in the browser with Web Audio (no audio files, no ElevenLabs credits): a driving D minor groove with drums and string stabs in the car, a faster, lighter heartbeat-and-shaker groove on foot. It gets brighter and busier as the player closes in, and drops right down whenever the French is spoken. B or the ♪ MUSIQUE button turns it off (remembered on this device); `?music=0` starts with it off.
+Dramatic chase music is made live in the browser with Web Audio (no audio files, no ElevenLabs credits): a driving D minor groove with drums and string stabs in the car, a faster, lighter heartbeat-and-shaker groove on foot. It gets brighter and busier as the player closes in, and drops right down whenever the French is spoken. The engine and screech sounds are made the same way and also drop down under the French; they stay on when the music is off. B or the ♪ MUSIQUE button turns the music off (remembered on this device); `?music=0` starts with it off.
 
 ## Chase types
 

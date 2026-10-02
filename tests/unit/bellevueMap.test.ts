@@ -21,7 +21,9 @@ describe('Bellevue City map', () => {
     expect(kinds.filter((k) => k === 'JUNCTION').length).toBeGreaterThanOrEqual(40);
     expect(kinds).toContain('DEAD_END');
     expect(BELLEVUE.nodes.filter((n) => n.trafficLight).length).toBeGreaterThanOrEqual(4);
-    expect(BELLEVUE.edges.filter((e) => e.bridge)).toHaveLength(1);
+    // Le pont for cars, and the footbridge over the harbour for runners.
+    expect(BELLEVUE.edges.filter((e) => e.bridge && e.car)).toHaveLength(1);
+    expect(BELLEVUE.edges.filter((e) => e.bridge && !e.car)).toHaveLength(1);
     expect(BELLEVUE.nodes.filter((n) => n.roundaboutId === 'RB')).toHaveLength(4);
   });
 

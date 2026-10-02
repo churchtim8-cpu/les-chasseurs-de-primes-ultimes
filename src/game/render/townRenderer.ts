@@ -57,7 +57,12 @@ export function drawTown(scene: Phaser.Scene, graph: TownGraph): TownLayers {
   const footEdges = map.edges.filter((e) => !e.car);
 
   // Footpaths first (under roads where they meet).
-  for (const e of footEdges) strokeEdge(g, graph, e, HALF_WIDTH[e.kind], e.kind === 'PATH' ? 0xd8c9a3 : 0xcdb994);
+  for (const e of footEdges) {
+    // The footbridge has a wooden deck and railings.
+    const colour = e.bridge ? 0xb08a5a : e.kind === 'PATH' ? 0xd8c9a3 : 0xcdb994;
+    strokeEdge(g, graph, e, HALF_WIDTH[e.kind], colour);
+    if (e.bridge) drawBridge(g, graph, e);
+  }
 
   // Pavements, then asphalt, drawn as thick strokes with round joints at nodes.
   for (const e of carEdges) strokeEdge(g, graph, e, HALF_WIDTH[e.kind] + PAVEMENT, PALETTE.stone);
@@ -173,7 +178,7 @@ function drawRoundabout(g: Phaser.GameObjects.Graphics, graph: TownGraph, paveme
 function drawBridge(g: Phaser.GameObjects.Graphics, graph: TownGraph, e: MapEdge) {
   const a = graph.node(e.from);
   const b = graph.node(e.to);
-  const half = HALF_WIDTH[e.kind] + PAVEMENT;
+  const half = HALF_WIDTH[e.kind] + (e.car ? PAVEMENT : 0.5);
   const horizontal = Math.abs(b.x - a.x) >= Math.abs(b.y - a.y);
   g.fillStyle(0x8c7a68);
   if (horizontal) {

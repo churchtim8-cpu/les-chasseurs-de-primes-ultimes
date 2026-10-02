@@ -12,6 +12,7 @@ import type { Rng } from '../rng/prng';
 import { distance } from '../world/geometry';
 import type { TownGraph, TravelMode } from '../world/graph';
 import type { MapLocation } from '../world/types';
+import { FOOT_ROUTES } from './settings';
 
 export interface RouteSpec {
   length: [number, number];
@@ -132,6 +133,11 @@ export function generateRoute(graph: TownGraph, rng: Rng, spec: RouteSpec, attem
   const starts = startsFrom(graph, spec);
   if (starts.length === 0) throw new Error(`No way to start a ${spec.mode} route from ${spec.from}`);
   const waypoints = graph.nodesFor(spec.mode).filter((id) => graph.node(id).kind === 'JUNCTION');
+  // On foot the suspect cuts through the park, the square, alleys, the footbridge and the promenade
+  // (but heads for a road when it is running to a car, so the police car can follow).
+  const footways = spec.mode === 'FOOT' && !spec.transferTo ? footwayNodes(graph) : [];
+  const pickWaypoint = () =>
+    footways.length > 0 && rng.chance(FOOT_ROUTES.footwayWaypointChance) ? rng.pick(footways) : rng.pick(waypoints);
   const locations = graph.map.locations;
   const transfers = spec.transferTo ? transferNodes(graph, spec.mode, spec.transferTo) : [];
 
@@ -142,7 +148,7 @@ export function generateRoute(graph: TownGraph, rng: Rng, spec: RouteSpec, attem
     if (end === origin || end === towards) continue;
 
     // Start → (0 to 2 random waypoints) → destination, never reversing at a waypoint.
-    const stops = [...Array.from({ length: rng.int(0, 2) }, () => rng.pick(waypoints)), end];
+    const stops = [...Array.from({ length: rng.int(0, 2) }, pickWaypoint), end];
     let nodes = [origin, towards];
     let ok = true;
     for (const stop of stops) {
@@ -157,13 +163,41 @@ export function generateRoute(graph: TownGraph, rng: Rng, spec: RouteSpec, attem
       nodes = [...nodes, ...segment.nodes.slice(1)];
     }
     if (!ok || new Set(nodes).size !== nodes.length) continue; // loops look silly and confuse "la prochaine rue"
+    // Arrive at a change of transport along a way the next mode can use, so the police can follow.
+    if (spec.transferTo) {
+      const last = graph.edgeBetween(nodes[nodes.length - 2] as string, nodes[nodes.length - 1] as string);
+      if (!last || !(spec.transferTo === 'CAR' ? last.car : last.foot)) continue;
+    }
     if (followProblem(graph, nodes, spec.mode)) continue;
     const length = pathLength(graph, nodes);
     if (length < spec.length[0] || length > spec.length[1]) continue;
+    // Most attempts insist on some running off the roads; the last ones take any route.
+    const strict = footways.length > 0 && attempt < attempts * FOOT_ROUTES.strictAttempts;
+    if (strict && footwayLength(graph, nodes) < length * FOOT_ROUTES.minFootwayShare) continue;
     if (spec.accept && !spec.accept(nodes)) continue;
     return { nodes, length, destination: destination?.id ?? null };
   }
   throw new Error(`No valid route after ${attempts} attempts`);
+}
+
+/** Junctions on pedestrian-only ways (park and square paths, alleys, the footbridge, the promenade). */
+function footwayNodes(graph: TownGraph): string[] {
+  const nodes = new Set<string>();
+  for (const e of graph.map.edges) {
+    if (e.car) continue;
+    for (const id of [e.from, e.to]) if (graph.node(id).kind === 'JUNCTION') nodes.add(id);
+  }
+  return [...nodes].sort();
+}
+
+/** Metres of a route on pedestrian-only ways. */
+export function footwayLength(graph: TownGraph, nodes: readonly string[]): number {
+  let total = 0;
+  for (let i = 0; i < nodes.length - 1; i++) {
+    const edge = graph.edgeBetween(nodes[i] as string, nodes[i + 1] as string);
+    if (edge && !edge.car) total += graph.edgeLength(edge);
+  }
+  return total;
 }
 
 /**

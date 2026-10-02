@@ -52,6 +52,20 @@ export const TRANSFER = {
 } as const;
 
 /**
+ * Foot routes (Mr Henry, 2026-10-02): a runner does not keep to the car
+ * roads but cuts across the park and the square, down alleys between
+ * buildings, over the footbridge and along the promenade.
+ */
+export const FOOT_ROUTES = {
+  /** Chance that each random waypoint of a foot route is on a pedestrian-only way. */
+  footwayWaypointChance: 0.75,
+  /** A foot route has at least this share of its length on pedestrian-only ways... */
+  minFootwayShare: 0.2,
+  /** ...for this share of the attempts to build one (then any route will do). */
+  strictAttempts: 0.75,
+} as const;
+
+/**
  * Chase tuning per difficulty (provisional; tune in playtesting).
  * Distances are metres measured along roads, not straight lines.
  */
@@ -154,6 +168,8 @@ export const TURN_OFF = {
   laterStageShare: 0.35,
   /** ...or, either way, within this many metres of the earliest point. */
   minWindow: 170,
+  /** Routes to try for a chase that should change direction before giving up on the change. */
+  routeTries: 3,
   /** Length of the route the scanner wrongly predicted, from the turn-off point (metres). */
   decoyLength: [250, 700] as [number, number],
   /**

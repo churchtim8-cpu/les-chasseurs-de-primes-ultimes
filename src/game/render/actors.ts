@@ -79,25 +79,36 @@ export function createOfficer(scene: Phaser.Scene): Phaser.GameObjects.Container
   g.fillStyle(0x1f4e9c).fillEllipse(0, 0, 5.5, 7); // shoulders
   g.fillStyle(0x16233d).fillCircle(0.4, 0, 2.2); // cap
   g.fillStyle(0xe8c547).fillCircle(1.6, 0, 0.7); // badge on the cap peak
-  // Much larger than life: on foot the player should be big and easy to follow.
-  return scene.add.container(0, 0, [...parts, g]).setDepth(31).setScale(2);
+  // About the size of the people walking in town (a car is three times as long); a soft
+  // ring underneath keeps the player easy to find.
+  const ring = scene.add.circle(0, 0, 6.5, 0xffffff, 0.22).setStrokeStyle(0.8, 0x1f4e9c, 0.8).setName('ring');
+  return scene.add.container(0, 0, [ring, ...parts, g]).setDepth(31).setScale(OFFICER_SCALE);
 }
 
-/** Swing the officer's feet and arms; `stride` advances with distance run (radians). */
+/** On-foot figures are drawn at this scale (shapes are in metres). */
+const OFFICER_SCALE = 0.95;
+
+/**
+ * Running: long strides, arms pumping against the legs, and a bounce with
+ * every step. `stride` advances with distance run (radians).
+ */
 export function animateOfficer(officer: Phaser.GameObjects.Container, stride: number, moving: boolean): void {
-  const swing = moving ? Math.sin(stride) * 2.4 : 0;
+  const swing = moving ? Math.sin(stride) * 3.4 : 0;
   const part = (name: string) => officer.getByName(name) as Phaser.GameObjects.Ellipse | null;
   part('footL')?.setX(swing);
   part('footR')?.setX(-swing);
-  part('armL')?.setX(-swing * 0.6);
-  part('armR')?.setX(swing * 0.6);
+  part('armL')?.setX(-swing * 0.8);
+  part('armR')?.setX(swing * 0.8);
+  const bounce = moving ? Math.abs(Math.sin(stride)) * 0.08 : 0;
+  officer.setScale(OFFICER_SCALE * (1 + bounce));
+  part('ring')?.setScale(1 - bounce);
 }
 
 /** Placeholder suspect on foot, seen from above. */
 export function createSuspectRunner(scene: Phaser.Scene): Phaser.GameObjects.Container {
   const g = scene.add.graphics();
   drawRunner(g);
-  return scene.add.container(0, 0, [g]).setDepth(29).setScale(2);
+  return scene.add.container(0, 0, [g]).setDepth(29).setScale(OFFICER_SCALE);
 }
 
 /**

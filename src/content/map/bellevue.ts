@@ -57,6 +57,10 @@ function buildBellevue(): TownMap {
   b.node('Q2W', 700, 520).node('Q2E', 820, 520);
   b.node('PK', 1970, 520).node('PKN', 1970, 320).node('PKS', 1970, 720);
   b.node('PL', 1090, 420);
+  // Alleys between buildings (pedestrians only) and the harbour footbridge.
+  b.node('A1W', 980, 820).node('A1E', 1200, 820);
+  b.node('A2W', 320, 820).node('A2E', 540, 820);
+  b.node('FBW', 700, 920).node('FBE', 820, 920);
   // Promenade (west and east of the canal mouth).
   for (let c = 0; c < X.length; c++) b.node(`p${c}`, X[c] as number, PROMENADE_Y);
   b.node('PQW', 700, PROMENADE_Y).node('PQE', 820, PROMENADE_Y).node('PE', 2360, PROMENADE_Y);
@@ -85,10 +89,10 @@ function buildBellevue(): TownMap {
 
   // ---- Columns (north-south) -------------------------------------------
   b.street('c0', 'rue', 'Rue de la Gare', col(0, [1, 2, 3, 4]), { edgeKind: 'STREET' });
-  b.street('c1', 'rue', 'Rue des Rails', col(1, [1, 2, 3, 4]), { edgeKind: 'STREET' });
-  b.street('c2', 'rue', 'Quai Ouest', col(2, [1, 2, 3, 4]), { edgeKind: 'STREET' });
-  b.street('c3', 'rue', 'Rue Molière', col(3, [0, 1, 2, 3, 4]), { edgeKind: 'STREET' });
-  b.street('c4', 'rue', 'Rue de la Mairie', col(4, [0, 1, 2, 3, 4]), { edgeKind: 'STREET' });
+  b.street('c1', 'rue', 'Rue des Rails', [...col(1, [1, 2, 3]), 'A2W', n(1, 4)], { edgeKind: 'STREET' });
+  b.street('c2', 'rue', 'Quai Ouest', [...col(2, [1, 2, 3]), 'A2E', n(2, 4)], { edgeKind: 'STREET' });
+  b.street('c3', 'rue', 'Rue Molière', [...col(3, [0, 1, 2, 3]), 'A1W', n(3, 4)], { edgeKind: 'STREET' });
+  b.street('c4', 'rue', 'Rue de la Mairie', [...col(4, [0, 1, 2, 3]), 'A1E', n(4, 4)], { edgeKind: 'STREET' });
   b.street('c5n', 'avenue', 'Avenue des Arts', [...col(5, [0, 1, 2]), 'RB_N'], { edgeKind: 'AVENUE' });
   b.street('c5s', 'avenue', 'Avenue des Arts', ['RB_S', n(5, 4)], { edgeKind: 'AVENUE' });
   b.street('c6', 'rue', 'Rue Pasteur', col(6, [0, 1, 2, 3, 4]), { edgeKind: 'STREET' });
@@ -107,6 +111,13 @@ function buildBellevue(): TownMap {
   for (const corner of [n(3, 1), n(4, 1), n(3, 2), n(4, 2)]) {
     b.street(`pl-${corner}`, 'chemin', 'Place de la Mairie', ['PL', corner], { edgeKind: 'PATH' });
   }
+  // Runners can cut between buildings and cross the harbour on the footbridge.
+  b.street('al1', 'passage', 'Passage du Marché', ['A1W', 'A1E'], { edgeKind: 'PASSAGE' });
+  b.street('al2', 'passage', 'Passage des Rails', ['A2W', 'A2E'], { edgeKind: 'PASSAGE' });
+  b.street('fb', 'chemin', 'Passerelle du Port', [n(2, 4), 'FBW', 'FBE', n(3, 4)], {
+    edgeKind: 'PATH',
+    bridges: [['FBW', 'FBE']],
+  });
   b.street('pk-ew', 'chemin', 'Parc des Mouettes', [n(7, 2), 'PK', n(8, 2)], { edgeKind: 'PATH' });
   b.street('pk-ns', 'chemin', 'Parc des Mouettes', ['PKN', 'PK', 'PKS'], { edgeKind: 'PATH' });
   for (let c = 0; c < X.length; c++) {

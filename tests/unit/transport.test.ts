@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { BELLEVUE } from '../../src/content/map/bellevue';
 import { TRANSPORT_LINES } from '../../src/engine/audio/script';
 import { Chase, type ChaseEvent } from '../../src/engine/chase/chase';
+import { footwayLength } from '../../src/engine/chase/route';
 import { generateScenario, validateScenario } from '../../src/engine/chase/scenario';
 import {
   CHASE_TYPE_MODES,
@@ -74,6 +75,18 @@ describe('chase types', () => {
     const time = (chaseType: ChaseType) => new Chase(graph, generateScenario(graph, seed, { chaseType })).status.timeLeft;
     expect(time('CAR_CAR')).toBe(DIFFICULTY_SETTINGS.EXPERT.timeLimitSeconds);
     expect(time('CAR_FOOT_CAR')).toBe(DIFFICULTY_SETTINGS.EXPERT.timeLimitSeconds + 2 * TRANSFER.extraSeconds);
+  });
+});
+
+describe('foot routes', () => {
+  it('cut through the park, the square, alleys, the footbridge and the promenade', () => {
+    let share = 0;
+    const list = seeds('INTERMEDIATE', 30, 'footways');
+    for (const seed of list) {
+      const stage = generateScenario(graph, seed, { chaseType: 'FOOT_FOOT' }).stages[0]!;
+      share += footwayLength(graph, stage.route) / stage.length;
+    }
+    expect(share / list.length).toBeGreaterThan(0.25);
   });
 });
 
