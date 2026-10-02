@@ -19,7 +19,15 @@ import type { MoverStart } from '../movement/mover';
 import { Rng } from '../rng/prng';
 import { parseSeed } from '../rng/seedCode';
 import type { TownGraph, TravelMode } from '../world/graph';
-import { arrivalNode, followProblem, generateRoute, pathLength, placeOnRoute, transferNodes } from './route';
+import {
+  arrivalNode,
+  followProblem,
+  generateRoute,
+  pathLength,
+  placeOnRoute,
+  transferNodes,
+  turnsOftenEnough,
+} from './route';
 import { pickVehicles, planSightings, sightingProblems, type Sighting } from './sightings';
 import {
   CHASE_SETTINGS,
@@ -297,7 +305,11 @@ function decoyOk(
   if (decoy[0] !== route[at] || decoy[1] === route[at + 1]) return false;
   if (decoy.slice(1).some((n) => used.has(n))) return false;
   const guide = [...route.slice(0, at), ...decoy];
-  return followProblem(graph, guide, mode) === null && describable(graph, guide, mode, difficulty);
+  return (
+    followProblem(graph, guide, mode) === null &&
+    turnsOftenEnough(graph, guide, mode) &&
+    describable(graph, guide, mode, difficulty)
+  );
 }
 
 /** Pipeline step "VALIDATE CHASE": every check a generated chase must pass. */
@@ -315,6 +327,7 @@ export function validateScenario(graph: TownGraph, s: ChaseScenario): string[] {
     const follow = followProblem(graph, stage.route, stage.mode);
     if (follow) problems.push(`${label}: ${follow}`);
     if (new Set(stage.route).size !== stage.route.length) problems.push(`${label} visits a node twice`);
+    if (!turnsOftenEnough(graph, stage.route, stage.mode)) problems.push(`${label} goes straight through too many junctions`);
     const earlier = new Set(s.stages.slice(0, i).flatMap((e) => e.route));
     if (stage.route.slice(1).some((n) => earlier.has(n))) problems.push(`${label} doubles back over an earlier stage`);
     if (!describable(graph, stage.route, stage.mode, s.difficulty)) {

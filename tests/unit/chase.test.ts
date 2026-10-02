@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { BELLEVUE } from '../../src/content/map/bellevue';
 import { Chase } from '../../src/engine/chase/chase';
 import { roadDistance } from '../../src/engine/chase/distance';
+import { straightRuns } from '../../src/engine/chase/route';
 import { generateScenario, validateScenario } from '../../src/engine/chase/scenario';
+import { STRAIGHT_RUNS } from '../../src/engine/chase/settings';
 import { DIFFICULTIES, type Difficulty } from '../../src/engine/difficulty';
 import { Mover } from '../../src/engine/movement/mover';
 import { exitsAt, type TurnIntent } from '../../src/engine/movement/turns';
@@ -39,6 +41,35 @@ describe('chase generation', () => {
     const scenarios = seeds('EASY', 200).map((s) => generateScenario(graph, s));
     expect(new Set(scenarios.map((s) => s.route.join())).size).toBeGreaterThan(190);
     expect(new Set(scenarios.map((s) => s.destination)).size).toBeGreaterThanOrEqual(25);
+  });
+
+  // Playtest 2026-10-02: "Sometimes the suspect goes straight for too long."
+  it.each(DIFFICULTIES)('turns regularly instead of going straight through junction after junction (%s)', (difficulty) => {
+    for (const seed of seeds(difficulty, 150, 'straight')) {
+      const scenario = generateScenario(graph, seed);
+      const routes = scenario.stages.map((st) => ({ mode: st.mode, nodes: st.route }));
+      if (scenario.turnOff) {
+        // The route the scanner predicts before the change of direction turns regularly too.
+        const { stage, at, decoy } = scenario.turnOff;
+        const st = scenario.stages[stage]!;
+        routes.push({ mode: st.mode, nodes: [...st.route.slice(0, at), ...decoy] });
+      }
+      for (const { mode, nodes } of routes) {
+        for (const run of straightRuns(graph, nodes, mode)) {
+          expect(run.junctions, `${seed} ${mode}`).toBeLessThanOrEqual(STRAIGHT_RUNS[mode].maxJunctions);
+          expect(run.metres, `${seed} ${mode}`).toBeLessThanOrEqual(STRAIGHT_RUNS[mode].maxMetres);
+        }
+      }
+    }
+  }, 120_000);
+
+  it('counts only junctions passed straight through, not long streets or bends', () => {
+    // Along Rue Jean-Jaurès from c3 to c7: straight through c4, c5 and c6, one run to the end.
+    const runs = straightRuns(graph, ['c3r2', 'c4r2', 'c5r2', 'c6r2', 'c7r2'], 'CAR');
+    expect(runs).toEqual([{ from: 0, to: 4, junctions: 3, metres: 660 }]);
+    // Turning at every junction: three runs, no junction passed straight through.
+    const zigzag = straightRuns(graph, ['c3r1', 'c4r1', 'c4r2', 'c5r2', 'c5r1'], 'CAR');
+    expect(zigzag.map((r) => r.junctions)).toEqual([0, 0, 0, 0]);
   });
 
   it('rejects a doctored chase', () => {

@@ -7,12 +7,12 @@
  */
 
 import type { MoverStart } from '../movement/mover';
-import { exitsAt } from '../movement/turns';
+import { exitsAt, type Exit } from '../movement/turns';
 import type { Rng } from '../rng/prng';
 import { distance } from '../world/geometry';
 import type { TownGraph, TravelMode } from '../world/graph';
-import type { MapLocation } from '../world/types';
-import { FOOT_ROUTES } from './settings';
+import type { MapEdge, MapLocation } from '../world/types';
+import { FOOT_ROUTES, STRAIGHT_RUNS } from './settings';
 
 export interface RouteSpec {
   length: [number, number];
@@ -67,6 +67,176 @@ export function followProblem(graph: TownGraph, nodes: readonly string[], mode: 
     const exits = exitsAt(graph, arrived, nodes[i] as string, mode);
     if (!exits.some((e) => e.step.to === nodes[i + 1])) {
       return `At ${nodes[i]} the route cannot continue to ${nodes[i + 1]}`;
+    }
+  }
+  return null;
+}
+
+/**
+ * A stretch of route between two turns (or the route's start or end), and
+ * the junctions where the route goes straight through on the way. A junction
+ * counts when the mode has another way out there; bends, roundabout ring
+ * nodes (for cars) and long streets with no side roads do not.
+ */
+export interface StraightRun {
+  /** Index of the turn (or route start) the run starts from. */
+  from: number;
+  /** Index of the turn (or route end) the run ends at. */
+  to: number;
+  /** Junctions passed straight through. */
+  junctions: number;
+  /** Metres from the start of the run to the last junction passed straight through (0 if none). */
+  metres: number;
+}
+
+/** The route's straight runs, between consecutive turns. */
+export function straightRuns(graph: TownGraph, nodes: readonly string[], mode: TravelMode): StraightRun[] {
+  const runs: StraightRun[] = [];
+  let run: StraightRun = { from: 0, to: 0, junctions: 0, metres: 0 };
+  let s = 0;
+  for (let i = 1; i < nodes.length; i++) {
+    const arrived = graph.edgeBetween(nodes[i - 1] as string, nodes[i] as string);
+    if (!arrived) break;
+    s += graph.edgeLength(arrived);
+    if (i === nodes.length - 1) break;
+    const exits = exitsAt(graph, arrived, nodes[i] as string, mode);
+    if (exits.length <= 1) continue;
+    if (mode === 'CAR' && graph.node(nodes[i] as string).roundaboutId !== undefined) {
+      // Going round counts as straight on; leaving the ring is a turn.
+      const exit = exits.find((e) => e.step.to === nodes[i + 1]);
+      if (exit?.kind === 'STRAIGHT') continue;
+    } else {
+      const exit = exits.find((e) => e.step.to === nodes[i + 1]);
+      if (exit?.kind === 'STRAIGHT') {
+        run.junctions++;
+        run.metres = s;
+        continue;
+      }
+    }
+    runs.push({ ...run, to: i });
+    run = { from: i, to: i, junctions: 0, metres: 0 };
+    s = 0;
+  }
+  runs.push({ ...run, to: nodes.length - 1 });
+  return runs;
+}
+
+/** Does the route turn often enough: no run of junctions passed straight through beyond `STRAIGHT_RUNS`? */
+export function turnsOftenEnough(graph: TownGraph, nodes: readonly string[], mode: TravelMode): boolean {
+  const { maxJunctions, maxMetres } = STRAIGHT_RUNS[mode];
+  return straightRuns(graph, nodes, mode).every((r) => r.junctions <= maxJunctions && r.metres <= maxMetres);
+}
+
+const exitCache = new WeakMap<TownGraph, Map<string, Exit[]>>();
+/** `exitsAt`, remembered per map (the map never changes during a game). */
+function cachedExits(graph: TownGraph, arrivedBy: MapEdge, node: string, mode: TravelMode): Exit[] {
+  let cache = exitCache.get(graph);
+  if (!cache) exitCache.set(graph, (cache = new Map()));
+  const key = `${mode}|${arrivedBy.id}|${node}`;
+  let exits = cache.get(key);
+  if (!exits) cache.set(key, (exits = exitsAt(graph, arrivedBy, node, mode)));
+  return exits;
+}
+
+/**
+ * The shortest way on from the end of `sofar` to `stop` that turns often
+ * enough (see `STRAIGHT_RUNS`): a search over (node, way in, junctions passed
+ * straight since the last turn), taking only the ways out a mover is offered
+ * (no U-turns, no one-way streets the wrong way) and never going back
+ * through a node already on the route. Returns the nodes from the end of
+ * `sofar` to `stop`, or null if there is no such way within `maxLength` metres.
+ */
+export function turningPath(
+  graph: TownGraph,
+  sofar: readonly string[],
+  stop: string,
+  mode: TravelMode,
+  maxLength = Infinity,
+): string[] | null {
+  const { maxJunctions, maxMetres } = STRAIGHT_RUNS[mode];
+  const start = sofar[sofar.length - 1] as string;
+  const firstEdge = graph.edgeBetween(sofar[sofar.length - 2] as string, start);
+  if (!firstEdge) return null;
+  const last = straightRuns(graph, sofar, mode).at(-1) as StraightRun;
+  const visited = new Set(sofar);
+
+  interface Label {
+    node: string;
+    edge: MapEdge;
+    junctions: number;
+    /** Metres since the last turn, up to this node. */
+    since: number;
+    cost: number;
+    prev: Label | null;
+  }
+  const best = new Map<string, number>();
+  const key = (l: Pick<Label, 'node' | 'edge' | 'junctions'>) => `${l.node}|${l.edge.id}|${l.junctions}`;
+  const heap: Label[] = [];
+  const push = (l: Label) => {
+    const k = key(l);
+    if ((best.get(k) ?? Infinity) <= l.cost) return;
+    best.set(k, l.cost);
+    heap.push(l);
+    for (let i = heap.length - 1; i > 0; ) {
+      const parent = (i - 1) >> 1;
+      if ((heap[parent] as Label).cost <= (heap[i] as Label).cost) break;
+      [heap[parent], heap[i]] = [heap[i] as Label, heap[parent] as Label];
+      i = parent;
+    }
+  };
+  const pop = (): Label => {
+    const top = heap[0] as Label;
+    const end = heap.pop() as Label;
+    if (heap.length > 0) {
+      heap[0] = end;
+      for (let i = 0; ; ) {
+        const l = 2 * i + 1;
+        const r = l + 1;
+        let m = i;
+        if (l < heap.length && (heap[l] as Label).cost < (heap[m] as Label).cost) m = l;
+        if (r < heap.length && (heap[r] as Label).cost < (heap[m] as Label).cost) m = r;
+        if (m === i) break;
+        [heap[m], heap[i]] = [heap[i] as Label, heap[m] as Label];
+        i = m;
+      }
+    }
+    return top;
+  };
+
+  push({
+    node: start,
+    edge: firstEdge,
+    junctions: last.junctions,
+    since: pathLength(graph, sofar.slice(last.from)),
+    cost: 0,
+    prev: null,
+  });
+  while (heap.length > 0) {
+    const at = pop();
+    if (at.cost > (best.get(key(at)) ?? Infinity)) continue;
+    if (at.node === stop) {
+      const out: string[] = [];
+      for (let l: Label | null = at; l; l = l.prev) out.unshift(l.node);
+      return out;
+    }
+    const exits = cachedExits(graph, at.edge, at.node, mode);
+    const ring = mode === 'CAR' && graph.node(at.node).roundaboutId !== undefined;
+    for (const exit of exits) {
+      const to = exit.step.to;
+      if (visited.has(to)) continue;
+      const length = exit.step.length;
+      if (at.cost + length > maxLength) continue;
+      let junctions = at.junctions;
+      let since = at.since + length;
+      if (exits.length > 1 && exit.kind !== 'STRAIGHT') {
+        junctions = 0; // a turn
+        since = length;
+      } else if (exits.length > 1 && !ring) {
+        // Straight through a junction.
+        if (junctions + 1 > maxJunctions || at.since > maxMetres) continue;
+        junctions++;
+      }
+      push({ node: to, edge: exit.step.edge, junctions, since, cost: at.cost + length, prev: at });
     }
   }
   return null;
@@ -154,13 +324,12 @@ export function generateRoute(graph: TownGraph, rng: Rng, spec: RouteSpec, attem
     for (const stop of stops) {
       const at = nodes[nodes.length - 1] as string;
       if (stop === at) continue;
-      const arrivedBy = graph.edgeBetween(nodes[nodes.length - 2] as string, at);
-      const segment = graph.shortestPath(at, stop, spec.mode, new Set(arrivedBy ? [arrivedBy.id] : []));
+      const segment = turningPath(graph, nodes, stop, spec.mode, spec.length[1] - pathLength(graph, nodes));
       if (!segment) {
         ok = false;
         break;
       }
-      nodes = [...nodes, ...segment.nodes.slice(1)];
+      nodes = [...nodes, ...segment.slice(1)];
     }
     if (!ok || new Set(nodes).size !== nodes.length) continue; // loops look silly and confuse "la prochaine rue"
     // Arrive at a change of transport along a way the next mode can use, so the police can follow.
@@ -171,6 +340,8 @@ export function generateRoute(graph: TownGraph, rng: Rng, spec: RouteSpec, attem
     if (followProblem(graph, nodes, spec.mode)) continue;
     const length = pathLength(graph, nodes);
     if (length < spec.length[0] || length > spec.length[1]) continue;
+    // The suspect turns regularly instead of driving straight through junction after junction.
+    if (!turnsOftenEnough(graph, nodes, spec.mode)) continue;
     // Most attempts insist on some running off the roads; the last ones take any route.
     const strict = footways.length > 0 && attempt < attempts * FOOT_ROUTES.strictAttempts;
     if (strict && footwayLength(graph, nodes) < length * FOOT_ROUTES.minFootwayShare) continue;
