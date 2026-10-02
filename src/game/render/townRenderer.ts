@@ -6,6 +6,7 @@ import type { TownGraph } from '../../engine/world/graph';
 import type { EdgeKind, MapEdge, Rect, Region, RegionKind } from '../../engine/world/types';
 import { FONT_FAMILY, PALETTE, toCss } from '../palette';
 import { building, palm, shade, SHADOW, tree } from './art';
+import { canvaLookOn, hasLandmarkPicture, pictureShadow, placeCanvaArt } from './canvaArt';
 import { LANDMARKS, type SignText } from './landmarks';
 
 /**
@@ -90,7 +91,8 @@ export function drawTown(scene: Phaser.Scene, graph: TownGraph): TownLayers {
 
   // Trees on free ground, then buildings: plain houses, then the vocabulary places.
   drawTrees(g, graph);
-  map.fillers.forEach((f, i) => drawHouse(g, f.footprint, i));
+  const canva = canvaLookOn();
+  map.fillers.forEach((f, i) => (canva ? pictureShadow(g, f.footprint) : drawHouse(g, f.footprint, i)));
   const sign: SignText = (x, y, text, size, colour, bold = false) => {
     scene.add
       .text(x, y, text, {
@@ -103,9 +105,13 @@ export function drawTown(scene: Phaser.Scene, graph: TownGraph): TownLayers {
       .setResolution(4)
       .setDepth(1);
   };
-  for (const loc of map.locations) LANDMARKS[loc.id]?.(g, loc.footprint, sign);
+  for (const loc of map.locations) {
+    if (hasLandmarkPicture(loc.id)) pictureShadow(g, loc.footprint);
+    else LANDMARKS[loc.id]?.(g, loc.footprint, sign);
+  }
   g.fillStyle(SUNLIGHT.colour, SUNLIGHT.alpha).fillRect(0, 0, map.width, map.height);
   bake(scene, g, map.width, map.height);
+  if (canva) placeCanvaArt(scene, map.locations, map.fillers.map((f) => f.footprint));
 
   // French labels for every location.
   const labels = map.locations.map((loc) => {
