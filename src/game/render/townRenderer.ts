@@ -6,7 +6,7 @@ import type { TownGraph } from '../../engine/world/graph';
 import type { EdgeKind, MapEdge, Rect, Region, RegionKind } from '../../engine/world/types';
 import { FONT_FAMILY, PALETTE, toCss } from '../palette';
 import { building, palm, shade, SHADOW, tree } from './art';
-import { canvaLookOn, hasLandmarkPicture, pictureShadow, placeCanvaArt } from './canvaArt';
+import { canvaLookOn, hasLandmarkPicture, houseLayout, pictureShadow, placeCanvaArt } from './canvaArt';
 import { LANDMARKS, type SignText } from './landmarks';
 
 /**
@@ -92,7 +92,10 @@ export function drawTown(scene: Phaser.Scene, graph: TownGraph): TownLayers {
   // Trees on free ground, then buildings: plain houses, then the vocabulary places.
   drawTrees(g, graph);
   const canva = canvaLookOn();
-  map.fillers.forEach((f, i) => (canva ? pictureShadow(g, f.footprint) : drawHouse(g, f.footprint, i)));
+  map.fillers.forEach((f, i) => {
+    if (canva) for (const roof of houseLayout(i, f.footprint)) pictureShadow(g, roof.rect);
+    else drawHouse(g, f.footprint, i);
+  });
   const sign: SignText = (x, y, text, size, colour, bold = false) => {
     scene.add
       .text(x, y, text, {
@@ -106,12 +109,24 @@ export function drawTown(scene: Phaser.Scene, graph: TownGraph): TownLayers {
       .setDepth(1);
   };
   for (const loc of map.locations) {
-    if (hasLandmarkPicture(loc.id)) pictureShadow(g, loc.footprint);
+    if (hasLandmarkPicture(loc.id)) {
+      if (!loc.open) pictureShadow(g, loc.footprint);
+    }
     else LANDMARKS[loc.id]?.(g, loc.footprint, sign);
   }
   g.fillStyle(SUNLIGHT.colour, SUNLIGHT.alpha).fillRect(0, 0, map.width, map.height);
   bake(scene, g, map.width, map.height);
-  if (canva) placeCanvaArt(scene, map.locations, map.fillers.map((f) => f.footprint));
+  if (canva) {
+    placeCanvaArt(scene, graph);
+    // The real paths across the park and the square stay visible on top of their pictures.
+    const paths = scene.add.graphics().setDepth(0.35);
+    const open = map.locations.filter((loc) => loc.open && hasLandmarkPicture(loc.id)).map((loc) => loc.footprint);
+    for (const e of footEdges) {
+      if (!edgeCrosses(graph, e, open)) continue;
+      strokeEdge(paths, graph, e, HALF_WIDTH[e.kind] + 0.8, 0x9c8a66);
+      strokeEdge(paths, graph, e, HALF_WIDTH[e.kind], e.kind === 'PATH' ? 0xd8c9a3 : 0xcdb994);
+    }
+  }
 
   // French labels for every location.
   const labels = map.locations.map((loc) => {
@@ -453,4 +468,16 @@ function drawDebugGraph(scene: Phaser.Scene, graph: TownGraph): Phaser.GameObjec
     );
   }
   return container;
+}
+
+/** True when any part of the edge runs inside one of the rectangles. */
+function edgeCrosses(graph: TownGraph, e: MapEdge, rects: Rect[]): boolean {
+  const a = graph.node(e.from);
+  const b = graph.node(e.to);
+  for (let s = 0; s <= 10; s++) {
+    const x = a.x + ((b.x - a.x) * s) / 10;
+    const y = a.y + ((b.y - a.y) * s) / 10;
+    if (rects.some((r) => x > r.x && x < r.x + r.w && y > r.y && y < r.y + r.h)) return true;
+  }
+  return false;
 }
