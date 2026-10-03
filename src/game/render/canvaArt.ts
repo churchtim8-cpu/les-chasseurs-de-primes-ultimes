@@ -66,10 +66,19 @@ export function canvaLookOn(): boolean {
   return new URLSearchParams(window.location.search).get('look') !== 'drawn';
 }
 
+/**
+ * Top-down cartoon car and van, drawn white so code can colour them: the
+ * suspect's colour, the police livery, or traffic.
+ */
+export const CAR_PICTURES = { CAR: 'canva-car', VAN: 'canva-van' } as const;
+
 export function preloadCanvaArt(scene: Phaser.Scene): void {
   if (!canvaLookOn()) return;
   for (const file of [...Object.values(LANDMARK_PICTURES), ...HOUSE_PICTURES]) {
     if (!scene.textures.exists(key(file))) scene.load.image(key(file), `${import.meta.env.BASE_URL}images/canva/${file}`);
+  }
+  for (const [file, texture] of [['car.png', CAR_PICTURES.CAR], ['van.png', CAR_PICTURES.VAN]] as const) {
+    if (!scene.textures.exists(texture)) scene.load.image(texture, `${import.meta.env.BASE_URL}images/cars/${file}`);
   }
 }
 
