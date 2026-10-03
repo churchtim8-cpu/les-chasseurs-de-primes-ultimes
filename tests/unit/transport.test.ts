@@ -111,8 +111,10 @@ describe('changing transport in a chase', () => {
         firstChange === 'FOOT'
           ? [TRANSPORT_LINES.SUSPECT_LEFT_CAR, TRANSPORT_LINES.ON_FOOT, TRANSPORT_LINES.GET_OUT]
           : [TRANSPORT_LINES.SUSPECT_BOARDS, TRANSPORT_LINES.GET_IN];
-      // Vehicles and a lost signal are other events, checked elsewhere.
-      const transport = announced.filter((id) => !id.startsWith('event.vehicle.') && id !== 'event.lost_signal');
+      // Vehicles, a lost signal and a crash are other events, checked elsewhere.
+      const transport = announced.filter(
+        (id) => !id.startsWith('event.vehicle.') && id !== 'event.lost_signal' && id !== 'event.crashed',
+      );
       expect(transport.slice(0, expected.length), seed).toEqual(expected.map((l) => l.audioId));
     }
     expect(checked).toBeGreaterThan(10);

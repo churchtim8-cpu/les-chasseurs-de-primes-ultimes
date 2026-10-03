@@ -51,7 +51,12 @@ describe('the suspect crashes and runs just before the arrest', () => {
     expect(crashed.length).toBeGreaterThanOrEqual(runs.length * 0.85);
     for (const r of crashed) {
       expect(spoken(r.events)).toEqual(
-        expect.arrayContaining([TRANSPORT_LINES.SUSPECT_LEFT_CAR.audioId, TRANSPORT_LINES.ON_FOOT.audioId, TRANSPORT_LINES.GET_OUT.audioId]),
+        expect.arrayContaining([
+          EVENT_LINES.CRASHED.audioId,
+          TRANSPORT_LINES.SUSPECT_LEFT_CAR.audioId,
+          TRANSPORT_LINES.ON_FOOT.audioId,
+          TRANSPORT_LINES.GET_OUT.audioId,
+        ]),
       );
       expect(r.bot.failedOrders).toEqual([]);
     }

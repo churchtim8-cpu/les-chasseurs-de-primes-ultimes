@@ -3674,7 +3674,8 @@
     "category": "DIRECTION",
     "template": null,
     "levels": [
-      "HARD"
+      "HARD",
+      "EXPERT"
     ]
   },
   {
@@ -3684,7 +3685,8 @@
     "category": "DIRECTION",
     "template": null,
     "levels": [
-      "HARD"
+      "HARD",
+      "EXPERT"
     ]
   },
   {
@@ -4912,6 +4914,30 @@
     ]
   },
   {
+    "audioId": "seq.street.right.deuxieme+puis+street.right.troisieme",
+    "text": "Prenez la deuxième rue à droite, puis prenez la troisième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.deuxieme+puis+street.left.troisieme",
+    "text": "Prenez la deuxième rue à droite, puis prenez la troisième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "seq.street.right.deuxieme+puis+turn.right",
     "text": "Prenez la deuxième rue à droite, puis tournez à droite.",
     "voice": "DISPATCHER",
@@ -5046,6 +5072,30 @@
   {
     "audioId": "seq.street.left.deuxieme+puis+street.left.prochaine",
     "text": "Prenez la deuxième rue à gauche, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.deuxieme+puis+street.right.troisieme",
+    "text": "Prenez la deuxième rue à gauche, puis prenez la troisième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.deuxieme+puis+street.left.troisieme",
+    "text": "Prenez la deuxième rue à gauche, puis prenez la troisième rue à gauche.",
     "voice": "DISPATCHER",
     "category": "DIRECTION",
     "template": "I3",
@@ -5200,6 +5250,30 @@
     ]
   },
   {
+    "audioId": "seq.street.right.premiere+puis+street.right.troisieme",
+    "text": "Prenez la première rue à droite, puis prenez la troisième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.premiere+puis+street.left.troisieme",
+    "text": "Prenez la première rue à droite, puis prenez la troisième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "seq.street.right.premiere+puis+turn.right",
     "text": "Prenez la première rue à droite, puis tournez à droite.",
     "voice": "DISPATCHER",
@@ -5334,6 +5408,30 @@
   {
     "audioId": "seq.street.left.premiere+puis+street.left.prochaine",
     "text": "Prenez la première rue à gauche, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.premiere+puis+street.right.troisieme",
+    "text": "Prenez la première rue à gauche, puis prenez la troisième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.premiere+puis+street.left.troisieme",
+    "text": "Prenez la première rue à gauche, puis prenez la troisième rue à gauche.",
     "voice": "DISPATCHER",
     "category": "DIRECTION",
     "template": "I3",
@@ -5488,6 +5586,30 @@
     ]
   },
   {
+    "audioId": "seq.street.right.prochaine+puis+street.right.troisieme",
+    "text": "Prenez la prochaine rue à droite, puis prenez la troisième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.prochaine+puis+street.left.troisieme",
+    "text": "Prenez la prochaine rue à droite, puis prenez la troisième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "seq.street.right.prochaine+puis+turn.right",
     "text": "Prenez la prochaine rue à droite, puis tournez à droite.",
     "voice": "DISPATCHER",
@@ -5622,6 +5744,30 @@
   {
     "audioId": "seq.street.left.prochaine+puis+street.left.prochaine",
     "text": "Prenez la prochaine rue à gauche, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.prochaine+puis+street.right.troisieme",
+    "text": "Prenez la prochaine rue à gauche, puis prenez la troisième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.prochaine+puis+street.left.troisieme",
+    "text": "Prenez la prochaine rue à gauche, puis prenez la troisième rue à gauche.",
     "voice": "DISPATCHER",
     "category": "DIRECTION",
     "template": "I3",
@@ -5776,6 +5922,30 @@
     ]
   },
   {
+    "audioId": "seq.street.right.troisieme+puis+street.right.troisieme",
+    "text": "Prenez la troisième rue à droite, puis prenez la troisième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.right.troisieme+puis+street.left.troisieme",
+    "text": "Prenez la troisième rue à droite, puis prenez la troisième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "seq.street.right.troisieme+puis+turn.right",
     "text": "Prenez la troisième rue à droite, puis tournez à droite.",
     "voice": "DISPATCHER",
@@ -5920,6 +6090,30 @@
     ]
   },
   {
+    "audioId": "seq.street.left.troisieme+puis+street.right.troisieme",
+    "text": "Prenez la troisième rue à gauche, puis prenez la troisième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.street.left.troisieme+puis+street.left.troisieme",
+    "text": "Prenez la troisième rue à gauche, puis prenez la troisième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "seq.street.left.troisieme+puis+turn.right",
     "text": "Prenez la troisième rue à gauche, puis tournez à droite.",
     "voice": "DISPATCHER",
@@ -6049,6 +6243,17 @@
   {
     "audioId": "seq.turn.right.apres.bus_stop+puis+street.left.prochaine",
     "text": "Tournez à droite après l'arrêt de bus, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H2",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.right.apres.bus_stop+puis+street.left.troisieme",
+    "text": "Tournez à droite après l'arrêt de bus, puis prenez la troisième rue à gauche.",
     "voice": "DISPATCHER",
     "category": "DIRECTION",
     "template": "H2",
@@ -6969,6 +7174,17 @@
     ]
   },
   {
+    "audioId": "seq.turn.right.apres.post_office+puis+street.right.troisieme",
+    "text": "Tournez à droite après la poste, puis prenez la troisième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H2",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "seq.turn.right.apres.post_office+puis+turn.right",
     "text": "Tournez à droite après la poste, puis tournez à droite.",
     "voice": "DISPATCHER",
@@ -7015,6 +7231,17 @@
     ]
   },
   {
+    "audioId": "seq.turn.right.apres.gas_station+puis+street.left.deuxieme",
+    "text": "Tournez à droite après la station-service, puis prenez la deuxième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H2",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "seq.turn.right.apres.gas_station+puis+street.right.premiere",
     "text": "Tournez à droite après la station-service, puis prenez la première rue à droite.",
     "voice": "DISPATCHER",
@@ -7050,6 +7277,17 @@
   {
     "audioId": "seq.turn.right.apres.gas_station+puis+street.left.prochaine",
     "text": "Tournez à droite après la station-service, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H2",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.right.apres.gas_station+puis+street.right.troisieme",
+    "text": "Tournez à droite après la station-service, puis prenez la troisième rue à droite.",
     "voice": "DISPATCHER",
     "category": "DIRECTION",
     "template": "H2",
@@ -7726,6 +7964,17 @@
   {
     "audioId": "seq.turn.right.apres.restaurant+puis+street.left.prochaine",
     "text": "Tournez à droite après le restaurant, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H2",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.right.apres.restaurant+puis+street.right.troisieme",
+    "text": "Tournez à droite après le restaurant, puis prenez la troisième rue à droite.",
     "voice": "DISPATCHER",
     "category": "DIRECTION",
     "template": "H2",
@@ -8768,6 +9017,17 @@
     ]
   },
   {
+    "audioId": "seq.turn.right.devant.bank+puis+street.right.troisieme",
+    "text": "Tournez à droite devant la banque, puis prenez la troisième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H1",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "seq.turn.right.devant.bank+puis+turn.right",
     "text": "Tournez à droite devant la banque, puis tournez à droite.",
     "voice": "DISPATCHER",
@@ -9743,6 +10003,17 @@
     ]
   },
   {
+    "audioId": "seq.turn.right.devant.square+puis+street.right.troisieme",
+    "text": "Tournez à droite devant la place, puis prenez la troisième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H1",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "seq.turn.right.devant.square+puis+turn.right",
     "text": "Tournez à droite devant la place, puis tournez à droite.",
     "voice": "DISPATCHER",
@@ -9780,6 +10051,17 @@
   {
     "audioId": "seq.turn.right.devant.beach+puis+street.right.deuxieme",
     "text": "Tournez à droite devant la plage, puis prenez la deuxième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H1",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.right.devant.beach+puis+street.left.deuxieme",
+    "text": "Tournez à droite devant la plage, puis prenez la deuxième rue à gauche.",
     "voice": "DISPATCHER",
     "category": "DIRECTION",
     "template": "H1",
@@ -9833,6 +10115,17 @@
     ]
   },
   {
+    "audioId": "seq.turn.right.devant.beach+puis+street.right.troisieme",
+    "text": "Tournez à droite devant la plage, puis prenez la troisième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H1",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "seq.turn.right.devant.beach+puis+turn.right",
     "text": "Tournez à droite devant la plage, puis tournez à droite.",
     "voice": "DISPATCHER",
@@ -9863,6 +10156,17 @@
     "levels": [
       "EASY",
       "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.right.devant.post_office+puis+street.right.deuxieme",
+    "text": "Tournez à droite devant la poste, puis prenez la deuxième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H1",
+    "levels": [
       "HARD",
       "EXPERT"
     ]
@@ -9914,6 +10218,17 @@
   {
     "audioId": "seq.turn.right.devant.post_office+puis+street.left.prochaine",
     "text": "Tournez à droite devant la poste, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H1",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.right.devant.post_office+puis+street.left.troisieme",
+    "text": "Tournez à droite devant la poste, puis prenez la troisième rue à gauche.",
     "voice": "DISPATCHER",
     "category": "DIRECTION",
     "template": "H1",
@@ -10024,6 +10339,17 @@
     ]
   },
   {
+    "audioId": "seq.turn.right.devant.gas_station+puis+street.left.troisieme",
+    "text": "Tournez à droite devant la station-service, puis prenez la troisième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H1",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "seq.turn.right.devant.gas_station+puis+turn.right",
     "text": "Tournez à droite devant la station-service, puis tournez à droite.",
     "voice": "DISPATCHER",
@@ -10116,6 +10442,17 @@
   {
     "audioId": "seq.turn.right.devant.cafe+puis+street.left.prochaine",
     "text": "Tournez à droite devant le café, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H1",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.right.devant.cafe+puis+street.right.troisieme",
+    "text": "Tournez à droite devant le café, puis prenez la troisième rue à droite.",
     "voice": "DISPATCHER",
     "category": "DIRECTION",
     "template": "H1",
@@ -10318,6 +10655,17 @@
   {
     "audioId": "seq.turn.right.devant.cinema+puis+street.left.prochaine",
     "text": "Tournez à droite devant le cinéma, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H1",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.right.devant.cinema+puis+street.left.troisieme",
+    "text": "Tournez à droite devant le cinéma, puis prenez la troisième rue à gauche.",
     "voice": "DISPATCHER",
     "category": "DIRECTION",
     "template": "H1",
@@ -10977,6 +11325,17 @@
     ]
   },
   {
+    "audioId": "seq.turn.right.devant.car_park+puis+street.right.troisieme",
+    "text": "Tournez à droite devant le parking, puis prenez la troisième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H1",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "seq.turn.right.devant.car_park+puis+turn.right",
     "text": "Tournez à droite devant le parking, puis tournez à droite.",
     "voice": "DISPATCHER",
@@ -11069,6 +11428,17 @@
   {
     "audioId": "seq.turn.right.devant.restaurant+puis+street.left.prochaine",
     "text": "Tournez à droite devant le restaurant, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H1",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.right.devant.restaurant+puis+street.left.troisieme",
+    "text": "Tournez à droite devant le restaurant, puis prenez la troisième rue à gauche.",
     "voice": "DISPATCHER",
     "category": "DIRECTION",
     "template": "H1",
@@ -11478,6 +11848,30 @@
   {
     "audioId": "seq.turn.right+puis+street.left.prochaine",
     "text": "Tournez à droite, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.right+puis+street.right.troisieme",
+    "text": "Tournez à droite, puis prenez la troisième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.right+puis+street.left.troisieme",
+    "text": "Tournez à droite, puis prenez la troisième rue à gauche.",
     "voice": "DISPATCHER",
     "category": "DIRECTION",
     "template": "I3",
@@ -12645,6 +13039,17 @@
     ]
   },
   {
+    "audioId": "seq.turn.left.apres.cafe+puis+street.right.deuxieme",
+    "text": "Tournez à gauche après le café, puis prenez la deuxième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H2",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "seq.turn.left.apres.cafe+puis+street.left.deuxieme",
     "text": "Tournez à gauche après le café, puis prenez la deuxième rue à gauche.",
     "voice": "DISPATCHER",
@@ -12691,6 +13096,17 @@
   {
     "audioId": "seq.turn.left.apres.cafe+puis+street.left.prochaine",
     "text": "Tournez à gauche après le café, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H2",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.left.apres.cafe+puis+street.left.troisieme",
+    "text": "Tournez à gauche après le café, puis prenez la troisième rue à gauche.",
     "voice": "DISPATCHER",
     "category": "DIRECTION",
     "template": "H2",
@@ -13679,6 +14095,17 @@
     ]
   },
   {
+    "audioId": "seq.turn.left.avant.bus_stop+puis+street.left.troisieme",
+    "text": "Tournez à gauche avant l'arrêt de bus, puis prenez la troisième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H2",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "seq.turn.left.avant.bus_stop+puis+turn.right",
     "text": "Tournez à gauche avant l'arrêt de bus, puis tournez à droite.",
     "voice": "DISPATCHER",
@@ -14244,6 +14671,17 @@
   {
     "audioId": "seq.turn.left.devant.bank+puis+street.left.prochaine",
     "text": "Tournez à gauche devant la banque, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H1",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.left.devant.bank+puis+street.right.troisieme",
+    "text": "Tournez à gauche devant la banque, puis prenez la troisième rue à droite.",
     "voice": "DISPATCHER",
     "category": "DIRECTION",
     "template": "H1",
@@ -15061,6 +15499,17 @@
     ]
   },
   {
+    "audioId": "seq.turn.left.devant.swimming_pool+puis+street.right.deuxieme",
+    "text": "Tournez à gauche devant la piscine, puis prenez la deuxième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H1",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "seq.turn.left.devant.swimming_pool+puis+street.left.deuxieme",
     "text": "Tournez à gauche devant la piscine, puis prenez la deuxième rue à gauche.",
     "voice": "DISPATCHER",
@@ -15217,6 +15666,17 @@
     ]
   },
   {
+    "audioId": "seq.turn.left.devant.square+puis+street.left.troisieme",
+    "text": "Tournez à gauche devant la place, puis prenez la troisième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H1",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "seq.turn.left.devant.square+puis+turn.right",
     "text": "Tournez à gauche devant la place, puis tournez à droite.",
     "voice": "DISPATCHER",
@@ -15298,6 +15758,17 @@
     ]
   },
   {
+    "audioId": "seq.turn.left.devant.post_office+puis+street.right.deuxieme",
+    "text": "Tournez à gauche devant la poste, puis prenez la deuxième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H1",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "seq.turn.left.devant.post_office+puis+street.left.deuxieme",
     "text": "Tournez à gauche devant la poste, puis prenez la deuxième rue à gauche.",
     "voice": "DISPATCHER",
@@ -15344,6 +15815,17 @@
   {
     "audioId": "seq.turn.left.devant.post_office+puis+street.left.prochaine",
     "text": "Tournez à gauche devant la poste, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H1",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.left.devant.post_office+puis+street.left.troisieme",
+    "text": "Tournez à gauche devant la poste, puis prenez la troisième rue à gauche.",
     "voice": "DISPATCHER",
     "category": "DIRECTION",
     "template": "H1",
@@ -15454,6 +15936,17 @@
     ]
   },
   {
+    "audioId": "seq.turn.left.devant.gas_station+puis+street.left.troisieme",
+    "text": "Tournez à gauche devant la station-service, puis prenez la troisième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H1",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "seq.turn.left.devant.gas_station+puis+turn.right",
     "text": "Tournez à gauche devant la station-service, puis tournez à droite.",
     "voice": "DISPATCHER",
@@ -15546,6 +16039,17 @@
   {
     "audioId": "seq.turn.left.devant.cafe+puis+street.left.prochaine",
     "text": "Tournez à gauche devant le café, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H1",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.left.devant.cafe+puis+street.right.troisieme",
+    "text": "Tournez à gauche devant le café, puis prenez la troisième rue à droite.",
     "voice": "DISPATCHER",
     "category": "DIRECTION",
     "template": "H1",
@@ -15748,6 +16252,17 @@
   {
     "audioId": "seq.turn.left.devant.cinema+puis+street.left.prochaine",
     "text": "Tournez à gauche devant le cinéma, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H1",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.left.devant.cinema+puis+street.left.troisieme",
+    "text": "Tournez à gauche devant le cinéma, puis prenez la troisième rue à gauche.",
     "voice": "DISPATCHER",
     "category": "DIRECTION",
     "template": "H1",
@@ -16407,6 +16922,17 @@
     ]
   },
   {
+    "audioId": "seq.turn.left.devant.car_park+puis+street.left.troisieme",
+    "text": "Tournez à gauche devant le parking, puis prenez la troisième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H1",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "seq.turn.left.devant.car_park+puis+turn.right",
     "text": "Tournez à gauche devant le parking, puis tournez à droite.",
     "voice": "DISPATCHER",
@@ -16499,6 +17025,17 @@
   {
     "audioId": "seq.turn.left.devant.restaurant+puis+street.left.prochaine",
     "text": "Tournez à gauche devant le restaurant, puis prenez la prochaine rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "H1",
+    "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.left.devant.restaurant+puis+street.left.troisieme",
+    "text": "Tournez à gauche devant le restaurant, puis prenez la troisième rue à gauche.",
     "voice": "DISPATCHER",
     "category": "DIRECTION",
     "template": "H1",
@@ -16918,6 +17455,30 @@
     ]
   },
   {
+    "audioId": "seq.turn.left+puis+street.right.troisieme",
+    "text": "Tournez à gauche, puis prenez la troisième rue à droite.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "seq.turn.left+puis+street.left.troisieme",
+    "text": "Tournez à gauche, puis prenez la troisième rue à gauche.",
+    "voice": "DISPATCHER",
+    "category": "DIRECTION",
+    "template": "I3",
+    "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "seq.turn.left+puis+turn.right",
     "text": "Tournez à gauche, puis tournez à droite.",
     "voice": "DISPATCHER",
@@ -17064,1152 +17625,25 @@
     ]
   },
   {
-    "audioId": "event.sighting.van.school",
-    "text": "La camionnette est près de l'école.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.van.hospital",
-    "text": "La camionnette est près de l'hôpital.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.van.hotel",
-    "text": "La camionnette est près de l'hôtel.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.van.bakery",
-    "text": "La camionnette est près de la boulangerie.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.van.bus_station",
-    "text": "La camionnette est près de la gare routière.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.van.bookshop",
-    "text": "La camionnette est près de la librairie.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.van.pharmacy",
-    "text": "La camionnette est près de la pharmacie.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.van.swimming_pool",
-    "text": "La camionnette est près de la piscine.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.van.square",
-    "text": "La camionnette est près de la place.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.van.beach",
-    "text": "La camionnette est près de la plage.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.van.gas_station",
-    "text": "La camionnette est près de la station-service.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.van.cinema",
-    "text": "La camionnette est près du cinéma.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.van.police_station",
-    "text": "La camionnette est près du commissariat de police.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.van.shop",
-    "text": "La camionnette est près du magasin.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.van.museum",
-    "text": "La camionnette est près du musée.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.van.park",
-    "text": "La camionnette est près du parc.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.van.car_park",
-    "text": "La camionnette est près du parking.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.van.restaurant",
-    "text": "La camionnette est près du restaurant.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.van.stadium",
-    "text": "La camionnette est près du stade.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.white.school",
-    "text": "La voiture blanche est près de l'école.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.white.hospital",
-    "text": "La voiture blanche est près de l'hôpital.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.white.hotel",
-    "text": "La voiture blanche est près de l'hôtel.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.white.bakery",
-    "text": "La voiture blanche est près de la boulangerie.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.white.bus_station",
-    "text": "La voiture blanche est près de la gare routière.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.white.bookshop",
-    "text": "La voiture blanche est près de la librairie.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.white.pharmacy",
-    "text": "La voiture blanche est près de la pharmacie.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.white.swimming_pool",
-    "text": "La voiture blanche est près de la piscine.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.white.square",
-    "text": "La voiture blanche est près de la place.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.white.beach",
-    "text": "La voiture blanche est près de la plage.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.white.gas_station",
-    "text": "La voiture blanche est près de la station-service.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.white.cinema",
-    "text": "La voiture blanche est près du cinéma.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.white.police_station",
-    "text": "La voiture blanche est près du commissariat de police.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.white.shop",
-    "text": "La voiture blanche est près du magasin.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.white.museum",
-    "text": "La voiture blanche est près du musée.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.white.park",
-    "text": "La voiture blanche est près du parc.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.white.car_park",
-    "text": "La voiture blanche est près du parking.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.white.restaurant",
-    "text": "La voiture blanche est près du restaurant.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.white.stadium",
-    "text": "La voiture blanche est près du stade.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.blue.school",
-    "text": "La voiture bleue est près de l'école.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.blue.hospital",
-    "text": "La voiture bleue est près de l'hôpital.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.blue.hotel",
-    "text": "La voiture bleue est près de l'hôtel.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.blue.bakery",
-    "text": "La voiture bleue est près de la boulangerie.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.blue.bus_station",
-    "text": "La voiture bleue est près de la gare routière.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.blue.bookshop",
-    "text": "La voiture bleue est près de la librairie.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.blue.pharmacy",
-    "text": "La voiture bleue est près de la pharmacie.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.blue.swimming_pool",
-    "text": "La voiture bleue est près de la piscine.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.blue.square",
-    "text": "La voiture bleue est près de la place.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.blue.beach",
-    "text": "La voiture bleue est près de la plage.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.blue.gas_station",
-    "text": "La voiture bleue est près de la station-service.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.blue.cinema",
-    "text": "La voiture bleue est près du cinéma.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.blue.police_station",
-    "text": "La voiture bleue est près du commissariat de police.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.blue.shop",
-    "text": "La voiture bleue est près du magasin.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.blue.museum",
-    "text": "La voiture bleue est près du musée.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.blue.park",
-    "text": "La voiture bleue est près du parc.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.blue.car_park",
-    "text": "La voiture bleue est près du parking.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.blue.restaurant",
-    "text": "La voiture bleue est près du restaurant.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.blue.stadium",
-    "text": "La voiture bleue est près du stade.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.black.school",
-    "text": "La voiture noire est près de l'école.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.black.hospital",
-    "text": "La voiture noire est près de l'hôpital.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.black.hotel",
-    "text": "La voiture noire est près de l'hôtel.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.black.bakery",
-    "text": "La voiture noire est près de la boulangerie.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.black.bus_station",
-    "text": "La voiture noire est près de la gare routière.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.black.bookshop",
-    "text": "La voiture noire est près de la librairie.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.black.pharmacy",
-    "text": "La voiture noire est près de la pharmacie.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.black.swimming_pool",
-    "text": "La voiture noire est près de la piscine.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.black.square",
-    "text": "La voiture noire est près de la place.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.black.beach",
-    "text": "La voiture noire est près de la plage.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.black.gas_station",
-    "text": "La voiture noire est près de la station-service.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.black.cinema",
-    "text": "La voiture noire est près du cinéma.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.black.police_station",
-    "text": "La voiture noire est près du commissariat de police.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.black.shop",
-    "text": "La voiture noire est près du magasin.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.black.museum",
-    "text": "La voiture noire est près du musée.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.black.park",
-    "text": "La voiture noire est près du parc.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.black.car_park",
-    "text": "La voiture noire est près du parking.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.black.restaurant",
-    "text": "La voiture noire est près du restaurant.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.black.stadium",
-    "text": "La voiture noire est près du stade.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.green.school",
-    "text": "La voiture verte est près de l'école.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.green.hospital",
-    "text": "La voiture verte est près de l'hôpital.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.green.hotel",
-    "text": "La voiture verte est près de l'hôtel.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.green.bakery",
-    "text": "La voiture verte est près de la boulangerie.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.green.bus_station",
-    "text": "La voiture verte est près de la gare routière.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.green.bookshop",
-    "text": "La voiture verte est près de la librairie.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.green.pharmacy",
-    "text": "La voiture verte est près de la pharmacie.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.green.swimming_pool",
-    "text": "La voiture verte est près de la piscine.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.green.square",
-    "text": "La voiture verte est près de la place.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.green.beach",
-    "text": "La voiture verte est près de la plage.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.green.gas_station",
-    "text": "La voiture verte est près de la station-service.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.green.cinema",
-    "text": "La voiture verte est près du cinéma.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.green.police_station",
-    "text": "La voiture verte est près du commissariat de police.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.green.shop",
-    "text": "La voiture verte est près du magasin.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.green.museum",
-    "text": "La voiture verte est près du musée.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.green.park",
-    "text": "La voiture verte est près du parc.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.green.car_park",
-    "text": "La voiture verte est près du parking.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.green.restaurant",
-    "text": "La voiture verte est près du restaurant.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.green.stadium",
-    "text": "La voiture verte est près du stade.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
     "audioId": "event.changed_direction",
     "text": "Le suspect a changé de direction.",
     "voice": "DISPATCHER",
     "category": "EVENT",
     "template": null,
     "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "event.crashed",
+    "text": "Le suspect a eu un accident !",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
       "INTERMEDIATE",
       "HARD",
       "EXPERT"
@@ -18294,253 +17728,6 @@
     ]
   },
   {
-    "audioId": "event.sighting.suspect.school",
-    "text": "Le suspect est près de l'école.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD",
-      "EXPERT"
-    ]
-  },
-  {
-    "audioId": "event.sighting.suspect.hospital",
-    "text": "Le suspect est près de l'hôpital.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD",
-      "EXPERT"
-    ]
-  },
-  {
-    "audioId": "event.sighting.suspect.hotel",
-    "text": "Le suspect est près de l'hôtel.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD",
-      "EXPERT"
-    ]
-  },
-  {
-    "audioId": "event.sighting.suspect.bakery",
-    "text": "Le suspect est près de la boulangerie.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD",
-      "EXPERT"
-    ]
-  },
-  {
-    "audioId": "event.sighting.suspect.bus_station",
-    "text": "Le suspect est près de la gare routière.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD",
-      "EXPERT"
-    ]
-  },
-  {
-    "audioId": "event.sighting.suspect.bookshop",
-    "text": "Le suspect est près de la librairie.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD",
-      "EXPERT"
-    ]
-  },
-  {
-    "audioId": "event.sighting.suspect.pharmacy",
-    "text": "Le suspect est près de la pharmacie.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD",
-      "EXPERT"
-    ]
-  },
-  {
-    "audioId": "event.sighting.suspect.swimming_pool",
-    "text": "Le suspect est près de la piscine.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD",
-      "EXPERT"
-    ]
-  },
-  {
-    "audioId": "event.sighting.suspect.square",
-    "text": "Le suspect est près de la place.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD",
-      "EXPERT"
-    ]
-  },
-  {
-    "audioId": "event.sighting.suspect.beach",
-    "text": "Le suspect est près de la plage.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD",
-      "EXPERT"
-    ]
-  },
-  {
-    "audioId": "event.sighting.suspect.gas_station",
-    "text": "Le suspect est près de la station-service.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD",
-      "EXPERT"
-    ]
-  },
-  {
-    "audioId": "event.sighting.suspect.cinema",
-    "text": "Le suspect est près du cinéma.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD",
-      "EXPERT"
-    ]
-  },
-  {
-    "audioId": "event.sighting.suspect.police_station",
-    "text": "Le suspect est près du commissariat de police.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD",
-      "EXPERT"
-    ]
-  },
-  {
-    "audioId": "event.sighting.suspect.shop",
-    "text": "Le suspect est près du magasin.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD",
-      "EXPERT"
-    ]
-  },
-  {
-    "audioId": "event.sighting.suspect.museum",
-    "text": "Le suspect est près du musée.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD",
-      "EXPERT"
-    ]
-  },
-  {
-    "audioId": "event.sighting.suspect.park",
-    "text": "Le suspect est près du parc.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD",
-      "EXPERT"
-    ]
-  },
-  {
-    "audioId": "event.sighting.suspect.car_park",
-    "text": "Le suspect est près du parking.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD",
-      "EXPERT"
-    ]
-  },
-  {
-    "audioId": "event.sighting.suspect.restaurant",
-    "text": "Le suspect est près du restaurant.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD",
-      "EXPERT"
-    ]
-  },
-  {
-    "audioId": "event.sighting.suspect.stadium",
-    "text": "Le suspect est près du stade.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD",
-      "EXPERT"
-    ]
-  },
-  {
     "audioId": "event.suspect_left_car",
     "text": "Le suspect est sorti de la voiture.",
     "voice": "DISPATCHER",
@@ -18550,234 +17737,6 @@
       "INTERMEDIATE",
       "HARD",
       "EXPERT"
-    ]
-  },
-  {
-    "audioId": "event.sighting.taxi.school",
-    "text": "Le taxi est près de l'école.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.taxi.hospital",
-    "text": "Le taxi est près de l'hôpital.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.taxi.hotel",
-    "text": "Le taxi est près de l'hôtel.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.taxi.bakery",
-    "text": "Le taxi est près de la boulangerie.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.taxi.bus_station",
-    "text": "Le taxi est près de la gare routière.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.taxi.bookshop",
-    "text": "Le taxi est près de la librairie.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.taxi.pharmacy",
-    "text": "Le taxi est près de la pharmacie.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.taxi.swimming_pool",
-    "text": "Le taxi est près de la piscine.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.taxi.square",
-    "text": "Le taxi est près de la place.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.taxi.beach",
-    "text": "Le taxi est près de la plage.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.taxi.gas_station",
-    "text": "Le taxi est près de la station-service.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.taxi.cinema",
-    "text": "Le taxi est près du cinéma.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.taxi.police_station",
-    "text": "Le taxi est près du commissariat de police.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.taxi.shop",
-    "text": "Le taxi est près du magasin.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.taxi.museum",
-    "text": "Le taxi est près du musée.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.taxi.park",
-    "text": "Le taxi est près du parc.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.taxi.car_park",
-    "text": "Le taxi est près du parking.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.taxi.restaurant",
-    "text": "Le taxi est près du restaurant.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
-    ]
-  },
-  {
-    "audioId": "event.sighting.taxi.stadium",
-    "text": "Le taxi est près du stade.",
-    "voice": "DISPATCHER",
-    "category": "EVENT",
-    "template": null,
-    "levels": [
-      "EASY",
-      "INTERMEDIATE",
-      "HARD"
     ]
   },
   {
@@ -18841,6 +17800,19 @@
     ]
   },
   {
+    "audioId": "event.go_faster",
+    "text": "Allez ! Vite !",
+    "voice": "DISPATCHER",
+    "category": "OUTCOME",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "outcome.captured",
     "text": "Le suspect est arrêté !",
     "voice": "DISPATCHER",
@@ -18854,8 +17826,8 @@
     ]
   },
   {
-    "audioId": "event.moving_away",
-    "text": "Le suspect s'éloigne.",
+    "audioId": "outcome.escaped",
+    "text": "Oh non ! Il s'est échappé !",
     "voice": "DISPATCHER",
     "category": "OUTCOME",
     "template": null,
@@ -18867,8 +17839,8 @@
     ]
   },
   {
-    "audioId": "outcome.escaped",
-    "text": "Le suspect s'est échappé.",
+    "audioId": "event.moving_away",
+    "text": "Vite ! Le suspect s'éloigne !",
     "voice": "DISPATCHER",
     "category": "OUTCOME",
     "template": null,
