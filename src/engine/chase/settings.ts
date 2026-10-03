@@ -267,6 +267,17 @@ export const CRASH = {
   routeShare: [0.6, 1.1] as [number, number],
 } as const;
 
+/**
+ * The suspect never escapes by distance: nearing the end of its route it
+ * plans a fresh route onwards (see `Chase.keepGoing`), away from the police.
+ */
+export const KEEP_GOING = {
+  /** Plan the route onwards when the suspect is within this many metres of the end of its route, so the directions come in good time. */
+  aheadMetres: 160,
+  /** The new route keeps every one of its junctions at least this many sighting distances from the police, and ends further away than it starts by as much. */
+  clearSightings: 4,
+} as const;
+
 export const DODGE = {
   /** Extra seconds on the clock, by mode: the chase starts again. */
   extraSeconds: { CAR: 15, FOOT: 8 } as Record<TravelMode, number>,

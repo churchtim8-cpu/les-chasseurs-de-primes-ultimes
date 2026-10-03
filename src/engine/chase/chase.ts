@@ -48,7 +48,7 @@ import { Rng } from '../rng/prng';
 import { distance, lerp, type Point } from '../world/geometry';
 import { canTravel, type TownGraph, type TravelMode } from '../world/graph';
 import { roadDistance } from './distance';
-import { followProblem, generateRoute, placeOnRoute, turnsOftenEnough } from './route';
+import { followProblem, generateRoute, pathLength, placeOnRoute, turnsOftenEnough } from './route';
 import type { ChaseScenario, ChaseStage, NearCapture } from './scenario';
 import { RepeatCounter, type RepeatResult } from '../audio/repeat';
 import {
@@ -63,6 +63,7 @@ import {
   TURN_OFF,
   type ChaseSettings,
   type Vehicle,
+  KEEP_GOING,
 } from './settings';
 import { isDecision, scanAhead } from '../language/analysis';
 
@@ -414,6 +415,8 @@ export class Chase {
     if (!this.suspectArrived && this.suspect.snapshot().waiting === 'ARRIVED') {
       if (this.suspectStage < this.lastStage) this.changeSuspectTransport(events);
       else this.keepGoing(events);
+    } else if (this.suspectStage === this.lastStage && !this.suspectArrived) {
+      this.keepGoingAhead(events);
     }
 
     this.checkTurnOff(events);
@@ -491,28 +494,12 @@ export class Chase {
    * on (a dead end with no route back), it stops where it is and can be caught.
    */
   private keepGoing(events: ChaseEvent[]): void {
-    // Away from the police, not back past them: luck must not catch what listening would.
-    const me = this.player.snapshot();
-    const clear = this.settings.sightingDistance * 4;
-    const away = (nodes: readonly string[]) => {
-      const start = this.graph.node(nodes[0] as string);
-      const end = this.graph.node(nodes[nodes.length - 1] as string);
-      return distance(end, me) > distance(start, me) + clear && nodes.every((n) => distance(this.graph.node(n), me) > clear);
-    };
-    const planFrom = (at: MoverStart) => {
-      const length = this.settings.stageLength[at.mode];
-      return (
-        this.escapeRoute(at.towards, at.edgeId, at.mode, length, away) ??
-        this.escapeRoute(at.towards, at.edgeId, at.mode, [length[0] / 2, length[1]], away) ??
-        this.escapeRoute(at.towards, at.edgeId, at.mode, [length[0] / 2, length[1]])
-      );
-    };
     let at = this.suspect.location();
-    let route = planFrom(at);
+    let route = this.routeOnwards(at.towards, at.edgeId, at.mode);
     let turnedRound = false;
     if (!route && this.suspect.uTurn()) {
       at = this.suspect.location();
-      route = planFrom(at);
+      route = this.routeOnwards(at.towards, at.edgeId, at.mode);
       turnedRound = true;
     }
     if (!route) {
@@ -520,12 +507,54 @@ export class Chase {
       events.push({ type: 'SUSPECT_ARRIVED' });
       return;
     }
-    const stage = this.stages[this.suspectStage]!;
-    this.stages[this.suspectStage] = { ...stage, route: [...stage.route, ...route.nodes.slice(1)], length: stage.length + route.length };
-    this.destination = route.destination;
     this.suspect = new Mover(this.graph, at);
     this.suspect.followPlan(route.nodes);
     this.suspect.speedFactor = this.suspectSpeedFor(this.suspectStage);
+    this.goOn(route, turnedRound, events);
+  }
+
+  /**
+   * Nearing the end of its route, the suspect plans the way on before it gets
+   * there, so the scanner can give the next turn in good time (a turn planned
+   * only on arrival would come too late for a player close behind).
+   */
+  private keepGoingAhead(events: ChaseEvent[]): void {
+    const plan = this.suspect.remainingPlan();
+    const me = this.suspect.snapshot();
+    const left = distance(me, this.graph.node(plan[0] as string)) + pathLength(this.graph, plan);
+    if (left > KEEP_GOING.aheadMetres) return;
+    const end = plan[plan.length - 1] as string;
+    const before = plan.length >= 2 ? (plan[plan.length - 2] as string) : this.graph.other(this.graph.edge(me.edgeId), me.towards);
+    const lastEdge = this.graph.edgeBetween(before, end);
+    if (!lastEdge) return;
+    const route = this.routeOnwards(end, lastEdge.id, me.mode);
+    if (!route) return; // on arrival, `keepGoing` tries again (turning round if it must)
+    this.suspect.followPlan([...plan, ...route.nodes.slice(1)]);
+    this.goOn(route, false, events);
+  }
+
+  /** A fresh route on from `from` (not back along `avoidEdge`), away from the police: luck must not catch what listening would. */
+  private routeOnwards(from: string, avoidEdge: string, mode: TravelMode) {
+    const me = this.player.snapshot();
+    const clear = this.settings.sightingDistance * KEEP_GOING.clearSightings;
+    const away = (nodes: readonly string[]) => {
+      const start = this.graph.node(nodes[0] as string);
+      const end = this.graph.node(nodes[nodes.length - 1] as string);
+      return distance(end, me) > distance(start, me) + clear && nodes.every((n) => distance(this.graph.node(n), me) > clear);
+    };
+    const length = this.settings.stageLength[mode];
+    return (
+      this.escapeRoute(from, avoidEdge, mode, length, away) ??
+      this.escapeRoute(from, avoidEdge, mode, [length[0] / 2, length[1]], away) ??
+      this.escapeRoute(from, avoidEdge, mode, [length[0] / 2, length[1]])
+    );
+  }
+
+  /** The suspect's route has grown by `route`: the stage, the destination and the directions follow. */
+  private goOn(route: { nodes: string[]; length: number; destination: string }, turnedRound: boolean, events: ChaseEvent[]): void {
+    const stage = this.stages[this.suspectStage]!;
+    this.stages[this.suspectStage] = { ...stage, route: [...stage.route, ...route.nodes.slice(1)], length: stage.length + route.length };
+    this.destination = route.destination;
     if (this.playerStage !== this.suspectStage) return; // the next stage's directions already follow the longer route
     const here = this.player.location();
     // Driving on: the directions already given stand and the next ones follow the longer
