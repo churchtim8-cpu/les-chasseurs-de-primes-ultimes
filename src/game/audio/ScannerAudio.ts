@@ -12,6 +12,8 @@ const MIX = {
   effects: 0.35,
   /** Music and ambience level while French is playing (blueprint section 17). */
   duckTo: 0.18,
+  /** Sound effects drop to this share while French is playing, so a crash never drowns a call. */
+  effectsDuckTo: 0.5,
   duckSeconds: 0.15,
   /** Radio band: telephone-like, still clear enough for learners. */
   radioLowCut: 300,
@@ -31,7 +33,7 @@ const MIX = {
 export class ScannerAudio {
   private manifest: AudioManifest = EMPTY_MANIFEST;
   private ctx: AudioContext | null = null;
-  private buses?: { scanner: GainNode; effects: GainNode; music: GainNode; radio: AudioNode };
+  private buses?: { scanner: GainNode; effects: GainNode; music: GainNode; radio: AudioNode; chirps: GainNode };
   private readonly buffers = new Map<string, Promise<AudioBuffer | null>>();
   private sources: AudioScheduledSourceNode[] = [];
   private busy: Promise<void> = Promise.resolve();
@@ -122,18 +124,37 @@ export class ScannerAudio {
   private createContext(): AudioContext | null {
     const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!Ctx) return null;
-    const ctx = new Ctx();
-    const master = ctx.createDynamicsCompressor();
-    master.connect(ctx.destination);
-    const bus = (level: number) => {
+    // 'playback' asks for a bigger sound buffer: a little more delay, but no
+    // crackles or drop-outs when a slow school computer is busy drawing the town.
+    let ctx: AudioContext;
+    try {
+      ctx = new Ctx({ latencyHint: 'playback' });
+    } catch {
+      ctx = new Ctx();
+    }
+    // A last-moment safety limiter that only touches rare peaks.
+    const limiter = ctx.createDynamicsCompressor();
+    limiter.threshold.value = -2;
+    limiter.knee.value = 0;
+    limiter.ratio.value = 20;
+    limiter.attack.value = 0.002;
+    limiter.release.value = 0.1;
+    limiter.connect(ctx.destination);
+    // Music and effects share a compressor; the French bypasses it, so loud
+    // drums, sirens or crashes can no longer squash the voice mid-sentence.
+    const sounds = ctx.createDynamicsCompressor();
+    sounds.connect(limiter);
+    const bus = (level: number, into: AudioNode) => {
       const gain = ctx.createGain();
       gain.gain.value = level;
-      gain.connect(master);
+      gain.connect(into);
       return gain;
     };
-    const scanner = bus(MIX.scanner);
-    const effects = bus(MIX.effects);
-    const music = bus(1);
+    const scanner = bus(MIX.scanner, limiter);
+    const effects = bus(MIX.effects, sounds);
+    const music = bus(1, sounds);
+    // The scanner's own beep, static and click: part of the call, so never ducked.
+    const chirps = bus(MIX.effects, sounds);
     const low = ctx.createBiquadFilter();
     low.type = 'highpass';
     low.frequency.value = MIX.radioLowCut;
@@ -141,7 +162,7 @@ export class ScannerAudio {
     high.type = 'lowpass';
     high.frequency.value = MIX.radioHighCut;
     low.connect(high).connect(scanner);
-    this.buses = { scanner, effects, music, radio: low };
+    this.buses = { scanner, effects, music, radio: low, chirps };
     return ctx;
   }
 
@@ -171,9 +192,10 @@ export class ScannerAudio {
   }
 
   private duck(on: boolean): void {
-    const music = this.buses?.music;
-    if (!music || !this.ctx) return;
+    if (!this.buses || !this.ctx) return;
+    const { music, effects } = this.buses;
     music.gain.setTargetAtTime(on ? MIX.duckTo : 1, this.ctx.currentTime, MIX.duckSeconds / 3);
+    effects.gain.setTargetAtTime(MIX.effects * (on ? MIX.effectsDuckTo : 1), this.ctx.currentTime, MIX.duckSeconds / 3);
   }
 
   /** Radio beep then a short burst of static. Returns when the voice can start. */
@@ -199,7 +221,7 @@ export class ScannerAudio {
     gain.gain.linearRampToValueAtTime(0.5, t + 0.01);
     gain.gain.setValueAtTime(0.5, t + seconds - 0.02);
     gain.gain.linearRampToValueAtTime(0, t + seconds);
-    osc.connect(gain).connect(this.buses!.effects);
+    osc.connect(gain).connect(this.buses!.chirps);
     this.track(osc).start(t);
     osc.stop(t + seconds);
   }
@@ -218,7 +240,7 @@ export class ScannerAudio {
     band.frequency.value = 1800;
     const gain = ctx.createGain();
     gain.gain.value = level;
-    source.connect(band).connect(gain).connect(this.buses!.effects);
+    source.connect(band).connect(gain).connect(this.buses!.chirps);
     this.track(source).start(t);
   }
 
