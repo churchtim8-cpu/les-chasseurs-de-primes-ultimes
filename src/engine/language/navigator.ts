@@ -192,10 +192,11 @@ export class Navigator {
   pointAhead(player: MoverStart, metres: number): { x: number; y: number } {
     const edge = this.graph.edge(player.edgeId);
     const here = lerp(this.graph.node(edge.from), this.graph.node(edge.to), player.t);
-    if (!this.onGuide(player)) return here;
+    const progress = this.progressAt(player);
+    if (progress === -1) return here;
     let at = here;
     let left = metres;
-    for (let k = this.progress + 1; k < this.guide.length; k++) {
+    for (let k = progress + 1; k < this.guide.length; k++) {
       const next = this.graph.node(this.guide[k] as string);
       const d = distance(at, next);
       if (d >= left) return lerp(at, next, left / Math.max(d, 1e-6));
@@ -210,8 +211,9 @@ export class Navigator {
    * guide, or the next junction has not been covered by a call yet?
    */
   hasNews(player: MoverStart): boolean {
-    if (!this.onGuide(player)) return true;
-    const next = this.actions.find((a) => a > this.progress);
+    const progress = this.progressAt(player);
+    if (progress === -1) return true;
+    const next = this.actions.find((a) => a > progress);
     return next === undefined ? !this.finalDone && this.destination !== null : !this.covered.has(next);
   }
 
@@ -221,8 +223,9 @@ export class Navigator {
    * lines fit in that gap without making a direction late.
    */
   quietFor(player: MoverStart): number {
-    if (!this.onGuide(player)) return 0;
-    const next = this.actions.findIndex((a) => a > this.progress && !this.covered.has(a));
+    const progress = this.progressAt(player);
+    if (progress === -1) return 0;
+    const next = this.actions.findIndex((a) => a > progress && !this.covered.has(a));
     let callAt: number;
     if (next === -1) {
       if (this.finalDone || this.destination === null) return Infinity;
@@ -230,8 +233,8 @@ export class Navigator {
     } else {
       callAt = next === 0 ? -1 : (this.actions[next - 1] as number);
     }
-    if (callAt <= this.progress) return 0;
-    return Math.max(0, this.distanceTo(player, callAt) / this.speed - Math.max(0, this.radioFreeIn));
+    if (callAt <= progress) return 0;
+    return Math.max(0, this.distanceTo(player, callAt, progress) / this.speed - Math.max(0, this.radioFreeIn));
   }
 
   /** The signal is back: say what the player needs now (the next direction, or a way back). */
@@ -252,30 +255,36 @@ export class Navigator {
    */
   /** Road distance from the player to the end of the guide (Infinity when off it). */
   toGuideEnd(player: MoverStart): number {
-    return this.distanceTo(player, this.guide.length - 1);
+    const progress = this.progressAt(player);
+    return progress === -1 ? Infinity : this.distanceTo(player, this.guide.length - 1, progress);
   }
 
-  distanceTo(player: MoverStart, target: number | string): number {
-    const index = typeof target === 'number' ? target : this.guide.indexOf(target, this.progress + 1);
-    if (index <= this.progress) return Infinity;
+  distanceTo(player: MoverStart, target: number | string, progress = this.progress): number {
+    const index = typeof target === 'number' ? target : this.guide.indexOf(target, progress + 1);
+    if (index <= progress) return Infinity;
     const edge = this.graph.edge(player.edgeId);
-    if (player.towards !== this.guide[this.progress + 1]) return Infinity;
+    if (player.towards !== this.guide[progress + 1]) return Infinity;
     const along = player.towards === edge.to ? player.t : 1 - player.t;
     const rest = (1 - along) * this.graph.edgeLength(edge);
-    return rest + pathLength(this.graph, this.guide.slice(this.progress + 1, index + 1));
+    return rest + pathLength(this.graph, this.guide.slice(progress + 1, index + 1));
   }
 
   /** Is the player where the guide expects (moving forward along it)? Advances `progress` if so. */
   private onGuide(player: MoverStart): boolean {
+    const k = this.progressAt(player);
+    if (k === -1) return false;
+    this.progress = k;
+    return true;
+  }
+
+  /** The guide edge the player is on, moving forward (-1 when off the guide). Changes nothing. */
+  private progressAt(player: MoverStart): number {
     const last = Math.min(this.progress + 4, this.guide.length - 2);
     for (let k = this.progress; k <= last; k++) {
       const edge = this.graph.edgeBetween(this.guide[k] as string, this.guide[k + 1] as string);
-      if (edge?.id === player.edgeId && player.towards === this.guide[k + 1]) {
-        this.progress = k;
-        return true;
-      }
+      if (edge?.id === player.edgeId && player.towards === this.guide[k + 1]) return k;
     }
-    return false;
+    return -1;
   }
 
   /** Just past the last node (usually driving up to the stopped suspect): not a mistake yet. */

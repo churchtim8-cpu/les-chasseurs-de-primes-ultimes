@@ -40,7 +40,9 @@ describe('chase generation', () => {
 
   it('varies routes and destinations (no fixed suspect routes)', () => {
     const scenarios = seeds('EASY', 200).map((s) => generateScenario(graph, s));
-    expect(new Set(scenarios.map((s) => s.route.join())).size).toBeGreaterThan(190);
+    // Every turn must be callable in time (2026-10-03), which leaves Easy fewer routes to pick from:
+    // some chases share a route, but most are still different.
+    expect(new Set(scenarios.map((s) => s.route.join())).size).toBeGreaterThan(145);
     expect(new Set(scenarios.map((s) => s.destination)).size).toBeGreaterThanOrEqual(25);
   });
 

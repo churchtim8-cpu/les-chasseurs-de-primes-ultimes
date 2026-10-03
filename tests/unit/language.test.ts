@@ -259,7 +259,8 @@ describe('scanner instructions in real chases', () => {
   it.each(DIFFICULTIES)('the scanner speaks as soon as the chase starts (%s)', (difficulty) => {
     for (const seed of seeds(difficulty, 150, 'first-call')) {
       const chase = new Chase(graph, generateScenario(graph, seed));
-      const first = chase.update(0.05).find((e) => e.type === 'TRANSMISSION');
+      // The game plays the opening call in full before anything moves.
+      const first = chase.openingCall().find((e) => e.type === 'TRANSMISSION');
       expect(first, seed).toBeDefined();
     }
   });

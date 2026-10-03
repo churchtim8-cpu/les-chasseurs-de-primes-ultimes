@@ -244,6 +244,7 @@ export class Chase {
   private changeHold: { armed: boolean; until: number } | null = null;
   /** When keepGoingAhead may next try to plan a way on. */
   private nextAheadTry = 0;
+  private aheadMisses = 0;
   private readonly hasAudio: AudioCheck | undefined;
   private started = false;
   private nextSighting = 0;
@@ -341,7 +342,7 @@ export class Chase {
    */
   private checkTurnOff(events: ChaseEvent[]): void {
     const turnOff = this.scenario.turnOff;
-    if (!this.turnOffPending || !turnOff || this.suspectStage !== turnOff.stage || this.lostSince !== null) return;
+    if (!this.turnOffPending || !turnOff || this.suspectStage !== turnOff.stage) return;
     const route = this.stages[turnOff.stage]!.route;
     const junction = route[turnOff.at] as string;
     const plan = this.suspect.remainingPlan();
@@ -363,6 +364,8 @@ export class Chase {
       distance(this.suspect.snapshot(), this.graph.node(plan[0] as string)) + pathLength(this.graph, plan.slice(0, k + 1)) <=
         TURN_OFF.seenWithin[this.suspect.mode];
     if (!seen && !atCallPoint) return;
+    // The scanner comes back to report it (the signal was lost).
+    if (this.lostSince !== null) this.restoreSignal(events);
     if (this.playerStage !== turnOff.stage || this.pending || this.autoStage !== null) {
       this.turnOffPending = false;
       return;
@@ -504,7 +507,9 @@ export class Chase {
     if (!held) this.timeLeft = Math.max(0, this.timeLeft - dt);
     this.player.speedFactor = held ? 0 : 1;
     this.player.update(dt);
-    this.suspect.update(dt);
+    // After a change of transport the whole chase waits for the first direction to be heard,
+    // as it does for the opening call: the suspect gains nothing while the scanner speaks.
+    this.suspect.update(this.changeHold ? 0 : dt);
     if (!this.suspectArrived && this.suspect.snapshot().waiting === 'ARRIVED') {
       if (this.suspectStage < this.lastStage) this.changeSuspectTransport(events);
       else this.keepGoing(events);
@@ -629,8 +634,10 @@ export class Chase {
     const before = plan.length >= 2 ? (plan[plan.length - 2] as string) : this.graph.other(this.graph.edge(me.edgeId), me.towards);
     const lastEdge = this.graph.edgeBetween(before, end);
     if (!lastEdge || this.elapsed < this.nextAheadTry) return;
-    this.nextAheadTry = this.elapsed + KEEP_GOING.retrySeconds; // planning is costly: not every frame
     const route = this.routeOnwards(end, lastEdge.id, me.mode, this.stages[this.suspectStage]!.route, true);
+    // Planning is costly: after a miss, wait a little longer each time before trying again.
+    this.aheadMisses = route ? 0 : this.aheadMisses + 1;
+    this.nextAheadTry = this.elapsed + Math.min(KEEP_GOING.retrySeconds * 2 ** this.aheadMisses, KEEP_GOING.maxRetrySeconds);
     if (!route) {
       // Boxed in for now: drive on straight one more block (no turn to call) and plan from there.
       const straight = exitsAt(this.graph, lastEdge, end, me.mode).find((e) => e.kind === 'STRAIGHT');
@@ -639,7 +646,6 @@ export class Chase {
       const block = { nodes: [end, next], length: this.graph.edgeLength(straight.step.edge), destination: this.destination };
       this.suspect.followPlan([...plan, next]);
       this.goOn(block, false, events);
-      this.nextAheadTry = this.elapsed;
       return;
     }
     this.suspect.followPlan([...plan, ...route.nodes.slice(1)]);
@@ -836,11 +842,12 @@ export class Chase {
           mode,
           from,
           avoidEdge,
+          // Cheapest checks first: describing a whole route is the costly part.
           accept: (nodes) =>
-            turnsOftenEnough(this.graph, nodes, mode) &&
-            describable(this.graph, nodes, mode, difficulty) &&
             extra(nodes) &&
-            (tail.length > 1 ? carriesOnCallable(this.graph, [...tail, ...nodes.slice(1)], ctx) : callable(this.graph, nodes, ctx)),
+            turnsOftenEnough(this.graph, nodes, mode) &&
+            (tail.length > 1 ? carriesOnCallable(this.graph, [...tail, ...nodes.slice(1)], ctx) : callable(this.graph, nodes, ctx)) &&
+            describable(this.graph, nodes, mode, difficulty),
           minTurnGap: CALL_ROUTES.minTurnGap[mode],
           ...(lastTurn > 0 ? { sinceTurn: pathLength(this.graph, before.slice(lastTurn)) } : {}),
         },

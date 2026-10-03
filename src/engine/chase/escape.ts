@@ -73,6 +73,8 @@ export class Escape {
   private closeSaid = false;
   /** News of the police waiting for a quiet moment on the radio (see report). */
   private closeNews = false;
+  /** After a change of transport the police wait until the new stage's first direction has been heard (see waitForFirstCall). */
+  private policeWait: { firstCall: boolean; until: number } | null = null;
   private lostNews: SpokenText | null = null;
   /** The player must change to this mode; `announced` once the order has been given. */
   private pending: { mode: TravelMode; announced: boolean } | null = null;
@@ -236,6 +238,14 @@ export class Escape {
     return this.navigator;
   }
 
+  /** Is the player on their stage route, going the right way? */
+  private onRoute(): boolean {
+    const here = this.player.location();
+    const route = this.stages[this.stage]!.route;
+    const k = route.indexOf(here.towards);
+    return k > 0 && this.graph.edgeBetween(route[k - 1] as string, here.towards)?.id === here.edgeId;
+  }
+
   /** The rest of the stage route from the furthest node reached (starting with the next node). */
   private remainingRoute(): string[] {
     return this.stages[this.stage]!.route.slice(this.furthest + 1);
@@ -285,6 +295,7 @@ export class Escape {
       const transmissions = this.nav(events).update(here, this.remainingRoute());
       for (const transmission of transmissions) events.push({ type: 'TRANSMISSION', transmission });
     }
+    this.waitForFirstCall(events);
 
     this.distance = this.measure();
     this.report(events);
@@ -310,8 +321,19 @@ export class Escape {
     return events;
   }
 
+  /** Once the new stage's first direction has been given, the police wait only until it has been heard. */
+  private waitForFirstCall(events: readonly ChaseEvent[]): void {
+    if (!this.policeWait?.firstCall || this.autoStage !== null || !events.some((e) => e.type === 'TRANSMISSION')) return;
+    this.hearRadio(events);
+    this.policeWait = { firstCall: false, until: Math.min(this.policeWait.until, this.radioFreeAt) };
+  }
+
   /** The police follow the player by the shortest way, choosing again at every junction. */
   private movePolice(dt: number, playerTurned = false): void {
+    if (this.policeWait) {
+      if (this.elapsed < this.policeWait.until) return;
+      this.policeWait = null;
+    }
     if (this.policeBehind > 0) {
       // Still on their way from off the map: not moving yet, but closing.
       this.policeBehind -= dt * MOVEMENT[this.police.mode].cruise * this.police.speedFactor;
@@ -489,7 +511,10 @@ export class Escape {
     }
     this.changePoint = { at: this.player.location(), mode: this.player.mode };
     this.startTrail();
+    // As in a chase, the whole chase waits for the radio here: the police gain nothing while it speaks.
+    this.policeWait = { firstCall: true, until: this.elapsed + ESCAPE.changeWaitSeconds };
     this.startStage(events);
+    this.waitForFirstCall(events);
     this.distance = this.measure();
     return { result: { ok: true }, events };
   }
@@ -588,8 +613,11 @@ export class Escape {
     if (this.closeNews) lines.push(ESCAPE_LINES.POLICE_CLOSE);
     if (this.lostNews) lines.push(this.lostNews);
     if (lines.length === 0) return;
-    // Said only where it is over before the next direction is due, never making that late.
-    if (this.nav(events).quietFor(this.player.location()) < callSeconds(lines.map((l) => l.text))) return;
+    // Said where it is over before the next direction is due, so that is not made late;
+    // a player who has gone wrong (the directions already putting them right) hears it at once.
+    // (On the way to a new stage's start the first direction is about to come: that waits too.)
+    const quiet = this.nav(events).quietFor(this.player.location()) >= callSeconds(lines.map((l) => l.text));
+    if (!quiet && (this.autoStage !== null || this.onRoute())) return;
     this.closeNews = false;
     this.lostNews = null;
     // Said after a direction given this frame, never over it.

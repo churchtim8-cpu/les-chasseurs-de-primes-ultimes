@@ -300,8 +300,9 @@ export const CRASH = {
 export const KEEP_GOING = {
   /** Plan the route onwards when the suspect is within this many metres of the end of its route, so the directions come in good time. */
   aheadMetres: { CAR: 600, FOOT: 150 } as Record<TravelMode, number>,
-  /** When no way on is found, try again after this many seconds (planning is costly). */
+  /** When no way on is found, try again after this many seconds, doubling after each miss up to maxRetrySeconds (planning is costly). */
   retrySeconds: 0.5,
+  maxRetrySeconds: 4,
   /** The new route keeps every one of its junctions at least this many sighting distances from the police, and ends further away than it starts by as much. */
   clearSightings: 4,
 } as const;
@@ -413,7 +414,12 @@ export const ESCAPE = {
    * route takes at cruising speed, by level: room to listen, hesitate and
    * repeat, not to wander the town (a perfect run takes about 1.1 to 1.5).
    */
-  timeFactor: { EASY: 2.6, INTERMEDIATE: 2.2, HARD: 1.9, EXPERT: 1.7 } as Record<Difficulty, number>,
+  timeFactor: { EASY: 2.6, INTERMEDIATE: 2.1, HARD: 1.9, EXPERT: 1.7 } as Record<Difficulty, number>,
   /** The player's getaway car waits this far (metres) along a car stage's route. */
   carAheadMetres: 14,
+  /**
+   * After a change of transport the police wait until the new stage's first
+   * direction has been heard, as a chase does; at most this long (seconds).
+   */
+  changeWaitSeconds: 15,
 } as const;
