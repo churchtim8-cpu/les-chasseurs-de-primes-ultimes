@@ -62,6 +62,7 @@ export class CampaignScene extends Phaser.Scene {
     });
     const reset = menu.add(width / 2 + 300, 660, 200, 56, 'RECOMMENCER', () => this.reset(reset.label), { size: 20 });
     menu.add(width / 2 + 500, 660, 160, 56, 'MENU', () => this.scene.start('Title'), { key: 'ESC', size: 20 });
+    menu.add(width / 2 - 360, 600, 300, 44, '🏅 COMMISSARIAT (O)', () => this.scene.start('Commissariat'), { key: 'O', size: 18 });
     this.drawCar();
   }
 

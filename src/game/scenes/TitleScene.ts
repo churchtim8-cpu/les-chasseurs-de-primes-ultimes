@@ -5,7 +5,9 @@ import { parseSeed, type ChaseSeed } from '../../engine';
 import type { AudioManifest } from '../../engine/audio/manifest';
 import { capturedCount, isComplete, MISSION_COUNT } from '../../engine/campaign/campaign';
 import { scannerAudio } from '../audio/ScannerAudio';
+import { rankFor } from '../../engine/campaign/profile';
 import { loadProgress } from '../campaignStore';
+import { loadProfile } from '../profileStore';
 import { debugState } from '../debug/debugState';
 import { GAME_HEIGHT, GAME_WIDTH, TITLE_PICTURE } from '../layout';
 import { PALETTE, toCss } from '../palette';
@@ -56,14 +58,17 @@ export class TitleScene extends Phaser.Scene {
     const top = replay ? 420 : 370;
     menu.add(GAME_WIDTH / 2 - 210, top, 400, 64, campaignLabel, () => this.scene.start('Campaign'), { key: 'C', size: 22 });
     menu.add(GAME_WIDTH / 2 + 210, top, 400, 64, 'ENTRAÎNEMENT', () => this.scene.start('Practice'), { key: 'P' });
+    const profile = loadProfile();
+    const rank = rankFor(profile.points);
     const detail =
       played === 0
         ? '8 suspects, du niveau Facile au niveau Expert   ·   C : campagne   ·   P : entraînement'
-        : `${capturedCount(progress)} / ${MISSION_COUNT} suspects arrêtés   ·   C : campagne   ·   P : entraînement`;
+        : `${capturedCount(progress)} / ${MISSION_COUNT} suspects arrêtés   ·   Grade : ${rank.name} (${profile.points.toLocaleString('fr-FR')} pts)`;
     text(this, GAME_WIDTH / 2, top + 62, detail, 19).setOrigin(0.5);
-    // Day or night in the town, remembered on this device.
+    // The police station (rank, badges, case files), and day or night in the town (remembered on this device).
+    menu.add(GAME_WIDTH / 2 - 170, top + 108, 300, 44, '🏅 COMMISSARIAT (O)', () => this.scene.start('Commissariat'), { key: 'O', size: 19 });
     const nightLabel = () => `🌙 NUIT : ${nightOn() ? 'OUI' : 'NON'}`;
-    const night = menu.add(GAME_WIDTH / 2, top + 108, 300, 44, nightLabel(), () => {
+    const night = menu.add(GAME_WIDTH / 2 + 170, top + 108, 300, 44, nightLabel(), () => {
       setNight(!nightOn());
       night.label.setText(nightLabel());
     }, { key: 'N', size: 19 });

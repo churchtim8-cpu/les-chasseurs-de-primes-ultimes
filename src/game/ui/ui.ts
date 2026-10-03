@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { jingles, menuMusic } from '../audio/Jingles';
+import { nextRank, rankFor } from '../../engine/campaign/profile';
 import { FONT_FAMILY, PALETTE, toCss } from '../palette';
 
 /** Screen pictures made in Canva for M8 (public/images/m8). */
@@ -197,3 +198,17 @@ export function medalBadge(scene: Phaser.Scene, x: number, y: number, medal: 'GO
 }
 
 export const MEDAL_NAMES = { GOLD: 'Or', SILVER: 'Argent', BRONZE: 'Bronze' } as const;
+
+/** "Grade : Brigadier · 3 450 pts" with a bar towards the next rank, `width` wide. */
+export function rankLine(scene: Phaser.Scene, x: number, y: number, points: number, width: number): void {
+  const rank = rankFor(points);
+  const next = nextRank(rank);
+  const label = `Grade : ${rank.name}   ·   ${points.toLocaleString('fr-FR')} pts`;
+  text(scene, x, y, label, 20, { bold: true, color: toCss(PALETTE.seaDeep) });
+  const barY = y + 30;
+  scene.add.rectangle(x, barY, width, 10, PALETTE.stone).setOrigin(0, 0.5).setStrokeStyle(1.5, PALETTE.ink, 0.6);
+  const share = next ? Math.min(1, (points - rank.points) / (next.points - rank.points)) : 1;
+  scene.add.rectangle(x + 1, barY, Math.max(0, (width - 2) * share), 7, PALETTE.terracotta).setOrigin(0, 0.5);
+  const hint = next ? `${(next.points - points).toLocaleString('fr-FR')} pts avant le grade ${next.name}` : 'Grade le plus élevé !';
+  text(scene, x + width, barY + 10, hint, 15, { color: toCss(PALETTE.ink) }).setOrigin(1, 0);
+}

@@ -3,16 +3,29 @@ import { jingles, menuMusic } from '../audio/Jingles';
 import { isComplete, MISSION_COUNT, MISSIONS, newlyUnlocked, recordMission } from '../../engine/campaign/campaign';
 import { scoreMission, type MissionStats, type ScoreLine } from '../../engine/campaign/scoring';
 import type { EscapeReason } from '../../engine/chase/chase';
+import { BOSS, bossInfo, recordChase } from '../../engine/campaign/profile';
+import type { ChaseType, Vehicle } from '../../engine/chase/settings';
+import type { TravelMode } from '../../engine/world/graph';
 import { loadProgress, saveProgress } from '../campaignStore';
+import { loadProfile, saveProfile, today } from '../profileStore';
 import { debugState } from '../debug/debugState';
 import { PALETTE, toCss } from '../palette';
-import { backdrop, MEDAL_NAMES, medalBadge, Menu, paper, SCREEN_PICTURES, text } from '../ui/ui';
+import { backdrop, MEDAL_NAMES, medalBadge, Menu, paper, rankLine, SCREEN_PICTURES, text } from '../ui/ui';
 
 export interface ResultsData {
   seed: string;
   /** Campaign mission (0-based), or null for a practice chase. */
   mission: number | null;
+  /** A hidden boss's picture id, or null. */
+  boss: string | null;
   stats: MissionStats;
+  /** For the player's record: the clock, the look, the mode at the end, and the suspect's file. */
+  timeLimit: number;
+  night: boolean;
+  mode: TravelMode;
+  lastSeen: string | null;
+  vehicle: Vehicle | null;
+  chaseType: ChaseType;
   escapeReason?: EscapeReason;
 }
 
@@ -65,13 +78,31 @@ export class ResultsScene extends Phaser.Scene {
       unlocked = newlyUnlocked(before, after).map((l) => l.name);
       caseDone = isComplete(after);
     }
+    // The player's record: points towards the next rank, badges, and the suspect's case file.
+    const boss = this.result.boss ? bossInfo(this.result.boss) ?? BOSS : null;
+    const previousBest = boss ? loadProfile().files[boss.picture]?.bestScore ?? -1 : -1;
+    const recorded = recordChase(loadProfile(), {
+      stats,
+      score,
+      timeLimit: this.result.timeLimit,
+      night: this.result.night,
+      mode: this.result.mode,
+      suspect: boss ? boss.picture : mission !== null ? MISSIONS[mission]!.picture : null,
+      lastSeen: this.result.lastSeen,
+      vehicle: this.result.vehicle,
+      chaseType: this.result.chaseType,
+      campaign: loadProgress(),
+      date: today(),
+    });
+    saveProfile(recorded.profile);
+    if (boss && captured) best = score.total > previousBest;
 
     backdrop(this, captured ? SCREEN_PICTURES.captured : SCREEN_PICTURES.escaped);
     // Clear of the full-screen button in the top-right corner.
     const x = 628;
     paper(this, x, 30, 600, 600, 0.95);
     const left = x + 32;
-    text(this, left, 50, mission === null ? 'ENTRAÎNEMENT' : `MISSION ${mission + 1} / ${MISSION_COUNT}`, 22, {
+    text(this, left, 50, boss ? `MISSION SPÉCIALE : ${boss.nickname.toUpperCase()}` : mission === null ? 'ENTRAÎNEMENT' : `MISSION ${mission + 1} / ${MISSION_COUNT}`, 22, {
       bold: true,
       color: toCss(PALETTE.seaDeep),
     });
@@ -79,7 +110,7 @@ export class ResultsScene extends Phaser.Scene {
       bold: true,
       color: toCss(captured ? 0x2e8b57 : PALETTE.terracotta),
     });
-    const nickname = mission !== null ? ` « ${MISSIONS[mission]!.nickname} »` : '';
+    const nickname = boss ? ` « ${boss.nickname} »` : mission !== null ? ` « ${MISSIONS[mission]!.nickname} »` : '';
     const detail = captured
       ? `Vous avez capturé le suspect${nickname} !`
       : 'Le temps est écoulé.';
@@ -117,9 +148,24 @@ export class ResultsScene extends Phaser.Scene {
       text(this, left, note, `Nouvelle couleur de voiture : ${name} !`, 21, { bold: true, color: toCss(0x2e8b57) });
       note += 28;
     }
+    if (recorded.newBadges.length > 0) {
+      const one = recorded.newBadges.length === 1;
+      const list = recorded.newBadges.map((b) => `${b.icon} ${b.name}`).join('   ');
+      const badges = text(this, left, note, `${one ? 'Nouveau badge' : 'Nouveaux badges'} : ${list} !`, 20, { bold: true, color: toCss(PALETTE.seaDeep), wordWrap: { width: 536 } });
+      note += badges.height + 6;
+    }
+    if (recorded.rankAfter.id !== recorded.rankBefore.id) {
+      text(this, left, note, `Nouveau grade : ${recorded.rankAfter.name} !`, 22, { bold: true, color: toCss(PALETTE.terracotta) });
+    }
+    // Rank and points, along the bottom of the sheet.
+    rankLine(this, left, 562, recorded.profile.points, 536);
 
     const menu = new Menu(this);
-    if (mission !== null) {
+    if (boss) {
+      menu.add(x + 300, 680, 340, 60, 'COMMISSARIAT  ▶', () => this.scene.start('Commissariat'), { size: 22 });
+      menu.add(x - 60, 680, 240, 60, 'RÉESSAYER (R)', () => this.scene.start('Briefing', { boss: boss.picture }), { key: 'R', size: 22 });
+      menu.add(x - 330, 680, 220, 60, 'MENU', () => this.scene.start('Title'), { key: 'ESC', size: 22 });
+    } else if (mission !== null) {
       const last = mission + 1 >= MISSION_COUNT;
       const nextLabel = caseDone && last ? 'AFFAIRE CLASSÉE  ▶' : last ? 'DOSSIER  ▶' : 'MISSION SUIVANTE  ▶';
       menu.add(x + 300, 680, 340, 60, nextLabel, () => {
