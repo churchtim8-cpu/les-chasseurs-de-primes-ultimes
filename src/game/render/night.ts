@@ -7,7 +7,7 @@ import { bakeLayer, SURROUND } from './townRenderer';
 
 /**
  * Night mode (drawing only: the chase is the same). The town is laid under a
- * deep blue dusk, street lamps throw warm pools of light along every road
+ * deep blue dusk, street lamps throw small warm pools of light along every road
  * and at every junction, windows glow in the houses and the landmarks, and
  * every car drives with its headlights and tail lights on. The light is soft:
  * the lamps, windows and beams are added to what is beneath them, so they
@@ -16,12 +16,16 @@ import { bakeLayer, SURROUND } from './townRenderer';
 export const NIGHT = {
   /** The dark blue of the night laid over the whole town. */
   sky: { colour: 0x0a1230, alpha: 0.6 },
-  /** Street lamps: metres between lamps along a road, and the warm pool of light each throws (radius in metres). */
-  lamp: { spacing: 55, colour: 0xffc46a, radius: 24 },
+  /**
+   * Street lamps: metres between lamps along a road, and the small warm pool
+   * of light each throws (radius in metres). Kept tight, about the size and
+   * brightness of a lit window's glow, so the night stays dark and readable.
+   */
+  lamp: { spacing: 55, colour: 0xffc46a, radius: 6 },
   /** Lit windows: colour and size (metres); roughly this share of a house's windows are lit, fewer of a landmark's. */
   window: { colour: 0xffd98a, size: 2.4, litShare: 0.7, landmarkShare: 0.45, landmarkStep: 12 },
-  /** Headlights: beam colour, how far it reaches ahead (metres) and how wide it spreads. */
-  headlight: { colour: 0xfff3c4, reach: 30, spread: 9 },
+  /** Headlights: beam colour, how far it reaches ahead (metres) and how wide it spreads; short, soft beams. */
+  headlight: { colour: 0xfff3c4, reach: 12, spread: 3.5 },
   tailLight: 0xff3b30,
   /** Above the town, its people and traffic shadows; below skid marks, smoke and the cars. */
   depth: { dark: 24.5, lights: 24.6 },
@@ -89,11 +93,9 @@ function streetLamps(g: Phaser.GameObjects.Graphics, graph: TownGraph): void {
 /** One lamp: a warm pool of light fading outwards, with the bright bulb at its centre. */
 function pool(g: Phaser.GameObjects.Graphics, x: number, y: number): void {
   const { colour, radius } = NIGHT.lamp;
-  g.fillStyle(colour, 0.06).fillCircle(x, y, radius);
-  g.fillStyle(colour, 0.08).fillCircle(x, y, radius * 0.7);
-  g.fillStyle(colour, 0.11).fillCircle(x, y, radius * 0.42);
-  g.fillStyle(colour, 0.18).fillCircle(x, y, radius * 0.18);
-  g.fillStyle(0xfff6dc, 0.95).fillCircle(x, y, 1.1);
+  g.fillStyle(colour, 0.08).fillCircle(x, y, radius);
+  g.fillStyle(colour, 0.12).fillCircle(x, y, radius * 0.55);
+  g.fillStyle(0xfff6dc, 0.9).fillCircle(x, y, 0.9);
 }
 
 /** Windows glowing in the houses (a few each) and along the sides of the landmarks. */
@@ -153,10 +155,10 @@ export function carLights(scene: Phaser.Scene, length: number): Phaser.GameObjec
   for (const side of [-1, 1]) {
     const y = side * 3;
     // The beam fans out from each headlight, brighter close to the car.
-    g.fillStyle(colour, 0.09).fillTriangle(nose, y, nose + reach, y - spread, nose + reach, y + spread);
-    g.fillStyle(colour, 0.12).fillTriangle(nose, y, nose + reach * 0.55, y - spread * 0.6, nose + reach * 0.55, y + spread * 0.6);
-    g.fillStyle(0xffffff, 0.9).fillCircle(nose - 0.6, y, 1.1);
-    g.fillStyle(NIGHT.tailLight, 0.25).fillCircle(-nose + 0.4, y, 2.6);
+    g.fillStyle(colour, 0.07).fillTriangle(nose, y, nose + reach, y - spread, nose + reach, y + spread);
+    g.fillStyle(colour, 0.1).fillTriangle(nose, y, nose + reach * 0.5, y - spread * 0.55, nose + reach * 0.5, y + spread * 0.55);
+    g.fillStyle(0xffffff, 0.9).fillCircle(nose - 0.6, y, 1);
+    g.fillStyle(NIGHT.tailLight, 0.2).fillCircle(-nose + 0.4, y, 1.8);
     g.fillStyle(NIGHT.tailLight, 0.95).fillCircle(-nose + 0.8, y, 0.9);
   }
   return [g];

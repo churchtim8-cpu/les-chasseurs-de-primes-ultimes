@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { menuMusic } from '../audio/Jingles';
 import { nightOn, setNight } from '../render/night';
+import { titleBackdropFx, titleFrontFx } from '../render/titleFx';
 import { parseSeed, type ChaseSeed } from '../../engine';
 import type { AudioManifest } from '../../engine/audio/manifest';
 import { capturedCount, isComplete, MISSION_COUNT } from '../../engine/campaign/campaign';
@@ -36,14 +37,19 @@ export class TitleScene extends Phaser.Scene {
     } else {
       this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, PALETTE.seaDeep);
     }
-    this.add.rectangle(GAME_WIDTH / 2, 336, 1180, 380, PALETTE.cream, 0.78).setStrokeStyle(3, PALETTE.ink, 0.5);
+    // Police glows at the edges and speed streaks, behind the panel.
+    titleBackdropFx(this);
+    const panel = { x: GAME_WIDTH / 2 - 590, y: 336 - 190, w: 1180, h: 380 };
+    this.add.rectangle(GAME_WIDTH / 2, 336, panel.w, panel.h, PALETTE.cream, 0.78).setStrokeStyle(3, PALETTE.ink, 0.5);
 
-    text(this, GAME_WIDTH / 2, 196, 'Les Chasseurs de Primes Ultimes', 58, {
+    const title = text(this, GAME_WIDTH / 2, 196, 'Les Chasseurs de Primes Ultimes', 58, {
       bold: true,
       stroke: toCss(PALETTE.cream),
       strokeThickness: 8,
     }).setOrigin(0.5);
     text(this, GAME_WIDTH / 2, 266, 'BELLEVUE CITY', 28, { color: toCss(PALETTE.terracotta), letterSpacing: 10 }).setOrigin(0.5);
+    // The flashing light bar, the scanner sweep and the pulsing title (under the buttons).
+    titleFrontFx(this, panel, title);
 
     const progress = loadProgress();
     const played = progress.missions.filter((m) => m !== null).length;
