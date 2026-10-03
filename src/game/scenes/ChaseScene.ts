@@ -5,7 +5,7 @@ import { EVENT_LINES, OUTCOME_LINES, REPEAT_LINES, TRANSPORT_LINES } from '../..
 import { DIFFICULTY_SETTINGS } from '../../engine/difficulty';
 import { Chase, pointOf, type ChaseEvent, type SpokenText } from '../../engine/chase/chase';
 import { generateScenario } from '../../engine/chase/scenario';
-import { SIGHTING } from '../../engine/chase/settings';
+import { DODGE, SIGHTING } from '../../engine/chase/settings';
 import { livery, MISSION_COUNT } from '../../engine/campaign/campaign';
 import type { MissionStats } from '../../engine/campaign/scoring';
 import type { SightingCard } from '../../engine/chase/sightings';
@@ -15,6 +15,7 @@ import { LOCATION_WORD_BY_ID, withArticle } from '../../engine/language/location
 import type { MoverStart } from '../../engine/movement/mover';
 import { TownGraph, type TravelMode } from '../../engine/world/graph';
 import { HALF_WIDTH, PAVEMENT } from '../../engine/world/geometry';
+import { actionSounds } from '../audio/ActionSounds';
 import { ChaseMusic } from '../audio/ChaseMusic';
 import { DrivingSounds } from '../audio/DrivingSounds';
 import { FootSounds } from '../audio/FootSounds';
@@ -37,6 +38,7 @@ import {
 } from '../render/actors';
 import { arrestKind, playArrest } from '../render/arrest';
 import { DriftEffects } from '../render/drift';
+import { EscapeEffects } from '../render/escapes';
 import { RoundaboutGuide } from '../render/roundaboutGuide';
 import { preloadCanvaArt } from '../render/canvaArt';
 import { drawTown, type TownLayers } from '../render/townRenderer';
@@ -93,6 +95,11 @@ export class ChaseScene extends Phaser.Scene {
   private suspectCars: (Phaser.GameObjects.Container | null)[] = [];
   private suspectRunner!: Phaser.GameObjects.Container;
   private abandonedCar!: Phaser.GameObjects.Container;
+  private escapes!: EscapeEffects;
+  /** Stages whose car the suspect crashed: the wreck stays where it came to rest. */
+  private wrecked = new Set<number>();
+  /** The police car is skidding to a stop (held after a crash or U-turn). */
+  private policeSkid = false;
   private routeOverlay!: Phaser.GameObjects.Graphics;
   private badge!: ReturnType<typeof createIntentBadge>;
   private roundabout!: RoundaboutGuide;
@@ -114,6 +121,8 @@ export class ChaseScene extends Phaser.Scene {
     this.mission = typeof data.mission === 'number' ? data.mission : null;
     this.stage = 'COUNTDOWN';
     this.staged = false;
+    this.wrecked = new Set();
+    this.policeSkid = false;
   }
 
   preload(): void {
@@ -158,6 +167,7 @@ export class ChaseScene extends Phaser.Scene {
     this.suspectRunner = createSuspectRunner(this).setAlpha(0);
     this.trail = this.add.graphics().setDepth(28);
     this.drift = new DriftEffects(this);
+    this.escapes = new EscapeEffects(this, this.drift);
     const colours = livery(loadProgress().livery);
     this.car = createPoliceCar(this, colours);
     this.officer = createOfficer(this, colours).setVisible(false);
@@ -294,6 +304,12 @@ export class ChaseScene extends Phaser.Scene {
           break;
         case 'SUSPECT_MODE':
           break;
+        case 'SUSPECT_CRASH':
+          this.crashSuspectCar();
+          break;
+        case 'SUSPECT_DODGE':
+          this.escapes.dodge(event.mode, DODGE.downSeconds[event.mode], this.officer);
+          break;
       }
     }
   }
@@ -414,6 +430,9 @@ export class ChaseScene extends Phaser.Scene {
     this.displayHeading += Phaser.Math.Angle.Wrap(me.heading - this.displayHeading) * Math.min(1, delta / 90);
     const avatar = me.mode === 'CAR' ? this.car : this.officer;
     const mine = this.onPavement(me, this.pavement.me, delta);
+    const suspectNow = this.chase.suspect.snapshot();
+    const spinningCar = this.escapes.spinning ? this.suspectCars[this.chase.suspectStage] ?? null : null;
+    const tumble = this.escapes.update(delta, spinningCar, this.officer);
     const drift = this.drift.update(
       { x: me.x, y: me.y, heading: me.heading, speed: me.speed, driving: me.mode === 'CAR' && this.stage === 'PURSUIT' },
       this.displayHeading,
@@ -423,14 +442,20 @@ export class ChaseScene extends Phaser.Scene {
       avatar.setPosition(me.x + mine.x + drift.dx, me.y + mine.y + drift.dy).setRotation(this.displayHeading + drift.swing);
       // About three strides a second at running speed.
       this.stride += (delta / 1000) * me.speed * 0.75;
-      if (me.mode === 'FOOT') animateRunner(this.officer, this.stride, me.speed > 1);
+      if (me.mode === 'FOOT') {
+        animateRunner(this.officer, this.stride, me.speed > 1 && tumble === 0);
+        // Knocked over by the suspect turning round: sprawled across the way, seeing stars.
+        if (tumble > 0) this.officer.setRotation(this.displayHeading + tumble);
+      }
+      this.skidToStop(me);
     }
     this.officer.setVisible(me.mode === 'FOOT');
     this.drawTrail(me);
     this.driving.update({ driving: me.mode === 'CAR' && this.stage === 'PURSUIT', speed: me.speed, heading: me.heading }, delta);
     this.footsteps.update({ running: me.mode === 'FOOT' && this.stage === 'PURSUIT', speed: me.speed, stride: this.stride }, delta);
     this.placeParked(this.car, me.mode === 'CAR' ? null : this.chase.parkedCar, me.mode === 'CAR');
-    this.placeParked(this.abandonedCar, this.chase.abandonedCar, false);
+    // After a crash the wreck stands for the abandoned car (and any car left earlier stays where it is).
+    if (this.wrecked.size === 0) this.placeParked(this.abandonedCar, this.chase.abandonedCar, false);
     // Above the player on screen, whichever way the map is turned.
     const lift = me.mode === 'CAR' ? 16 : 10;
     const turned = this.rig.rotation;
@@ -440,12 +465,15 @@ export class ChaseScene extends Phaser.Scene {
     this.music.setIntensity(status.signal);
     this.roundabout.update(this.chase.player, this.stage === 'PURSUIT' && !status.followingTracks);
 
-    const suspect = this.chase.suspect.snapshot();
-    this.suspectHeading += Phaser.Math.Angle.Wrap(suspect.heading - this.suspectHeading) * Math.min(1, delta / 90);
-    // The suspect is only on the map when close (a sighting) or at the end; debug always shows it.
-    const visible = debugState.isEnabled || this.chase.status.suspectVisible || this.stage === 'RESULTS';
-    const shown = this.suspectCars[this.chase.suspectStage] ?? this.suspectRunner;
-    for (const sprite of [...this.suspectCars, this.suspectRunner]) if (sprite && sprite !== shown) sprite.setAlpha(0);
+    const suspect = suspectNow;
+    // A car spinning round turns visibly; otherwise the heading eases round quickly.
+    const ease = this.escapes.spinning ? 320 : 90;
+    this.suspectHeading += Phaser.Math.Angle.Wrap(suspect.heading - this.suspectHeading) * Math.min(1, delta / ease);
+    // The suspect is only on the map when close (a sighting), just after an escape, or at the end; debug always shows it.
+    const visible = debugState.isEnabled || this.chase.status.suspectVisible || this.escapes.revealing || this.stage === 'RESULTS';
+    const shown = this.suspectSprite();
+    this.suspectCars.forEach((sprite, i) => sprite && sprite !== shown && !this.wrecked.has(i) && sprite.setAlpha(0));
+    if (shown !== this.suspectRunner) this.suspectRunner.setAlpha(0);
     const theirs = this.onPavement(suspect, this.pavement.suspect, delta);
     if (!this.staged) {
       shown.setPosition(suspect.x + theirs.x, suspect.y + theirs.y).setRotation(this.suspectHeading);
@@ -458,10 +486,46 @@ export class ChaseScene extends Phaser.Scene {
     }
 
     // During the arrest the camera frames both of them.
-    const framed = this.staged ? this.suspectCars[this.chase.suspectStage] ?? this.suspectRunner : null;
+    const framed = this.staged ? this.suspectSprite() : null;
     this.rig.update(framed ? { x: (avatar.x + framed.x) / 2, y: (avatar.y + framed.y) / 2, heading: this.suspectHeading } : me, delta);
     this.scaleLabels();
     this.keepUpright();
+  }
+
+  /** The suspect as drawn now: their car, or on foot (out of a crashed car too). */
+  private suspectSprite(): Phaser.GameObjects.Container {
+    const stage = this.chase.suspectStage;
+    return (this.wrecked.has(stage) ? null : this.suspectCars[stage]) ?? this.suspectRunner;
+  }
+
+  /**
+   * The suspect crashes: the car they were driving slides into the kerb and
+   * stays there as a steaming wreck while they run off.
+   */
+  private crashSuspectCar(): void {
+    // Just before the arrest the suspect is already on foot; at a planned change of transport, still in the car.
+    const stage = this.chase.suspect.mode === 'CAR' ? this.chase.suspectStage : this.chase.suspectStage - 1;
+    const car = this.suspectCars[stage];
+    if (!car || this.wrecked.has(stage)) return;
+    this.wrecked.add(stage);
+    const at = this.chase.suspect.location();
+    const p = pointOf(this.graph, at);
+    const edge = this.graph.edge(at.edgeId);
+    const from = this.graph.node(this.graph.other(edge, at.towards));
+    const to = this.graph.node(at.towards);
+    const heading = Math.atan2(to.y - from.y, to.x - from.x);
+    // Up on the pavement on its right, out of the police car's way.
+    const kerb = edge.car ? HALF_WIDTH[edge.kind] + PAVEMENT / 2 : 0;
+    this.escapes.crash(car, { x: p.x - Math.sin(heading) * kerb, y: p.y + Math.cos(heading) * kerb, rotation: heading });
+  }
+
+  /** Held still after a crash or a U-turn, the police car skids to a stop with a screech. */
+  private skidToStop(me: { x: number; y: number; speed: number; mode: TravelMode }): void {
+    const skidding = me.mode === 'CAR' && this.stage === 'PURSUIT' && this.chase.player.speedFactor === 0 && me.speed > 12;
+    if (skidding && !this.policeSkid) actionSounds.screech(Math.min(1.2, me.speed / 70), 0.22);
+    if (skidding) this.drift.tyres('police', this.car.x, this.car.y, this.car.rotation, 0.8, this.game.loop.delta / 1000);
+    else if (this.policeSkid) this.drift.lift('police');
+    this.policeSkid = skidding;
   }
 
   /**
@@ -603,7 +667,8 @@ export class ChaseScene extends Phaser.Scene {
     this.stage = 'ARREST';
     this.staged = true;
     const me = this.chase.player.snapshot();
-    const suspectCar = this.suspectCars[this.chase.suspectStage] ?? null;
+    const sprite = this.suspectSprite();
+    const suspectCar = sprite === this.suspectRunner ? null : sprite;
     this.rig.closeUp();
     void playArrest(this, this.drift, {
       police: me.mode === 'CAR' ? this.car : this.officer,

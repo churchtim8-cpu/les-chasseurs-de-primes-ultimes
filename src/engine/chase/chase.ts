@@ -916,12 +916,15 @@ export class Chase {
   }
 
   /**
-   * Debug tools: put the player right on the suspect (tests the capture rules).
+   * Debug tools: put the player right on the suspect, or `behind` metres back (tests the capture rules).
    * On a footpath a driver cannot follow, the player arrives on foot.
    */
-  teleportPlayerToSuspect(): void {
-    const at = this.suspect.location();
+  teleportPlayerToSuspect(behind = 0): void {
+    const at = { ...this.suspect.location() };
     const edge = this.graph.edge(at.edgeId);
+    // `behind` metres back along the suspect's street (as far as its start).
+    const back = behind / Math.max(1, this.graph.edgeLength(edge));
+    at.t = Math.min(1, Math.max(0, at.towards === edge.to ? at.t - back : at.t + back));
     const mode = this.player.mode === 'CAR' && !edge.car ? 'FOOT' : this.player.mode;
     if (mode !== this.player.mode) this.parkedCar = this.player.location();
     const start = { ...at, mode };
