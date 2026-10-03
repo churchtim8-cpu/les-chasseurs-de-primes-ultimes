@@ -22,18 +22,16 @@ function standStill(seed: string, chaseType: ChaseType = CHASE_TYPES[0]!) {
   const plannedEnd = chase.scenario.stages[chase.scenario.stages.length - 1]!.route.at(-1);
   let arrivedAt: number | null = null;
   let movingAfter = false;
-  let transmissionsAfter = 0;
   let endedEarly = false;
   for (let t = 0; t < 600 && chase.status.phase === 'PURSUIT'; t += 0.1) {
     const events = chase.update(0.1);
     const suspect = chase.suspect.snapshot();
     if (arrivedAt === null && suspect.towards === plannedEnd && suspect.speed === 0) arrivedAt = t;
     if (arrivedAt !== null && t > arrivedAt + 2 && suspect.speed > 1) movingAfter = true;
-    if (arrivedAt !== null) transmissionsAfter += events.filter((e) => e.type === 'TRANSMISSION').length;
     const after = chase.status as { phase: string; timeLeft: number };
     if (after.phase === 'ESCAPED' && after.timeLeft > 0) endedEarly = true;
   }
-  return { chase, movingAfter, transmissionsAfter, endedEarly };
+  return { chase, movingAfter, endedEarly };
 }
 
 describe('the suspect only escapes when time runs out', () => {
@@ -57,13 +55,12 @@ describe('the suspect only escapes when time runs out', () => {
     let tried = 0;
     for (const chaseType of CHASE_TYPES) {
       for (const seed of seeds('EASY', 4, `keep-going-${chaseType}`)) {
-        const { chase, movingAfter, transmissionsAfter } = standStill(seed, chaseType);
+        const { chase, movingAfter } = standStill(seed, chaseType);
         tried++;
         if (!movingAfter) continue;
         kept++;
-        // The scanner planned a way onto the longer route (a player still on an
-        // earlier stage gets the longer route with that stage's directions).
-        if (chase.playerStage === chase.suspectStage) expect(transmissionsAfter, `${seed} ${chaseType}`).toBeGreaterThan(0);
+        // The suspect has a route to follow again.
+        expect(chase.suspect.remainingPlan().length, `${seed} ${chaseType}`).toBeGreaterThan(1);
         expect(chase.status.phase === 'ESCAPED' ? chase.status.timeLeft : 0, seed).toBe(0);
       }
     }

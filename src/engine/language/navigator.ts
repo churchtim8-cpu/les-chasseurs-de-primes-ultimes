@@ -93,14 +93,17 @@ export class Navigator {
    * longer route. False when the guide ends elsewhere (the player is being
    * led back onto the route, and that plan already has the longer route).
    */
-  extend(nodes: readonly string[], destination: string | null): boolean {
-    if (nodes[0] !== this.guide[this.guide.length - 1]) return false;
+  extend(player: MoverStart, nodes: readonly string[], destination: string | null): Transmission[] | null {
+    if (nodes[0] !== this.guide[this.guide.length - 1]) return null;
     this.guide.push(...nodes.slice(1));
     this.actions = actionIndices(this.graph, this.guide, this.mode);
     this.destination = destination;
     this.finalDone = false;
     this.fillerFor = null;
-    return true;
+    // The next turn may be close: say it now rather than at the next node.
+    const out: Transmission[] = [];
+    if (this.onGuide(player)) this.schedule(player, out);
+    return out;
   }
 
   /** The most recent transmission (for the Repeat button). */

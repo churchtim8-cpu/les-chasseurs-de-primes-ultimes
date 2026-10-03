@@ -493,11 +493,11 @@ export class Chase {
   private keepGoing(events: ChaseEvent[]): void {
     // Away from the police, not back past them: luck must not catch what listening would.
     const me = this.player.snapshot();
-    const clear = this.settings.sightingDistance * 2;
+    const clear = this.settings.sightingDistance * 4;
     const away = (nodes: readonly string[]) => {
       const start = this.graph.node(nodes[0] as string);
       const end = this.graph.node(nodes[nodes.length - 1] as string);
-      return distance(end, me) > distance(start, me) && nodes.every((n) => distance(this.graph.node(n), me) > clear);
+      return distance(end, me) > distance(start, me) + clear && nodes.every((n) => distance(this.graph.node(n), me) > clear);
     };
     const planFrom = (at: MoverStart) => {
       const length = this.settings.stageLength[at.mode];
@@ -509,9 +509,11 @@ export class Chase {
     };
     let at = this.suspect.location();
     let route = planFrom(at);
+    let turnedRound = false;
     if (!route && this.suspect.uTurn()) {
       at = this.suspect.location();
       route = planFrom(at);
+      turnedRound = true;
     }
     if (!route) {
       this.suspectArrived = true;
@@ -525,9 +527,13 @@ export class Chase {
     this.suspect.followPlan(route.nodes);
     this.suspect.speedFactor = this.suspectSpeedFor(this.suspectStage);
     if (this.playerStage !== this.suspectStage) return; // the next stage's directions already follow the longer route
-    // The directions already given stand; the next ones follow the longer route.
-    if (this.navigator.extend(route.nodes, this.destination)) return;
-    const transmissions = this.navigator.redirect(this.player.location(), this.suspect.remainingPlan(), this.destination);
+    const here = this.player.location();
+    // Driving on: the directions already given stand and the next ones follow the longer
+    // route. Turned round: that is a change of direction, corrected like any other.
+    const transmissions =
+      (turnedRound ? null : this.navigator.extend(here, route.nodes, this.destination)) ??
+      this.navigator.redirect(here, this.suspect.remainingPlan(), this.destination);
+    if (turnedRound) events.push({ type: 'ANNOUNCE', lines: [EVENT_LINES.ATTENTION, EVENT_LINES.CHANGED_DIRECTION] });
     for (const transmission of transmissions) events.push({ type: 'TRANSMISSION', transmission });
   }
 
