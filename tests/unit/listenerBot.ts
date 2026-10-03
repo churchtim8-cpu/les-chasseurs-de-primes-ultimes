@@ -34,10 +34,11 @@ interface Task {
 }
 
 export class ListenerBot {
-  private heard: { at: number; transmission: Transmission }[] = [];
+  private heard: { at: number; seq: number; transmission: Transmission }[] = [];
+  private seq = 0;
   private orders: { at: number; audioId: string }[] = [];
-  /** Times at which the bot has understood that the suspect changed direction. */
-  private changes: number[] = [];
+  /** When the bot understands that the suspect changed direction, and which calls came before the warning. */
+  private changes: { at: number; before: number }[] = [];
   /** The vehicle it was last told the suspect is in. */
   private vehicle: Vehicle | null = null;
   private question: { at: number; cards: SightingCard[]; audioId: string } | null = null;
@@ -61,14 +62,16 @@ export class ListenerBot {
   hear(events: ChaseEvent[]): void {
     for (const e of events) {
       if (e.type === 'TRANSMISSION') {
-        this.heard.push({ at: this.time + this.reaction, transmission: e.transmission });
+        this.heard.push({ at: this.time + this.reaction, seq: this.seq++, transmission: e.transmission });
         this.log.push(e.transmission);
       } else if (e.type === 'ANNOUNCE') {
         for (const line of e.lines) {
           if (line.audioId === TRANSPORT_LINES.GET_OUT.audioId || line.audioId === TRANSPORT_LINES.GET_IN.audioId) {
             this.orders.push({ at: this.time + this.reaction, audioId: line.audioId });
           }
-          if (line.audioId === EVENT_LINES.CHANGED_DIRECTION.audioId) this.changes.push(this.time + this.reaction);
+          if (line.audioId === EVENT_LINES.CHANGED_DIRECTION.audioId) {
+            this.changes.push({ at: this.time + this.reaction, before: this.seq });
+          }
           const told = VEHICLES.find((v) => vehicleLine(v).audioId === line.audioId);
           if (told) this.vehicle = told;
         }
@@ -98,10 +101,12 @@ export class ListenerBot {
       this.hear(events);
     }
     const player = chase.player;
-    while (this.changes.length > 0 && (this.changes[0] ?? Infinity) <= this.time) {
-      // The directions it was following no longer apply; the corrected ones are already queued.
-      this.changes.shift();
+    while (this.changes.length > 0 && (this.changes[0]?.at ?? Infinity) <= this.time) {
+      // The directions it was following no longer apply, nor do any heard just
+      // before the warning; the corrected ones that follow it are kept.
+      const change = this.changes.shift()!;
       this.tasks = [];
+      this.heard = this.heard.filter((h) => h.seq >= change.before);
       player.clearQueue();
     }
     while (this.heard.length > 0 && (this.heard[0]?.at ?? Infinity) <= this.time) {

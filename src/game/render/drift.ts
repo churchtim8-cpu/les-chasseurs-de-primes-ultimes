@@ -28,7 +28,26 @@ interface Mark {
   bx: number;
   by: number;
   age: number;
+  /** How dark the mark is (a burnout leaves black rubber; a drift a lighter scuff). */
+  alpha: number;
 }
+
+/** How a car's tyres smoke and mark the road: a drift (default) or a burnout (big white clouds, black rubber). */
+export interface TyreSmoke {
+  size: number;
+  /** Puffs per second relative to a drift's. */
+  rate: number;
+  colour: number;
+  markAlpha: number;
+  /** How long a puff lasts relative to a drift's, and whether it thins out quickly or hangs in the air. */
+  life: number;
+  hangs: boolean;
+}
+
+export const DRIFT_SMOKE: TyreSmoke = { size: 1, rate: 1, colour: 0xd2d2d2, markAlpha: 0.6, life: 1, hangs: false };
+export const BURNOUT_SMOKE: TyreSmoke = { size: 1.6, rate: 3.5, colour: 0xf4f4f4, markAlpha: 0.95, life: 2.4, hangs: true };
+/** Tones a burnout's cloud is made of, so it looks like billowing smoke rather than one pale disc. */
+const SMOKE_TONES = [0xffffff, 0xeeeeee, 0xdcdcdc, 0xc8c8c8];
 
 export class DriftEffects {
   private readonly marks: Phaser.GameObjects.Graphics;
@@ -43,7 +62,7 @@ export class DriftEffects {
 
   constructor(private readonly scene: Phaser.Scene) {
     this.marks = scene.add.graphics().setDepth(27);
-    for (let i = 0; i < 40; i++) this.puffs.push(scene.add.circle(0, 0, 5, 0xd2d2d2).setAlpha(0).setDepth(29));
+    for (let i = 0; i < 90; i++) this.puffs.push(scene.add.circle(0, 0, 5, 0xd2d2d2).setAlpha(0).setDepth(29));
   }
 
   /** The objects to keep off the interface camera. */
@@ -108,23 +127,34 @@ export class DriftEffects {
    * the player's drift, or the suspect braking hard). Call every frame while
    * it skids; `id` keeps each car's marks joined up.
    */
-  tyres(id: string, x: number, y: number, body: number, strength: number, dt: number): void {
+  tyres(id: string, x: number, y: number, body: number, strength: number, dt: number, smoke: TyreSmoke = DRIFT_SMOKE): void {
     const wheels = [-1, 1].map((side) => ({
       x: x - Math.cos(body) * DRIFT.rear - Math.sin(body) * (side * DRIFT.track),
       y: y - Math.sin(body) * DRIFT.rear + Math.cos(body) * (side * DRIFT.track),
     }));
     const last = this.lastWheels.get(id);
     if (last) {
-      wheels.forEach((w, i) => this.segments.push({ ax: last[i]!.x, ay: last[i]!.y, bx: w.x, by: w.y, age: 0 }));
+      wheels.forEach((w, i) =>
+        this.segments.push({ ax: last[i]!.x, ay: last[i]!.y, bx: w.x, by: w.y, age: 0, alpha: smoke.markAlpha }),
+      );
       if (this.segments.length > 600) this.segments.splice(0, this.segments.length - 600);
     }
     this.lastWheels.set(id, wheels);
     const clock = (this.puffClocks.get(id) ?? 0) + dt;
     let left = clock;
-    while (left >= DRIFT.puffEvery) {
-      left -= DRIFT.puffEvery;
+    while (left >= DRIFT.puffEvery / smoke.rate) {
+      left -= DRIFT.puffEvery / smoke.rate;
       const w = wheels[this.nextPuff++ % 2]!;
-      this.puff(w.x, w.y, strength);
+      if (smoke.hangs) {
+        // Billows out behind the car and to the sides, in mixed tones.
+        const tone = SMOKE_TONES[this.nextPuff % SMOKE_TONES.length]!;
+        const back = 6 + Phaser.Math.FloatBetween(0, 14);
+        const side = Phaser.Math.FloatBetween(-6, 6);
+        const push = { x: -Math.cos(body) * back - Math.sin(body) * side, y: -Math.sin(body) * back + Math.cos(body) * side };
+        this.puff(w.x, w.y, strength, tone, smoke.size * Phaser.Math.FloatBetween(0.7, 1.3), smoke.life, true, push);
+      } else {
+        this.puff(w.x, w.y, strength, smoke.colour, smoke.size, smoke.life, false);
+      }
     }
     this.puffClocks.set(id, left);
   }
@@ -155,22 +185,33 @@ export class DriftEffects {
     }
   }
 
-  private puff(x: number, y: number, strength: number, colour = 0xd2d2d2, size = 1): void {
+  private puff(
+    x: number,
+    y: number,
+    strength: number,
+    colour = 0xd2d2d2,
+    size = 1,
+    life = 1,
+    hangs = false,
+    push = { x: 0, y: 0 },
+  ): void {
     const p = this.puffs[this.puffIndex++ % this.puffs.length]!;
     this.scene.tweens.killTweensOf(p);
     p.setFillStyle(colour);
     p.setPosition(x + Phaser.Math.FloatBetween(-1, 1), y + Phaser.Math.FloatBetween(-1, 1))
       .setScale(0.7 * size)
       .setAlpha(0.6 + 0.3 * strength);
+    const duration = Phaser.Math.Between(900, 1300) * life;
     this.scene.tweens.add({
       targets: p,
       scale: Phaser.Math.FloatBetween(2.6, 3.8) * size,
-      alpha: 0,
-      x: p.x + Phaser.Math.FloatBetween(-4, 4) * size,
-      y: p.y + Phaser.Math.FloatBetween(-4, 4) * size,
-      duration: Phaser.Math.Between(900, 1300),
+      x: p.x + Phaser.Math.FloatBetween(-4, 4) * size + push.x,
+      y: p.y + Phaser.Math.FloatBetween(-4, 4) * size + push.y,
+      duration,
       ease: 'Quad.easeOut',
     });
+    // A drift's wisps thin out at once; a burnout's cloud hangs, then clears.
+    this.scene.tweens.add({ targets: p, alpha: 0, duration, ease: hangs ? 'Quad.easeIn' : 'Quad.easeOut' });
   }
 
   private fadeMarks(dt: number): void {
@@ -179,7 +220,7 @@ export class DriftEffects {
     for (const m of this.segments) m.age += dt;
     this.segments = this.segments.filter((m) => m.age < DRIFT.markSeconds);
     for (const m of this.segments) {
-      this.marks.lineStyle(2.2, 0x161616, 0.6 * (1 - m.age / DRIFT.markSeconds)).lineBetween(m.ax, m.ay, m.bx, m.by);
+      this.marks.lineStyle(2.2, 0x161616, m.alpha * (1 - m.age / DRIFT.markSeconds)).lineBetween(m.ax, m.ay, m.bx, m.by);
     }
   }
 }

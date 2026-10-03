@@ -6,6 +6,7 @@ import { DIFFICULTY_SETTINGS } from '../../engine/difficulty';
 import { Chase, pointOf, type ChaseEvent, type SpokenText } from '../../engine/chase/chase';
 import { generateScenario } from '../../engine/chase/scenario';
 import { DODGE, SIGHTING } from '../../engine/chase/settings';
+import { MOVEMENT } from '../../engine/movement/settings';
 import { livery, MISSION_COUNT } from '../../engine/campaign/campaign';
 import type { MissionStats } from '../../engine/campaign/scoring';
 import type { SightingCard } from '../../engine/chase/sightings';
@@ -37,7 +38,7 @@ import {
   createSuspectRunner,
 } from '../render/actors';
 import { arrestKind, playArrest } from '../render/arrest';
-import { DriftEffects } from '../render/drift';
+import { BURNOUT_SMOKE, DriftEffects } from '../render/drift';
 import { LanePosition } from '../render/lanes';
 import { EscapeEffects } from '../render/escapes';
 import { RoundaboutGuide } from '../render/roundaboutGuide';
@@ -51,10 +52,23 @@ export interface ChaseSceneData {
   mission?: number;
 }
 
-type Stage = 'COUNTDOWN' | 'PURSUIT' | 'ARREST' | 'RESULTS';
+type Stage = 'OPENING' | 'PURSUIT' | 'ARREST' | 'RESULTS';
 
 /** When the results screen opens after "Le suspect est arrêté" / "s'est échappé" (ms). */
 const RESULTS_DELAY = { minMs: 1800, afterLineMs: 600, maxMs: 9000 } as const;
+/**
+ * The chase begins only once the opening call has been heard in full
+ * (Mr Henry, 2026-10-03): never sooner than minMs after the scene opens
+ * (time to read it when there is no sound), never later than maxMs.
+ */
+const OPENING = { minMs: 2500, maxMs: 14_000, goBannerMs: 900 } as const;
+/**
+ * "GO !" in the car: a burnout. The car sits spinning its wheels in a cloud of
+ * tyre smoke for `holdMs`, then takes off, still smoking, until `ms` is up.
+ */
+const BURNOUT = { holdMs: 700, ms: 1800 } as const;
+/** The suspect's run up to its getaway car takes this share of the change of transport; then it gets in. */
+const BOARDING = { runShare: 0.55, getInShare: 0.25, doorMetres: 2.4 } as const;
 
 /**
  * One chase: the suspect travels its generated route (driving, on foot, or
@@ -111,7 +125,13 @@ export class ChaseScene extends Phaser.Scene {
   private cameraMode: TravelMode = 'CAR';
   private displayHeading = 0;
   private suspectHeading = 0;
-  private stage: Stage = 'COUNTDOWN';
+  private stage: Stage = 'OPENING';
+  /** The call being spoken (resolves when it has been heard). */
+  private speech: Promise<void> = Promise.resolve();
+  /** The burnout at "GO !" lasts until this scene time; the car only moves off from `launchAt`. */
+  private burnoutUntil = 0;
+  private launchAt = 0;
+  private burning = false;
   private seed = '';
   private mission: number | null = null;
 
@@ -122,7 +142,10 @@ export class ChaseScene extends Phaser.Scene {
   init(data: ChaseSceneData): void {
     this.seed = data.seed;
     this.mission = typeof data.mission === 'number' ? data.mission : null;
-    this.stage = 'COUNTDOWN';
+    this.stage = 'OPENING';
+    this.burnoutUntil = 0;
+    this.launchAt = 0;
+    this.burning = false;
     this.staged = false;
     this.wrecked = new Set();
     this.warnings = 0;
@@ -226,12 +249,12 @@ export class ChaseScene extends Phaser.Scene {
     debugState.info.set('route', stages.join(' → '));
     debugState.info.set('audio', `${scannerAudio.clipCount} clips`);
     this.hud.update(this.chase.status, me.mode);
-    this.countdown();
+    this.opening();
   }
 
   override update(_time: number, delta: number): void {
     const dt = Math.min(delta, 50) / 1000;
-    if (this.stage === 'PURSUIT') {
+    if (this.stage === 'PURSUIT' && this.time.now >= this.launchAt) {
       const { accelerate, brake } = this.controls.state;
       this.chase.player.setThrottle(brake ? 'BRAKE' : accelerate ? 'ACCELERATE' : 'CRUISE');
       this.handleEvents(this.chase.update(dt));
@@ -256,11 +279,26 @@ export class ChaseScene extends Phaser.Scene {
     }
   }
 
-  private countdown(): void {
-    const steps = ['3', '2', '1', 'GO !'];
-    steps.forEach((text, i) => this.time.delayedCall(i * 700, () => this.hud.showBanner(text)));
-    this.time.delayedCall(steps.length * 700 - 500, () => (this.stage = 'PURSUIT'));
-    this.time.delayedCall(steps.length * 700 + 100, () => this.hud.showBanner(''));
+  /**
+   * The dispatcher's opening call is heard in full before anything moves,
+   * then "GO !" and the chase begins (in the car with a burnout).
+   */
+  private opening(): void {
+    this.hud.showBanner('PRÊT…');
+    this.handleEvents(this.chase.openingCall());
+    const minWait = new Promise<void>((resolve) => this.time.delayedCall(OPENING.minMs, () => resolve()));
+    const maxWait = new Promise<void>((resolve) => this.time.delayedCall(OPENING.maxMs, () => resolve()));
+    void Promise.race([Promise.all([this.speech, minWait]), maxWait]).then(() => {
+      if (!this.scene.isActive() || this.stage !== 'OPENING') return;
+      this.hud.showBanner('GO !');
+      this.stage = 'PURSUIT';
+      if (this.chase.player.mode === 'CAR') {
+        this.launchAt = this.time.now + BURNOUT.holdMs;
+        this.burnoutUntil = this.time.now + BURNOUT.ms;
+        actionSounds.screech(BURNOUT.ms / 1000 + 0.2, 0.3);
+      }
+      this.time.delayedCall(OPENING.goBannerMs, () => this.hud.showBanner(''));
+    });
   }
 
   private handleEvents(events: ChaseEvent[]): void {
@@ -391,7 +429,7 @@ export class ChaseScene extends Phaser.Scene {
     const seconds = LANGUAGE_SETTINGS[difficulty].textSeconds + 2 * (clips.length - 1);
     this.hud.showScanner(clips.map((c) => c.text).join(' '), audioOnly ? 0 : seconds);
     this.orderToasts(lead);
-    void scannerAudio.play([...before, ...clips.map((c) => ({ audioId: c.audioId, radio: true }))]);
+    this.speech = scannerAudio.play([...before, ...clips.map((c) => ({ audioId: c.audioId, radio: true }))]);
     const detail = [
       ...lead.map((l) => l.audioId),
       ...transmission.instructions.map((i) => `${i.template} ${i.audioId}`),
@@ -464,6 +502,7 @@ export class ChaseScene extends Phaser.Scene {
         if (tumble > 0) this.officer.setRotation(this.displayHeading + tumble);
       }
       this.skidToStop(me);
+      this.burnout(me, delta);
     }
     this.officer.setVisible(me.mode === 'FOOT');
     this.drawTrail({ ...me, x: me.x + mine.x, y: me.y + mine.y });
@@ -488,16 +527,28 @@ export class ChaseScene extends Phaser.Scene {
     // The suspect is only on the map when close (a sighting), just after an escape, or at the end; debug always shows it.
     const visible = debugState.isEnabled || this.chase.status.suspectVisible || this.escapes.revealing || this.stage === 'RESULTS';
     const shown = this.suspectSprite();
-    this.suspectCars.forEach((sprite, i) => sprite && sprite !== shown && !this.wrecked.has(i) && sprite.setAlpha(0));
+    const stage = this.chase.suspectStage;
+    const stages = this.chase.scenario.stages;
+    // A getaway car waits parked where its stage starts until the suspect runs up and gets in.
+    this.suspectCars.forEach((sprite, i) => {
+      if (!sprite || sprite === shown || this.wrecked.has(i)) return;
+      if (i > stage && stages[i - 1]?.mode === 'FOOT') {
+        this.placeParked(sprite, this.chase.stageStart(i), false);
+        sprite.setAlpha(1);
+      } else sprite.setAlpha(0);
+    });
     if (shown !== this.suspectRunner) this.suspectRunner.setAlpha(0);
     const theirs = this.lanes.suspect.update(suspect, traffic, delta);
     if (!this.staged) {
       shown.setPosition(suspect.x + theirs.x, suspect.y + theirs.y).setRotation(this.suspectHeading);
+      let inCar = 0;
       if (shown === this.suspectRunner) {
-        this.suspectStride += (delta / 1000) * suspect.speed * 0.75;
-        animateRunner(this.suspectRunner, this.suspectStride, suspect.speed > 1);
+        const boarding = this.boarding(shown);
+        inCar = boarding?.inCar ?? 0;
+        this.suspectStride += (delta / 1000) * (boarding ? boarding.speed : suspect.speed) * 0.75;
+        animateRunner(this.suspectRunner, this.suspectStride, (boarding ? boarding.speed : suspect.speed) > 1);
       }
-      const alpha = shown.alpha + ((visible ? 1 : 0) - shown.alpha) * Math.min(1, delta / 250);
+      const alpha = shown.alpha + ((visible && inCar < 1 ? 1 - inCar : 0) - shown.alpha) * Math.min(1, delta / 250);
       shown.setAlpha(alpha);
     }
 
@@ -506,6 +557,37 @@ export class ChaseScene extends Phaser.Scene {
     this.rig.update(framed ? { x: (avatar.x + framed.x) / 2, y: (avatar.y + framed.y) / 2, heading: this.suspectHeading } : me, delta);
     this.scaleLabels();
     this.keepUpright();
+  }
+
+  /**
+   * The suspect changing into a car: runs the last metres up to the getaway
+   * car, opens the door and gets in (the runner fades as it does); the car
+   * then pulls away when its stage starts. Moves the runner and returns how
+   * far it is into the car (0 to 1) and how fast it is drawn running.
+   */
+  private boarding(runner: Phaser.GameObjects.Container): { inCar: number; speed: number } | null {
+    const transfer = this.chase.transfer;
+    if (!transfer || transfer.to !== 'CAR') return null;
+    const car = this.suspectCars[this.chase.suspectStage + 1];
+    if (!car) return null;
+    const run = Phaser.Math.Clamp(transfer.progress / BOARDING.runShare, 0, 1);
+    const inCar = Phaser.Math.Clamp((transfer.progress - BOARDING.runShare) / BOARDING.getInShare, 0, 1);
+    // The driver's door is on the car's left.
+    const door = { x: car.x + Math.sin(car.rotation) * BOARDING.doorMetres, y: car.y - Math.cos(car.rotation) * BOARDING.doorMetres };
+    const eased = 1 - (1 - run) * (1 - run);
+    const from = { x: runner.x, y: runner.y };
+    runner.setPosition(from.x + (door.x - from.x) * eased, from.y + (door.y - from.y) * eased);
+    if (run < 1) runner.setRotation(Math.atan2(door.y - from.y, door.x - from.x));
+    else runner.setRotation(car.rotation);
+    return { inCar, speed: run < 1 ? MOVEMENT.FOOT.cruise : 0 };
+  }
+
+  /** "GO !" in the car: skid marks and tyre smoke pour off the rear wheels as it takes off. */
+  private burnout(me: { x: number; y: number; mode: TravelMode }, delta: number): void {
+    const burning = me.mode === 'CAR' && this.stage === 'PURSUIT' && this.time.now < this.burnoutUntil;
+    if (burning) this.drift.tyres('police', this.car.x, this.car.y, this.car.rotation, 1, delta / 1000, BURNOUT_SMOKE);
+    else if (this.burning) this.drift.lift('police');
+    this.burning = burning;
   }
 
   /** The suspect as drawn now: their car, or on foot (out of a crashed car too). */
