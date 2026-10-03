@@ -12,6 +12,12 @@ export const VEHICLE_COLOURS: Record<Vehicle, number> = {
   VAN: 0x9aa3ab,
 };
 
+/**
+ * Every car in town (police, suspect, traffic) is drawn at this scale, so they are all the
+ * same size and each fits in one lane of a two-way road.
+ */
+export const CAR_SCALE = 1.1;
+
 /** Draws a vehicle facing east (heading 0) into `g`, in metres. */
 export function drawVehicle(g: Phaser.GameObjects.Graphics, vehicle: Vehicle): void {
   const colour = VEHICLE_COLOURS[vehicle];
@@ -61,15 +67,15 @@ export function createPoliceCar(scene: Phaser.Scene, colours: PoliceColours = CL
   const lightBlue = scene.add.rectangle(-1, 2, 2, 2, 0x2f7de1).setAlpha(0.2);
   scene.tweens.add({ targets: [lightRed, glowRed], alpha: 0.15, duration: 230, yoyo: true, repeat: -1 });
   scene.tweens.add({ targets: [lightBlue, glowBlue], alpha: 1, duration: 230, yoyo: true, repeat: -1 });
-  // Drawn slightly larger than life so the player's car is easy to find on screen.
-  return scene.add.container(0, 0, [glowRed, glowBlue, g, lightRed, lightBlue]).setDepth(30).setScale(1.3);
+  // The same size as every other car; the flashing lights make it easy to find on screen.
+  return scene.add.container(0, 0, [glowRed, glowBlue, g, lightRed, lightBlue]).setDepth(30).setScale(CAR_SCALE);
 }
 
 /** The suspect's vehicle (the one the scanner names), drawn facing east. */
 export function createSuspectCar(scene: Phaser.Scene, vehicle: Vehicle): Phaser.GameObjects.Container {
   const g = scene.add.graphics();
   drawVehicle(g, vehicle);
-  return scene.add.container(0, 0, [g]).setDepth(29).setScale(1.3);
+  return scene.add.container(0, 0, [g]).setDepth(29).setScale(CAR_SCALE);
 }
 
 /**
