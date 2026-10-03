@@ -164,7 +164,7 @@ Your section 14 object becomes a list of clauses, because multi-step instruction
 ### C6. Movement and the distance model
 
 - The player moves **along the road graph** (see Decision 2): in car mode the car cruises forward automatically, the player chooses turns with arrow keys (or on-screen arrows), can speed up, slow down, and turn around. A turn pressed early is held until the next junction where that turn is possible. No crashing, no steering physics. In foot mode, the same idea at walking pace on footpaths, with the closer camera.
-- **Distance is measured along roads**, not in a straight line: the length of the shortest legal path from the player to the suspect. Correct moves close it (the suspect is slightly slower than a player who follows well). Wrong turns and hesitation open it. Warnings at thresholds, escape past the final threshold or at time-out.
+- **Distance is measured along roads**, not in a straight line: the length of the shortest legal path from the player to the suspect. Correct moves close it (the suspect is slightly slower than a player who follows well). Wrong turns and hesitation open it. Warnings at thresholds; the suspect escapes only at time-out (decided 2026-10-03: a lost player can always recover, at the cost of time and points).
 - **Capture** when the path distance is under a threshold *and* conditions fit (for example, you can't catch a moving car on foot; you catch it after it stops or the suspect gets out).
 
 ### C7. Mission state machine

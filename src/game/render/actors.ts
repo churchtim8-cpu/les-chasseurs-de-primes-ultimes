@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import type { Vehicle } from '../../engine/chase/settings';
 import type { TurnIntent } from '../../engine/movement/turns';
 import { CAR_PICTURES } from './canvaArt';
+import { carLights } from './night';
 
 /** Body colours of the suspect's possible vehicles (they must match the French: "une voiture verte"). */
 export const VEHICLE_COLOURS: Record<Vehicle, number> = {
@@ -120,7 +121,8 @@ export function createPoliceCar(scene: Phaser.Scene, colours: PoliceColours = CL
   scene.tweens.add({ targets: [lightRed, glowRed], alpha: 0.15, duration: 230, yoyo: true, repeat: -1 });
   scene.tweens.add({ targets: [lightBlue, glowBlue], alpha: 1, duration: 230, yoyo: true, repeat: -1 });
   // The same size as every other car; the flashing lights make it easy to find on screen.
-  return scene.add.container(0, 0, [glowRed, glowBlue, ...picture, g, lightRed, lightBlue]).setDepth(30).setScale(CAR_SCALE);
+  const parts = [glowRed, glowBlue, ...picture, g, lightRed, lightBlue, ...carLights(scene, 18)];
+  return scene.add.container(0, 0, parts).setDepth(30).setScale(CAR_SCALE);
 }
 
 /** The suspect's vehicle (the one the scanner names), drawn facing east. */
@@ -130,7 +132,7 @@ export function createSuspectCar(scene: Phaser.Scene, vehicle: Vehicle): Phaser.
   if (picture.length === 0) drawVehicle(g, vehicle);
   // A taxi's sign on the roof.
   else if (vehicle === 'TAXI') g.fillStyle(0x21313a).fillRoundedRect(-2.6, -2, 2.2, 4, 0.5).fillStyle(0xfff4b8).fillRect(-2.1, -1.4, 1.2, 2.8);
-  return scene.add.container(0, 0, [...picture, g]).setDepth(29).setScale(CAR_SCALE);
+  return scene.add.container(0, 0, [...picture, g, ...carLights(scene, vehicle === 'VAN' ? 22 : 18)]).setDepth(29).setScale(CAR_SCALE);
 }
 
 /**

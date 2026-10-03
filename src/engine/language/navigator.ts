@@ -43,6 +43,13 @@ const OVERSHOOT = 60;
 /** Turning round must save at least this much road to be preferred over driving on. */
 const U_TURN_PENALTY = 40;
 
+/**
+ * Reaching the suspect's route this far (metres of road) ahead of the suspect
+ * still catches it as it comes through. Any earlier and the player would be
+ * leading a suspect that never stops: as bad as being that far behind it.
+ */
+const EARLY_ARRIVAL = 30;
+
 export class Navigator {
   /** Nodes the player should follow; the player is on the edge guide[progress] → guide[progress + 1]. */
   guide: string[];
@@ -78,12 +85,32 @@ export class Navigator {
     route: readonly string[],
     /** Where the suspect is heading, or null when this stage ends at a change of transport (no final line). */
     private destination: string | null,
-    mode: TravelMode = 'CAR',
+    private readonly mode: TravelMode = 'CAR',
     /** Only sentences with a recording may be used (all, until audio is loaded). */
     private readonly hasAudio: AudioCheck = () => true,
   ) {
     this.guide = [...route];
     this.actions = actionIndices(graph, this.guide, mode);
+  }
+
+  /**
+   * The suspect drives on past the end of its route (it never waits): the
+   * guide grows by `nodes`, which start at its last node, towards a new
+   * destination. Directions already given stand; the next ones follow the
+   * longer route. False when the guide ends elsewhere (the player is being
+   * led back onto the route, and that plan already has the longer route).
+   */
+  extend(player: MoverStart, nodes: readonly string[], destination: string | null): Transmission[] | null {
+    if (nodes[0] !== this.guide[this.guide.length - 1]) return null;
+    this.guide.push(...nodes.slice(1));
+    this.actions = actionIndices(this.graph, this.guide, this.mode);
+    this.destination = destination;
+    this.finalDone = false;
+    this.fillerFor = null;
+    // The next turn may be close: say it now rather than at the next node.
+    const out: Transmission[] = [];
+    if (this.onGuide(player)) this.schedule(player, out);
+    return out;
   }
 
   /** The most recent transmission (for the Repeat button). */
@@ -308,8 +335,10 @@ export class Navigator {
 
 /**
  * A guide from the player's position onto the suspect's route: either going
- * on, or turning round, whichever gets there sooner. The guide starts with
- * the edge the player is on (turned round when `uTurn` is set).
+ * on, or turning round, whichever gets there closest behind the suspect (it
+ * never stops, so getting there long before it means leading it, not catching
+ * it). The guide starts with the edge the player is on (turned round when
+ * `uTurn` is set).
  */
 export function planGuide(
   graph: TownGraph,
@@ -341,7 +370,9 @@ export function planGuide(
       const guide = [option.first[0], ...path.nodes, ...suspectRoute.slice(k + 1)];
       if (new Set(guide).size !== guide.length || followProblem(graph, guide, mode)) continue;
       if (!describable(graph, guide, mode, difficulty)) continue;
-      const cost = option.lead + path.length - pathLength(graph, suspectRoute.slice(0, k + 1));
+      // How far behind the suspect the player reaches the join (negative: ahead of it).
+      const behind = option.lead + path.length - pathLength(graph, suspectRoute.slice(0, k + 1));
+      const cost = behind >= -EARLY_ARRIVAL ? Math.max(behind, 0) : -behind - EARLY_ARRIVAL;
       if (!best || cost < best.cost) best = { guide, uTurn: option.uTurn, cost };
       break;
     }

@@ -39,6 +39,7 @@ import {
 } from '../render/actors';
 import { arrestKind, playArrest } from '../render/arrest';
 import { BURNOUT_SMOKE, DriftEffects } from '../render/drift';
+import { drawNight, nightOn } from '../render/night';
 import { LanePosition } from '../render/lanes';
 import { EscapeEffects } from '../render/escapes';
 import { RoundaboutGuide } from '../render/roundaboutGuide';
@@ -184,6 +185,7 @@ export class ChaseScene extends Phaser.Scene {
       this.footsteps.stop();
     });
     this.layers = drawTown(this, this.graph);
+    if (nightOn()) drawNight(this, this.graph);
     if (new URLSearchParams(window.location.search).get('life') !== '0') {
       this.life = new TownLife(this, this.graph, {
         player: () => (this.chase.player.mode === 'CAR' ? this.car : this.officer),
