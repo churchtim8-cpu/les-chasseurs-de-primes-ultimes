@@ -142,7 +142,7 @@ function buildBellevue(): TownMap {
     [700, 470],
   ]);
   b.rectRegion('railway', 'RAILWAY', { x: 0, y: 30, w: 720, h: 70 });
-  b.rectRegion('park', 'PARK', { x: 1875, y: 335, w: 190, h: 370 });
+  b.rectRegion('park', 'PARK', { x: 1875, y: 335, w: 190, h: 366 });
   b.rectRegion('pond', 'WATER', { x: 1995, y: 380, w: 50, h: 35 });
   b.rectRegion('square', 'PLAZA', { x: 995, y: 335, w: 190, h: 170 });
 
@@ -155,7 +155,7 @@ function buildBellevue(): TownMap {
   b.location('BUS_STATION', 'TRANSPORT', { x: 125, y: 345, w: 170, h: 110 }, [[n(0, 1), n(0, 2), 0.45]]);
   b.location('CAR_PARK', 'TRANSPORT', { x: 340, y: 340, w: 180, h: 150 }, [[n(1, 2), n(2, 2), 0.5]]);
   b.location('GAS_STATION', 'TRANSPORT', { x: 350, y: 560, w: 150, h: 130 }, [[n(1, 3), n(2, 3), 0.5]]);
-  b.location('BUS_STOP', 'TRANSPORT', { x: 185, y: 736, w: 50, h: 14 }, [[n(0, 3), n(1, 3), 0.5]]);
+  b.location('BUS_STOP', 'TRANSPORT', { x: 185, y: 740, w: 50, h: 14 }, [[n(0, 3), n(1, 3), 0.5]]);
 
   // Civic (north)
   b.location('THEATRE', 'CIVIC', { x: 1005, y: 200, w: 170, h: 105 }, [[n(3, 1), n(4, 1), 0.5]]);
@@ -185,7 +185,7 @@ function buildBellevue(): TownMap {
   b.location('BANK', 'TOWN_CENTRE', { x: 1220, y: 450, w: 95, h: 55 }, [[n(4, 2), n(5, 2), 0.25]]);
   b.location('POST_OFFICE', 'TOWN_CENTRE', { x: 995, y: 535, w: 95, h: 70 }, [[n(3, 2), n(4, 2), 0.25]]);
   b.location('CAFE', 'TOWN_CENTRE', { x: 1105, y: 535, w: 80, h: 60 }, [[n(3, 2), n(4, 2), 0.75]]);
-  b.location('RESTAURANT', 'TOWN_CENTRE', { x: 995, y: 625, w: 105, h: 78 }, [[n(3, 3), n(4, 3), 0.3]]);
+  b.location('RESTAURANT', 'TOWN_CENTRE', { x: 995, y: 623, w: 105, h: 78 }, [[n(3, 3), n(4, 3), 0.3]]);
 
   // Commercial
   b.location('BOOKSHOP', 'COMMERCIAL', { x: 1440, y: 440, w: 80, h: 65 }, [[n(5, 2), n(6, 2), 0.2]]);
@@ -200,7 +200,7 @@ function buildBellevue(): TownMap {
   b.location(
     'PARK',
     'COASTAL',
-    { x: 1875, y: 335, w: 190, h: 370 },
+    { x: 1875, y: 335, w: 190, h: 366 },
     [
       ['PKN', 'PK', 0.05],
       [n(7, 2), 'PK', 0.05],

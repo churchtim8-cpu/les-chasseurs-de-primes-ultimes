@@ -38,6 +38,7 @@ import {
 } from '../render/actors';
 import { arrestKind, playArrest } from '../render/arrest';
 import { DriftEffects } from '../render/drift';
+import { LanePosition } from '../render/lanes';
 import { EscapeEffects } from '../render/escapes';
 import { RoundaboutGuide } from '../render/roundaboutGuide';
 import { preloadCanvaArt } from '../render/canvaArt';
@@ -89,8 +90,8 @@ export class ChaseScene extends Phaser.Scene {
   private staged = false;
   private stride = 0;
   private suspectStride = 0;
-  /** Smoothed sideways shift that puts runners on the pavement (see onPavement). */
-  private readonly pavement = { me: { x: 0, y: 0 }, suspect: { x: 0, y: 0 } };
+  /** Where across the road the police and the suspect are drawn: their lane, or the pavement on foot. */
+  private lanes!: { me: LanePosition; suspect: LanePosition };
   /** The suspect's vehicle in each stage (null on foot). */
   private suspectCars: (Phaser.GameObjects.Container | null)[] = [];
   private suspectRunner!: Phaser.GameObjects.Container;
@@ -131,6 +132,7 @@ export class ChaseScene extends Phaser.Scene {
 
   create(): void {
     this.graph = new TownGraph(BELLEVUE);
+    this.lanes = { me: new LanePosition(this.graph), suspect: new LanePosition(this.graph) };
     this.chase = new Chase(this.graph, generateScenario(this.graph, this.seed, scenarioOptionsFromAddress()), {
       hasAudio: audioCheck(scannerAudio.library),
     });
@@ -157,7 +159,16 @@ export class ChaseScene extends Phaser.Scene {
     });
     this.layers = drawTown(this, this.graph);
     if (new URLSearchParams(window.location.search).get('life') !== '0') {
-      this.life = new TownLife(this, this.graph, { player: () => this.chase.player.snapshot() });
+      this.life = new TownLife(this, this.graph, {
+        player: () => (this.chase.player.mode === 'CAR' ? this.car : this.officer),
+        chasers: () => {
+          const theirs = this.suspectSprite();
+          return [
+            ...(this.chase.player.mode === 'CAR' ? [this.car] : []),
+            ...(theirs !== this.suspectRunner && theirs.alpha > 0.5 ? [theirs] : []),
+          ];
+        },
+      });
     }
     this.routeOverlay = this.drawRoute();
     // A suspect only ever leaves its first car behind (a later car stage is the last).
@@ -429,12 +440,13 @@ export class ChaseScene extends Phaser.Scene {
     }
     this.displayHeading += Phaser.Math.Angle.Wrap(me.heading - this.displayHeading) * Math.min(1, delta / 90);
     const avatar = me.mode === 'CAR' ? this.car : this.officer;
-    const mine = this.onPavement(me, this.pavement.me, delta);
+    const traffic = this.life?.cars() ?? [];
+    const mine = this.lanes.me.update(me, traffic, delta);
     const suspectNow = this.chase.suspect.snapshot();
     const spinningCar = this.escapes.spinning ? this.suspectCars[this.chase.suspectStage] ?? null : null;
     const tumble = this.escapes.update(delta, spinningCar, this.officer);
     const drift = this.drift.update(
-      { x: me.x, y: me.y, heading: me.heading, speed: me.speed, driving: me.mode === 'CAR' && this.stage === 'PURSUIT' },
+      { x: me.x + mine.x, y: me.y + mine.y, heading: me.heading, speed: me.speed, driving: me.mode === 'CAR' && this.stage === 'PURSUIT' },
       this.displayHeading,
       delta,
     );
@@ -450,7 +462,7 @@ export class ChaseScene extends Phaser.Scene {
       this.skidToStop(me);
     }
     this.officer.setVisible(me.mode === 'FOOT');
-    this.drawTrail(me);
+    this.drawTrail({ ...me, x: me.x + mine.x, y: me.y + mine.y });
     this.driving.update({ driving: me.mode === 'CAR' && this.stage === 'PURSUIT', speed: me.speed, heading: me.heading }, delta);
     this.footsteps.update({ running: me.mode === 'FOOT' && this.stage === 'PURSUIT', speed: me.speed, stride: this.stride }, delta);
     this.placeParked(this.car, me.mode === 'CAR' ? null : this.chase.parkedCar, me.mode === 'CAR');
@@ -474,7 +486,7 @@ export class ChaseScene extends Phaser.Scene {
     const shown = this.suspectSprite();
     this.suspectCars.forEach((sprite, i) => sprite && sprite !== shown && !this.wrecked.has(i) && sprite.setAlpha(0));
     if (shown !== this.suspectRunner) this.suspectRunner.setAlpha(0);
-    const theirs = this.onPavement(suspect, this.pavement.suspect, delta);
+    const theirs = this.lanes.suspect.update(suspect, traffic, delta);
     if (!this.staged) {
       shown.setPosition(suspect.x + theirs.x, suspect.y + theirs.y).setRotation(this.suspectHeading);
       if (shown === this.suspectRunner) {
@@ -526,24 +538,6 @@ export class ChaseScene extends Phaser.Scene {
     if (skidding) this.drift.tyres('police', this.car.x, this.car.y, this.car.rotation, 0.8, this.game.loop.delta / 1000);
     else if (this.policeSkid) this.drift.lift('police');
     this.policeSkid = skidding;
-  }
-
-  /**
-   * On foot along a road, runners keep to the pavement on their right instead of
-   * the middle of the road (drawing only: the chase still measures the road's centre).
-   * The shift eases in and out so it never jumps at junctions or footpaths.
-   */
-  private onPavement(
-    who: { heading: number; mode: TravelMode; edgeId: string },
-    shift: { x: number; y: number },
-    delta: number,
-  ): { x: number; y: number } {
-    const edge = this.graph.edge(who.edgeId);
-    const side = who.mode === 'FOOT' && edge.car ? HALF_WIDTH[edge.kind] + PAVEMENT / 2 : 0;
-    const k = Math.min(1, delta / 220);
-    shift.x += (-Math.sin(who.heading) * side - shift.x) * k;
-    shift.y += (Math.cos(who.heading) * side - shift.y) * k;
-    return shift;
   }
 
   /** Light streaks behind the police car at speed: driving feels fast, running does not leave them. */

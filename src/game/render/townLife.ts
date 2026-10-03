@@ -1,8 +1,9 @@
 import Phaser from 'phaser';
-import { HALF_WIDTH, PAVEMENT } from '../../engine/world/geometry';
+import { HALF_WIDTH, laneOffset, PAVEMENT } from '../../engine/world/geometry';
 import type { TownGraph } from '../../engine/world/graph';
 import type { MapEdge } from '../../engine/world/types';
 import { PALETTE } from '../palette';
+import { CAR_SCALE } from './actors';
 
 /**
  * Life in Bellevue City: traffic, people out walking, waves, boats, the
@@ -11,7 +12,7 @@ import { PALETTE } from '../palette';
  *
  * Traffic only ever uses colours the scanner never names (no blue, black,
  * white or green car, taxi or van), so a passing car can't be mistaken for
- * the suspect's, and it is drawn smaller than the suspect's car.
+ * the suspect's. Every car is the same size, each in its own lane.
  */
 
 /** Texture pixels per metre, so the sprites stay sharp when the camera zooms in. */
@@ -23,6 +24,15 @@ const WALKER_COLOURS = [0xf2c94c, 0x5bb6cc, 0xe86a8a, 0x8e5bb0, 0xf29a4b, 0x6fb2
 const TRAFFIC_COUNT = 16;
 const WALKER_COUNT = 44;
 const TRAFFIC_SPEED: [number, number] = [32, 44];
+/** A car's size on the map (metres), the same as the police car and the suspect's. */
+const CAR_LENGTH = 18 * CAR_SCALE;
+const CAR_WIDTH = 9.6 * CAR_SCALE;
+/**
+ * Pulling over for the chase: within `range` metres along the road, cars move
+ * over until their middle is `onKerb` metres past the kerb, at `crawl` times
+ * their speed, easing across at `ease` per second.
+ */
+const PULL_OVER = { range: 80, onKerb: 0.5, crawl: 0.3, ease: 4 };
 const WALKER_SPEED: [number, number] = [4, 7];
 
 interface Traveller {
@@ -35,12 +45,16 @@ interface Traveller {
   speed: number;
   /** Sideways offset from the centre line: the right-hand lane, or a pavement. */
   offset: number;
+  /** A car pulled over to the kerb to let the chase by. */
+  pulledOver: boolean;
   car: boolean;
 }
 
 export interface TownLifeOptions {
-  /** Where the player is, so traffic slows down instead of driving through them. */
+  /** Where the player is drawn, so traffic waits behind them instead of driving through. */
   player: () => { x: number; y: number };
+  /** The police car and the suspect's car (drawn), when driving: traffic pulls over to let them by. */
+  chasers?: () => { x: number; y: number }[];
 }
 
 export class TownLife {
@@ -65,11 +79,20 @@ export class TownLife {
     this.addGulls();
   }
 
+  /** Where the traffic is drawn, so the police and the suspect can pull out round it. */
+  cars(): { x: number; y: number }[] {
+    return this.travellers.filter((t) => t.car).map((t) => t.sprite);
+  }
+
   update(deltaMs: number): void {
     const dt = Math.min(deltaMs, 50) / 1000;
     this.clock += dt;
     const player = this.options.player();
-    for (const t of this.travellers) this.move(t, dt, player);
+    const chasers = this.options.chasers?.() ?? [];
+    for (const t of this.travellers) {
+      if (t.car) this.giveWay(t, chasers, dt);
+      this.move(t, dt, player);
+    }
     this.waves.forEach((w, i) => {
       w.tilePositionX += dt * (i === 0 ? 3 : -2) * RES;
       w.tilePositionY = Math.sin(this.clock * 0.8 + i) * 2 * RES;
@@ -192,13 +215,14 @@ export class TownLife {
       const edge = roads[Math.floor((i / TRAFFIC_COUNT) * roads.length)] as MapEdge;
       const forward = i % 2 === 0;
       this.travellers.push({
-        sprite: this.image(0, 0, `life-car-${i % TRAFFIC_COLOURS.length}`, 26),
+        sprite: this.image(0, 0, `life-car-${i % TRAFFIC_COLOURS.length}`, 26).setScale(CAR_SCALE / RES),
         edge,
         from: forward ? edge.from : edge.to,
         to: forward ? edge.to : edge.from,
         along: this.graph.edgeLength(edge) * Math.random(),
         speed: Phaser.Math.FloatBetween(...TRAFFIC_SPEED),
-        offset: HALF_WIDTH[edge.kind] * 0.5,
+        offset: laneOffset(edge.kind),
+        pulledOver: false,
         car: true,
       });
     }
@@ -213,6 +237,7 @@ export class TownLife {
         along: this.graph.edgeLength(edge) * Math.random(),
         speed: Phaser.Math.FloatBetween(...WALKER_SPEED),
         offset: side * this.walkOffset(edge),
+        pulledOver: false,
         car: false,
       });
     }
@@ -224,8 +249,26 @@ export class TownLife {
     return edge.car ? HALF_WIDTH[edge.kind] + PAVEMENT / 2 : Math.random() * HALF_WIDTH[edge.kind] * 0.6;
   }
 
+  /**
+   * With the chase coming along its road, a car pulls over to the kerb and
+   * crawls until it has gone by (as drivers do for a siren).
+   */
+  private giveWay(t: Traveller, chasers: readonly { x: number; y: number }[], dt: number): void {
+    const half = HALF_WIDTH[t.edge.kind];
+    const heading = t.sprite.rotation;
+    t.pulledOver = chasers.some((c) => {
+      const dx = c.x - t.sprite.x;
+      const dy = c.y - t.sprite.y;
+      const along = dx * Math.cos(heading) + dy * Math.sin(heading);
+      const across = -dx * Math.sin(heading) + dy * Math.cos(heading);
+      return Math.abs(along) < PULL_OVER.range && Math.abs(across) < half * 2;
+    });
+    const target = t.pulledOver ? half + PULL_OVER.onKerb : laneOffset(t.edge.kind);
+    t.offset += (target - t.offset) * Math.min(1, dt * PULL_OVER.ease);
+  }
+
   private move(t: Traveller, dt: number, player: { x: number; y: number }): void {
-    let step = t.speed * dt;
+    let step = t.speed * dt * (t.pulledOver ? PULL_OVER.crawl : 1);
     if (t.car && this.blocked(t, player)) step = 0;
     t.along += step;
     for (let guard = 0; guard < 4; guard++) {
@@ -245,10 +288,10 @@ export class TownLife {
       const dy = y - t.sprite.y;
       const forward = dx * Math.cos(heading) + dy * Math.sin(heading);
       const side = -dx * Math.sin(heading) + dy * Math.cos(heading);
-      return forward > 0 && forward < range && Math.abs(side) < 7;
+      return forward > 0 && forward < range && Math.abs(side) < CAR_WIDTH;
     };
-    if (ahead(player.x, player.y, 26)) return true;
-    return this.travellers.some((o) => o !== t && o.car && ahead(o.sprite.x, o.sprite.y, 17));
+    if (ahead(player.x, player.y, CAR_LENGTH * 1.5)) return true;
+    return this.travellers.some((o) => o !== t && o.car && ahead(o.sprite.x, o.sprite.y, CAR_LENGTH * 1.2));
   }
 
   private chooseNext(t: Traveller): void {
@@ -261,7 +304,7 @@ export class TownLife {
     t.from = at;
     t.to = this.graph.other(next, at);
     if (!t.car && next.car !== t.edge.car) t.offset = Math.sign(t.offset || 1) * this.walkOffset(next);
-    if (t.car) t.offset = HALF_WIDTH[next.kind] * 0.5;
+    if (t.car) t.offset = t.pulledOver ? HALF_WIDTH[next.kind] + PULL_OVER.onKerb : laneOffset(next.kind);
     t.edge = next;
   }
 
@@ -291,14 +334,14 @@ function makeTextures(scene: Phaser.Scene): void {
     g.destroy();
   };
 
-  // Traffic: 16 x 8 m cars facing east, smaller than the suspect's.
+  // Traffic: cars facing east, built like the suspect's (18 x 9.6 m, before CAR_SCALE).
   TRAFFIC_COLOURS.forEach((colour, i) =>
-    make(`life-car-${i}`, 18, 10, (g) => {
-      g.fillStyle(0x000000, 0.22).fillRoundedRect(1.8, 1.8, 16, 8, 2.2);
-      g.fillStyle(colour).fillRoundedRect(1, 1, 16, 8, 2.2);
-      g.lineStyle(0.5, 0xffffff, 0.5).strokeRoundedRect(1, 1, 16, 8, 2.2);
-      g.fillStyle(0x27323a).fillRoundedRect(10.5, 1.9, 3, 6.2, 0.9).fillRoundedRect(3.2, 2.2, 2, 5.6, 0.8);
-      g.fillStyle(0xfff4b8).fillRect(16.2, 1.8, 0.8, 1.6).fillRect(16.2, 6.6, 0.8, 1.6);
+    make(`life-car-${i}`, 21, 12.6, (g) => {
+      g.fillStyle(0x000000, 0.22).fillRoundedRect(2.5, 3, 18, 9.6, 2.5);
+      g.fillStyle(colour).fillRoundedRect(1, 1, 18, 9.6, 2.5);
+      g.lineStyle(0.6, 0xffffff, 0.55).strokeRoundedRect(1, 1, 18, 9.6, 2.5);
+      g.fillStyle(0x27323a).fillRoundedRect(11.5, 2, 3.5, 7.6, 1).fillRoundedRect(3.5, 2.2, 2.5, 7.2, 1);
+      g.fillStyle(0xfff4b8).fillRect(18.1, 2.2, 0.9, 1.8).fillRect(18.1, 7.6, 0.9, 1.8);
     }),
   );
   // People: smaller than the officer and the suspect, in bright clothes.

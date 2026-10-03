@@ -2,10 +2,10 @@ import type { EdgeKind, Rect } from './types';
 
 /** Half the drawn width of each kind of way, in metres (pavements excluded). */
 export const HALF_WIDTH: Record<EdgeKind, number> = {
-  AVENUE: 10,
-  STREET: 7,
-  LANE: 5,
-  ROUNDABOUT_RING: 8,
+  AVENUE: 14,
+  STREET: 11,
+  LANE: 8,
+  ROUNDABOUT_RING: 11,
   PATH: 2.5,
   PASSAGE: 3,
   PROMENADE: 6,
@@ -13,6 +13,11 @@ export const HALF_WIDTH: Record<EdgeKind, number> = {
 
 /** Pavement width drawn on each side of car roads. */
 export const PAVEMENT = 4;
+
+/** Two-way roads have a lane each way; vehicles keep to the right, in the middle of their lane. */
+export function laneOffset(kind: EdgeKind): number {
+  return HALF_WIDTH[kind] / 2;
+}
 
 export interface Point {
   x: number;
