@@ -66,6 +66,7 @@ import {
   KEEP_GOING,
 } from './settings';
 import { isDecision, scanAhead } from '../language/analysis';
+import { exitsAt, type Exit } from '../movement/turns';
 
 /** A fixed scanner line (not a route instruction): an event or an order. */
 export interface SpokenText {
@@ -728,16 +729,21 @@ export class Chase {
     if (edge.kind === 'ROUNDABOUT_RING' || !canTravel(edge, at.mode, back)) return false;
     // A way the scanner can guide the player straight onto, right behind the suspect (not a shortcut to its end).
     const here = this.player.location();
-    // It heads away from the police and does not loop back past them (they may skid on through the next junction).
-    const near = new Set([here.towards, this.graph.other(this.graph.edge(here.edgeId), here.towards)]);
-    const around = new Set(this.graph.steps(here.towards, here.mode).map((st) => st.to));
-    const followable = (strict: boolean) => (nodes: readonly string[]) =>
-      nodes.every((n, i) => i === 0 || (!near.has(n) && (i === 1 || !strict || !around.has(n)))) &&
+    // It heads away from the police and does not loop back past them: not through the junction ahead
+    // of them, nor (ideally) any street out of it, or at least not the one they may skid on into.
+    const playerEdge = this.graph.edge(here.edgeId);
+    const near = new Set([here.towards, this.graph.other(playerEdge, here.towards)]);
+    const exits = exitsAt(this.graph, playerEdge, here.towards, here.mode);
+    const around = new Set(exits.map((e) => e.step.to));
+    const skidOn = exits.reduce<Exit | null>((best, e) => (!best || Math.abs(e.relativeAngle) < Math.abs(best.relativeAngle) ? e : best), null);
+    const beyond = new Set(skidOn ? [skidOn.step.to] : []);
+    const followable = (avoid: ReadonlySet<string>) => (nodes: readonly string[]) =>
+      nodes.every((n, i) => i === 0 || (!near.has(n) && (i === 1 || !avoid.has(n)))) &&
       (planGuide(this.graph, here, nodes, this.scenario.difficulty)?.guide.slice(1).includes(nodes[1] as string) ?? false);
     const length = DODGE.routeLength[at.mode];
     const route =
-      this.escapeRoute(back, edge.id, at.mode, length, followable(true)) ??
-      this.escapeRoute(back, edge.id, at.mode, length, followable(false));
+      this.escapeRoute(back, edge.id, at.mode, length, followable(around)) ??
+      this.escapeRoute(back, edge.id, at.mode, length, followable(beyond));
     if (!route || !this.suspect.uTurn()) return false;
     this.suspect.followPlan(route.nodes);
     this.destination = route.destination;

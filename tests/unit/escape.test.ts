@@ -19,15 +19,16 @@ function seeds(difficulty: Difficulty, count: number, label: string): string[] {
 function standStill(seed: string, chaseType: ChaseType = CHASE_TYPES[0]!) {
   const chase = new Chase(graph, generateScenario(graph, seed, { chaseType, turnOff: false, sightings: false }));
   chase.openingCall();
-  const plannedEnd = chase.scenario.stages[chase.scenario.stages.length - 1]!.route.at(-1);
-  let arrivedAt: number | null = null;
+  // The route as planned: the suspect driving (or running) on past it is the point.
+  const planned = new Set(chase.scenario.stages[chase.scenario.stages.length - 1]!.route);
   let movingAfter = false;
   let endedEarly = false;
   for (let t = 0; t < 600 && chase.status.phase === 'PURSUIT'; t += 0.1) {
     const events = chase.update(0.1);
     const suspect = chase.suspect.snapshot();
-    if (arrivedAt === null && suspect.towards === plannedEnd && suspect.speed === 0) arrivedAt = t;
-    if (arrivedAt !== null && t > arrivedAt + 2 && suspect.speed > 1) movingAfter = true;
+    if (chase.suspectStage === chase.scenario.stages.length - 1 && !planned.has(suspect.towards) && suspect.speed > 1) {
+      movingAfter = true;
+    }
     const after = chase.status as { phase: string; timeLeft: number };
     if (after.phase === 'ESCAPED' && after.timeLeft > 0) endedEarly = true;
   }

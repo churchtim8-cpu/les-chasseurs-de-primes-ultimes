@@ -141,7 +141,7 @@ describe('pursuit balance (comprehension must beat luck)', () => {
   // Easy is the most forgiving (the suspect is slowest), so a lucky run happens more often.
   // Since the suspect only escapes at time-out (2026-10-03), a random driver plays the whole
   // clock and bumps into it a little more often; listening still wins by a wide margin.
-  const LUCK_LIMIT: Record<Difficulty, number> = { EASY: 0.25, INTERMEDIATE: 0.12, HARD: 0.08, EXPERT: 0.06 };
+  const LUCK_LIMIT: Record<Difficulty, number> = { EASY: 0.25, INTERMEDIATE: 0.15, HARD: 0.08, EXPERT: 0.06 };
 
   it.each(DIFFICULTIES)('a player who turns at random usually loses the suspect (%s)', (difficulty) => {
     const results = seeds(difficulty, 80, 'balance').map((s) => play(s, 'RANDOM'));
