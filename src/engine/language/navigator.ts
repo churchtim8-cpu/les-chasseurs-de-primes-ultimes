@@ -78,12 +78,29 @@ export class Navigator {
     route: readonly string[],
     /** Where the suspect is heading, or null when this stage ends at a change of transport (no final line). */
     private destination: string | null,
-    mode: TravelMode = 'CAR',
+    private readonly mode: TravelMode = 'CAR',
     /** Only sentences with a recording may be used (all, until audio is loaded). */
     private readonly hasAudio: AudioCheck = () => true,
   ) {
     this.guide = [...route];
     this.actions = actionIndices(graph, this.guide, mode);
+  }
+
+  /**
+   * The suspect drives on past the end of its route (it never waits): the
+   * guide grows by `nodes`, which start at its last node, towards a new
+   * destination. Directions already given stand; the next ones follow the
+   * longer route. False when the guide ends elsewhere (the player is being
+   * led back onto the route, and that plan already has the longer route).
+   */
+  extend(nodes: readonly string[], destination: string | null): boolean {
+    if (nodes[0] !== this.guide[this.guide.length - 1]) return false;
+    this.guide.push(...nodes.slice(1));
+    this.actions = actionIndices(this.graph, this.guide, this.mode);
+    this.destination = destination;
+    this.finalDone = false;
+    this.fillerFor = null;
+    return true;
   }
 
   /** The most recent transmission (for the Repeat button). */

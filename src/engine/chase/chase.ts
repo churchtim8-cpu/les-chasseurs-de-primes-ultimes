@@ -491,10 +491,19 @@ export class Chase {
    * on (a dead end with no route back), it stops where it is and can be caught.
    */
   private keepGoing(events: ChaseEvent[]): void {
+    // Away from the police, not back past them: luck must not catch what listening would.
+    const me = this.player.snapshot();
+    const clear = this.settings.sightingDistance * 2;
+    const away = (nodes: readonly string[]) => {
+      const start = this.graph.node(nodes[0] as string);
+      const end = this.graph.node(nodes[nodes.length - 1] as string);
+      return distance(end, me) > distance(start, me) && nodes.every((n) => distance(this.graph.node(n), me) > clear);
+    };
     const planFrom = (at: MoverStart) => {
       const length = this.settings.stageLength[at.mode];
       return (
-        this.escapeRoute(at.towards, at.edgeId, at.mode, length) ??
+        this.escapeRoute(at.towards, at.edgeId, at.mode, length, away) ??
+        this.escapeRoute(at.towards, at.edgeId, at.mode, [length[0] / 2, length[1]], away) ??
         this.escapeRoute(at.towards, at.edgeId, at.mode, [length[0] / 2, length[1]])
       );
     };
@@ -516,6 +525,8 @@ export class Chase {
     this.suspect.followPlan(route.nodes);
     this.suspect.speedFactor = this.suspectSpeedFor(this.suspectStage);
     if (this.playerStage !== this.suspectStage) return; // the next stage's directions already follow the longer route
+    // The directions already given stand; the next ones follow the longer route.
+    if (this.navigator.extend(route.nodes, this.destination)) return;
     const transmissions = this.navigator.redirect(this.player.location(), this.suspect.remainingPlan(), this.destination);
     for (const transmission of transmissions) events.push({ type: 'TRANSMISSION', transmission });
   }
