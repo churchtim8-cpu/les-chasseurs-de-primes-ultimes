@@ -76,4 +76,10 @@ export const SPEECH = {
   radioTailSeconds: 0.15,
   /** Time to act on a step once it has been heard, before its junction. */
   reactSeconds: 1,
+  /**
+   * Plans allow this much more (seconds): in play a call starts a frame or two
+   * after its junction, or the radio frees a moment late, so a plan with no
+   * room to spare would be just too late.
+   */
+  planSlackSeconds: 0.25,
 } as const;

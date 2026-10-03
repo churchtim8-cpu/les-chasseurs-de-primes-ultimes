@@ -642,7 +642,12 @@ export class Chase {
       // Boxed in for now: drive on straight one more block (no turn to call) and plan from there.
       const straight = exitsAt(this.graph, lastEdge, end, me.mode).find((e) => e.kind === 'STRAIGHT');
       const next = straight?.step.to;
-      if (!next || this.stages[this.suspectStage]!.route.includes(next)) return; // on arrival, `keepGoing` tries again (turning round if it must)
+      // (Not onto a roundabout: its exit would have to be called at once.)
+      const ring = next !== undefined && me.mode === 'CAR' && this.graph.node(next).roundaboutId !== undefined;
+      if (!next || ring || this.stages[this.suspectStage]!.route.includes(next)) {
+        this.branchEarlier(plan, me, events); // or leave the route a little before its end
+        return; // on arrival, `keepGoing` tries again (turning round if it must)
+      }
       const block = { nodes: [end, next], length: this.graph.edgeLength(straight.step.edge), destination: this.destination };
       this.suspect.followPlan([...plan, next]);
       this.goOn(block, false, events);
@@ -650,6 +655,40 @@ export class Chase {
     }
     this.suspect.followPlan([...plan, ...route.nodes.slice(1)]);
     this.goOn(route, false, events);
+  }
+
+  /** The player is still being guided along the route predicted before a change of direction. */
+  private get guidedByPrediction(): boolean {
+    return this.turnOffPending && this.scenario.turnOff?.stage === this.suspectStage;
+  }
+
+  /**
+   * No callable way on from the end of the route: try leaving it at one of
+   * the last few junctions before the end that no call has mentioned yet.
+   */
+  private branchEarlier(plan: readonly string[], me: { edgeId: string; towards: string; mode: TravelMode }, events: ChaseEvent[]): void {
+    const stage = this.stages[this.suspectStage]!;
+    const sameStage = this.playerStage === this.suspectStage;
+    if (sameStage && this.guidedByPrediction) return; // the player's directions follow the predicted route
+    for (let idx = plan.length - 2; idx >= Math.max(0, plan.length - 1 - KEEP_GOING.branchBackNodes); idx--) {
+      const node = plan[idx] as string;
+      if (sameStage && !this.navigator.canReroute(node)) continue;
+      const prev = idx > 0 ? (plan[idx - 1] as string) : this.graph.other(this.graph.edge(me.edgeId), me.towards);
+      const arrived = this.graph.edgeBetween(prev, node);
+      const k = stage.route.lastIndexOf(node);
+      if (!arrived || k === -1) continue;
+      const before = stage.route.slice(0, k + 1);
+      const route = this.routeOnwards(node, arrived.id, me.mode, before, true);
+      if (!route) continue;
+      const nodes = [...before, ...route.nodes.slice(1)];
+      this.stages[this.suspectStage] = { ...stage, route: nodes, length: pathLength(this.graph, nodes) };
+      this.destination = route.destination;
+      this.suspect.followPlan([...plan.slice(0, idx + 1), ...route.nodes.slice(1)]);
+      if (!sameStage) return;
+      const transmissions = this.nav(events).reroute(this.player.location(), node, route.nodes, this.destination) ?? [];
+      for (const transmission of transmissions) events.push({ type: 'TRANSMISSION', transmission });
+      return;
+    }
   }
 
   /** A fresh route on from `from` (not back along `avoidEdge`), away from the police: luck must not catch what listening would. */
@@ -693,6 +732,7 @@ export class Chase {
     this.stages[this.suspectStage] = { ...stage, route: [...stage.route, ...route.nodes.slice(1)], length: stage.length + route.length };
     this.destination = route.destination;
     if (this.playerStage !== this.suspectStage) return; // the next stage's directions already follow the longer route
+    if (this.guidedByPrediction) return; // the change of direction, still to come, redirects onto the longer route
     const here = this.player.location();
     // Driving on: the directions already given stand and the next ones follow the longer
     // route. Turned round: that is a change of direction, corrected like any other.

@@ -299,10 +299,12 @@ export const CRASH = {
  */
 export const KEEP_GOING = {
   /** Plan the route onwards when the suspect is within this many metres of the end of its route, so the directions come in good time. */
-  aheadMetres: { CAR: 600, FOOT: 150 } as Record<TravelMode, number>,
+  aheadMetres: { CAR: 900, FOOT: 220 } as Record<TravelMode, number>,
   /** When no way on is found, try again after this many seconds, doubling after each miss up to maxRetrySeconds (planning is costly). */
   retrySeconds: 0.5,
-  maxRetrySeconds: 4,
+  maxRetrySeconds: 2,
+  /** With no callable way on from the end of its route, the suspect may leave it at one of this many junctions before the end. */
+  branchBackNodes: 3,
   /** The new route keeps every one of its junctions at least this many sighting distances from the police, and ends further away than it starts by as much. */
   clearSightings: 4,
 } as const;

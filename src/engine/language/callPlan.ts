@@ -20,6 +20,7 @@ import type { MoverStart } from '../movement/mover';
 import { MOVEMENT } from '../movement/settings';
 import type { TownGraph, TravelMode } from '../world/graph';
 import { actionIndices, instructionOptions, positionLeaving, type AudioCheck, type Guided } from './generate';
+import { SPEECH } from './settings';
 import { neededSeconds } from './timing';
 
 export interface CallContext {
@@ -114,10 +115,10 @@ export function planCalls(graph: TownGraph, guide: readonly string[], ctx: CallC
       const from = positionLeaving(graph, guide[n] as string, guide[n + 1] as string, ctx.mode);
       const options = instructionOptions(graph, from, guide, a, actions.slice(k + 1, k + 3), ctx.difficulty, ctx.hasAudio);
       if (options.length === 0) continue; // no clear sentence yet: the next node
-      const ahead = (index: number) => (along[knownBy(graph, guide, index, n)] as number) - (along[n] as number);
+      const ahead = (index: number) => (along[knownBy(graph, guide, index, n, ctx.mode)] as number) - (along[n] as number);
       // Only a call said before the start (at the first node) is the opening call.
       const opening = k === 0 && n === 0 && ctx.firstCallBeforeStart === true && delay === 0;
-      return options.some((o) => (opening || fits(o, ahead, ctx.speed, delay)) && solvable(k + o.covers.length));
+      return options.some((o) => (opening || fits(o, ahead, ctx.speed, delay + SPEECH.planSlackSeconds)) && solvable(k + o.covers.length));
     }
     return false;
   };
@@ -165,7 +166,7 @@ export function aheadFrom(graph: TownGraph, guide: readonly string[], progress: 
   const done = t * graph.edgeLength(edge);
   return (index: number) => {
     if (index <= progress) return -Infinity;
-    return (along[knownBy(graph, guide, index, progress)] as number) - (along[progress] as number) - done;
+    return (along[knownBy(graph, guide, index, progress, player.mode)] as number) - (along[progress] as number) - done;
   };
 }
 
@@ -173,9 +174,10 @@ export function aheadFrom(graph: TownGraph, guide: readonly string[], progress: 
  * The guide index by which the step at `index` must have been heard: a
  * roundabout exit by the ring's entry, where the exits start being counted
  * (unless the player is already past it, after `from`); any other turn, its junction.
+ * On foot a roundabout is ordinary crossings: each turn is at its own junction.
  */
-export function knownBy(graph: TownGraph, guide: readonly string[], index: number, from: number): number {
-  const ring = graph.node(guide[index] as string).roundaboutId;
+export function knownBy(graph: TownGraph, guide: readonly string[], index: number, from: number, mode: TravelMode): number {
+  const ring = mode === 'CAR' ? graph.node(guide[index] as string).roundaboutId : undefined;
   if (ring === undefined) return index;
   let j = index;
   while (j > 0 && graph.node(guide[j - 1] as string).roundaboutId === ring) j--;

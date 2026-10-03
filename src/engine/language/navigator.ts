@@ -149,6 +149,32 @@ export class Navigator {
     return out;
   }
 
+  /**
+   * The suspect will leave its route at `at`, a junction ahead that no call
+   * has mentioned yet, and go on by `nodes` (starting at `at`): the directions
+   * already given stand, the next ones follow the new way. Null if `at` is
+   * not such a junction.
+   */
+  reroute(player: MoverStart, at: string, nodes: readonly string[], destination: string | null): Transmission[] | null {
+    if (!this.canReroute(at) || nodes[0] !== at) return null;
+    const index = this.guide.lastIndexOf(at);
+    this.guide.splice(index + 1, this.guide.length, ...nodes.slice(1));
+    this.actions = actionIndices(this.graph, this.guide, this.mode);
+    this.calls = null;
+    this.destination = destination;
+    this.fillerFor = null;
+    const out: Transmission[] = [];
+    if (this.onGuide(player)) this.schedule(player, out);
+    return out;
+  }
+
+  /** Is `at` a junction ahead on the guide that no call has mentioned yet (see reroute)? */
+  canReroute(at: string): boolean {
+    const index = this.guide.lastIndexOf(at);
+    const lastCovered = Math.max(-1, ...this.covered);
+    return !this.finalDone && index > this.progress && index > lastCovered && index < this.guide.length - 1;
+  }
+
   /** The most recent transmission (for the Repeat button). */
   get last(): Transmission | undefined {
     return this.history[this.history.length - 1];
