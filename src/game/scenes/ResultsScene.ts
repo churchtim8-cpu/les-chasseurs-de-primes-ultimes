@@ -27,6 +27,8 @@ export interface ResultsData {
   vehicle: Vehicle | null;
   chaseType: ChaseType;
   escapeReason?: EscapeReason;
+  /** Escape Mode: the player was the fugitive, and `stats.captured` means they reached the hideout. */
+  escape?: boolean;
 }
 
 const LINE_LABELS: Record<ScoreLine['key'], (count: number) => string> = {
@@ -59,6 +61,7 @@ export class ResultsScene extends Phaser.Scene {
 
   create(): void {
     const { stats, mission } = this.result;
+    const escape = this.result.escape === true;
     const score = scoreMission(stats);
     const captured = stats.captured;
     menuMusic.stop(0.2);
@@ -93,32 +96,41 @@ export class ResultsScene extends Phaser.Scene {
       chaseType: this.result.chaseType,
       campaign: loadProgress(),
       date: today(),
+      ...(escape ? { escape: true } : {}),
     });
     saveProfile(recorded.profile);
     if (boss && captured) best = score.total > previousBest;
 
-    backdrop(this, captured ? SCREEN_PICTURES.captured : SCREEN_PICTURES.escaped);
+    // Escape Mode shows the getaway for a win, the arrest for a loss.
+    backdrop(this, captured !== escape ? SCREEN_PICTURES.captured : SCREEN_PICTURES.escaped);
     // Clear of the full-screen button in the top-right corner.
     const x = 628;
     paper(this, x, 30, 600, 600, 0.95);
     const left = x + 32;
-    text(this, left, 50, boss ? `MISSION SPÉCIALE : ${boss.nickname.toUpperCase()}` : mission === null ? 'ENTRAÎNEMENT' : `MISSION ${mission + 1} / ${MISSION_COUNT}`, 22, {
+    text(this, left, 50, escape ? 'ÉVASION' : boss ? `MISSION SPÉCIALE : ${boss.nickname.toUpperCase()}` : mission === null ? 'ENTRAÎNEMENT' : `MISSION ${mission + 1} / ${MISSION_COUNT}`, 22, {
       bold: true,
       color: toCss(PALETTE.seaDeep),
     });
-    text(this, left, captured ? 80 : 86, captured ? 'Mission réussie !' : 'Le suspect s’est échappé.', captured ? 40 : 34, {
+    const headline = escape ? (captured ? 'Vous avez semé la police !' : 'Vous êtes arrêté.') : captured ? 'Mission réussie !' : 'Le suspect s’est échappé.';
+    text(this, left, captured ? 80 : 86, headline, captured && !escape ? 40 : 34, {
       bold: true,
       color: toCss(captured ? 0x2e8b57 : PALETTE.terracotta),
     });
     const nickname = boss ? ` « ${boss.nickname} »` : mission !== null ? ` « ${MISSIONS[mission]!.nickname} »` : '';
-    const detail = captured
-      ? `Vous avez capturé le suspect${nickname} !`
-      : 'Le temps est écoulé.';
+    const detail = escape
+      ? captured
+        ? 'Vous avez atteint la planque.'
+        : this.result.escapeReason === 'TIME'
+          ? 'Le temps est écoulé : les barrages étaient en place.'
+          : 'La police vous a rattrapé.'
+      : captured
+        ? `Vous avez capturé le suspect${nickname} !`
+        : 'Le temps est écoulé.';
     text(this, left, 134, detail, 22, { wordWrap: { width: 540 } });
 
     let y = 182;
     for (const line of score.lines) {
-      text(this, left, y, LINE_LABELS[line.key](line.count), 21);
+      text(this, left, y, escape && line.key === 'CAPTURE' ? 'Planque atteinte' : LINE_LABELS[line.key](line.count), 21);
       text(this, x + 568, y, `${line.points > 0 ? '+' : ''}${line.points}`, 21, {
         bold: true,
         color: toCss(line.points < 0 ? PALETTE.terracotta : PALETTE.ink),
@@ -161,7 +173,11 @@ export class ResultsScene extends Phaser.Scene {
     rankLine(this, left, 562, recorded.profile.points, 536);
 
     const menu = new Menu(this);
-    if (boss) {
+    if (escape) {
+      menu.add(x + 300, 680, 340, 60, 'NOUVELLE ÉVASION', () => this.scene.start('Practice', { autostart: true, escape: true }), { size: 22 });
+      menu.add(x - 60, 680, 240, 60, 'REJOUER (R)', () => this.scene.start('Escape', { seed: this.result.seed }), { key: 'R', size: 22 });
+      menu.add(x - 330, 680, 220, 60, 'MENU', () => this.scene.start('Title'), { key: 'ESC', size: 22 });
+    } else if (boss) {
       menu.add(x + 300, 680, 340, 60, 'COMMISSARIAT  ▶', () => this.scene.start('Commissariat'), { size: 22 });
       menu.add(x - 60, 680, 240, 60, 'RÉESSAYER (R)', () => this.scene.start('Briefing', { boss: boss.picture }), { key: 'R', size: 22 });
       menu.add(x - 330, 680, 220, 60, 'MENU', () => this.scene.start('Title'), { key: 'ESC', size: 22 });
@@ -180,6 +196,6 @@ export class ResultsScene extends Phaser.Scene {
       menu.add(x - 60, 680, 240, 60, 'REJOUER (R)', () => this.scene.start('Chase', { seed: this.result.seed }), { key: 'R', size: 22 });
       menu.add(x - 330, 680, 220, 60, 'MENU', () => this.scene.start('Title'), { key: 'ESC', size: 22 });
     }
-    text(this, 24, 24, `Poursuite ${this.result.seed}`, 16, { color: toCss(PALETTE.cream), backgroundColor: 'rgba(22, 50, 61, 0.7)', padding: { x: 8, y: 4 } });
+    text(this, 24, 24, `${escape ? 'Évasion' : 'Poursuite'} ${this.result.seed}`, 16, { color: toCss(PALETTE.cream), backgroundColor: 'rgba(22, 50, 61, 0.7)', padding: { x: 8, y: 4 } });
   }
 }

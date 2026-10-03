@@ -153,6 +153,6 @@ describe('the record of every chase', () => {
     expect(parseProfile(null)).toEqual(newProfile());
     expect(parseProfile('nonsense')).toEqual(newProfile());
     expect(parseProfile(JSON.stringify({ version: 1, points: -5, badges: { PREMIERE: 3, NOPE: 'x' }, files: { renard: 'bad' } }))).toEqual(newProfile());
-    expect(BADGES.map((b) => b.id)).toHaveLength(10);
+    expect(BADGES.map((b) => b.id)).toHaveLength(11);
   });
 });

@@ -1582,25 +1582,31 @@
 1581,All levels,Simple direction,Tournez à gauche.,Dispatcher (calm),17,dir.turn.left
 1582,All levels,Wrong-turn correction,Ce n'est pas la bonne rue.,Dispatcher (calm),26,dir.wrong_street
 1583,All levels,Wrong-turn correction,Faites demi-tour.,Dispatcher (calm),17,dir.u_turn
-1584,Intermediate and up,EVENT,Attention !,Dispatcher (calm),11,event.attention
-1585,Intermediate and up,EVENT,Descendez de la voiture !,Dispatcher (calm),25,event.get_out
-1586,Intermediate and up,EVENT,Il est à pied !,Dispatcher (calm),15,event.on_foot
-1587,Hard and up,EVENT,Il monte dans une voiture !,Dispatcher (calm),27,event.suspect_boards
-1588,Intermediate and up,EVENT,Le suspect a changé de direction.,Dispatcher (calm),33,event.changed_direction
-1589,All levels,EVENT,Le suspect a eu un accident !,Dispatcher (calm),29,event.crashed
-1590,All levels,EVENT,Le suspect est dans un taxi.,Dispatcher (calm),28,event.vehicle.taxi
-1591,All levels,EVENT,Le suspect est dans une camionnette.,Dispatcher (calm),36,event.vehicle.van
-1592,All levels,EVENT,Le suspect est dans une voiture blanche.,Dispatcher (calm),40,event.vehicle.white
-1593,All levels,EVENT,Le suspect est dans une voiture bleue.,Dispatcher (calm),38,event.vehicle.blue
-1594,All levels,EVENT,Le suspect est dans une voiture noire.,Dispatcher (calm),38,event.vehicle.black
-1595,All levels,EVENT,Le suspect est dans une voiture verte.,Dispatcher (calm),38,event.vehicle.green
-1596,Intermediate and up,EVENT,Le suspect est sorti de la voiture.,Dispatcher (calm),35,event.suspect_left_car
-1597,Hard and up,EVENT,Montez dans la voiture !,Dispatcher (calm),24,event.get_in
-1598,Expert and up,EVENT,Nous avons perdu le signal.,Dispatcher (calm),27,event.lost_signal
-1599,All levels,Officer asks for a repeat,"Pouvez-vous répéter, s'il vous plaît ?",Officer (urgent),38,repeat.calm
-1600,All levels,Officer asks for a repeat,Répétez ! Vite !,Officer (urgent),16,repeat.frantic
-1601,All levels,Officer asks for a repeat,"Répétez, s'il vous plaît !",Officer (urgent),26,repeat.urgent
-1602,All levels,End of chase,Allez ! Vite !,Dispatcher (calm),14,event.go_faster
-1603,All levels,End of chase,Le suspect est arrêté !,Dispatcher (calm),23,outcome.captured
-1604,All levels,End of chase,Oh non ! Il s'est échappé !,Dispatcher (calm),27,outcome.escaped
-1605,All levels,End of chase,Vite ! Le suspect s'éloigne !,Dispatcher (calm),29,event.moving_away
+1584,All levels,EVENT,Allez à la planque ! La police arrive.,Dispatcher (calm),38,escape.opening
+1585,Intermediate and up,EVENT,Attention !,Dispatcher (calm),11,event.attention
+1586,All levels,EVENT,Attention ! La police est juste derrière vous.,Dispatcher (calm),46,escape.police_close
+1587,All levels,EVENT,Bravo ! Vous avez semé la police !,Dispatcher (calm),34,escape.won
+1588,Intermediate and up,EVENT,Descendez de la voiture !,Dispatcher (calm),25,event.get_out
+1589,Intermediate and up,EVENT,Il est à pied !,Dispatcher (calm),15,event.on_foot
+1590,Hard and up,EVENT,Il monte dans une voiture !,Dispatcher (calm),27,event.suspect_boards
+1591,All levels,EVENT,La police vous a perdu de vue.,Dispatcher (calm),30,escape.police_lost
+1592,All levels,EVENT,La police vous a retrouvé !,Dispatcher (calm),27,escape.police_found
+1593,Intermediate and up,EVENT,Le suspect a changé de direction.,Dispatcher (calm),33,event.changed_direction
+1594,All levels,EVENT,Le suspect a eu un accident !,Dispatcher (calm),29,event.crashed
+1595,All levels,EVENT,Le suspect est dans un taxi.,Dispatcher (calm),28,event.vehicle.taxi
+1596,All levels,EVENT,Le suspect est dans une camionnette.,Dispatcher (calm),36,event.vehicle.van
+1597,All levels,EVENT,Le suspect est dans une voiture blanche.,Dispatcher (calm),40,event.vehicle.white
+1598,All levels,EVENT,Le suspect est dans une voiture bleue.,Dispatcher (calm),38,event.vehicle.blue
+1599,All levels,EVENT,Le suspect est dans une voiture noire.,Dispatcher (calm),38,event.vehicle.black
+1600,All levels,EVENT,Le suspect est dans une voiture verte.,Dispatcher (calm),38,event.vehicle.green
+1601,Intermediate and up,EVENT,Le suspect est sorti de la voiture.,Dispatcher (calm),35,event.suspect_left_car
+1602,Hard and up,EVENT,Montez dans la voiture !,Dispatcher (calm),24,event.get_in
+1603,Expert and up,EVENT,Nous avons perdu le signal.,Dispatcher (calm),27,event.lost_signal
+1604,All levels,EVENT,Vous êtes arrêté !,Dispatcher (calm),18,escape.arrested
+1605,All levels,Officer asks for a repeat,"Pouvez-vous répéter, s'il vous plaît ?",Officer (urgent),38,repeat.calm
+1606,All levels,Officer asks for a repeat,Répétez ! Vite !,Officer (urgent),16,repeat.frantic
+1607,All levels,Officer asks for a repeat,"Répétez, s'il vous plaît !",Officer (urgent),26,repeat.urgent
+1608,All levels,End of chase,Allez ! Vite !,Dispatcher (calm),14,event.go_faster
+1609,All levels,End of chase,Le suspect est arrêté !,Dispatcher (calm),23,outcome.captured
+1610,All levels,End of chase,Oh non ! Il s'est échappé !,Dispatcher (calm),27,outcome.escaped
+1611,All levels,End of chase,Vite ! Le suspect s'éloigne !,Dispatcher (calm),29,event.moving_away

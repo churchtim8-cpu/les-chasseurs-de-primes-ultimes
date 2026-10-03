@@ -62,13 +62,14 @@ export class TitleScene extends Phaser.Scene {
     const rank = rankFor(profile.points);
     const detail =
       played === 0
-        ? '8 suspects, du niveau Facile au niveau Expert   ·   C : campagne   ·   P : entraînement'
+        ? '8 suspects, du niveau Facile au niveau Expert   ·   C : campagne   ·   P : entraînement   ·   E : évasion'
         : `${capturedCount(progress)} / ${MISSION_COUNT} suspects arrêtés   ·   Grade : ${rank.name} (${profile.points.toLocaleString('fr-FR')} pts)`;
     text(this, GAME_WIDTH / 2, top + 62, detail, 19).setOrigin(0.5);
-    // The police station (rank, badges, case files), and day or night in the town (remembered on this device).
-    menu.add(GAME_WIDTH / 2 - 170, top + 108, 300, 44, '🏅 COMMISSARIAT (O)', () => this.scene.start('Commissariat'), { key: 'O', size: 19 });
+    // The police station (rank, badges, case files), Escape Mode (the player is the fugitive), and day or night in the town.
+    menu.add(GAME_WIDTH / 2 - 320, top + 108, 300, 44, '🏅 COMMISSARIAT (O)', () => this.scene.start('Commissariat'), { key: 'O', size: 19 });
+    menu.add(GAME_WIDTH / 2, top + 108, 300, 44, '🏃 ÉVASION (E)', () => this.scene.start('Practice', { escape: true }), { key: 'E', size: 19 });
     const nightLabel = () => `🌙 NUIT : ${nightOn() ? 'OUI' : 'NON'}`;
-    const night = menu.add(GAME_WIDTH / 2 + 170, top + 108, 300, 44, nightLabel(), () => {
+    const night = menu.add(GAME_WIDTH / 2 + 320, top + 108, 300, 44, nightLabel(), () => {
       setNight(!nightOn());
       night.label.setText(nightLabel());
     }, { key: 'N', size: 19 });

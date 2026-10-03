@@ -17578,12 +17578,51 @@
     ]
   },
   {
+    "audioId": "escape.opening",
+    "text": "Allez à la planque ! La police arrive.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "event.attention",
     "text": "Attention !",
     "voice": "DISPATCHER",
     "category": "EVENT",
     "template": null,
     "levels": [
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "escape.police_close",
+    "text": "Attention ! La police est juste derrière vous.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "escape.won",
+    "text": "Bravo ! Vous avez semé la police !",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
       "INTERMEDIATE",
       "HARD",
       "EXPERT"
@@ -17620,6 +17659,32 @@
     "category": "EVENT",
     "template": null,
     "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "escape.police_lost",
+    "text": "La police vous a perdu de vue.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "escape.police_found",
+    "text": "La police vous a retrouvé !",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
       "HARD",
       "EXPERT"
     ]
@@ -17757,6 +17822,19 @@
     "category": "EVENT",
     "template": null,
     "levels": [
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "escape.arrested",
+    "text": "Vous êtes arrêté !",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
       "EXPERT"
     ]
   },

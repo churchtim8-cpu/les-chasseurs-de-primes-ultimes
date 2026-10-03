@@ -211,3 +211,24 @@ test('the police station shows the rank, badges and case files, and the Boss ope
   await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Commissariat']));
   expect(errors).toEqual([]);
 });
+
+test('escape mode: the player is the fugitive, guided to the hideout, and reaching it wins', async ({ page }) => {
+  const errors = watchErrors(page);
+  await page.goto('./?debug=1&type=CAR_CAR&turnoff=0&sightings=0');
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Title']));
+  await page.keyboard.press('e');
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Practice']));
+  await page.keyboard.press('Enter');
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Escape', 'DebugOverlay']));
+  expect(await info(page, 'seed')).toMatch(/^BV-E-[0-9A-Z]{4}-[0-9A-Z]{4}$/);
+  expect(await info(page, 'mission')).toBe('ESCAPE');
+  // The partner's opening call, then the getaway car drives off on its own.
+  await expect.poll(() => info(page, 'scanner'), SLOW).toMatch(/^(DIRECTION|FILLER|FINAL): /);
+  await expect.poll(async () => Number(await info(page, 'speed')), SLOW).toBeGreaterThan(10);
+  expect(await info(page, 'phase')).toBe('PURSUIT');
+  // Debug: safe at the hideout now; the results screen follows.
+  await page.keyboard.press('x');
+  await expect.poll(() => info(page, 'phase'), SLOW).toBe('ESCAPED');
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Results']));
+  expect(errors).toEqual([]);
+});

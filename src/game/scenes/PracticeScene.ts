@@ -31,6 +31,8 @@ function saveLevel(level: Difficulty): void {
  * Practice: one chase at a level of the player's choice, outside the
  * campaign. Starting creates a chase seed at the chosen level and opens the
  * chase; `autostart` (from the results screen) starts the next one at once.
+ * With `escape`, the same screen starts an escape instead (Escape Mode: the
+ * player is the fugitive, guided to the hideout while the police follow).
  */
 export class PracticeScene extends Phaser.Scene {
   static readonly KEY = 'Practice';
@@ -43,10 +45,12 @@ export class PracticeScene extends Phaser.Scene {
   }
 
   private autostart = false;
+  private escape = false;
   private starting = false;
 
-  init(data?: { autostart?: boolean }): void {
+  init(data?: { autostart?: boolean; escape?: boolean }): void {
     this.autostart = data?.autostart === true;
+    this.escape = data?.escape === true;
     this.starting = false;
   }
 
@@ -70,13 +74,24 @@ export class PracticeScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.add
-      .text(GAME_WIDTH / 2, 262, 'ENTRAÎNEMENT', {
+      .text(GAME_WIDTH / 2, 262, this.escape ? 'ÉVASION' : 'ENTRAÎNEMENT', {
         fontFamily: FONT_FAMILY,
         fontSize: '28px',
         color: toCss(PALETTE.terracotta),
         letterSpacing: 10,
       })
       .setOrigin(0.5);
+    if (this.escape) {
+      this.add
+        .text(GAME_WIDTH / 2, 306, 'Vous êtes le fugitif : suivez les directions de votre partenaire jusqu’à la planque. La police est derrière vous !', {
+          fontFamily: FONT_FAMILY,
+          fontSize: '20px',
+          color: toCss(PALETTE.ink),
+          align: 'center',
+          wordWrap: { width: 1000 },
+        })
+        .setOrigin(0.5);
+    }
 
     this.add
       .text(GAME_WIDTH / 2, 352, 'Choisissez un niveau', {
@@ -160,8 +175,9 @@ export class PracticeScene extends Phaser.Scene {
     debugState.info.set('seed', this.seed.code);
     debugState.info.set('difficulty', DIFFICULTY_SETTINGS[this.seed.difficulty].label.en);
     const code = this.seed.code;
+    const scene = this.escape ? 'Escape' : 'Chase';
     if (this.autostart) {
-      this.scene.start('Chase', { seed: code });
+      this.scene.start(scene, { seed: code });
       return;
     }
     // The chosen level button presses in and flashes, with a blip, before the chase opens.
@@ -174,7 +190,7 @@ export class PracticeScene extends Phaser.Scene {
       button.label.setColor(toCss(PALETTE.ink));
       this.tweens.add({ targets: [button.box, button.label], scale: 0.92, duration: 80, yoyo: true });
     }
-    this.time.delayedCall(160, () => this.scene.start('Chase', { seed: code }));
+    this.time.delayedCall(160, () => this.scene.start(scene, { seed: code }));
   }
 
   /** The title picture behind a soft panel that keeps the words easy to read. */

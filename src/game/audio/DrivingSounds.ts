@@ -60,8 +60,13 @@ export class DrivingSounds {
 
   constructor(private readonly audio: ScannerAudio) {}
 
-  /** Call every frame. `driving` is false on foot, during the countdown and after the chase. */
-  update(state: { driving: boolean; speed: number; heading: number }, deltaMs: number): void {
+  /**
+   * Call every frame. `driving` is false on foot, during the countdown and
+   * after the chase. `siren` (default: while driving) is false for a car with
+   * no siren: the fugitive's in Escape Mode, which hears the police's instead
+   * when they are close.
+   */
+  update(state: { driving: boolean; speed: number; heading: number; siren?: boolean }, deltaMs: number): void {
     const out = this.out ?? this.connect();
     if (!out) return;
     const { ctx, gain, engine, tone } = out;
@@ -73,7 +78,7 @@ export class DrivingSounds {
     engine[0]!.frequency.setTargetAtTime(hz, now, 0.12);
     engine[1]!.frequency.setTargetAtTime(hz * 2.01, now, 0.12);
     tone.frequency.setTargetAtTime(300 + share * 900, now, 0.2);
-    out.siren.gain.setTargetAtTime(state.driving ? SIREN.level : 0, now, 0.25);
+    out.siren.gain.setTargetAtTime((state.siren ?? state.driving) ? SIREN.level : 0, now, 0.25);
 
     if (this.lastHeading !== null && state.driving && deltaMs > 0) {
       let turn = state.heading - this.lastHeading;

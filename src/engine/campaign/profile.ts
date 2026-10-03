@@ -55,7 +55,7 @@ export const BADGE_IDS = [
   'MARATHONIEN',
   'CHASSEUR_ULTIME',
   'BOSS',
-  'PATRONNE',
+  'PATRONNE', 'INSAISISSABLE'
 ] as const;
 export type BadgeId = (typeof BADGE_IDS)[number];
 
@@ -79,6 +79,7 @@ export const BADGES: readonly Badge[] = [
   { id: 'CHASSEUR_ULTIME', name: 'Chasseur ultime', how: 'Une médaille d’or pour les 8 suspects de la campagne.', icon: '🏆' },
   { id: 'BOSS', name: 'Le Boss sous les verrous', how: 'Arrêtez le Boss.', icon: '🐻' },
   { id: 'PATRONNE', name: 'La Patronne sous les verrous', how: 'Arrêtez la Patronne.', icon: '🐆' },
+  { id: 'INSAISISSABLE', name: 'Insaisissable', how: 'Semez la police en mode Évasion.', icon: '🏃' },
 ];
 
 /** Captures needed for the counting badges. */
@@ -201,6 +202,11 @@ export interface ChaseOutcome {
   campaign: CampaignProgress;
   /** Today, as YYYY-MM-DD. */
   date: string;
+  /**
+   * Escape Mode: the player was the fugitive, and `stats.captured` means they
+   * reached the hideout. Points count towards the rank; no arrest is recorded.
+   */
+  escape?: boolean;
 }
 
 export interface Recorded {
@@ -213,7 +219,7 @@ export interface Recorded {
 /** Adds a finished chase to the record: points, arrests, badges and the suspect's case file. */
 export function recordChase(before: Profile, outcome: ChaseOutcome): Recorded {
   const { stats, score } = outcome;
-  const captured = stats.captured;
+  const captured = stats.captured && !outcome.escape;
   const profile: Profile = {
     ...before,
     points: before.points + score.total,
@@ -222,7 +228,7 @@ export function recordChase(before: Profile, outcome: ChaseOutcome): Recorded {
     badges: { ...before.badges },
     files: { ...before.files },
   };
-  if (outcome.suspect) {
+  if (outcome.suspect && !outcome.escape) {
     const file = profile.files[outcome.suspect] ?? EMPTY_FILE;
     const elapsed = outcome.timeLimit - stats.timeLeft;
     profile.files[outcome.suspect] = {
@@ -244,8 +250,10 @@ export function recordChase(before: Profile, outcome: ChaseOutcome): Recorded {
 
 function earned(id: BadgeId, after: Profile, outcome: ChaseOutcome): boolean {
   const { stats } = outcome;
-  const captured = stats.captured;
+  const captured = stats.captured && !outcome.escape;
   switch (id) {
+    case 'INSAISISSABLE':
+      return stats.captured && outcome.escape === true;
     case 'PREMIERE':
       return captured;
     case 'SANS_FAUTE':

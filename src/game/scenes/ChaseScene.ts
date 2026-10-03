@@ -673,13 +673,7 @@ export class ChaseScene extends Phaser.Scene {
 
   /** V or the CARTE button: map turns on foot, always, or never (remembered on this device). */
   private cycleFacing(): void {
-    const facing = MAP_FACINGS[(MAP_FACINGS.indexOf(loadFacing()) + 1) % MAP_FACINGS.length] as MapFacing;
-    try {
-      window.localStorage.setItem(FACING_KEY, facing);
-    } catch {
-      // storage unavailable: the choice lasts for this chase only
-    }
-    chosenFacing = facing;
+    const facing = nextFacing();
     this.rig.setFacing(facing);
     this.hud.setFacing(facing);
   }
@@ -889,8 +883,20 @@ const FACING_KEY = 'chasseurs.mapFacing';
 /** Set when the player changes the facing during this visit. */
 let chosenFacing: MapFacing | null = null;
 
+/** The facing after the current one, chosen and remembered on this device. */
+export function nextFacing(): MapFacing {
+  const facing = MAP_FACINGS[(MAP_FACINGS.indexOf(loadFacing()) + 1) % MAP_FACINGS.length] as MapFacing;
+  try {
+    window.localStorage.setItem(FACING_KEY, facing);
+  } catch {
+    // storage unavailable: the choice lasts for this visit only
+  }
+  chosenFacing = facing;
+  return facing;
+}
+
 /** The map facing: the player's latest choice, else `?facing=north` (or foot, always), else remembered. */
-function loadFacing(): MapFacing {
+export function loadFacing(): MapFacing {
   if (chosenFacing) return chosenFacing;
   const fromAddress = new URLSearchParams(window.location.search).get('facing')?.toUpperCase();
   if (MAP_FACINGS.includes(fromAddress as MapFacing)) return fromAddress as MapFacing;
