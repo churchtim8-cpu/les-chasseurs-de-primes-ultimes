@@ -232,6 +232,8 @@ export class Chase {
   private nextSighting = 0;
   private check: { index: number; secondsLeft: number } | null = null;
   private revealUntil = -Infinity;
+  /** The suspect is in view while changing transport, and until this time (elapsed seconds) afterwards. */
+  private transferRevealUntil = -Infinity;
   private sightingsAsked = 0;
   private sightingsRight = 0;
   private lostSignalPending: boolean;
@@ -343,6 +345,41 @@ export class Chase {
     return !next || next.s >= TURN_OFF.clearSeconds * Math.max(me.speed, 1);
   }
 
+  /**
+   * While the suspect is changing transport at the end of a stage: the mode it
+   * is changing to and how far through the change it is (0 to 1), so the game
+   * can draw it running up to its getaway car and getting in. Null otherwise.
+   */
+  get transfer(): { to: TravelMode; progress: number } | null {
+    if (this.transferUntil === null || this.suspectStage >= this.lastStage) return null;
+    const to = this.stages[this.suspectStage + 1]!.mode;
+    const left = (this.transferUntil - this.elapsed) / TRANSFER.suspectSeconds[to];
+    return { to, progress: Math.min(1, Math.max(0, 1 - left)) };
+  }
+
+  /** Where the suspect starts a stage (its getaway car waits here before a change into a car). */
+  stageStart(stage: number): MoverStart {
+    const st = this.stages[stage]!;
+    return placeOnRoute(this.graph, st.route, TRANSFER.stageStartMetres[st.mode], st.mode).start;
+  }
+
+  /**
+   * The dispatcher's opening call (the suspect's vehicle, then the first
+   * direction), given before anything moves: the game plays it in full and
+   * only then starts the chase. Without it, the first `update` gives the same
+   * call as the chase starts.
+   */
+  openingCall(): ChaseEvent[] {
+    const events: ChaseEvent[] = [];
+    if (this.started || this.phase !== 'PURSUIT') return events;
+    this.started = true;
+    const vehicle = this.scenario.vehicles[0];
+    if (vehicle) events.push({ type: 'ANNOUNCE', lines: [vehicleLine(vehicle)] });
+    const transmissions = this.navigator.update(this.player.location(), this.suspect.remainingPlan());
+    for (const transmission of transmissions) events.push({ type: 'TRANSMISSION', transmission });
+    return events;
+  }
+
   /** Where the suspect changes transport at the end of the player's current stage. */
   private get transferNode(): string {
     const route = this.stages[this.playerStage]?.route ?? [];
@@ -409,7 +446,8 @@ export class Chase {
     const s = this.settings;
     const lost = this.lostSince !== null;
 
-    const sighted = !lost && (this.distance <= s.sightingDistance || this.elapsed < this.revealUntil);
+    const changing = this.transferUntil !== null || this.elapsed < this.transferRevealUntil;
+    const sighted = !lost && (this.distance <= s.sightingDistance || this.elapsed < this.revealUntil || changing);
     if (sighted !== this.sighted) {
       this.sighted = sighted;
       events.push({ type: 'SIGHTED', on: sighted });
@@ -460,18 +498,19 @@ export class Chase {
    */
   private changeSuspectTransport(events: ChaseEvent[]): void {
     if (this.transferUntil === null) {
-      this.transferUntil = this.elapsed + TRANSFER.suspectSeconds;
+      this.transferUntil = this.elapsed + TRANSFER.suspectSeconds[this.stages[this.suspectStage + 1]!.mode];
       if (this.scenario.transferCrashes[this.suspectStage]) events.push({ type: 'SUSPECT_CRASH' });
       return;
     }
     if (this.elapsed < this.transferUntil) return;
     this.transferUntil = null;
+    this.transferRevealUntil = this.elapsed + TRANSFER.revealSeconds;
     if (this.lostSince !== null) this.restoreSignal(events);
     const from = this.suspect.mode;
     this.suspectStage++;
     const stage = this.stages[this.suspectStage]!;
     if (from === 'CAR') this.abandonedCar = this.suspect.location();
-    const placed = placeOnRoute(this.graph, stage.route, 2, stage.mode);
+    const placed = placeOnRoute(this.graph, stage.route, TRANSFER.stageStartMetres[stage.mode], stage.mode);
     this.suspect = new Mover(this.graph, placed.start);
     this.suspect.followPlan(placed.plan);
     this.suspect.speedFactor = this.suspectSpeedFor(this.suspectStage);

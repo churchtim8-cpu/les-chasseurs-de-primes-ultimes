@@ -31,8 +31,23 @@ export const CHASE_TYPE_WEIGHTS: Record<Difficulty, Partial<Record<ChaseType, nu
 
 /** Transport-change tuning, shared by all levels (provisional). */
 export const TRANSFER = {
-  /** Seconds the suspect takes to get out of or into a car. */
-  suspectSeconds: 1.5,
+  /**
+   * Seconds the suspect stops for at a change of transport, by the mode it
+   * changes to: getting out of a car (FOOT), or running up to its getaway car,
+   * getting in and pulling away (CAR).
+   */
+  suspectSeconds: { FOOT: 1.5, CAR: 2.6 } as Record<TravelMode, number>,
+  /**
+   * The next stage starts this far (metres) along its route: a runner steps
+   * out beside the car; a getaway car waits a short sprint up the street.
+   */
+  stageStartMetres: { FOOT: 2, CAR: 14 } as Record<TravelMode, number>,
+  /**
+   * The suspect is in view while it changes transport (running to its getaway
+   * car and getting in, or jumping out) and for this long (seconds) after it
+   * moves off, however far away it is: the player sees the change happen.
+   */
+  revealSeconds: 2.5,
   /** "Descendez de la voiture !" is said when the player is this close (metres) to where the suspect got out. */
   getOutWithin: 70,
   /**

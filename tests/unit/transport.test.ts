@@ -178,3 +178,49 @@ describe('changing transport in a chase', () => {
     expect(results.filter((p) => p === 'CAPTURED').length / results.length).toBeLessThanOrEqual(0.15);
   }, 60_000);
 });
+
+describe('the opening call and the suspect boarding a car', () => {
+  it('gives the vehicle and the first direction before anything moves, and the first update repeats neither', () => {
+    for (const seed of seeds('INTERMEDIATE', 20, 'opening')) {
+      const chase = new Chase(graph, generateScenario(graph, seed, { chaseType: 'CAR_CAR' }));
+      const before = { suspect: chase.suspect.snapshot(), timeLeft: chase.status.timeLeft };
+      const opening = chase.openingCall();
+      expect(opening.map((e) => e.type), seed).toEqual(['ANNOUNCE', 'TRANSMISSION']);
+      expect(chase.suspect.snapshot(), seed).toEqual(before.suspect);
+      expect(chase.status.timeLeft).toBe(before.timeLeft);
+      expect(chase.openingCall()).toEqual([]);
+      const first = chase.update(0.05);
+      expect(first.filter((e) => e.type === 'ANNOUNCE' || e.type === 'TRANSMISSION'), seed).toEqual([]);
+    }
+  });
+
+  it('reports the run up to the getaway car, which waits where the car stage starts', () => {
+    let checked = 0;
+    for (const seed of seeds('HARD', 30, 'boarding')) {
+      const chase = new Chase(graph, generateScenario(graph, seed, { chaseType: 'FOOT_CAR' }));
+      chase.player.speedFactor = 0; // stays put: the suspect runs its stage alone
+      const carStart = chase.stageStart(1);
+      let seen: number[] = [];
+      for (let t = 0; t < 400 && chase.status.phase === 'PURSUIT' && chase.suspectStage === 0; t += 0.05) {
+        chase.update(0.05);
+        const transfer = chase.transfer;
+        if (transfer) {
+          expect(transfer.to).toBe('CAR');
+          seen.push(transfer.progress);
+        }
+      }
+      if (chase.suspectStage !== 1) continue;
+      checked++;
+      expect(seen.length, seed).toBeGreaterThanOrEqual(Math.floor(TRANSFER.suspectSeconds.CAR / 0.05) - 1);
+      expect(seen[0], seed).toBeLessThan(0.1);
+      expect(seen[seen.length - 1], seed).toBeGreaterThan(0.9);
+      expect(seen).toEqual([...seen].sort((a, b) => a - b));
+      expect(chase.transfer).toBeNull();
+      // The car stage starts where the parked getaway car was drawn.
+      expect(chase.suspect.location()).toMatchObject({ edgeId: carStart.edgeId, towards: carStart.towards });
+      expect(chase.suspect.location().t).toBeCloseTo(carStart.t, 3);
+      seen = [];
+    }
+    expect(checked).toBeGreaterThan(10);
+  });
+});
