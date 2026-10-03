@@ -80,6 +80,21 @@ export const TRANSPORT_LINES = {
 } as const;
 
 /**
+ * Escape Mode (the roles switched: the player flees to the hideout while the
+ * police follow; the partner on the radio gives the directions). Lines
+ * approved by the owner on 2026-10-03; the directions themselves are the
+ * same clips as the chase ("vous" is the player either way).
+ */
+export const ESCAPE_LINES = {
+  OPENING: { audioId: 'escape.opening', text: 'Allez à la planque ! La police arrive.' },
+  POLICE_CLOSE: { audioId: 'escape.police_close', text: 'Attention ! La police est juste derrière vous.' },
+  POLICE_LOST: { audioId: 'escape.police_lost', text: 'La police vous a perdu de vue.' },
+  POLICE_FOUND: { audioId: 'escape.police_found', text: 'La police vous a retrouvé !' },
+  ARRESTED: { audioId: 'escape.arrested', text: 'Vous êtes arrêté !' },
+  WON: { audioId: 'escape.won', text: 'Bravo ! Vous avez semé la police !' },
+} as const;
+
+/**
  * Chase events from the approved Events list (blueprint sections 11 and 18),
  * plus the crash line approved by the owner on 2026-10-03.
  */
@@ -265,6 +280,9 @@ export function buildScript(graph: TownGraph, modes: readonly TravelMode[] = ['C
     }
     for (const line of Object.values(OUTCOME_LINES)) {
       addLine(out, { ...line, voice: 'DISPATCHER', category: 'OUTCOME', template: null }, level);
+    }
+    for (const line of Object.values(ESCAPE_LINES)) {
+      addLine(out, { ...line, voice: 'DISPATCHER', category: 'EVENT', template: null }, level);
     }
     if (CHASE_SETTINGS[level].directionChange > 0) {
       for (const line of [EVENT_LINES.ATTENTION, EVENT_LINES.CHANGED_DIRECTION]) {

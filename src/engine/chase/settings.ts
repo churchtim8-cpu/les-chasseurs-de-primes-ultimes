@@ -356,3 +356,36 @@ export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
     lostSignal: 0.9,
   },
 };
+
+/**
+ * Escape Mode (the roles switched, Mr Henry 2026-10-03): the player is the
+ * suspect, driving or running to the hideout on the partner's directions,
+ * while a police car (then an officer on foot) follows by the shortest way.
+ * Right turns keep the gap; a detour or a wait lets the police close in.
+ */
+export const ESCAPE = {
+  /** Police speed as a fraction of the player's cruising speed, by level: a little slower, so listening wins. */
+  policeSpeed: { EASY: 0.86, INTERMEDIATE: 0.88, HARD: 0.9, EXPERT: 0.91 } as Record<Difficulty, number>,
+  /** The police are on the map when this close (metres of road), by the player's mode. */
+  seeWithin: { CAR: 170, FOOT: 90 } as Record<TravelMode, number>,
+  /** "Attention ! La police est juste derrière vous." when this close (metres of road)... */
+  closeWithin: { CAR: 95, FOOT: 50 } as Record<TravelMode, number>,
+  /** ...said again only once they have fallen back to this many times that distance. */
+  closeClear: 1.8,
+  /** "La police vous a perdu de vue." beyond the level's warningDistance; "retrouvé" back within this share of it. */
+  foundShare: 0.6,
+  /** The player gets into their getaway car from this far away (metres): a sprint up the street to it. */
+  boardWithin: 90,
+  /** The hideout is reached this close (metres) to the end of the route. */
+  arriveWithin: 10,
+  /** The police change transport where the player did, once within this distance (metres) of that spot. */
+  switchWithin: 45,
+  /**
+   * The clock (the roadblocks going up), as a multiple of the time the whole
+   * route takes at cruising speed, by level: room to listen, hesitate and
+   * repeat, not to wander the town (a perfect run takes about 1.1 to 1.5).
+   */
+  timeFactor: { EASY: 2.6, INTERMEDIATE: 2.2, HARD: 1.9, EXPERT: 1.7 } as Record<Difficulty, number>,
+  /** The player's getaway car waits this far (metres) along a car stage's route. */
+  carAheadMetres: 14,
+} as const;

@@ -15,7 +15,8 @@
  */
 
 import { EVENT_LINES, TRANSPORT_LINES } from '../../src/engine/audio/script';
-import type { Chase, ChaseEvent } from '../../src/engine/chase/chase';
+import type { ChaseEvent, ModeChangeResult } from '../../src/engine/chase/chase';
+import type { Mover } from '../../src/engine/movement/mover';
 import { VEHICLES, type Vehicle } from '../../src/engine/chase/settings';
 import { sightingLine, vehicleLine } from '../../src/engine/language/sightings';
 import type { SightingCard } from '../../src/engine/chase/sightings';
@@ -31,6 +32,14 @@ interface Task {
   travelled: number;
   target?: number;
   queued: boolean;
+}
+
+/** What the bot plays: the chase, or Escape Mode (the same French, the roles switched). */
+export interface Playable {
+  player: Mover;
+  update(dt: number): ChaseEvent[];
+  toggleMode(): { result: ModeChangeResult; events: ChaseEvent[] };
+  answerSighting(choice: number): ChaseEvent[];
 }
 
 export class ListenerBot {
@@ -82,7 +91,7 @@ export class ListenerBot {
   }
 
   /** Act, then advance the chase by dt. */
-  step(chase: Chase, dt: number): ChaseEvent[] {
+  step(chase: Playable, dt: number): ChaseEvent[] {
     this.time += dt;
     if (this.question && this.question.at <= this.time) {
       const choice = this.answer(this.question.cards, this.question.audioId);
@@ -160,7 +169,7 @@ export class ListenerBot {
   }
 
   /** Is it time to press the arrow for this clause? */
-  private ready(task: Task, chase: Chase, passedNode: string | null, arrivedBy: string): boolean {
+  private ready(task: Task, chase: Playable, passedNode: string | null, arrivedBy: string): boolean {
     const clause = task.clause;
     const pos = chase.player.location();
     const mode = chase.player.mode;

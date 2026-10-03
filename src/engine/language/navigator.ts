@@ -306,8 +306,11 @@ export class Navigator {
     }
   }
 
+  /** How a way back is planned after a wrong turn: onto a moving suspect's route (default), or to a fixed destination. */
+  planner: GuidePlanner = planGuide;
+
   private replan(player: MoverStart, suspectRoute: readonly string[]): { guide: string[]; uTurn: boolean } | null {
-    return planGuide(this.graph, player, suspectRoute, this.difficulty);
+    return this.planner(this.graph, player, suspectRoute, this.difficulty);
   }
 
   /** Is it too early for the direction about action `a` (see leadDistance)? The next node will do. */
@@ -332,6 +335,13 @@ export class Navigator {
     out.push(transmission);
   }
 }
+
+export type GuidePlanner = (
+  graph: TownGraph,
+  player: MoverStart,
+  route: readonly string[],
+  difficulty: Difficulty,
+) => { guide: string[]; uTurn: boolean } | null;
 
 /**
  * A guide from the player's position onto the suspect's route: either going
@@ -375,6 +385,46 @@ export function planGuide(
       const cost = behind >= -EARLY_ARRIVAL ? Math.max(behind, 0) : -behind - EARLY_ARRIVAL;
       if (!best || cost < best.cost) best = { guide, uTurn: option.uTurn, cost };
       break;
+    }
+  }
+  return best;
+}
+
+/**
+ * Escape Mode: a guide from the player's position to the end of `route` (the
+ * hideout, which does not move): the shortest describable way that joins the
+ * route somewhere and follows it to the end, going on or turning round.
+ */
+export function planEscapeGuide(
+  graph: TownGraph,
+  player: MoverStart,
+  route: readonly string[],
+  difficulty: Difficulty,
+): { guide: string[]; uTurn: boolean } | null {
+  const mode = player.mode;
+  const edge = graph.edge(player.edgeId);
+  const origin = graph.other(edge, player.towards);
+  const length = graph.edgeLength(edge);
+  const fromOrigin = (origin === edge.from ? player.t : 1 - player.t) * length;
+  const blocked = new Set([edge.id]);
+  const options: { first: [string, string]; lead: number; uTurn: boolean }[] = [
+    { first: [origin, player.towards], lead: length - fromOrigin, uTurn: false },
+  ];
+  if (canTravel(edge, mode, player.towards)) {
+    options.push({ first: [player.towards, origin], lead: fromOrigin + U_TURN_PENALTY, uTurn: true });
+  }
+  let best: { guide: string[]; uTurn: boolean; cost: number } | null = null;
+  for (const option of options) {
+    const start = option.first[1];
+    for (let k = 0; k < route.length; k++) {
+      const join = route[k] as string;
+      const path = start === join ? { nodes: [start], length: 0 } : graph.shortestPath(start, join, mode, blocked);
+      if (!path) continue;
+      const guide = [option.first[0], ...path.nodes, ...route.slice(k + 1)];
+      if (new Set(guide).size !== guide.length || followProblem(graph, guide, mode)) continue;
+      if (!describable(graph, guide, mode, difficulty)) continue;
+      const cost = option.lead + path.length + pathLength(graph, route.slice(k));
+      if (!best || cost < best.cost) best = { guide, uTurn: option.uTurn, cost };
     }
   }
   return best;

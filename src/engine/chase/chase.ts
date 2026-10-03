@@ -78,8 +78,8 @@ export type ModeChangeResult = { ok: true } | { ok: false; reason: 'NO_CAR' | 'T
 
 export type ChasePhase = 'PURSUIT' | 'CAPTURED' | 'ESCAPED';
 export type Proximity = 'CLOSE' | 'NEAR' | 'FAR' | 'LOSING';
-/** The suspect only ever escapes when the clock runs out. */
-export type EscapeReason = 'TIME';
+/** The suspect only ever escapes when the clock runs out; in Escape Mode the player gets away by reaching the hideout. */
+export type EscapeReason = 'TIME' | 'HIDEOUT';
 
 export type ChaseEvent =
   | { type: 'CAPTURED' }

@@ -3390,11 +3390,29 @@
       "voice": "DISPATCHER",
       "durationMs": 1254
     },
+    "escape.opening": {
+      "file": "dispatcher/escape.opening.mp3",
+      "text": "Allez à la planque ! La police arrive.",
+      "voice": "DISPATCHER",
+      "durationMs": 2586
+    },
     "event.attention": {
       "file": "dispatcher/event.attention.mp3",
       "text": "Attention !",
       "voice": "DISPATCHER",
       "durationMs": 1071
+    },
+    "escape.police_close": {
+      "file": "dispatcher/escape.police_close.mp3",
+      "text": "Attention ! La police est juste derrière vous.",
+      "voice": "DISPATCHER",
+      "durationMs": 3161
+    },
+    "escape.won": {
+      "file": "dispatcher/escape.won.mp3",
+      "text": "Bravo ! Vous avez semé la police !",
+      "voice": "DISPATCHER",
+      "durationMs": 2769
     },
     "event.get_out": {
       "file": "dispatcher/event.get_out.mp3",
@@ -3413,6 +3431,18 @@
       "text": "Il monte dans une voiture !",
       "voice": "DISPATCHER",
       "durationMs": 1933
+    },
+    "escape.police_lost": {
+      "file": "dispatcher/escape.police_lost.mp3",
+      "text": "La police vous a perdu de vue.",
+      "voice": "DISPATCHER",
+      "durationMs": 1829
+    },
+    "escape.police_found": {
+      "file": "dispatcher/escape.police_found.mp3",
+      "text": "La police vous a retrouvé !",
+      "voice": "DISPATCHER",
+      "durationMs": 1750
     },
     "event.changed_direction": {
       "file": "dispatcher/event.changed_direction.mp3",
@@ -3479,6 +3509,12 @@
       "text": "Nous avons perdu le signal.",
       "voice": "DISPATCHER",
       "durationMs": 1802
+    },
+    "escape.arrested": {
+      "file": "dispatcher/escape.arrested.mp3",
+      "text": "Vous êtes arrêté !",
+      "voice": "DISPATCHER",
+      "durationMs": 1228
     },
     "repeat.calm": {
       "file": "officer/repeat.calm.mp3",

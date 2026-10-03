@@ -30,6 +30,8 @@ export class Hud {
     private readonly scene: Phaser.Scene,
     /** Top-left label, e.g. "MISSION 4 / 8" (or "ENTRAÎNEMENT" in practice). */
     missionLabel: string,
+    /** What the signal bars measure: the suspect's signal, or "POLICE" in Escape Mode. */
+    private readonly signalName = 'SIGNAL',
   ) {
     const { width } = scene.scale;
     const panel = (x: number, y: number, text: string, origin: [number, number], size = 20) =>
@@ -155,7 +157,7 @@ export class Hud {
     const colour = status.signal > 0.6 ? 0x6fcf7c : status.signal > 0.3 ? 0xe8c547 : 0xe0463a;
     this.signalBars.forEach((bar, i) => bar.setFillStyle(i < lit ? colour : 0x55656b, 1));
     const blink = (status.warning || status.signalLost) && Math.floor(this.scene.time.now / 300) % 2 === 0;
-    this.signalLabel.setText(status.signalLost ? 'SIGNAL PERDU' : 'SIGNAL');
+    this.signalLabel.setText(status.signalLost ? 'SIGNAL PERDU' : this.signalName);
     this.signalLabel.setColor(blink ? '#ffb4a2' : toCss(PALETTE.cream));
     this.signalBars.forEach((bar) => bar.setVisible(!status.signalLost));
     if (status.sighting) this.sighting.tick(status.sighting.secondsLeft);
