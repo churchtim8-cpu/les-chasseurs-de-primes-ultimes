@@ -252,10 +252,12 @@ export class Navigator {
     destination: string | null,
     /** The new guide, when the player is still on it (starting with the edge they are on). */
     guide?: readonly string[],
+    /** The guide starts by turning round on that edge ("Faites demi-tour."). */
+    turnRound = false,
   ): Transmission[] {
     const out: Transmission[] = [];
     this.destination = destination;
-    const plan = guide ? { guide: [...guide], uTurn: false } : this.replan(player, suspectRoute);
+    const plan = guide ? { guide: [...guide], uTurn: turnRound } : this.replan(player, suspectRoute);
     if (!plan) return out; // off the guide now: the usual recovery takes over
     if (plan.uTurn) this.emit('CORRECTION', [makeInstruction([{ action: 'U_TURN' }], this.difficulty)], out);
     this.useGuide(plan, player, out);

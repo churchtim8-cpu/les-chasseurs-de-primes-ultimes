@@ -34,6 +34,8 @@ import {
   CHASE_TYPE_MODES,
   CHASE_TYPE_WEIGHTS,
   CHASE_TYPES,
+  CRASH,
+  NEAR_CAPTURE,
   TURN_OFF,
   type ChaseSettings,
   type ChaseType,
@@ -91,7 +93,13 @@ export interface ChaseScenario {
   sightings: Sighting[];
   /** The signal is lost once, after a multi-step call (Expert). */
   lostSignal: boolean;
+  /** A last-second escape just as the police are about to make the arrest (see NEAR_CAPTURE). */
+  nearCapture: NearCapture | null;
+  /** For each change of transport (at the end of stage i): true when the suspect crashes its car there. */
+  transferCrashes: boolean[];
 }
+
+export type NearCapture = 'CRASH' | 'DODGE';
 
 export interface ScenarioOptions {
   /** Debug and tests: force a chase type instead of drawing one from the seed. */
@@ -102,6 +110,8 @@ export interface ScenarioOptions {
   sightings?: boolean;
   /** Debug and tests: force a lost signal on or off. */
   lostSignal?: boolean;
+  /** Debug and tests: force a last-second escape (a crash needs a chase that ends in a car), or none. */
+  nearCapture?: NearCapture | null;
 }
 
 /** The chase type a seed gives at its difficulty (its own random stream, so routes are not reshuffled). */
@@ -163,6 +173,16 @@ export function generateScenario(graph: TownGraph, seedCode: string, options: Sc
       ? []
       : planSightings(graph, sightingRng, stages, vehicles, difficulty, PLAYER_OFFSET + headStart, options.sightings ? 1 : 0);
   const lostSignal = options.lostSignal ?? rng.fork('lost-signal').chance(settings.lostSignal);
+  const nearRng = rng.fork('near-capture');
+  const endsInCar = stages[stages.length - 1]?.mode === 'CAR';
+  const draw = nearRng.next();
+  const odds = NEAR_CAPTURE[difficulty];
+  const drawn: NearCapture | null = draw < odds.crash ? 'CRASH' : draw < odds.crash + odds.dodge ? 'DODGE' : null;
+  const wanted = options.nearCapture === undefined ? drawn : options.nearCapture;
+  const nearCapture = wanted === 'CRASH' && !endsInCar ? null : wanted;
+  const transferCrashes = stages
+    .slice(0, -1)
+    .map((st, i) => st.mode === 'CAR' && stages[i + 1]?.mode === 'FOOT' && difficulty !== 'EASY' && nearRng.chance(CRASH.atTransfer));
 
   const scenario: ChaseScenario = {
     seed: code,
@@ -179,6 +199,8 @@ export function generateScenario(graph: TownGraph, seedCode: string, options: Sc
     vehicles,
     sightings,
     lostSignal,
+    nearCapture,
+    transferCrashes,
   };
   const problems = validateScenario(graph, scenario);
   if (problems.length > 0) throw new Error(`Invalid chase ${code}: ${problems.join('; ')}`);
@@ -378,6 +400,8 @@ export function validateScenario(graph: TownGraph, s: ChaseScenario): string[] {
     }
   }
   problems.push(...sightingProblems(graph, s.stages, s.vehicles, s.sightings));
+  if (s.nearCapture === 'CRASH' && last.mode !== 'CAR') problems.push('A last-second crash needs a chase that ends in a car');
+  if (s.transferCrashes.length !== s.stages.length - 1) problems.push('Transfer crashes do not match the stages');
   const planStart = s.route.indexOf(s.suspectPlan[0] as string);
   if (planStart < 1 || s.route.slice(planStart).join() !== s.suspectPlan.join()) {
     problems.push('Suspect plan is not the rest of the route');

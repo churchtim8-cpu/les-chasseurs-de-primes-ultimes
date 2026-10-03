@@ -217,6 +217,55 @@ export const TURN_OFF = {
   seenWithin: { CAR: 60, FOOT: 20 } as Record<TravelMode, number>,
 } as const;
 
+/**
+ * Last-second escapes (Mr Henry, 2026-10-02). Just as the police are about to
+ * make the arrest, the suspect sometimes gets away once more, at most once a
+ * chase, and the chase starts again:
+ *   CRASH: driving, it swerves off the road, crashes, jumps out and runs
+ *     (Intermediate up). The scanner says "Le suspect est sorti de la voiture.
+ *     Il est à pied !" and "Descendez de la voiture !".
+ *   DODGE: it makes a sudden U-turn (Hard and Expert): the police car skids
+ *     past, or the officer falls over. "Attention ! Le suspect a changé de
+ *     direction." then "Faites demi-tour.".
+ * Chances per chase; a crash needs the chase to end in a car.
+ */
+export const NEAR_CAPTURE: Record<Difficulty, { crash: number; dodge: number }> = {
+  EASY: { crash: 0, dodge: 0 },
+  INTERMEDIATE: { crash: 0.35, dodge: 0 },
+  HARD: { crash: 0.25, dodge: 0.33 },
+  EXPERT: { crash: 0.2, dodge: 0.5 },
+};
+
+/** A last-second escape only happens with at least this much time left (seconds, by mode), so there is time to catch the suspect again. */
+export const NEAR_CAPTURE_MIN_SECONDS: Record<TravelMode, number> = { CAR: 40, FOOT: 20 };
+
+export const CRASH = {
+  /** Chance that a planned change from car to foot (Intermediate up) is a crash rather than pulling up. */
+  atTransfer: 0.5,
+  /** After a last-second crash the suspect sprints away until it is this share of the level's foot head start ahead... */
+  headStartShare: 0.6,
+  /** ...this much faster than its usual running speed. */
+  sprintFactor: 1.6,
+  /** The run after a last-second crash: this share of the level's foot stage lengths (shortest, longest). */
+  routeShare: [0.6, 1.1] as [number, number],
+} as const;
+
+export const DODGE = {
+  /** Extra seconds on the clock, by mode: the chase starts again. */
+  extraSeconds: { CAR: 15, FOOT: 8 } as Record<TravelMode, number>,
+  /** No capture for this long after the dodge (seconds). */
+  graceSeconds: 3,
+  /** The police car skids to a stop, or the officer is on the ground, at least this long (seconds). */
+  downSeconds: { CAR: 0.8, FOOT: 1.5 } as Record<TravelMode, number>,
+  /**
+   * The police car skids to a stop (and the officer waits, back on his feet)
+   * until the player turns round, or at most this long (seconds).
+   */
+  holdSeconds: 7,
+  /** Length of the suspect's new route after turning round (metres), long enough to catch it again. */
+  routeLength: { CAR: [2800, 3600], FOOT: [500, 850] } as Record<TravelMode, [number, number]>,
+} as const;
+
 export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
   EASY: {
     routeLength: [2400, 3300],
