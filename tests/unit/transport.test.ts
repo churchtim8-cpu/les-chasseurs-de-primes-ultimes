@@ -144,8 +144,9 @@ describe('changing transport in a chase', () => {
     for (const seed of seeds('HARD', 20, 'pickup')) {
       const { chase } = listen(seed, 'FOOT_CAR');
       if (chase.suspectStage === 0) continue;
-      expect(chase.playerStage, seed).toBe(1);
-      if (chase.status.phase === 'PURSUIT') expect(chase.player.mode).toBe('CAR');
+      // A last-second crash adds a stage on foot after the car.
+      expect(chase.playerStage, seed).toBeGreaterThanOrEqual(1);
+      if (chase.status.phase === 'PURSUIT' && chase.playerStage === 1) expect(chase.player.mode).toBe('CAR');
     }
   });
 

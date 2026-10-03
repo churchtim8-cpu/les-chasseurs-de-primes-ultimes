@@ -213,6 +213,8 @@ export class Mover {
   update(dt: number): string[] {
     const passed: string[] = [];
     const settings = MOVEMENT[this.currentMode];
+    // A turn chosen while held at a junction is taken once the mover may move again.
+    if (this.waitingReason === 'JUNCTION' && (this.queuedIntent || this.aim)) this.tryLeaveJunction();
     if (this.waitingReason) {
       this.speed = 0;
       return passed;
@@ -305,6 +307,8 @@ export class Mover {
   }
 
   private tryLeaveJunction(): void {
+    // Held still (speedFactor 0): stay at the junction for now.
+    if (this.speedFactor === 0) return;
     const exits = exitsAt(this.graph, this.edge, this.target, this.currentMode);
     const next = this.pickExit(exits);
     if (next) {

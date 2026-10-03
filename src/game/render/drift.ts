@@ -142,6 +142,19 @@ export class DriftEffects {
     }
   }
 
+  /** A wisp of steam from a crashed car's bonnet. */
+  steam(x: number, y: number): void {
+    this.puff(x, y, 0.1, 0xf2f2f2, 0.55);
+  }
+
+  /** Dark smoke and debris where a car hits something. */
+  smash(x: number, y: number, count = 10): void {
+    for (let i = 0; i < count; i++) {
+      const a = (i / count) * Math.PI * 2;
+      this.puff(x + Math.cos(a) * 2, y + Math.sin(a) * 2, 0.6, i % 3 === 0 ? 0x3a3a3a : 0x8a8a8a, 0.7);
+    }
+  }
+
   private puff(x: number, y: number, strength: number, colour = 0xd2d2d2, size = 1): void {
     const p = this.puffs[this.puffIndex++ % this.puffs.length]!;
     this.scene.tweens.killTweensOf(p);

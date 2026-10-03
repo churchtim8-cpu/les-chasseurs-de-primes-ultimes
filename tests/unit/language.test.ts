@@ -199,7 +199,8 @@ describe('scanner instructions in real chases', () => {
 
   it.each(DIFFICULTIES)('every turn on the route is announced before the junction (%s)', (difficulty) => {
     for (const seed of seeds(difficulty, 60, 'announce')) {
-      const { chase, log } = listen(seed, 1.2, { chaseType: 'CAR_CAR' });
+      // The route as planned (a last-second U-turn would change it).
+      const { chase, log } = listen(seed, 1.2, { chaseType: 'CAR_CAR', nearCapture: null });
       const route = chase.scenario.route;
       const announced = new Set(log.flatMap((t) => t.instructions.flatMap((i) => i.atNodes)));
       const reached = new Set<string>();
