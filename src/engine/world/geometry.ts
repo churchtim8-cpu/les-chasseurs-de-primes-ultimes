@@ -25,7 +25,9 @@ export interface Point {
 }
 
 export function distance(a: Point, b: Point): number {
-  return Math.hypot(a.x - b.x, a.y - b.y);
+  const dx = a.x - b.x;
+  const dy = a.y - b.y;
+  return Math.sqrt(dx * dx + dy * dy); // (Math.hypot is much slower, and this is hot)
 }
 
 export function lerp(a: Point, b: Point, t: number): Point {
@@ -89,7 +91,7 @@ export function rectsOverlap(a: Rect, b: Rect, gap = 0): boolean {
 export function pointRectDistance(p: Point, r: Rect): number {
   const dx = Math.max(r.x - p.x, 0, p.x - (r.x + r.w));
   const dy = Math.max(r.y - p.y, 0, p.y - (r.y + r.h));
-  return Math.hypot(dx, dy);
+  return Math.sqrt(dx * dx + dy * dy);
 }
 
 export function pointInPolygon(p: Point, points: readonly [number, number][]): boolean {

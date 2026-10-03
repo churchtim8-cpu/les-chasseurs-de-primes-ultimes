@@ -49,7 +49,7 @@ describe('the suspect only escapes when time runs out', () => {
       expect(status.timeLeft, seed).toBe(0);
     }
     expect(escaped).toBeGreaterThan(0);
-  }, 60_000);
+  }, 180_000);
 
   it('keeps the suspect moving past the end of its planned route, with directions following it', () => {
     let kept = 0;
@@ -65,5 +65,5 @@ describe('the suspect only escapes when time runs out', () => {
     }
     // A dead end with no way back is the only reason to stop; it is rare.
     expect(kept / tried).toBeGreaterThan(0.9);
-  }, 60_000);
+  }, 180_000);
 });

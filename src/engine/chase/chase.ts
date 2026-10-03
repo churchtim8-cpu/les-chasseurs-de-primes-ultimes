@@ -324,7 +324,7 @@ export class Chase {
     const { scenario } = this;
     const route = this.stages[stage]?.route ?? scenario.route;
     const turnOff = this.turnOffPending && scenario.turnOff?.stage === stage ? scenario.turnOff : null;
-    return new Navigator(
+    const navigator = new Navigator(
       this.graph,
       scenario.difficulty,
       Rng.fromSeed(scenario.seed).fork(stage === 0 ? 'language' : `language-${stage}`),
@@ -333,6 +333,9 @@ export class Chase {
       this.stages[stage]?.mode ?? 'CAR',
       this.hasAudio,
     );
+    // The directions stop where the change of direction will be said (see correctionPoint).
+    if (turnOff) navigator.holdAfter = this.turnOffCallAt;
+    return navigator;
   }
 
   /**
@@ -345,7 +348,7 @@ export class Chase {
     if (!this.turnOffPending || !turnOff || this.suspectStage !== turnOff.stage) return;
     const route = this.stages[turnOff.stage]!.route;
     const junction = route[turnOff.at] as string;
-    const plan = this.suspect.remainingPlan();
+    let plan = this.suspect.remainingPlan();
     // Where the player is on the shared part of the route, if they are on it.
     const here = this.player.location();
     const i = route.findIndex(
@@ -368,6 +371,7 @@ export class Chase {
     if (this.lostSince !== null) this.restoreSignal(events);
     if (this.playerStage !== turnOff.stage || this.pending || this.autoStage !== null) {
       this.turnOffPending = false;
+      this.navigator.holdAfter = null;
       return;
     }
     if (callAt !== null && i !== -1 && i < callAt) return; // the directions up to there are right
@@ -382,6 +386,11 @@ export class Chase {
     const mustSay =
       waited >= TURN_OFF.maxWaitSeconds || navigator.toGuideEnd(here) < TURN_OFF.guideEndSeconds * navigator.speed;
     if (!onRoute && !mustSay && !navigator.canRedirectInTime(here, plan, announce)) return;
+    // Near the end of its route, plan the way on first: the correction then leads on past the end.
+    if (!onRoute) {
+      this.keepGoingAhead(events, true);
+      plan = this.suspect.remainingPlan();
+    }
     this.turnOffPending = false;
     events.push({ type: 'ANNOUNCE', lines: [EVENT_LINES.ATTENTION, EVENT_LINES.CHANGED_DIRECTION] });
     navigator = this.nav(events);
@@ -625,15 +634,19 @@ export class Chase {
    * there, so the scanner can give the next turn in good time (a turn planned
    * only on arrival would come too late for a player close behind).
    */
-  private keepGoingAhead(events: ChaseEvent[]): void {
+  private keepGoingAhead(events: ChaseEvent[], now = false): void {
     const plan = this.suspect.remainingPlan();
     const me = this.suspect.snapshot();
-    const left = distance(me, this.graph.node(plan[0] as string)) + pathLength(this.graph, plan);
-    if (left > KEEP_GOING.aheadMetres[me.mode]) return;
+    let left = distance(me, this.graph.node(plan[0] as string)) + pathLength(this.graph, plan);
+    // A player close behind (or level) may reach the end first: the way on must be called before they get there.
+    if (this.playerStage === this.suspectStage && !this.guidedByPrediction) {
+      left = Math.min(left, this.navigator.toGuideEnd(this.player.location()));
+    }
+    if (left > KEEP_GOING.aheadMetres[me.mode] * (now ? 2 : 1)) return;
     const end = plan[plan.length - 1] as string;
     const before = plan.length >= 2 ? (plan[plan.length - 2] as string) : this.graph.other(this.graph.edge(me.edgeId), me.towards);
     const lastEdge = this.graph.edgeBetween(before, end);
-    if (!lastEdge || this.elapsed < this.nextAheadTry) return;
+    if (!lastEdge || (!now && this.elapsed < this.nextAheadTry)) return;
     const route = this.routeOnwards(end, lastEdge.id, me.mode, this.stages[this.suspectStage]!.route, true);
     // Planning is costly: after a miss, wait a little longer each time before trying again.
     this.aheadMisses = route ? 0 : this.aheadMisses + 1;
@@ -955,12 +968,19 @@ export class Chase {
       nodes.every((n, i) => i === 0 || (!near.has(n) && (i === 1 || !avoid.has(n)))) &&
       (planGuide(this.graph, here, nodes, this.scenario.difficulty)?.guide.slice(1).includes(nodes[1] as string) ?? false);
     const length = DODGE.routeLength[at.mode];
+    // Ideally every turn of it can be called in time (the player is held while the correction is said).
+    // (A shorter route carries on like any other, at its end.)
     const route =
       this.escapeRoute(back, edge.id, at.mode, length, followable(around)) ??
-      this.escapeRoute(back, edge.id, at.mode, length, followable(beyond));
+      this.escapeRoute(back, edge.id, at.mode, length, followable(beyond)) ??
+      this.escapeRoute(back, edge.id, at.mode, [length[0] / 2, length[1]], followable(around)) ??
+      this.escapeRoute(back, edge.id, at.mode, [length[0] / 2, length[1]], followable(beyond));
     if (!route || !this.suspect.uTurn()) return false;
     this.suspect.followPlan(route.nodes);
     this.destination = route.destination;
+    // Its route from here on (so a way on from its end carries on from this one).
+    const nodes = [at.towards, ...route.nodes];
+    this.stages[this.suspectStage] = { ...this.stages[this.suspectStage]!, route: nodes, length: pathLength(this.graph, nodes) };
     this.timeLeft += DODGE.extraSeconds[at.mode];
     this.noCaptureBefore = this.elapsed + DODGE.graceSeconds;
     // Turns it was about to take no longer lead to the suspect.
@@ -1036,8 +1056,8 @@ export class Chase {
    * The suspect has just passed the next planned sighting's place: report it
    * and pause for the answer.
    * The suspect may already be in view: the question is then easier. Skipped
-   * if the signal is lost or the player is being moved between stages. Waits a
-   * frame if the scanner is already speaking in this one.
+   * if the signal is lost or the player is being moved between stages. Waits
+   * until the scanner has finished what it is saying.
    */
   private checkSighting(events: ChaseEvent[]): void {
     const sighting = this.scenario.sightings[this.nextSighting];
@@ -1050,6 +1070,8 @@ export class Chase {
     const node = this.stages[sighting.stage]!.route[sighting.at] as string;
     if (this.suspect.remainingPlan().includes(node)) return;
     if (events.some((e) => e.type === 'TRANSMISSION' || e.type === 'ANNOUNCE')) return;
+    // Not over a call still being heard: the time to answer starts with the sighting line.
+    if (this.radioFreeAt > this.elapsed) return;
     const index = this.nextSighting++;
     if (this.lostSince !== null || this.autoStage !== null) return;
     const seconds = this.settings.sightings.pickSeconds;

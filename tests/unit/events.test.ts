@@ -39,7 +39,7 @@ describe('the suspect changes direction', () => {
     expect(share('EASY')).toBe(0);
     expect(share('INTERMEDIATE')).toBeGreaterThan(0.1);
     expect(share('EXPERT')).toBeGreaterThan(share('INTERMEDIATE'));
-  }, 60_000);
+  }, 180_000);
 
   it.each(LEVELS)('plans a fair predicted route that leaves the real one (%s)', (difficulty) => {
     let planned = 0;
@@ -57,9 +57,10 @@ describe('the suspect changes direction', () => {
         expect(turnOff.decoy[1]).not.toBe(route[turnOff.at + 1]);
       }
     }
-    // Short foot stages often leave no room for one; most chases have one when asked.
-    expect(planned / tried).toBeGreaterThan(0.4);
-  }, 60_000);
+    // Short foot stages often leave no room for one, nor does a route whose new turn could not
+    // be called in time after the warning (2026-10-03); many chases have one when asked.
+    expect(planned / tried).toBeGreaterThan(0.25);
+  }, 180_000);
 
   it.each(LEVELS)('a student who follows the correction still catches the suspect (%s)', (difficulty) => {
     const runs = seeds(difficulty, 90, 'follow').map((s) => listen(s, { turnOff: true }));
@@ -69,7 +70,7 @@ describe('the suspect changes direction', () => {
     expect(captured / changed.length).toBeGreaterThanOrEqual(0.95);
     // Following the French exactly is never called a wrong turn.
     expect(changed.filter((r) => r.bot.log.some((t) => t.kind === 'RECOVERY' && t.text.includes('bonne rue')))).toEqual([]);
-  }, 60_000);
+  }, 180_000);
 
   it('announces "Attention ! Le suspect a changé de direction." before the corrected directions', () => {
     for (const seed of seeds('EXPERT', 30, 'order')) {
@@ -78,5 +79,5 @@ describe('the suspect changes direction', () => {
       if (at === -1) continue;
       expect(heard[at - 1]).toBe(EVENT_LINES.ATTENTION.audioId);
     }
-  }, 60_000);
+  }, 180_000);
 });

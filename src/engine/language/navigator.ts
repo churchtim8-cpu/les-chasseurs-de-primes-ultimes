@@ -36,6 +36,7 @@ import { aheadFrom, callableFrom, fits, lateness, planCalls, type CallContext, t
 import { callSeconds } from './timing';
 import { SPEECH } from './settings';
 import { MOVEMENT } from '../movement/settings';
+import { exitsAt } from '../movement/turns';
 import { makeInstruction, type Instruction } from './instructions';
 
 /** RECOVERY answers a wrong turn; CORRECTION follows the suspect changing direction ("Faites demi-tour."). */
@@ -64,6 +65,9 @@ const U_TURN_PENALTY = 40;
  */
 const EARLY_ARRIVAL = 30;
 
+/** At most this many streets go by after a wrong turn before the way back is given, in time or not. */
+const MAX_DEFERRALS = 2;
+
 /** A way back should share at least this much of the suspect's route (metres). */
 const SHARED_ROUTE = 150;
 
@@ -76,6 +80,14 @@ export class Navigator {
   progress = 0;
   private actions: number[];
   private covered = new Set<number>();
+  /**
+   * No call covers a step past this guide index (null: no limit). Before a
+   * change of direction, the directions stop where it will be said: calls past
+   * there would only be taken back, and would keep the radio busy.
+   */
+  holdAfter: number | null = null;
+  /** Streets driven on since a wrong turn without a way back given yet (see recover). */
+  private deferrals = 0;
   private fillerFor: number | null = null;
   private finalDone = false;
   private started = false;
@@ -345,6 +357,7 @@ export class Navigator {
     }
     const a = this.actions[nextIndex] as number;
     if (this.covered.has(a)) return;
+    if (this.holdAfter !== null && a > this.holdAfter) return;
     if (this.spoken && this.tooEarly(pos, a)) return;
     if (wait && this.radioFreeIn > 0) {
       this.deferred = true;
@@ -360,7 +373,8 @@ export class Navigator {
       this.difficulty,
       this.hasAudio,
     );
-    const guided = pickInstruction(this.timely(options, pos, nextIndex, delay), this.difficulty, this.rng, this.preferSteps);
+    const allowed = this.holdAfter === null ? options : options.filter((o) => o.covers.every((c) => c <= this.holdAfter!));
+    const guided = pickInstruction(this.timely(allowed, pos, nextIndex, delay), this.difficulty, this.rng, this.preferSteps);
     if (guided) {
       for (const c of guided.covers) this.covered.add(c);
       this.emit('DIRECTION', [guided.instruction], out, this.guide[a]);
@@ -430,9 +444,20 @@ export class Navigator {
     );
     const wrongStreet = !onGuideEdge && fromIndex !== -1 && fromIndex < this.guide.length - 1;
 
-    const plan = this.replan(player, suspectRoute);
+    const { plan, timing } = this.replan(player, suspectRoute, wrongStreet);
     const lines: Instruction[] = [];
     if (wrongStreet) lines.push(makeInstruction([{ action: 'WRONG_STREET' }], this.difficulty));
+    // (Only where the player drives on: at a junction with no way straight on they stop, and can turn round there.)
+    const drivesOn = exitsAt(this.graph, edge, player.towards, player.mode).some((e) => e.kind === 'STRAIGHT');
+    if (plan?.uTurn && drivesOn && this.deferrals < MAX_DEFERRALS && !timely(this.graph, plan.guide, player, true, timing)) {
+      // Too close to the end of this street to turn round once told: say only that it
+      // is the wrong street, and give the way back from the next street, where there is room.
+      if (lines.length > 0) this.emit('RECOVERY', lines, out);
+      this.stuckOn = player.edgeId;
+      this.deferrals++;
+      return;
+    }
+    this.deferrals = 0;
     if (plan?.uTurn) lines.push(makeInstruction([{ action: 'U_TURN' }], this.difficulty));
     if (lines.length > 0) this.emit('RECOVERY', lines, out);
     this.stuckOn = plan ? null : player.edgeId;
@@ -472,6 +497,7 @@ export class Navigator {
   private useGuide(plan: { guide: string[]; uTurn: boolean }, player: MoverStart, out: Transmission[], wait = true): void {
     this.guide = plan.guide;
     this.progress = 0;
+    this.holdAfter = null; // a new guide: the old one's indices no longer apply
     this.actions = actionIndices(this.graph, this.guide, player.mode);
     this.calls = null;
     this.covered.clear();
@@ -491,10 +517,11 @@ export class Navigator {
   /** How a way back is planned after a wrong turn: onto a moving suspect's route (default), or to a fixed destination. */
   planner: GuidePlanner = planGuide;
 
-  private replan(player: MoverStart, suspectRoute: readonly string[]): { guide: string[]; uTurn: boolean } | null {
+  private replan(player: MoverStart, suspectRoute: readonly string[], wrongStreet: boolean) {
     // The first direction of the way back comes after what the radio is saying and "Ce n'est pas la bonne rue. Faites demi-tour."
-    const delay = Math.max(0, this.radioFreeIn) + callSeconds(["Ce n'est pas la bonne rue.", U_TURN_TEXT]);
-    return this.planner(this.graph, player, suspectRoute, this.difficulty, { ctx: this.callContext(), delay, uTurnSaid: true });
+    const delay = Math.max(0, this.radioFreeIn) + callSeconds([...(wrongStreet ? ["Ce n'est pas la bonne rue."] : []), U_TURN_TEXT]);
+    const timing: GuideTiming = { ctx: this.callContext(), delay, uTurnSaid: true };
+    return { plan: this.planner(this.graph, player, suspectRoute, this.difficulty, timing), timing };
   }
 
   /** Is it too early for the direction about action `a` (see leadDistance)? The next node will do. */

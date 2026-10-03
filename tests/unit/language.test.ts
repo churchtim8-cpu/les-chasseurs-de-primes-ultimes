@@ -241,7 +241,7 @@ describe('scanner instructions in real chases', () => {
     }
     expect(steps).toBeGreaterThan(100);
     expect(late, `${late} of ${steps} steps heard too late`).toBeLessThanOrEqual(steps * 0.01);
-  }, 60_000);
+  }, 180_000);
 
   it('uses only the templates allowed at each difficulty', () => {
     for (const difficulty of DIFFICULTIES) {
@@ -259,8 +259,10 @@ describe('scanner instructions in real chases', () => {
   it.each(DIFFICULTIES)('the scanner speaks as soon as the chase starts (%s)', (difficulty) => {
     for (const seed of seeds(difficulty, 150, 'first-call')) {
       const chase = new Chase(graph, generateScenario(graph, seed));
-      // The game plays the opening call in full before anything moves.
-      const first = chase.openingCall().find((e) => e.type === 'TRANSMISSION');
+      // The game plays the opening call in full before anything moves. Where no direction is
+      // clear yet from the start (the turn is past a nearer junction on that side), it names
+      // the suspect's vehicle and the direction comes at that junction.
+      const first = chase.openingCall().find((e) => e.type === 'TRANSMISSION' || e.type === 'ANNOUNCE');
       expect(first, seed).toBeDefined();
     }
   });

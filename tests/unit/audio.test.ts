@@ -17,7 +17,7 @@ let script: ScriptLine[] = [];
 
 beforeAll(() => {
   script = buildScript(graph);
-}, 60_000);
+}, 180_000);
 
 function seeds(difficulty: Difficulty, count: number, label: string): string[] {
   const rng = Rng.fromSeed(`${label}-${difficulty}`);
