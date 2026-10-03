@@ -16,7 +16,7 @@
  *   correct navigation → the player (faster than the suspect) closes in
  *   wrong turn or hesitation → the suspect gains road distance
  *   recovery → the gap closes again
- *   far away for too long, or out of time → escape (with warnings first)
+ *   out of time → escape (warnings first when the suspect is far away)
  *   close enough for long enough → capture (no need to ram the suspect)
  *
  * Sightings: as the suspect passes a planned place, the scanner reports it
@@ -76,7 +76,8 @@ export type ModeChangeResult = { ok: true } | { ok: false; reason: 'NO_CAR' | 'T
 
 export type ChasePhase = 'PURSUIT' | 'CAPTURED' | 'ESCAPED';
 export type Proximity = 'CLOSE' | 'NEAR' | 'FAR' | 'LOSING';
-export type EscapeReason = 'DISTANCE' | 'TIME' | 'ARRIVED';
+/** The suspect only ever escapes when the clock runs out. */
+export type EscapeReason = 'TIME';
 
 export type ChaseEvent =
   | { type: 'CAPTURED' }
@@ -212,7 +213,6 @@ export class Chase {
   private elapsed = 0;
   private timeLeft: number;
   private closeFor = 0;
-  private farFor = 0;
   private distance: number;
   private warning = false;
   private sighted = false;
@@ -413,10 +413,7 @@ export class Chase {
     this.suspect.update(dt);
     if (!this.suspectArrived && this.suspect.snapshot().waiting === 'ARRIVED') {
       if (this.suspectStage < this.lastStage) this.changeSuspectTransport(events);
-      else {
-        this.suspectArrived = true;
-        events.push({ type: 'SUSPECT_ARRIVED' });
-      }
+      else this.keepGoing(events);
     }
 
     this.checkTurnOff(events);
@@ -467,8 +464,6 @@ export class Chase {
     const stopped = this.transferUntil !== null;
     const canCapture = (this.player.mode === this.suspect.mode || stopped) && this.elapsed >= this.noCaptureBefore;
     this.closeFor = this.distance <= s.captureDistance && canCapture ? this.closeFor + dt : 0;
-    // No escape while the scanner is silent: the player cannot be warned.
-    this.farFor = this.distance >= s.escapeDistance && !lost ? this.farFor + dt : 0;
 
     // A stopped suspect is caught as soon as the player reaches it: an auto-driving
     // car would otherwise roll straight past before the hold time is up.
@@ -479,17 +474,50 @@ export class Chase {
     } else if (caught) {
       this.phase = 'CAPTURED';
       events.push({ type: 'CAPTURED' });
-    } else if (this.suspectArrived) {
-      // The suspect never waits for the player: reaching its destination first, it gets away.
+    } else if (this.timeLeft <= 0) {
+      // Losing the suspect costs time, never the chase: only the clock ends it.
       this.phase = 'ESCAPED';
-      this.escapeReason = 'ARRIVED';
-      events.push({ type: 'ESCAPED', reason: 'ARRIVED' });
-    } else if (this.farFor >= s.escapeHold || this.timeLeft <= 0) {
-      this.phase = 'ESCAPED';
-      this.escapeReason = this.timeLeft <= 0 ? 'TIME' : 'DISTANCE';
-      events.push({ type: 'ESCAPED', reason: this.escapeReason });
+      this.escapeReason = 'TIME';
+      events.push({ type: 'ESCAPED', reason: 'TIME' });
     }
     return events;
+  }
+
+  /**
+   * The suspect reaches the end of its route before it is caught. It never
+   * stops or waits, so it drives (or runs) on along a fresh route from here,
+   * and the scanner's directions follow it: the chase only ends when the
+   * clock runs out, however far behind the player falls. Boxed in with no way
+   * on (a dead end with no route back), it stops where it is and can be caught.
+   */
+  private keepGoing(events: ChaseEvent[]): void {
+    const planFrom = (at: MoverStart) => {
+      const length = this.settings.stageLength[at.mode];
+      return (
+        this.escapeRoute(at.towards, at.edgeId, at.mode, length) ??
+        this.escapeRoute(at.towards, at.edgeId, at.mode, [length[0] / 2, length[1]])
+      );
+    };
+    let at = this.suspect.location();
+    let route = planFrom(at);
+    if (!route && this.suspect.uTurn()) {
+      at = this.suspect.location();
+      route = planFrom(at);
+    }
+    if (!route) {
+      this.suspectArrived = true;
+      events.push({ type: 'SUSPECT_ARRIVED' });
+      return;
+    }
+    const stage = this.stages[this.suspectStage]!;
+    this.stages[this.suspectStage] = { ...stage, route: [...stage.route, ...route.nodes.slice(1)], length: stage.length + route.length };
+    this.destination = route.destination;
+    this.suspect = new Mover(this.graph, at);
+    this.suspect.followPlan(route.nodes);
+    this.suspect.speedFactor = this.suspectSpeedFor(this.suspectStage);
+    if (this.playerStage !== this.suspectStage) return; // the next stage's directions already follow the longer route
+    const transmissions = this.navigator.redirect(this.player.location(), this.suspect.remainingPlan(), this.destination);
+    for (const transmission of transmissions) events.push({ type: 'TRANSMISSION', transmission });
   }
 
   /**
@@ -954,8 +982,8 @@ export class Chase {
   forceOutcome(outcome: 'CAPTURED' | 'ESCAPED'): ChaseEvent[] {
     if (this.phase !== 'PURSUIT') return [];
     this.phase = outcome;
-    if (outcome === 'ESCAPED') this.escapeReason = 'DISTANCE';
-    return [outcome === 'CAPTURED' ? { type: 'CAPTURED' } : { type: 'ESCAPED', reason: 'DISTANCE' }];
+    if (outcome === 'ESCAPED') this.escapeReason = 'TIME';
+    return [outcome === 'CAPTURED' ? { type: 'CAPTURED' } : { type: 'ESCAPED', reason: 'TIME' }];
   }
 
   /**
@@ -982,7 +1010,7 @@ export class Chase {
 
   get status(): ChaseStatus {
     const s = this.settings;
-    const signal = 1 - (this.distance - s.captureDistance) / (s.escapeDistance - s.captureDistance);
+    const signal = 1 - (this.distance - s.captureDistance) / (s.farDistance - s.captureDistance);
     return {
       phase: this.phase,
       distance: this.distance,

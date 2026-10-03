@@ -4,6 +4,7 @@ import type { TownGraph } from '../../engine/world/graph';
 import type { MapEdge } from '../../engine/world/types';
 import { PALETTE } from '../palette';
 import { CAR_SCALE, carPicture } from './actors';
+import { carLights } from './night';
 
 /**
  * Life in Bellevue City: traffic, people out walking, waves, boats, the
@@ -39,6 +40,8 @@ interface Traveller {
   sprite: Phaser.GameObjects.Image;
   /** A car picture's shadow, which follows it. */
   shadow?: Phaser.GameObjects.Image;
+  /** A car's headlights and tail lights at night, which follow it too. */
+  lights?: Phaser.GameObjects.Container;
   edge: MapEdge;
   from: string;
   to: string;
@@ -219,7 +222,9 @@ export class TownLife {
       // The same cartoon car as the police and the suspect drive, in a traffic colour.
       const [shadow, picture] = carPicture(this.scene, 'CAR', TRAFFIC_COLOURS[i % TRAFFIC_COLOURS.length] as number, 18 * CAR_SCALE);
       if (shadow) this.add(shadow.setDepth(25.9));
+      const lights = carLights(this.scene, 18);
       this.travellers.push({
+        ...(lights.length > 0 ? { lights: this.add(this.scene.add.container(0, 0, lights).setDepth(26.1).setScale(CAR_SCALE)) } : {}),
         sprite: picture
           ? this.add(picture.setDepth(26))
           : this.image(0, 0, `life-car-${i % TRAFFIC_COLOURS.length}`, 26).setScale(CAR_SCALE / RES),
@@ -328,6 +333,7 @@ export class TownLife {
     t.sprite.setPosition(a.x + (b.x - a.x) * k + nx * t.offset, a.y + (b.y - a.y) * k + ny * t.offset);
     t.sprite.setRotation(angle);
     t.shadow?.setPosition(t.sprite.x + 1.5, t.sprite.y + 2).setRotation(angle);
+    t.lights?.setPosition(t.sprite.x, t.sprite.y).setRotation(angle);
   }
 }
 

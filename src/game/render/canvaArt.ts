@@ -94,7 +94,7 @@ export function pictureShadow(g: G, r: Rect): void {
 }
 
 /** A small whole-number hash, so each house's arrangement is fixed but looks random. */
-function hash(i: number, salt: number): number {
+export function hash(i: number, salt: number): number {
   let h = (i + 1) * 374761393 + salt * 668265263;
   h = (h ^ (h >>> 13)) * 1274126177;
   return Math.abs(h ^ (h >>> 16));

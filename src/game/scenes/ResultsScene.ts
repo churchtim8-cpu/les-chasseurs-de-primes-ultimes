@@ -82,11 +82,7 @@ export class ResultsScene extends Phaser.Scene {
     const nickname = mission !== null ? ` « ${MISSIONS[mission]!.nickname} »` : '';
     const detail = captured
       ? `Vous avez capturé le suspect${nickname} !`
-      : this.result.escapeReason === 'TIME'
-        ? 'Le temps est écoulé.'
-        : this.result.escapeReason === 'ARRIVED'
-          ? 'Il est arrivé avant vous.'
-          : 'Vous avez perdu le suspect.';
+      : 'Le temps est écoulé.';
     text(this, left, 134, detail, 22, { wordWrap: { width: 540 } });
 
     let y = 182;

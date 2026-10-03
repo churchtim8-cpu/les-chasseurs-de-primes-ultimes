@@ -121,12 +121,14 @@ export interface ChaseSettings {
   captureDistance: number;
   /** ...for this many seconds. */
   captureHold: number;
-  /** Warnings start beyond this distance. */
+  /** Warnings ("Vite ! Le suspect s'éloigne !") start beyond this distance. */
   warningDistance: number;
-  /** Escape when this far away... */
-  escapeDistance: number;
-  /** ...for this many seconds (the player gets a chance to recover first). */
-  escapeHold: number;
+  /**
+   * The signal bar reads empty from this far away. The suspect never escapes
+   * by distance (only when the clock runs out), so a lost player can always
+   * recover; it just costs them time, and so points.
+   */
+  farDistance: number;
   /**
    * Chance that the suspect changes direction mid-chase, away from the route
    * the scanner predicted: "Attention ! Le suspect a changé de direction."
@@ -292,8 +294,7 @@ export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
     captureDistance: 28,
     captureHold: 0.6,
     warningDistance: 600,
-    escapeDistance: 850,
-    escapeHold: 4,
+    farDistance: 850,
     directionChange: 0,
     sightings: { count: 0, cards: 2, pickSeconds: 12 },
     lostSignal: 0,
@@ -308,8 +309,7 @@ export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
     captureDistance: 28,
     captureHold: 0.7,
     warningDistance: 550,
-    escapeDistance: 800,
-    escapeHold: 3.5,
+    farDistance: 800,
     directionChange: 0.3,
     sightings: { count: 0, cards: 3, pickSeconds: 10 },
     lostSignal: 0,
@@ -324,8 +324,7 @@ export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
     captureDistance: 26,
     captureHold: 0.8,
     warningDistance: 500,
-    escapeDistance: 750,
-    escapeHold: 3,
+    farDistance: 750,
     directionChange: 0.5,
     sightings: { count: 0, cards: 3, pickSeconds: 9 },
     lostSignal: 0,
@@ -340,8 +339,7 @@ export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
     captureDistance: 25,
     captureHold: 0.9,
     warningDistance: 480,
-    escapeDistance: 700,
-    escapeHold: 2.5,
+    farDistance: 700,
     directionChange: 0.7,
     sightings: { count: 0, cards: 3, pickSeconds: 9 },
     lostSignal: 0.9,

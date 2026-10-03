@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { menuMusic } from '../audio/Jingles';
+import { nightOn, setNight } from '../render/night';
 import { parseSeed, type ChaseSeed } from '../../engine';
 import type { AudioManifest } from '../../engine/audio/manifest';
 import { capturedCount, isComplete, MISSION_COUNT } from '../../engine/campaign/campaign';
@@ -60,6 +61,12 @@ export class TitleScene extends Phaser.Scene {
         ? '8 suspects, du niveau Facile au niveau Expert   ·   C : campagne   ·   P : entraînement'
         : `${capturedCount(progress)} / ${MISSION_COUNT} suspects arrêtés   ·   C : campagne   ·   P : entraînement`;
     text(this, GAME_WIDTH / 2, top + 62, detail, 19).setOrigin(0.5);
+    // Day or night in the town, remembered on this device.
+    const nightLabel = () => `🌙 NUIT : ${nightOn() ? 'OUI' : 'NON'}`;
+    const night = menu.add(GAME_WIDTH / 2, top + 108, 300, 44, nightLabel(), () => {
+      setNight(!nightOn());
+      night.label.setText(nightLabel());
+    }, { key: 'N', size: 19 });
   }
 
   private replay(seed: ChaseSeed): void {
