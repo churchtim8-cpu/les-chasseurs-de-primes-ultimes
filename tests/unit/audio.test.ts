@@ -136,4 +136,18 @@ describe('recorded library', () => {
       expect(byId.get(id)?.voice, id).toBe(clip.voice);
     }
   });
+
+  it.each(DIFFICULTIES)('keeps chases catchable with no corrections using only the clips in the library (%s)', (difficulty) => {
+    const manifest = JSON.parse(readFileSync('public/audio/manifest.json', 'utf8')) as AudioManifest;
+    const list = seeds(difficulty, 60, 'library');
+    let captured = 0;
+    for (const seed of list) {
+      const chase = new Chase(graph, generateScenario(graph, seed), { hasAudio: audioCheck(manifest) });
+      const bot = new ListenerBot(graph);
+      for (let t = 0; t < 400 && chase.status.phase === 'PURSUIT'; t += 0.05) bot.step(chase, 0.05);
+      expect(bot.log.filter((t) => t.kind === 'RECOVERY'), seed).toEqual([]);
+      if (chase.status.phase === 'CAPTURED') captured++;
+    }
+    expect(captured / list.length).toBeGreaterThanOrEqual(0.95);
+  });
 });

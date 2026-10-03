@@ -99,6 +99,8 @@ export class ChaseScene extends Phaser.Scene {
   private escapes!: EscapeEffects;
   /** Stages whose car the suspect crashed: the wreck stays where it came to rest. */
   private wrecked = new Set<number>();
+  /** How many times the suspect has pulled away: the calls alternate so they never sound canned. */
+  private warnings = 0;
   /** The police car is skidding to a stop (held after a crash or U-turn). */
   private policeSkid = false;
   private routeOverlay!: Phaser.GameObjects.Graphics;
@@ -123,6 +125,7 @@ export class ChaseScene extends Phaser.Scene {
     this.stage = 'COUNTDOWN';
     this.staged = false;
     this.wrecked = new Set();
+    this.warnings = 0;
     this.policeSkid = false;
   }
 
@@ -269,7 +272,8 @@ export class ChaseScene extends Phaser.Scene {
         case 'WARNING':
           if (event.on) {
             this.hud.showToast('Le suspect s’éloigne !');
-            void scannerAudio.play([{ audioId: OUTCOME_LINES.WARNING.audioId, radio: true }]);
+            const call = this.warnings++ % 2 === 0 ? OUTCOME_LINES.WARNING : OUTCOME_LINES.HURRY;
+            void scannerAudio.play([{ audioId: call.audioId, radio: true }]);
           }
           break;
         case 'CAPTURED':

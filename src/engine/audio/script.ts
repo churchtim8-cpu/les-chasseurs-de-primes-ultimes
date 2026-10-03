@@ -54,11 +54,16 @@ export const REPEAT_LINES = {
   FRANTIC: { audioId: 'repeat.frantic', text: 'Répétez ! Vite !' },
 } as const;
 
-/** End-of-chase lines from the approved success/failure vocabulary. */
+/**
+ * End-of-chase lines from the approved success/failure vocabulary, and the
+ * urgent calls when the suspect pulls away ("Allez ! Vite !" and the escape
+ * line approved by the owner on 2026-10-03).
+ */
 export const OUTCOME_LINES = {
   CAPTURED: { audioId: 'outcome.captured', text: 'Le suspect est arrêté !' },
-  ESCAPED: { audioId: 'outcome.escaped', text: "Le suspect s'est échappé." },
-  WARNING: { audioId: 'event.moving_away', text: "Le suspect s'éloigne." },
+  ESCAPED: { audioId: 'outcome.escaped', text: "Oh non ! Il s'est échappé !" },
+  WARNING: { audioId: 'event.moving_away', text: "Vite ! Le suspect s'éloigne !" },
+  HURRY: { audioId: 'event.go_faster', text: 'Allez ! Vite !' },
 } as const;
 
 /**
@@ -74,9 +79,13 @@ export const TRANSPORT_LINES = {
   GET_IN: { audioId: 'event.get_in', text: 'Montez dans la voiture !' },
 } as const;
 
-/** Chase events from the approved Events list (blueprint sections 11 and 18). */
+/**
+ * Chase events from the approved Events list (blueprint sections 11 and 18),
+ * plus the crash line approved by the owner on 2026-10-03.
+ */
 export const EVENT_LINES = {
   ATTENTION: { audioId: 'event.attention', text: 'Attention !' },
+  CRASHED: { audioId: 'event.crashed', text: 'Le suspect a eu un accident !' },
   CHANGED_DIRECTION: { audioId: 'event.changed_direction', text: 'Le suspect a changé de direction.' },
   LOST_SIGNAL: { audioId: 'event.lost_signal', text: 'Nous avons perdu le signal.' },
 } as const;
@@ -262,6 +271,7 @@ export function buildScript(graph: TownGraph, modes: readonly TravelMode[] = ['C
         addLine(out, { ...line, voice: 'DISPATCHER', category: 'EVENT', template: null }, level);
       }
     }
+    addLine(out, { ...EVENT_LINES.CRASHED, voice: 'DISPATCHER', category: 'EVENT', template: null }, level);
     if (CHASE_SETTINGS[level].lostSignal > 0) {
       addLine(out, { ...EVENT_LINES.LOST_SIGNAL, voice: 'DISPATCHER', category: 'EVENT', template: null }, level);
     }

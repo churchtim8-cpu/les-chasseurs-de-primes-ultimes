@@ -2,7 +2,7 @@
   "version": 1,
   "model": "eleven_v4",
   "voices": {
-    "DISPATCHER": "M9MhEgzxZ8w5I27Tl1h5",
+    "DISPATCHER": "qEqs132fQmytmOsVez6J",
     "OFFICER": "qEqs132fQmytmOsVez6J"
   },
   "clips": {
@@ -10,97 +10,97 @@
       "file": "dispatcher/dir.allez_until.bus_stop.mp3",
       "text": "Allez jusqu'à l'arrêt de bus.",
       "voice": "DISPATCHER",
-      "durationMs": 2064
+      "durationMs": 1907
     },
     "dir.allez_until.school": {
       "file": "dispatcher/dir.allez_until.school.mp3",
       "text": "Allez jusqu'à l'école.",
       "voice": "DISPATCHER",
-      "durationMs": 1672
+      "durationMs": 1724
     },
     "dir.allez_until.hospital": {
       "file": "dispatcher/dir.allez_until.hospital.mp3",
       "text": "Allez jusqu'à l'hôpital.",
       "voice": "DISPATCHER",
-      "durationMs": 1750
+      "durationMs": 1855
     },
     "dir.allez_until.hotel": {
       "file": "dispatcher/dir.allez_until.hotel.mp3",
       "text": "Allez jusqu'à l'hôtel.",
       "voice": "DISPATCHER",
-      "durationMs": 1437
+      "durationMs": 1724
     },
     "dir.allez_until.bank": {
       "file": "dispatcher/dir.allez_until.bank.mp3",
       "text": "Allez jusqu'à la banque.",
       "voice": "DISPATCHER",
-      "durationMs": 1829
+      "durationMs": 1855
     },
     "dir.allez_until.library": {
       "file": "dispatcher/dir.allez_until.library.mp3",
       "text": "Allez jusqu'à la bibliothèque.",
       "voice": "DISPATCHER",
-      "durationMs": 1907
+      "durationMs": 2064
     },
     "dir.allez_until.bakery": {
       "file": "dispatcher/dir.allez_until.bakery.mp3",
       "text": "Allez jusqu'à la boulangerie.",
       "voice": "DISPATCHER",
-      "durationMs": 1985
+      "durationMs": 1959
     },
     "dir.allez_until.bus_station": {
       "file": "dispatcher/dir.allez_until.bus_station.mp3",
       "text": "Allez jusqu'à la gare routière.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2037
     },
     "dir.allez_until.train_station": {
       "file": "dispatcher/dir.allez_until.train_station.mp3",
       "text": "Allez jusqu'à la gare.",
       "voice": "DISPATCHER",
-      "durationMs": 1829
+      "durationMs": 1541
     },
     "dir.allez_until.bookshop": {
       "file": "dispatcher/dir.allez_until.bookshop.mp3",
       "text": "Allez jusqu'à la librairie.",
       "voice": "DISPATCHER",
-      "durationMs": 1985
+      "durationMs": 2011
     },
     "dir.allez_until.town_hall": {
       "file": "dispatcher/dir.allez_until.town_hall.mp3",
       "text": "Allez jusqu'à la mairie.",
       "voice": "DISPATCHER",
-      "durationMs": 1829
+      "durationMs": 1567
     },
     "dir.allez_until.pharmacy": {
       "file": "dispatcher/dir.allez_until.pharmacy.mp3",
       "text": "Allez jusqu'à la pharmacie.",
       "voice": "DISPATCHER",
-      "durationMs": 1985
+      "durationMs": 2142
     },
     "dir.allez_until.swimming_pool": {
       "file": "dispatcher/dir.allez_until.swimming_pool.mp3",
       "text": "Allez jusqu'à la piscine.",
       "voice": "DISPATCHER",
-      "durationMs": 1829
+      "durationMs": 1750
     },
     "dir.allez_until.square": {
       "file": "dispatcher/dir.allez_until.square.mp3",
       "text": "Allez jusqu'à la place.",
       "voice": "DISPATCHER",
-      "durationMs": 1829
+      "durationMs": 1776
     },
     "dir.allez_until.beach": {
       "file": "dispatcher/dir.allez_until.beach.mp3",
       "text": "Allez jusqu'à la plage.",
       "voice": "DISPATCHER",
-      "durationMs": 1829
+      "durationMs": 1933
     },
     "dir.allez_until.post_office": {
       "file": "dispatcher/dir.allez_until.post_office.mp3",
       "text": "Allez jusqu'à la poste.",
       "voice": "DISPATCHER",
-      "durationMs": 1593
+      "durationMs": 1802
     },
     "dir.allez_until.gas_station": {
       "file": "dispatcher/dir.allez_until.gas_station.mp3",
@@ -112,43 +112,43 @@
       "file": "dispatcher/dir.allez_until.cafe.mp3",
       "text": "Allez jusqu'au café.",
       "voice": "DISPATCHER",
-      "durationMs": 1750
+      "durationMs": 1620
     },
     "dir.allez_until.shopping_centre": {
       "file": "dispatcher/dir.allez_until.shopping_centre.mp3",
       "text": "Allez jusqu'au centre commercial.",
       "voice": "DISPATCHER",
-      "durationMs": 2299
+      "durationMs": 2246
     },
     "dir.allez_until.cinema": {
       "file": "dispatcher/dir.allez_until.cinema.mp3",
       "text": "Allez jusqu'au cinéma.",
       "voice": "DISPATCHER",
-      "durationMs": 1750
+      "durationMs": 1881
     },
     "dir.allez_until.police_station": {
       "file": "dispatcher/dir.allez_until.police_station.mp3",
       "text": "Allez jusqu'au commissariat de police.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2299
     },
     "dir.allez_until.shop": {
       "file": "dispatcher/dir.allez_until.shop.mp3",
       "text": "Allez jusqu'au magasin.",
       "voice": "DISPATCHER",
-      "durationMs": 1672
+      "durationMs": 1750
     },
     "dir.allez_until.market": {
       "file": "dispatcher/dir.allez_until.market.mp3",
       "text": "Allez jusqu'au marché.",
       "voice": "DISPATCHER",
-      "durationMs": 1750
+      "durationMs": 1672
     },
     "dir.allez_until.museum": {
       "file": "dispatcher/dir.allez_until.museum.mp3",
       "text": "Allez jusqu'au musée.",
       "voice": "DISPATCHER",
-      "durationMs": 1672
+      "durationMs": 1750
     },
     "dir.allez_until.park": {
       "file": "dispatcher/dir.allez_until.park.mp3",
@@ -166,55 +166,55 @@
       "file": "dispatcher/dir.allez_until.restaurant.mp3",
       "text": "Allez jusqu'au restaurant.",
       "voice": "DISPATCHER",
-      "durationMs": 1829
+      "durationMs": 1776
     },
     "dir.allez_until.stadium": {
       "file": "dispatcher/dir.allez_until.stadium.mp3",
       "text": "Allez jusqu'au stade.",
       "voice": "DISPATCHER",
-      "durationMs": 1672
+      "durationMs": 1646
     },
     "dir.allez_until.supermarket": {
       "file": "dispatcher/dir.allez_until.supermarket.mp3",
       "text": "Allez jusqu'au supermarché.",
       "voice": "DISPATCHER",
-      "durationMs": 1985
+      "durationMs": 1959
     },
     "dir.allez_until.theatre": {
       "file": "dispatcher/dir.allez_until.theatre.mp3",
       "text": "Allez jusqu'au théâtre.",
       "voice": "DISPATCHER",
-      "durationMs": 1750
+      "durationMs": 1541
     },
     "seq.roundabout.deuxieme+puis+street.right.deuxieme": {
       "file": "dispatcher/seq.roundabout.deuxieme+puis+street.right.deuxieme.mp3",
       "text": "Au rond-point, prenez la deuxième sortie, puis prenez la deuxième rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4937
+      "durationMs": 5042
     },
     "seq.roundabout.deuxieme+puis+street.left.deuxieme": {
       "file": "dispatcher/seq.roundabout.deuxieme+puis+street.left.deuxieme.mp3",
       "text": "Au rond-point, prenez la deuxième sortie, puis prenez la deuxième rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 5015
+      "durationMs": 5146
     },
     "seq.roundabout.deuxieme+puis+street.right.premiere": {
       "file": "dispatcher/seq.roundabout.deuxieme+puis+street.right.premiere.mp3",
       "text": "Au rond-point, prenez la deuxième sortie, puis prenez la première rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 5172
+      "durationMs": 5068
     },
     "seq.roundabout.deuxieme+puis+street.left.premiere": {
       "file": "dispatcher/seq.roundabout.deuxieme+puis+street.left.premiere.mp3",
       "text": "Au rond-point, prenez la deuxième sortie, puis prenez la première rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 5015
+      "durationMs": 5172
     },
     "seq.roundabout.deuxieme+puis+street.right.prochaine": {
       "file": "dispatcher/seq.roundabout.deuxieme+puis+street.right.prochaine.mp3",
       "text": "Au rond-point, prenez la deuxième sortie, puis prenez la prochaine rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 5094
+      "durationMs": 5042
     },
     "seq.roundabout.deuxieme+puis+street.left.prochaine": {
       "file": "dispatcher/seq.roundabout.deuxieme+puis+street.left.prochaine.mp3",
@@ -226,181 +226,181 @@
       "file": "dispatcher/seq.roundabout.deuxieme+puis+turn.right.mp3",
       "text": "Au rond-point, prenez la deuxième sortie, puis tournez à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4153
+      "durationMs": 4023
     },
     "seq.roundabout.deuxieme+puis+turn.left": {
       "file": "dispatcher/seq.roundabout.deuxieme+puis+turn.left.mp3",
       "text": "Au rond-point, prenez la deuxième sortie, puis tournez à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4153
+      "durationMs": 4180
     },
     "dir.roundabout.deuxieme": {
       "file": "dispatcher/dir.roundabout.deuxieme.mp3",
       "text": "Au rond-point, prenez la deuxième sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 2795
+      "durationMs": 2717
     },
     "seq.roundabout.premiere+puis+street.right.deuxieme": {
       "file": "dispatcher/seq.roundabout.premiere+puis+street.right.deuxieme.mp3",
       "text": "Au rond-point, prenez la première sortie, puis prenez la deuxième rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4937
+      "durationMs": 5224
     },
     "seq.roundabout.premiere+puis+street.left.deuxieme": {
       "file": "dispatcher/seq.roundabout.premiere+puis+street.left.deuxieme.mp3",
       "text": "Au rond-point, prenez la première sortie, puis prenez la deuxième rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 5094
+      "durationMs": 5277
     },
     "seq.roundabout.premiere+puis+street.right.premiere": {
       "file": "dispatcher/seq.roundabout.premiere+puis+street.right.premiere.mp3",
       "text": "Au rond-point, prenez la première sortie, puis prenez la première rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 5094
+      "durationMs": 5198
     },
     "seq.roundabout.premiere+puis+street.left.premiere": {
       "file": "dispatcher/seq.roundabout.premiere+puis+street.left.premiere.mp3",
       "text": "Au rond-point, prenez la première sortie, puis prenez la première rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 5015
+      "durationMs": 5224
     },
     "seq.roundabout.premiere+puis+street.right.prochaine": {
       "file": "dispatcher/seq.roundabout.premiere+puis+street.right.prochaine.mp3",
       "text": "Au rond-point, prenez la première sortie, puis prenez la prochaine rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 5172
+      "durationMs": 5224
     },
     "seq.roundabout.premiere+puis+street.left.prochaine": {
       "file": "dispatcher/seq.roundabout.premiere+puis+street.left.prochaine.mp3",
       "text": "Au rond-point, prenez la première sortie, puis prenez la prochaine rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4937
+      "durationMs": 5277
     },
     "seq.roundabout.premiere+puis+turn.right": {
       "file": "dispatcher/seq.roundabout.premiere+puis+turn.right.mp3",
       "text": "Au rond-point, prenez la première sortie, puis tournez à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4075
+      "durationMs": 4232
     },
     "seq.roundabout.premiere+puis+turn.left": {
       "file": "dispatcher/seq.roundabout.premiere+puis+turn.left.mp3",
       "text": "Au rond-point, prenez la première sortie, puis tournez à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4075
+      "durationMs": 4284
     },
     "dir.roundabout.premiere": {
       "file": "dispatcher/dir.roundabout.premiere.mp3",
       "text": "Au rond-point, prenez la première sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 2795
+      "durationMs": 2743
     },
     "seq.roundabout.troisieme+puis+street.right.deuxieme": {
       "file": "dispatcher/seq.roundabout.troisieme+puis+street.right.deuxieme.mp3",
       "text": "Au rond-point, prenez la troisième sortie, puis prenez la deuxième rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 5015
+      "durationMs": 5329
     },
     "seq.roundabout.troisieme+puis+street.left.deuxieme": {
       "file": "dispatcher/seq.roundabout.troisieme+puis+street.left.deuxieme.mp3",
       "text": "Au rond-point, prenez la troisième sortie, puis prenez la deuxième rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 5172
+      "durationMs": 5460
     },
     "seq.roundabout.troisieme+puis+street.right.premiere": {
       "file": "dispatcher/seq.roundabout.troisieme+puis+street.right.premiere.mp3",
       "text": "Au rond-point, prenez la troisième sortie, puis prenez la première rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 5015
+      "durationMs": 5303
     },
     "seq.roundabout.troisieme+puis+street.left.premiere": {
       "file": "dispatcher/seq.roundabout.troisieme+puis+street.left.premiere.mp3",
       "text": "Au rond-point, prenez la troisième sortie, puis prenez la première rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 5094
+      "durationMs": 5381
     },
     "seq.roundabout.troisieme+puis+street.right.prochaine": {
       "file": "dispatcher/seq.roundabout.troisieme+puis+street.right.prochaine.mp3",
       "text": "Au rond-point, prenez la troisième sortie, puis prenez la prochaine rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4937
+      "durationMs": 5277
     },
     "seq.roundabout.troisieme+puis+street.left.prochaine": {
       "file": "dispatcher/seq.roundabout.troisieme+puis+street.left.prochaine.mp3",
       "text": "Au rond-point, prenez la troisième sortie, puis prenez la prochaine rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 5015
+      "durationMs": 5329
     },
     "seq.roundabout.troisieme+puis+turn.right": {
       "file": "dispatcher/seq.roundabout.troisieme+puis+turn.right.mp3",
       "text": "Au rond-point, prenez la troisième sortie, puis tournez à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4153
+      "durationMs": 4362
     },
     "seq.roundabout.troisieme+puis+turn.left": {
       "file": "dispatcher/seq.roundabout.troisieme+puis+turn.left.mp3",
       "text": "Au rond-point, prenez la troisième sortie, puis tournez à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4153
+      "durationMs": 4389
     },
     "dir.roundabout.troisieme": {
       "file": "dispatcher/dir.roundabout.troisieme.mp3",
       "text": "Au rond-point, prenez la troisième sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 2873
+      "durationMs": 2717
     },
     "dir.continuez_until.bus_stop": {
       "file": "dispatcher/dir.continuez_until.bus_stop.mp3",
       "text": "Continuez jusqu'à l'arrêt de bus.",
       "voice": "DISPATCHER",
-      "durationMs": 2377
+      "durationMs": 2246
     },
     "dir.continuez_until.school": {
       "file": "dispatcher/dir.continuez_until.school.mp3",
       "text": "Continuez jusqu'à l'école.",
       "voice": "DISPATCHER",
-      "durationMs": 2064
+      "durationMs": 1985
     },
     "dir.continuez_until.hospital": {
       "file": "dispatcher/dir.continuez_until.hospital.mp3",
       "text": "Continuez jusqu'à l'hôpital.",
       "voice": "DISPATCHER",
-      "durationMs": 2142
+      "durationMs": 2090
     },
     "dir.continuez_until.hotel": {
       "file": "dispatcher/dir.continuez_until.hotel.mp3",
       "text": "Continuez jusqu'à l'hôtel.",
       "voice": "DISPATCHER",
-      "durationMs": 1985
+      "durationMs": 2142
     },
     "dir.continuez_until.bank": {
       "file": "dispatcher/dir.continuez_until.bank.mp3",
       "text": "Continuez jusqu'à la banque.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2011
     },
     "dir.continuez_until.library": {
       "file": "dispatcher/dir.continuez_until.library.mp3",
       "text": "Continuez jusqu'à la bibliothèque.",
       "voice": "DISPATCHER",
-      "durationMs": 2377
+      "durationMs": 2273
     },
     "dir.continuez_until.bakery": {
       "file": "dispatcher/dir.continuez_until.bakery.mp3",
       "text": "Continuez jusqu'à la boulangerie.",
       "voice": "DISPATCHER",
-      "durationMs": 2377
+      "durationMs": 2090
     },
     "dir.continuez_until.bus_station": {
       "file": "dispatcher/dir.continuez_until.bus_station.mp3",
       "text": "Continuez jusqu'à la gare routière.",
       "voice": "DISPATCHER",
-      "durationMs": 2612
+      "durationMs": 2246
     },
     "dir.continuez_until.train_station": {
       "file": "dispatcher/dir.continuez_until.train_station.mp3",
       "text": "Continuez jusqu'à la gare.",
       "voice": "DISPATCHER",
-      "durationMs": 2064
+      "durationMs": 2090
     },
     "dir.continuez_until.bookshop": {
       "file": "dispatcher/dir.continuez_until.bookshop.mp3",
@@ -412,43 +412,43 @@
       "file": "dispatcher/dir.continuez_until.town_hall.mp3",
       "text": "Continuez jusqu'à la mairie.",
       "voice": "DISPATCHER",
-      "durationMs": 2142
+      "durationMs": 2090
     },
     "dir.continuez_until.pharmacy": {
       "file": "dispatcher/dir.continuez_until.pharmacy.mp3",
       "text": "Continuez jusqu'à la pharmacie.",
       "voice": "DISPATCHER",
-      "durationMs": 2299
+      "durationMs": 2116
     },
     "dir.continuez_until.swimming_pool": {
       "file": "dispatcher/dir.continuez_until.swimming_pool.mp3",
       "text": "Continuez jusqu'à la piscine.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2299
     },
     "dir.continuez_until.square": {
       "file": "dispatcher/dir.continuez_until.square.mp3",
       "text": "Continuez jusqu'à la place.",
       "voice": "DISPATCHER",
-      "durationMs": 2142
+      "durationMs": 2194
     },
     "dir.continuez_until.beach": {
       "file": "dispatcher/dir.continuez_until.beach.mp3",
       "text": "Continuez jusqu'à la plage.",
       "voice": "DISPATCHER",
-      "durationMs": 1985
+      "durationMs": 2037
     },
     "dir.continuez_until.post_office": {
       "file": "dispatcher/dir.continuez_until.post_office.mp3",
       "text": "Continuez jusqu'à la poste.",
       "voice": "DISPATCHER",
-      "durationMs": 2064
+      "durationMs": 2037
     },
     "dir.continuez_until.gas_station": {
       "file": "dispatcher/dir.continuez_until.gas_station.mp3",
       "text": "Continuez jusqu'à la station-service.",
       "voice": "DISPATCHER",
-      "durationMs": 2795
+      "durationMs": 2560
     },
     "dir.continuez_until.cafe": {
       "file": "dispatcher/dir.continuez_until.cafe.mp3",
@@ -460,25 +460,25 @@
       "file": "dispatcher/dir.continuez_until.shopping_centre.mp3",
       "text": "Continuez jusqu'au centre commercial.",
       "voice": "DISPATCHER",
-      "durationMs": 2717
+      "durationMs": 2638
     },
     "dir.continuez_until.cinema": {
       "file": "dispatcher/dir.continuez_until.cinema.mp3",
       "text": "Continuez jusqu'au cinéma.",
       "voice": "DISPATCHER",
-      "durationMs": 2064
+      "durationMs": 1959
     },
     "dir.continuez_until.police_station": {
       "file": "dispatcher/dir.continuez_until.police_station.mp3",
       "text": "Continuez jusqu'au commissariat de police.",
       "voice": "DISPATCHER",
-      "durationMs": 2717
+      "durationMs": 2586
     },
     "dir.continuez_until.shop": {
       "file": "dispatcher/dir.continuez_until.shop.mp3",
       "text": "Continuez jusqu'au magasin.",
       "voice": "DISPATCHER",
-      "durationMs": 2142
+      "durationMs": 2273
     },
     "dir.continuez_until.market": {
       "file": "dispatcher/dir.continuez_until.market.mp3",
@@ -490,85 +490,1375 @@
       "file": "dispatcher/dir.continuez_until.museum.mp3",
       "text": "Continuez jusqu'au musée.",
       "voice": "DISPATCHER",
-      "durationMs": 2064
+      "durationMs": 1907
     },
     "dir.continuez_until.park": {
       "file": "dispatcher/dir.continuez_until.park.mp3",
       "text": "Continuez jusqu'au parc.",
       "voice": "DISPATCHER",
-      "durationMs": 1985
+      "durationMs": 1881
     },
     "dir.continuez_until.car_park": {
       "file": "dispatcher/dir.continuez_until.car_park.mp3",
       "text": "Continuez jusqu'au parking.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2011
     },
     "dir.continuez_until.restaurant": {
       "file": "dispatcher/dir.continuez_until.restaurant.mp3",
       "text": "Continuez jusqu'au restaurant.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2011
     },
     "dir.continuez_until.stadium": {
       "file": "dispatcher/dir.continuez_until.stadium.mp3",
       "text": "Continuez jusqu'au stade.",
       "voice": "DISPATCHER",
-      "durationMs": 2142
+      "durationMs": 2116
     },
     "dir.continuez_until.supermarket": {
       "file": "dispatcher/dir.continuez_until.supermarket.mp3",
       "text": "Continuez jusqu'au supermarché.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2377
     },
     "dir.continuez_until.theatre": {
       "file": "dispatcher/dir.continuez_until.theatre.mp3",
       "text": "Continuez jusqu'au théâtre.",
       "voice": "DISPATCHER",
-      "durationMs": 2064
+      "durationMs": 2168
     },
     "dir.straight": {
       "file": "dispatcher/dir.straight.mp3",
       "text": "Continuez tout droit.",
       "voice": "DISPATCHER",
-      "durationMs": 1593
+      "durationMs": 1332
+    },
+    "link.dabord.roundabout.deuxieme": {
+      "file": "dispatcher/link.dabord.roundabout.deuxieme.mp3",
+      "text": "D'abord, au rond-point, prenez la deuxième sortie.",
+      "voice": "DISPATCHER",
+      "durationMs": 3344
+    },
+    "link.dabord.roundabout.premiere": {
+      "file": "dispatcher/link.dabord.roundabout.premiere.mp3",
+      "text": "D'abord, au rond-point, prenez la première sortie.",
+      "voice": "DISPATCHER",
+      "durationMs": 3474
+    },
+    "link.dabord.roundabout.troisieme": {
+      "file": "dispatcher/link.dabord.roundabout.troisieme.mp3",
+      "text": "D'abord, au rond-point, prenez la troisième sortie.",
+      "voice": "DISPATCHER",
+      "durationMs": 3500
+    },
+    "link.dabord.street.right.deuxieme": {
+      "file": "dispatcher/link.dabord.street.right.deuxieme.mp3",
+      "text": "D'abord, prenez la deuxième rue à droite.",
+      "voice": "DISPATCHER",
+      "durationMs": 2821
+    },
+    "link.dabord.street.left.deuxieme": {
+      "file": "dispatcher/link.dabord.street.left.deuxieme.mp3",
+      "text": "D'abord, prenez la deuxième rue à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 2795
+    },
+    "link.dabord.street.right.premiere": {
+      "file": "dispatcher/link.dabord.street.right.premiere.mp3",
+      "text": "D'abord, prenez la première rue à droite.",
+      "voice": "DISPATCHER",
+      "durationMs": 2717
+    },
+    "link.dabord.street.left.premiere": {
+      "file": "dispatcher/link.dabord.street.left.premiere.mp3",
+      "text": "D'abord, prenez la première rue à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 2847
+    },
+    "link.dabord.street.right.prochaine": {
+      "file": "dispatcher/link.dabord.street.right.prochaine.mp3",
+      "text": "D'abord, prenez la prochaine rue à droite.",
+      "voice": "DISPATCHER",
+      "durationMs": 2926
+    },
+    "link.dabord.street.left.prochaine": {
+      "file": "dispatcher/link.dabord.street.left.prochaine.mp3",
+      "text": "D'abord, prenez la prochaine rue à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 2717
+    },
+    "link.dabord.street.right.troisieme": {
+      "file": "dispatcher/link.dabord.street.right.troisieme.mp3",
+      "text": "D'abord, prenez la troisième rue à droite.",
+      "voice": "DISPATCHER",
+      "durationMs": 2821
+    },
+    "link.dabord.street.left.troisieme": {
+      "file": "dispatcher/link.dabord.street.left.troisieme.mp3",
+      "text": "D'abord, prenez la troisième rue à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 2821
+    },
+    "link.dabord.turn.right.devant.school": {
+      "file": "dispatcher/link.dabord.turn.right.devant.school.mp3",
+      "text": "D'abord, tournez à droite devant l'école.",
+      "voice": "DISPATCHER",
+      "durationMs": 3030
+    },
+    "link.dabord.turn.right.devant.hospital": {
+      "file": "dispatcher/link.dabord.turn.right.devant.hospital.mp3",
+      "text": "D'abord, tournez à droite devant l'hôpital.",
+      "voice": "DISPATCHER",
+      "durationMs": 3161
+    },
+    "link.dabord.turn.right.devant.hotel": {
+      "file": "dispatcher/link.dabord.turn.right.devant.hotel.mp3",
+      "text": "D'abord, tournez à droite devant l'hôtel.",
+      "voice": "DISPATCHER",
+      "durationMs": 2952
+    },
+    "link.dabord.turn.right.devant.bank": {
+      "file": "dispatcher/link.dabord.turn.right.devant.bank.mp3",
+      "text": "D'abord, tournez à droite devant la banque.",
+      "voice": "DISPATCHER",
+      "durationMs": 3135
+    },
+    "link.dabord.turn.right.devant.library": {
+      "file": "dispatcher/link.dabord.turn.right.devant.library.mp3",
+      "text": "D'abord, tournez à droite devant la bibliothèque.",
+      "voice": "DISPATCHER",
+      "durationMs": 3265
+    },
+    "link.dabord.turn.right.devant.bakery": {
+      "file": "dispatcher/link.dabord.turn.right.devant.bakery.mp3",
+      "text": "D'abord, tournez à droite devant la boulangerie.",
+      "voice": "DISPATCHER",
+      "durationMs": 2900
+    },
+    "link.dabord.turn.right.devant.bus_station": {
+      "file": "dispatcher/link.dabord.turn.right.devant.bus_station.mp3",
+      "text": "D'abord, tournez à droite devant la gare routière.",
+      "voice": "DISPATCHER",
+      "durationMs": 3291
+    },
+    "link.dabord.turn.right.devant.train_station": {
+      "file": "dispatcher/link.dabord.turn.right.devant.train_station.mp3",
+      "text": "D'abord, tournez à droite devant la gare.",
+      "voice": "DISPATCHER",
+      "durationMs": 3030
+    },
+    "link.dabord.turn.right.devant.bookshop": {
+      "file": "dispatcher/link.dabord.turn.right.devant.bookshop.mp3",
+      "text": "D'abord, tournez à droite devant la librairie.",
+      "voice": "DISPATCHER",
+      "durationMs": 3082
+    },
+    "link.dabord.turn.right.devant.town_hall": {
+      "file": "dispatcher/link.dabord.turn.right.devant.town_hall.mp3",
+      "text": "D'abord, tournez à droite devant la mairie.",
+      "voice": "DISPATCHER",
+      "durationMs": 3056
+    },
+    "link.dabord.turn.right.devant.pharmacy": {
+      "file": "dispatcher/link.dabord.turn.right.devant.pharmacy.mp3",
+      "text": "D'abord, tournez à droite devant la pharmacie.",
+      "voice": "DISPATCHER",
+      "durationMs": 3056
+    },
+    "link.dabord.turn.right.devant.swimming_pool": {
+      "file": "dispatcher/link.dabord.turn.right.devant.swimming_pool.mp3",
+      "text": "D'abord, tournez à droite devant la piscine.",
+      "voice": "DISPATCHER",
+      "durationMs": 3004
+    },
+    "link.dabord.turn.right.devant.square": {
+      "file": "dispatcher/link.dabord.turn.right.devant.square.mp3",
+      "text": "D'abord, tournez à droite devant la place.",
+      "voice": "DISPATCHER",
+      "durationMs": 3082
+    },
+    "link.dabord.turn.right.devant.beach": {
+      "file": "dispatcher/link.dabord.turn.right.devant.beach.mp3",
+      "text": "D'abord, tournez à droite devant la plage.",
+      "voice": "DISPATCHER",
+      "durationMs": 2952
+    },
+    "link.dabord.turn.right.devant.post_office": {
+      "file": "dispatcher/link.dabord.turn.right.devant.post_office.mp3",
+      "text": "D'abord, tournez à droite devant la poste.",
+      "voice": "DISPATCHER",
+      "durationMs": 3213
+    },
+    "link.dabord.turn.right.devant.gas_station": {
+      "file": "dispatcher/link.dabord.turn.right.devant.gas_station.mp3",
+      "text": "D'abord, tournez à droite devant la station-service.",
+      "voice": "DISPATCHER",
+      "durationMs": 3500
+    },
+    "link.dabord.turn.right.devant.cafe": {
+      "file": "dispatcher/link.dabord.turn.right.devant.cafe.mp3",
+      "text": "D'abord, tournez à droite devant le café.",
+      "voice": "DISPATCHER",
+      "durationMs": 2926
+    },
+    "link.dabord.turn.right.devant.shopping_centre": {
+      "file": "dispatcher/link.dabord.turn.right.devant.shopping_centre.mp3",
+      "text": "D'abord, tournez à droite devant le centre commercial.",
+      "voice": "DISPATCHER",
+      "durationMs": 3526
+    },
+    "link.dabord.turn.right.devant.cinema": {
+      "file": "dispatcher/link.dabord.turn.right.devant.cinema.mp3",
+      "text": "D'abord, tournez à droite devant le cinéma.",
+      "voice": "DISPATCHER",
+      "durationMs": 3030
+    },
+    "link.dabord.turn.right.devant.police_station": {
+      "file": "dispatcher/link.dabord.turn.right.devant.police_station.mp3",
+      "text": "D'abord, tournez à droite devant le commissariat de police.",
+      "voice": "DISPATCHER",
+      "durationMs": 3735
+    },
+    "link.dabord.turn.right.devant.shop": {
+      "file": "dispatcher/link.dabord.turn.right.devant.shop.mp3",
+      "text": "D'abord, tournez à droite devant le magasin.",
+      "voice": "DISPATCHER",
+      "durationMs": 3082
+    },
+    "link.dabord.turn.right.devant.market": {
+      "file": "dispatcher/link.dabord.turn.right.devant.market.mp3",
+      "text": "D'abord, tournez à droite devant le marché.",
+      "voice": "DISPATCHER",
+      "durationMs": 2926
+    },
+    "link.dabord.turn.right.devant.museum": {
+      "file": "dispatcher/link.dabord.turn.right.devant.museum.mp3",
+      "text": "D'abord, tournez à droite devant le musée.",
+      "voice": "DISPATCHER",
+      "durationMs": 2900
+    },
+    "link.dabord.turn.right.devant.park": {
+      "file": "dispatcher/link.dabord.turn.right.devant.park.mp3",
+      "text": "D'abord, tournez à droite devant le parc.",
+      "voice": "DISPATCHER",
+      "durationMs": 2978
+    },
+    "link.dabord.turn.right.devant.car_park": {
+      "file": "dispatcher/link.dabord.turn.right.devant.car_park.mp3",
+      "text": "D'abord, tournez à droite devant le parking.",
+      "voice": "DISPATCHER",
+      "durationMs": 3082
+    },
+    "link.dabord.turn.right.devant.restaurant": {
+      "file": "dispatcher/link.dabord.turn.right.devant.restaurant.mp3",
+      "text": "D'abord, tournez à droite devant le restaurant.",
+      "voice": "DISPATCHER",
+      "durationMs": 3109
+    },
+    "link.dabord.turn.right.devant.stadium": {
+      "file": "dispatcher/link.dabord.turn.right.devant.stadium.mp3",
+      "text": "D'abord, tournez à droite devant le stade.",
+      "voice": "DISPATCHER",
+      "durationMs": 2952
+    },
+    "link.dabord.turn.right.devant.supermarket": {
+      "file": "dispatcher/link.dabord.turn.right.devant.supermarket.mp3",
+      "text": "D'abord, tournez à droite devant le supermarché.",
+      "voice": "DISPATCHER",
+      "durationMs": 3291
+    },
+    "link.dabord.turn.right.devant.theatre": {
+      "file": "dispatcher/link.dabord.turn.right.devant.theatre.mp3",
+      "text": "D'abord, tournez à droite devant le théâtre.",
+      "voice": "DISPATCHER",
+      "durationMs": 2978
+    },
+    "link.dabord.turn.right": {
+      "file": "dispatcher/link.dabord.turn.right.mp3",
+      "text": "D'abord, tournez à droite.",
+      "voice": "DISPATCHER",
+      "durationMs": 1959
+    },
+    "link.dabord.turn.left.devant.school": {
+      "file": "dispatcher/link.dabord.turn.left.devant.school.mp3",
+      "text": "D'abord, tournez à gauche devant l'école.",
+      "voice": "DISPATCHER",
+      "durationMs": 2638
+    },
+    "link.dabord.turn.left.devant.hospital": {
+      "file": "dispatcher/link.dabord.turn.left.devant.hospital.mp3",
+      "text": "D'abord, tournez à gauche devant l'hôpital.",
+      "voice": "DISPATCHER",
+      "durationMs": 2847
+    },
+    "link.dabord.turn.left.devant.hotel": {
+      "file": "dispatcher/link.dabord.turn.left.devant.hotel.mp3",
+      "text": "D'abord, tournez à gauche devant l'hôtel.",
+      "voice": "DISPATCHER",
+      "durationMs": 2769
+    },
+    "link.dabord.turn.left.devant.bank": {
+      "file": "dispatcher/link.dabord.turn.left.devant.bank.mp3",
+      "text": "D'abord, tournez à gauche devant la banque.",
+      "voice": "DISPATCHER",
+      "durationMs": 2743
+    },
+    "link.dabord.turn.left.devant.library": {
+      "file": "dispatcher/link.dabord.turn.left.devant.library.mp3",
+      "text": "D'abord, tournez à gauche devant la bibliothèque.",
+      "voice": "DISPATCHER",
+      "durationMs": 3056
+    },
+    "link.dabord.turn.left.devant.bakery": {
+      "file": "dispatcher/link.dabord.turn.left.devant.bakery.mp3",
+      "text": "D'abord, tournez à gauche devant la boulangerie.",
+      "voice": "DISPATCHER",
+      "durationMs": 2847
+    },
+    "link.dabord.turn.left.devant.bus_station": {
+      "file": "dispatcher/link.dabord.turn.left.devant.bus_station.mp3",
+      "text": "D'abord, tournez à gauche devant la gare routière.",
+      "voice": "DISPATCHER",
+      "durationMs": 3109
+    },
+    "link.dabord.turn.left.devant.train_station": {
+      "file": "dispatcher/link.dabord.turn.left.devant.train_station.mp3",
+      "text": "D'abord, tournez à gauche devant la gare.",
+      "voice": "DISPATCHER",
+      "durationMs": 2664
+    },
+    "link.dabord.turn.left.devant.bookshop": {
+      "file": "dispatcher/link.dabord.turn.left.devant.bookshop.mp3",
+      "text": "D'abord, tournez à gauche devant la librairie.",
+      "voice": "DISPATCHER",
+      "durationMs": 2821
+    },
+    "link.dabord.turn.left.devant.town_hall": {
+      "file": "dispatcher/link.dabord.turn.left.devant.town_hall.mp3",
+      "text": "D'abord, tournez à gauche devant la mairie.",
+      "voice": "DISPATCHER",
+      "durationMs": 2638
+    },
+    "link.dabord.turn.left.devant.pharmacy": {
+      "file": "dispatcher/link.dabord.turn.left.devant.pharmacy.mp3",
+      "text": "D'abord, tournez à gauche devant la pharmacie.",
+      "voice": "DISPATCHER",
+      "durationMs": 2978
+    },
+    "link.dabord.turn.left.devant.swimming_pool": {
+      "file": "dispatcher/link.dabord.turn.left.devant.swimming_pool.mp3",
+      "text": "D'abord, tournez à gauche devant la piscine.",
+      "voice": "DISPATCHER",
+      "durationMs": 2900
+    },
+    "link.dabord.turn.left.devant.square": {
+      "file": "dispatcher/link.dabord.turn.left.devant.square.mp3",
+      "text": "D'abord, tournez à gauche devant la place.",
+      "voice": "DISPATCHER",
+      "durationMs": 3135
+    },
+    "link.dabord.turn.left.devant.beach": {
+      "file": "dispatcher/link.dabord.turn.left.devant.beach.mp3",
+      "text": "D'abord, tournez à gauche devant la plage.",
+      "voice": "DISPATCHER",
+      "durationMs": 2795
+    },
+    "link.dabord.turn.left.devant.post_office": {
+      "file": "dispatcher/link.dabord.turn.left.devant.post_office.mp3",
+      "text": "D'abord, tournez à gauche devant la poste.",
+      "voice": "DISPATCHER",
+      "durationMs": 2821
+    },
+    "link.dabord.turn.left.devant.gas_station": {
+      "file": "dispatcher/link.dabord.turn.left.devant.gas_station.mp3",
+      "text": "D'abord, tournez à gauche devant la station-service.",
+      "voice": "DISPATCHER",
+      "durationMs": 3370
+    },
+    "link.dabord.turn.left.devant.cafe": {
+      "file": "dispatcher/link.dabord.turn.left.devant.cafe.mp3",
+      "text": "D'abord, tournez à gauche devant le café.",
+      "voice": "DISPATCHER",
+      "durationMs": 2691
+    },
+    "link.dabord.turn.left.devant.shopping_centre": {
+      "file": "dispatcher/link.dabord.turn.left.devant.shopping_centre.mp3",
+      "text": "D'abord, tournez à gauche devant le centre commercial.",
+      "voice": "DISPATCHER",
+      "durationMs": 3317
+    },
+    "link.dabord.turn.left.devant.cinema": {
+      "file": "dispatcher/link.dabord.turn.left.devant.cinema.mp3",
+      "text": "D'abord, tournez à gauche devant le cinéma.",
+      "voice": "DISPATCHER",
+      "durationMs": 2926
+    },
+    "link.dabord.turn.left.devant.police_station": {
+      "file": "dispatcher/link.dabord.turn.left.devant.police_station.mp3",
+      "text": "D'abord, tournez à gauche devant le commissariat de police.",
+      "voice": "DISPATCHER",
+      "durationMs": 3553
+    },
+    "link.dabord.turn.left.devant.shop": {
+      "file": "dispatcher/link.dabord.turn.left.devant.shop.mp3",
+      "text": "D'abord, tournez à gauche devant le magasin.",
+      "voice": "DISPATCHER",
+      "durationMs": 2795
+    },
+    "link.dabord.turn.left.devant.market": {
+      "file": "dispatcher/link.dabord.turn.left.devant.market.mp3",
+      "text": "D'abord, tournez à gauche devant le marché.",
+      "voice": "DISPATCHER",
+      "durationMs": 2769
+    },
+    "link.dabord.turn.left.devant.museum": {
+      "file": "dispatcher/link.dabord.turn.left.devant.museum.mp3",
+      "text": "D'abord, tournez à gauche devant le musée.",
+      "voice": "DISPATCHER",
+      "durationMs": 2717
+    },
+    "link.dabord.turn.left.devant.park": {
+      "file": "dispatcher/link.dabord.turn.left.devant.park.mp3",
+      "text": "D'abord, tournez à gauche devant le parc.",
+      "voice": "DISPATCHER",
+      "durationMs": 3030
+    },
+    "link.dabord.turn.left.devant.car_park": {
+      "file": "dispatcher/link.dabord.turn.left.devant.car_park.mp3",
+      "text": "D'abord, tournez à gauche devant le parking.",
+      "voice": "DISPATCHER",
+      "durationMs": 3056
+    },
+    "link.dabord.turn.left.devant.restaurant": {
+      "file": "dispatcher/link.dabord.turn.left.devant.restaurant.mp3",
+      "text": "D'abord, tournez à gauche devant le restaurant.",
+      "voice": "DISPATCHER",
+      "durationMs": 2847
+    },
+    "link.dabord.turn.left.devant.stadium": {
+      "file": "dispatcher/link.dabord.turn.left.devant.stadium.mp3",
+      "text": "D'abord, tournez à gauche devant le stade.",
+      "voice": "DISPATCHER",
+      "durationMs": 2821
+    },
+    "link.dabord.turn.left.devant.supermarket": {
+      "file": "dispatcher/link.dabord.turn.left.devant.supermarket.mp3",
+      "text": "D'abord, tournez à gauche devant le supermarché.",
+      "voice": "DISPATCHER",
+      "durationMs": 3082
+    },
+    "link.dabord.turn.left.devant.theatre": {
+      "file": "dispatcher/link.dabord.turn.left.devant.theatre.mp3",
+      "text": "D'abord, tournez à gauche devant le théâtre.",
+      "voice": "DISPATCHER",
+      "durationMs": 2873
+    },
+    "link.dabord.turn.left": {
+      "file": "dispatcher/link.dabord.turn.left.mp3",
+      "text": "D'abord, tournez à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 1985
+    },
+    "link.enfin.roundabout.deuxieme": {
+      "file": "dispatcher/link.enfin.roundabout.deuxieme.mp3",
+      "text": "Enfin, au rond-point, prenez la deuxième sortie.",
+      "voice": "DISPATCHER",
+      "durationMs": 3553
+    },
+    "link.enfin.roundabout.premiere": {
+      "file": "dispatcher/link.enfin.roundabout.premiere.mp3",
+      "text": "Enfin, au rond-point, prenez la première sortie.",
+      "voice": "DISPATCHER",
+      "durationMs": 3579
+    },
+    "link.enfin.roundabout.troisieme": {
+      "file": "dispatcher/link.enfin.roundabout.troisieme.mp3",
+      "text": "Enfin, au rond-point, prenez la troisième sortie.",
+      "voice": "DISPATCHER",
+      "durationMs": 3422
+    },
+    "link.enfin.street.right.deuxieme": {
+      "file": "dispatcher/link.enfin.street.right.deuxieme.mp3",
+      "text": "Enfin, prenez la deuxième rue à droite.",
+      "voice": "DISPATCHER",
+      "durationMs": 2978
+    },
+    "link.enfin.street.left.deuxieme": {
+      "file": "dispatcher/link.enfin.street.left.deuxieme.mp3",
+      "text": "Enfin, prenez la deuxième rue à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 2821
+    },
+    "link.enfin.street.right.premiere": {
+      "file": "dispatcher/link.enfin.street.right.premiere.mp3",
+      "text": "Enfin, prenez la première rue à droite.",
+      "voice": "DISPATCHER",
+      "durationMs": 2926
+    },
+    "link.enfin.street.left.premiere": {
+      "file": "dispatcher/link.enfin.street.left.premiere.mp3",
+      "text": "Enfin, prenez la première rue à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 2978
+    },
+    "link.enfin.street.right.prochaine": {
+      "file": "dispatcher/link.enfin.street.right.prochaine.mp3",
+      "text": "Enfin, prenez la prochaine rue à droite.",
+      "voice": "DISPATCHER",
+      "durationMs": 2795
+    },
+    "link.enfin.street.left.prochaine": {
+      "file": "dispatcher/link.enfin.street.left.prochaine.mp3",
+      "text": "Enfin, prenez la prochaine rue à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 2847
+    },
+    "link.enfin.street.right.troisieme": {
+      "file": "dispatcher/link.enfin.street.right.troisieme.mp3",
+      "text": "Enfin, prenez la troisième rue à droite.",
+      "voice": "DISPATCHER",
+      "durationMs": 2821
+    },
+    "link.enfin.street.left.troisieme": {
+      "file": "dispatcher/link.enfin.street.left.troisieme.mp3",
+      "text": "Enfin, prenez la troisième rue à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 2952
+    },
+    "link.enfin.turn.right.devant.school": {
+      "file": "dispatcher/link.enfin.turn.right.devant.school.mp3",
+      "text": "Enfin, tournez à droite devant l'école.",
+      "voice": "DISPATCHER",
+      "durationMs": 2482
+    },
+    "link.enfin.turn.right.devant.hospital": {
+      "file": "dispatcher/link.enfin.turn.right.devant.hospital.mp3",
+      "text": "Enfin, tournez à droite devant l'hôpital.",
+      "voice": "DISPATCHER",
+      "durationMs": 2717
+    },
+    "link.enfin.turn.right.devant.hotel": {
+      "file": "dispatcher/link.enfin.turn.right.devant.hotel.mp3",
+      "text": "Enfin, tournez à droite devant l'hôtel.",
+      "voice": "DISPATCHER",
+      "durationMs": 2638
+    },
+    "link.enfin.turn.right.devant.bank": {
+      "file": "dispatcher/link.enfin.turn.right.devant.bank.mp3",
+      "text": "Enfin, tournez à droite devant la banque.",
+      "voice": "DISPATCHER",
+      "durationMs": 2534
+    },
+    "link.enfin.turn.right.devant.library": {
+      "file": "dispatcher/link.enfin.turn.right.devant.library.mp3",
+      "text": "Enfin, tournez à droite devant la bibliothèque.",
+      "voice": "DISPATCHER",
+      "durationMs": 2952
+    },
+    "link.enfin.turn.right.devant.bakery": {
+      "file": "dispatcher/link.enfin.turn.right.devant.bakery.mp3",
+      "text": "Enfin, tournez à droite devant la boulangerie.",
+      "voice": "DISPATCHER",
+      "durationMs": 2586
+    },
+    "link.enfin.turn.right.devant.bus_station": {
+      "file": "dispatcher/link.enfin.turn.right.devant.bus_station.mp3",
+      "text": "Enfin, tournez à droite devant la gare routière.",
+      "voice": "DISPATCHER",
+      "durationMs": 2821
+    },
+    "link.enfin.turn.right.devant.train_station": {
+      "file": "dispatcher/link.enfin.turn.right.devant.train_station.mp3",
+      "text": "Enfin, tournez à droite devant la gare.",
+      "voice": "DISPATCHER",
+      "durationMs": 2455
+    },
+    "link.enfin.turn.right.devant.bookshop": {
+      "file": "dispatcher/link.enfin.turn.right.devant.bookshop.mp3",
+      "text": "Enfin, tournez à droite devant la librairie.",
+      "voice": "DISPATCHER",
+      "durationMs": 2638
+    },
+    "link.enfin.turn.right.devant.town_hall": {
+      "file": "dispatcher/link.enfin.turn.right.devant.town_hall.mp3",
+      "text": "Enfin, tournez à droite devant la mairie.",
+      "voice": "DISPATCHER",
+      "durationMs": 2482
+    },
+    "link.enfin.turn.right.devant.pharmacy": {
+      "file": "dispatcher/link.enfin.turn.right.devant.pharmacy.mp3",
+      "text": "Enfin, tournez à droite devant la pharmacie.",
+      "voice": "DISPATCHER",
+      "durationMs": 2821
+    },
+    "link.enfin.turn.right.devant.swimming_pool": {
+      "file": "dispatcher/link.enfin.turn.right.devant.swimming_pool.mp3",
+      "text": "Enfin, tournez à droite devant la piscine.",
+      "voice": "DISPATCHER",
+      "durationMs": 2691
+    },
+    "link.enfin.turn.right.devant.square": {
+      "file": "dispatcher/link.enfin.turn.right.devant.square.mp3",
+      "text": "Enfin, tournez à droite devant la place.",
+      "voice": "DISPATCHER",
+      "durationMs": 2586
+    },
+    "link.enfin.turn.right.devant.beach": {
+      "file": "dispatcher/link.enfin.turn.right.devant.beach.mp3",
+      "text": "Enfin, tournez à droite devant la plage.",
+      "voice": "DISPATCHER",
+      "durationMs": 2482
+    },
+    "link.enfin.turn.right.devant.post_office": {
+      "file": "dispatcher/link.enfin.turn.right.devant.post_office.mp3",
+      "text": "Enfin, tournez à droite devant la poste.",
+      "voice": "DISPATCHER",
+      "durationMs": 2612
+    },
+    "link.enfin.turn.right.devant.gas_station": {
+      "file": "dispatcher/link.enfin.turn.right.devant.gas_station.mp3",
+      "text": "Enfin, tournez à droite devant la station-service.",
+      "voice": "DISPATCHER",
+      "durationMs": 3109
+    },
+    "link.enfin.turn.right.devant.cafe": {
+      "file": "dispatcher/link.enfin.turn.right.devant.cafe.mp3",
+      "text": "Enfin, tournez à droite devant le café.",
+      "voice": "DISPATCHER",
+      "durationMs": 2586
+    },
+    "link.enfin.turn.right.devant.shopping_centre": {
+      "file": "dispatcher/link.enfin.turn.right.devant.shopping_centre.mp3",
+      "text": "Enfin, tournez à droite devant le centre commercial.",
+      "voice": "DISPATCHER",
+      "durationMs": 3161
+    },
+    "link.enfin.turn.right.devant.cinema": {
+      "file": "dispatcher/link.enfin.turn.right.devant.cinema.mp3",
+      "text": "Enfin, tournez à droite devant le cinéma.",
+      "voice": "DISPATCHER",
+      "durationMs": 2926
+    },
+    "link.enfin.turn.right.devant.police_station": {
+      "file": "dispatcher/link.enfin.turn.right.devant.police_station.mp3",
+      "text": "Enfin, tournez à droite devant le commissariat de police.",
+      "voice": "DISPATCHER",
+      "durationMs": 3370
+    },
+    "link.enfin.turn.right.devant.shop": {
+      "file": "dispatcher/link.enfin.turn.right.devant.shop.mp3",
+      "text": "Enfin, tournez à droite devant le magasin.",
+      "voice": "DISPATCHER",
+      "durationMs": 2664
+    },
+    "link.enfin.turn.right.devant.market": {
+      "file": "dispatcher/link.enfin.turn.right.devant.market.mp3",
+      "text": "Enfin, tournez à droite devant le marché.",
+      "voice": "DISPATCHER",
+      "durationMs": 2612
+    },
+    "link.enfin.turn.right.devant.museum": {
+      "file": "dispatcher/link.enfin.turn.right.devant.museum.mp3",
+      "text": "Enfin, tournez à droite devant le musée.",
+      "voice": "DISPATCHER",
+      "durationMs": 2586
+    },
+    "link.enfin.turn.right.devant.park": {
+      "file": "dispatcher/link.enfin.turn.right.devant.park.mp3",
+      "text": "Enfin, tournez à droite devant le parc.",
+      "voice": "DISPATCHER",
+      "durationMs": 2612
+    },
+    "link.enfin.turn.right.devant.car_park": {
+      "file": "dispatcher/link.enfin.turn.right.devant.car_park.mp3",
+      "text": "Enfin, tournez à droite devant le parking.",
+      "voice": "DISPATCHER",
+      "durationMs": 2638
+    },
+    "link.enfin.turn.right.devant.restaurant": {
+      "file": "dispatcher/link.enfin.turn.right.devant.restaurant.mp3",
+      "text": "Enfin, tournez à droite devant le restaurant.",
+      "voice": "DISPATCHER",
+      "durationMs": 2717
+    },
+    "link.enfin.turn.right.devant.stadium": {
+      "file": "dispatcher/link.enfin.turn.right.devant.stadium.mp3",
+      "text": "Enfin, tournez à droite devant le stade.",
+      "voice": "DISPATCHER",
+      "durationMs": 2847
+    },
+    "link.enfin.turn.right.devant.supermarket": {
+      "file": "dispatcher/link.enfin.turn.right.devant.supermarket.mp3",
+      "text": "Enfin, tournez à droite devant le supermarché.",
+      "voice": "DISPATCHER",
+      "durationMs": 2900
+    },
+    "link.enfin.turn.right.devant.theatre": {
+      "file": "dispatcher/link.enfin.turn.right.devant.theatre.mp3",
+      "text": "Enfin, tournez à droite devant le théâtre.",
+      "voice": "DISPATCHER",
+      "durationMs": 2612
+    },
+    "link.enfin.turn.right": {
+      "file": "dispatcher/link.enfin.turn.right.mp3",
+      "text": "Enfin, tournez à droite.",
+      "voice": "DISPATCHER",
+      "durationMs": 1698
+    },
+    "link.enfin.turn.left.devant.school": {
+      "file": "dispatcher/link.enfin.turn.left.devant.school.mp3",
+      "text": "Enfin, tournez à gauche devant l'école.",
+      "voice": "DISPATCHER",
+      "durationMs": 2482
+    },
+    "link.enfin.turn.left.devant.hospital": {
+      "file": "dispatcher/link.enfin.turn.left.devant.hospital.mp3",
+      "text": "Enfin, tournez à gauche devant l'hôpital.",
+      "voice": "DISPATCHER",
+      "durationMs": 2769
+    },
+    "link.enfin.turn.left.devant.hotel": {
+      "file": "dispatcher/link.enfin.turn.left.devant.hotel.mp3",
+      "text": "Enfin, tournez à gauche devant l'hôtel.",
+      "voice": "DISPATCHER",
+      "durationMs": 2612
+    },
+    "link.enfin.turn.left.devant.bank": {
+      "file": "dispatcher/link.enfin.turn.left.devant.bank.mp3",
+      "text": "Enfin, tournez à gauche devant la banque.",
+      "voice": "DISPATCHER",
+      "durationMs": 2664
+    },
+    "link.enfin.turn.left.devant.library": {
+      "file": "dispatcher/link.enfin.turn.left.devant.library.mp3",
+      "text": "Enfin, tournez à gauche devant la bibliothèque.",
+      "voice": "DISPATCHER",
+      "durationMs": 2900
+    },
+    "link.enfin.turn.left.devant.bakery": {
+      "file": "dispatcher/link.enfin.turn.left.devant.bakery.mp3",
+      "text": "Enfin, tournez à gauche devant la boulangerie.",
+      "voice": "DISPATCHER",
+      "durationMs": 2717
+    },
+    "link.enfin.turn.left.devant.bus_station": {
+      "file": "dispatcher/link.enfin.turn.left.devant.bus_station.mp3",
+      "text": "Enfin, tournez à gauche devant la gare routière.",
+      "voice": "DISPATCHER",
+      "durationMs": 3056
+    },
+    "link.enfin.turn.left.devant.train_station": {
+      "file": "dispatcher/link.enfin.turn.left.devant.train_station.mp3",
+      "text": "Enfin, tournez à gauche devant la gare.",
+      "voice": "DISPATCHER",
+      "durationMs": 2952
+    },
+    "link.enfin.turn.left.devant.bookshop": {
+      "file": "dispatcher/link.enfin.turn.left.devant.bookshop.mp3",
+      "text": "Enfin, tournez à gauche devant la librairie.",
+      "voice": "DISPATCHER",
+      "durationMs": 3030
+    },
+    "link.enfin.turn.left.devant.town_hall": {
+      "file": "dispatcher/link.enfin.turn.left.devant.town_hall.mp3",
+      "text": "Enfin, tournez à gauche devant la mairie.",
+      "voice": "DISPATCHER",
+      "durationMs": 2482
+    },
+    "link.enfin.turn.left.devant.pharmacy": {
+      "file": "dispatcher/link.enfin.turn.left.devant.pharmacy.mp3",
+      "text": "Enfin, tournez à gauche devant la pharmacie.",
+      "voice": "DISPATCHER",
+      "durationMs": 2821
+    },
+    "link.enfin.turn.left.devant.swimming_pool": {
+      "file": "dispatcher/link.enfin.turn.left.devant.swimming_pool.mp3",
+      "text": "Enfin, tournez à gauche devant la piscine.",
+      "voice": "DISPATCHER",
+      "durationMs": 2664
+    },
+    "link.enfin.turn.left.devant.square": {
+      "file": "dispatcher/link.enfin.turn.left.devant.square.mp3",
+      "text": "Enfin, tournez à gauche devant la place.",
+      "voice": "DISPATCHER",
+      "durationMs": 2769
+    },
+    "link.enfin.turn.left.devant.beach": {
+      "file": "dispatcher/link.enfin.turn.left.devant.beach.mp3",
+      "text": "Enfin, tournez à gauche devant la plage.",
+      "voice": "DISPATCHER",
+      "durationMs": 2691
+    },
+    "link.enfin.turn.left.devant.post_office": {
+      "file": "dispatcher/link.enfin.turn.left.devant.post_office.mp3",
+      "text": "Enfin, tournez à gauche devant la poste.",
+      "voice": "DISPATCHER",
+      "durationMs": 2743
+    },
+    "link.enfin.turn.left.devant.gas_station": {
+      "file": "dispatcher/link.enfin.turn.left.devant.gas_station.mp3",
+      "text": "Enfin, tournez à gauche devant la station-service.",
+      "voice": "DISPATCHER",
+      "durationMs": 3291
+    },
+    "link.enfin.turn.left.devant.cafe": {
+      "file": "dispatcher/link.enfin.turn.left.devant.cafe.mp3",
+      "text": "Enfin, tournez à gauche devant le café.",
+      "voice": "DISPATCHER",
+      "durationMs": 2691
+    },
+    "link.enfin.turn.left.devant.shopping_centre": {
+      "file": "dispatcher/link.enfin.turn.left.devant.shopping_centre.mp3",
+      "text": "Enfin, tournez à gauche devant le centre commercial.",
+      "voice": "DISPATCHER",
+      "durationMs": 3265
+    },
+    "link.enfin.turn.left.devant.cinema": {
+      "file": "dispatcher/link.enfin.turn.left.devant.cinema.mp3",
+      "text": "Enfin, tournez à gauche devant le cinéma.",
+      "voice": "DISPATCHER",
+      "durationMs": 2743
+    },
+    "link.enfin.turn.left.devant.police_station": {
+      "file": "dispatcher/link.enfin.turn.left.devant.police_station.mp3",
+      "text": "Enfin, tournez à gauche devant le commissariat de police.",
+      "voice": "DISPATCHER",
+      "durationMs": 3422
+    },
+    "link.enfin.turn.left.devant.shop": {
+      "file": "dispatcher/link.enfin.turn.left.devant.shop.mp3",
+      "text": "Enfin, tournez à gauche devant le magasin.",
+      "voice": "DISPATCHER",
+      "durationMs": 3030
+    },
+    "link.enfin.turn.left.devant.market": {
+      "file": "dispatcher/link.enfin.turn.left.devant.market.mp3",
+      "text": "Enfin, tournez à gauche devant le marché.",
+      "voice": "DISPATCHER",
+      "durationMs": 2691
+    },
+    "link.enfin.turn.left.devant.museum": {
+      "file": "dispatcher/link.enfin.turn.left.devant.museum.mp3",
+      "text": "Enfin, tournez à gauche devant le musée.",
+      "voice": "DISPATCHER",
+      "durationMs": 2847
+    },
+    "link.enfin.turn.left.devant.park": {
+      "file": "dispatcher/link.enfin.turn.left.devant.park.mp3",
+      "text": "Enfin, tournez à gauche devant le parc.",
+      "voice": "DISPATCHER",
+      "durationMs": 2743
+    },
+    "link.enfin.turn.left.devant.car_park": {
+      "file": "dispatcher/link.enfin.turn.left.devant.car_park.mp3",
+      "text": "Enfin, tournez à gauche devant le parking.",
+      "voice": "DISPATCHER",
+      "durationMs": 2847
+    },
+    "link.enfin.turn.left.devant.restaurant": {
+      "file": "dispatcher/link.enfin.turn.left.devant.restaurant.mp3",
+      "text": "Enfin, tournez à gauche devant le restaurant.",
+      "voice": "DISPATCHER",
+      "durationMs": 2743
+    },
+    "link.enfin.turn.left.devant.stadium": {
+      "file": "dispatcher/link.enfin.turn.left.devant.stadium.mp3",
+      "text": "Enfin, tournez à gauche devant le stade.",
+      "voice": "DISPATCHER",
+      "durationMs": 2612
+    },
+    "link.enfin.turn.left.devant.supermarket": {
+      "file": "dispatcher/link.enfin.turn.left.devant.supermarket.mp3",
+      "text": "Enfin, tournez à gauche devant le supermarché.",
+      "voice": "DISPATCHER",
+      "durationMs": 2926
+    },
+    "link.enfin.turn.left.devant.theatre": {
+      "file": "dispatcher/link.enfin.turn.left.devant.theatre.mp3",
+      "text": "Enfin, tournez à gauche devant le théâtre.",
+      "voice": "DISPATCHER",
+      "durationMs": 2638
+    },
+    "link.enfin.turn.left": {
+      "file": "dispatcher/link.enfin.turn.left.mp3",
+      "text": "Enfin, tournez à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 1907
+    },
+    "link.ensuite.roundabout.deuxieme": {
+      "file": "dispatcher/link.ensuite.roundabout.deuxieme.mp3",
+      "text": "Ensuite, au rond-point, prenez la deuxième sortie.",
+      "voice": "DISPATCHER",
+      "durationMs": 3291
+    },
+    "link.ensuite.roundabout.premiere": {
+      "file": "dispatcher/link.ensuite.roundabout.premiere.mp3",
+      "text": "Ensuite, au rond-point, prenez la première sortie.",
+      "voice": "DISPATCHER",
+      "durationMs": 3161
+    },
+    "link.ensuite.roundabout.troisieme": {
+      "file": "dispatcher/link.ensuite.roundabout.troisieme.mp3",
+      "text": "Ensuite, au rond-point, prenez la troisième sortie.",
+      "voice": "DISPATCHER",
+      "durationMs": 3161
+    },
+    "link.ensuite.street.right.deuxieme": {
+      "file": "dispatcher/link.ensuite.street.right.deuxieme.mp3",
+      "text": "Ensuite, prenez la deuxième rue à droite.",
+      "voice": "DISPATCHER",
+      "durationMs": 2847
+    },
+    "link.ensuite.street.left.deuxieme": {
+      "file": "dispatcher/link.ensuite.street.left.deuxieme.mp3",
+      "text": "Ensuite, prenez la deuxième rue à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 2847
+    },
+    "link.ensuite.street.right.premiere": {
+      "file": "dispatcher/link.ensuite.street.right.premiere.mp3",
+      "text": "Ensuite, prenez la première rue à droite.",
+      "voice": "DISPATCHER",
+      "durationMs": 2821
+    },
+    "link.ensuite.street.left.premiere": {
+      "file": "dispatcher/link.ensuite.street.left.premiere.mp3",
+      "text": "Ensuite, prenez la première rue à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 3082
+    },
+    "link.ensuite.street.right.prochaine": {
+      "file": "dispatcher/link.ensuite.street.right.prochaine.mp3",
+      "text": "Ensuite, prenez la prochaine rue à droite.",
+      "voice": "DISPATCHER",
+      "durationMs": 2821
+    },
+    "link.ensuite.street.left.prochaine": {
+      "file": "dispatcher/link.ensuite.street.left.prochaine.mp3",
+      "text": "Ensuite, prenez la prochaine rue à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 2978
+    },
+    "link.ensuite.street.right.troisieme": {
+      "file": "dispatcher/link.ensuite.street.right.troisieme.mp3",
+      "text": "Ensuite, prenez la troisième rue à droite.",
+      "voice": "DISPATCHER",
+      "durationMs": 2978
+    },
+    "link.ensuite.street.left.troisieme": {
+      "file": "dispatcher/link.ensuite.street.left.troisieme.mp3",
+      "text": "Ensuite, prenez la troisième rue à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 3082
+    },
+    "link.ensuite.turn.right.devant.school": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.school.mp3",
+      "text": "Ensuite, tournez à droite devant l'école.",
+      "voice": "DISPATCHER",
+      "durationMs": 2743
+    },
+    "link.ensuite.turn.right.devant.hospital": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.hospital.mp3",
+      "text": "Ensuite, tournez à droite devant l'hôpital.",
+      "voice": "DISPATCHER",
+      "durationMs": 2691
+    },
+    "link.ensuite.turn.right.devant.hotel": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.hotel.mp3",
+      "text": "Ensuite, tournez à droite devant l'hôtel.",
+      "voice": "DISPATCHER",
+      "durationMs": 2612
+    },
+    "link.ensuite.turn.right.devant.bank": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.bank.mp3",
+      "text": "Ensuite, tournez à droite devant la banque.",
+      "voice": "DISPATCHER",
+      "durationMs": 2717
+    },
+    "link.ensuite.turn.right.devant.library": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.library.mp3",
+      "text": "Ensuite, tournez à droite devant la bibliothèque.",
+      "voice": "DISPATCHER",
+      "durationMs": 3030
+    },
+    "link.ensuite.turn.right.devant.bakery": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.bakery.mp3",
+      "text": "Ensuite, tournez à droite devant la boulangerie.",
+      "voice": "DISPATCHER",
+      "durationMs": 2821
+    },
+    "link.ensuite.turn.right.devant.bus_station": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.bus_station.mp3",
+      "text": "Ensuite, tournez à droite devant la gare routière.",
+      "voice": "DISPATCHER",
+      "durationMs": 3135
+    },
+    "link.ensuite.turn.right.devant.train_station": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.train_station.mp3",
+      "text": "Ensuite, tournez à droite devant la gare.",
+      "voice": "DISPATCHER",
+      "durationMs": 3004
+    },
+    "link.ensuite.turn.right.devant.bookshop": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.bookshop.mp3",
+      "text": "Ensuite, tournez à droite devant la librairie.",
+      "voice": "DISPATCHER",
+      "durationMs": 2900
+    },
+    "link.ensuite.turn.right.devant.town_hall": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.town_hall.mp3",
+      "text": "Ensuite, tournez à droite devant la mairie.",
+      "voice": "DISPATCHER",
+      "durationMs": 2743
+    },
+    "link.ensuite.turn.right.devant.pharmacy": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.pharmacy.mp3",
+      "text": "Ensuite, tournez à droite devant la pharmacie.",
+      "voice": "DISPATCHER",
+      "durationMs": 3056
+    },
+    "link.ensuite.turn.right.devant.swimming_pool": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.swimming_pool.mp3",
+      "text": "Ensuite, tournez à droite devant la piscine.",
+      "voice": "DISPATCHER",
+      "durationMs": 2978
+    },
+    "link.ensuite.turn.right.devant.square": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.square.mp3",
+      "text": "Ensuite, tournez à droite devant la place.",
+      "voice": "DISPATCHER",
+      "durationMs": 2952
+    },
+    "link.ensuite.turn.right.devant.beach": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.beach.mp3",
+      "text": "Ensuite, tournez à droite devant la plage.",
+      "voice": "DISPATCHER",
+      "durationMs": 2691
+    },
+    "link.ensuite.turn.right.devant.post_office": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.post_office.mp3",
+      "text": "Ensuite, tournez à droite devant la poste.",
+      "voice": "DISPATCHER",
+      "durationMs": 2952
+    },
+    "link.ensuite.turn.right.devant.gas_station": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.gas_station.mp3",
+      "text": "Ensuite, tournez à droite devant la station-service.",
+      "voice": "DISPATCHER",
+      "durationMs": 3265
+    },
+    "link.ensuite.turn.right.devant.cafe": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.cafe.mp3",
+      "text": "Ensuite, tournez à droite devant le café.",
+      "voice": "DISPATCHER",
+      "durationMs": 2612
+    },
+    "link.ensuite.turn.right.devant.shopping_centre": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.shopping_centre.mp3",
+      "text": "Ensuite, tournez à droite devant le centre commercial.",
+      "voice": "DISPATCHER",
+      "durationMs": 3553
+    },
+    "link.ensuite.turn.right.devant.cinema": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.cinema.mp3",
+      "text": "Ensuite, tournez à droite devant le cinéma.",
+      "voice": "DISPATCHER",
+      "durationMs": 2769
+    },
+    "link.ensuite.turn.right.devant.police_station": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.police_station.mp3",
+      "text": "Ensuite, tournez à droite devant le commissariat de police.",
+      "voice": "DISPATCHER",
+      "durationMs": 3814
+    },
+    "link.ensuite.turn.right.devant.shop": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.shop.mp3",
+      "text": "Ensuite, tournez à droite devant le magasin.",
+      "voice": "DISPATCHER",
+      "durationMs": 3030
+    },
+    "link.ensuite.turn.right.devant.market": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.market.mp3",
+      "text": "Ensuite, tournez à droite devant le marché.",
+      "voice": "DISPATCHER",
+      "durationMs": 2978
+    },
+    "link.ensuite.turn.right.devant.museum": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.museum.mp3",
+      "text": "Ensuite, tournez à droite devant le musée.",
+      "voice": "DISPATCHER",
+      "durationMs": 2952
+    },
+    "link.ensuite.turn.right.devant.park": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.park.mp3",
+      "text": "Ensuite, tournez à droite devant le parc.",
+      "voice": "DISPATCHER",
+      "durationMs": 2978
+    },
+    "link.ensuite.turn.right.devant.car_park": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.car_park.mp3",
+      "text": "Ensuite, tournez à droite devant le parking.",
+      "voice": "DISPATCHER",
+      "durationMs": 2821
+    },
+    "link.ensuite.turn.right.devant.restaurant": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.restaurant.mp3",
+      "text": "Ensuite, tournez à droite devant le restaurant.",
+      "voice": "DISPATCHER",
+      "durationMs": 3030
+    },
+    "link.ensuite.turn.right.devant.stadium": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.stadium.mp3",
+      "text": "Ensuite, tournez à droite devant le stade.",
+      "voice": "DISPATCHER",
+      "durationMs": 2926
+    },
+    "link.ensuite.turn.right.devant.supermarket": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.supermarket.mp3",
+      "text": "Ensuite, tournez à droite devant le supermarché.",
+      "voice": "DISPATCHER",
+      "durationMs": 3213
+    },
+    "link.ensuite.turn.right.devant.theatre": {
+      "file": "dispatcher/link.ensuite.turn.right.devant.theatre.mp3",
+      "text": "Ensuite, tournez à droite devant le théâtre.",
+      "voice": "DISPATCHER",
+      "durationMs": 2952
+    },
+    "link.ensuite.turn.right": {
+      "file": "dispatcher/link.ensuite.turn.right.mp3",
+      "text": "Ensuite, tournez à droite.",
+      "voice": "DISPATCHER",
+      "durationMs": 1881
+    },
+    "link.ensuite.turn.left.devant.school": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.school.mp3",
+      "text": "Ensuite, tournez à gauche devant l'école.",
+      "voice": "DISPATCHER",
+      "durationMs": 2638
+    },
+    "link.ensuite.turn.left.devant.hospital": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.hospital.mp3",
+      "text": "Ensuite, tournez à gauche devant l'hôpital.",
+      "voice": "DISPATCHER",
+      "durationMs": 2821
+    },
+    "link.ensuite.turn.left.devant.hotel": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.hotel.mp3",
+      "text": "Ensuite, tournez à gauche devant l'hôtel.",
+      "voice": "DISPATCHER",
+      "durationMs": 2664
+    },
+    "link.ensuite.turn.left.devant.bank": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.bank.mp3",
+      "text": "Ensuite, tournez à gauche devant la banque.",
+      "voice": "DISPATCHER",
+      "durationMs": 2873
+    },
+    "link.ensuite.turn.left.devant.library": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.library.mp3",
+      "text": "Ensuite, tournez à gauche devant la bibliothèque.",
+      "voice": "DISPATCHER",
+      "durationMs": 3082
+    },
+    "link.ensuite.turn.left.devant.bakery": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.bakery.mp3",
+      "text": "Ensuite, tournez à gauche devant la boulangerie.",
+      "voice": "DISPATCHER",
+      "durationMs": 3161
+    },
+    "link.ensuite.turn.left.devant.bus_station": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.bus_station.mp3",
+      "text": "Ensuite, tournez à gauche devant la gare routière.",
+      "voice": "DISPATCHER",
+      "durationMs": 3109
+    },
+    "link.ensuite.turn.left.devant.train_station": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.train_station.mp3",
+      "text": "Ensuite, tournez à gauche devant la gare.",
+      "voice": "DISPATCHER",
+      "durationMs": 2586
+    },
+    "link.ensuite.turn.left.devant.bookshop": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.bookshop.mp3",
+      "text": "Ensuite, tournez à gauche devant la librairie.",
+      "voice": "DISPATCHER",
+      "durationMs": 2978
+    },
+    "link.ensuite.turn.left.devant.town_hall": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.town_hall.mp3",
+      "text": "Ensuite, tournez à gauche devant la mairie.",
+      "voice": "DISPATCHER",
+      "durationMs": 2560
+    },
+    "link.ensuite.turn.left.devant.pharmacy": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.pharmacy.mp3",
+      "text": "Ensuite, tournez à gauche devant la pharmacie.",
+      "voice": "DISPATCHER",
+      "durationMs": 2795
+    },
+    "link.ensuite.turn.left.devant.swimming_pool": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.swimming_pool.mp3",
+      "text": "Ensuite, tournez à gauche devant la piscine.",
+      "voice": "DISPATCHER",
+      "durationMs": 2926
+    },
+    "link.ensuite.turn.left.devant.square": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.square.mp3",
+      "text": "Ensuite, tournez à gauche devant la place.",
+      "voice": "DISPATCHER",
+      "durationMs": 2691
+    },
+    "link.ensuite.turn.left.devant.beach": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.beach.mp3",
+      "text": "Ensuite, tournez à gauche devant la plage.",
+      "voice": "DISPATCHER",
+      "durationMs": 2821
+    },
+    "link.ensuite.turn.left.devant.post_office": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.post_office.mp3",
+      "text": "Ensuite, tournez à gauche devant la poste.",
+      "voice": "DISPATCHER",
+      "durationMs": 3056
+    },
+    "link.ensuite.turn.left.devant.gas_station": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.gas_station.mp3",
+      "text": "Ensuite, tournez à gauche devant la station-service.",
+      "voice": "DISPATCHER",
+      "durationMs": 3579
+    },
+    "link.ensuite.turn.left.devant.cafe": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.cafe.mp3",
+      "text": "Ensuite, tournez à gauche devant le café.",
+      "voice": "DISPATCHER",
+      "durationMs": 2691
+    },
+    "link.ensuite.turn.left.devant.shopping_centre": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.shopping_centre.mp3",
+      "text": "Ensuite, tournez à gauche devant le centre commercial.",
+      "voice": "DISPATCHER",
+      "durationMs": 3291
+    },
+    "link.ensuite.turn.left.devant.cinema": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.cinema.mp3",
+      "text": "Ensuite, tournez à gauche devant le cinéma.",
+      "voice": "DISPATCHER",
+      "durationMs": 2691
+    },
+    "link.ensuite.turn.left.devant.police_station": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.police_station.mp3",
+      "text": "Ensuite, tournez à gauche devant le commissariat de police.",
+      "voice": "DISPATCHER",
+      "durationMs": 3422
+    },
+    "link.ensuite.turn.left.devant.shop": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.shop.mp3",
+      "text": "Ensuite, tournez à gauche devant le magasin.",
+      "voice": "DISPATCHER",
+      "durationMs": 2743
+    },
+    "link.ensuite.turn.left.devant.market": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.market.mp3",
+      "text": "Ensuite, tournez à gauche devant le marché.",
+      "voice": "DISPATCHER",
+      "durationMs": 2743
+    },
+    "link.ensuite.turn.left.devant.museum": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.museum.mp3",
+      "text": "Ensuite, tournez à gauche devant le musée.",
+      "voice": "DISPATCHER",
+      "durationMs": 2691
+    },
+    "link.ensuite.turn.left.devant.park": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.park.mp3",
+      "text": "Ensuite, tournez à gauche devant le parc.",
+      "voice": "DISPATCHER",
+      "durationMs": 2691
+    },
+    "link.ensuite.turn.left.devant.car_park": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.car_park.mp3",
+      "text": "Ensuite, tournez à gauche devant le parking.",
+      "voice": "DISPATCHER",
+      "durationMs": 2873
+    },
+    "link.ensuite.turn.left.devant.restaurant": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.restaurant.mp3",
+      "text": "Ensuite, tournez à gauche devant le restaurant.",
+      "voice": "DISPATCHER",
+      "durationMs": 2821
+    },
+    "link.ensuite.turn.left.devant.stadium": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.stadium.mp3",
+      "text": "Ensuite, tournez à gauche devant le stade.",
+      "voice": "DISPATCHER",
+      "durationMs": 2664
+    },
+    "link.ensuite.turn.left.devant.supermarket": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.supermarket.mp3",
+      "text": "Ensuite, tournez à gauche devant le supermarché.",
+      "voice": "DISPATCHER",
+      "durationMs": 2978
+    },
+    "link.ensuite.turn.left.devant.theatre": {
+      "file": "dispatcher/link.ensuite.turn.left.devant.theatre.mp3",
+      "text": "Ensuite, tournez à gauche devant le théâtre.",
+      "voice": "DISPATCHER",
+      "durationMs": 2743
+    },
+    "link.ensuite.turn.left": {
+      "file": "dispatcher/link.ensuite.turn.left.mp3",
+      "text": "Ensuite, tournez à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 1985
     },
     "seq.street.right.deuxieme+puis+street.right.deuxieme": {
       "file": "dispatcher/seq.street.right.deuxieme+puis+street.right.deuxieme.mp3",
       "text": "Prenez la deuxième rue à droite, puis prenez la deuxième rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4859
+      "durationMs": 4806
     },
     "seq.street.right.deuxieme+puis+street.left.deuxieme": {
       "file": "dispatcher/seq.street.right.deuxieme+puis+street.left.deuxieme.mp3",
       "text": "Prenez la deuxième rue à droite, puis prenez la deuxième rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4545
+      "durationMs": 4650
     },
     "seq.street.right.deuxieme+puis+street.right.premiere": {
       "file": "dispatcher/seq.street.right.deuxieme+puis+street.right.premiere.mp3",
       "text": "Prenez la deuxième rue à droite, puis prenez la première rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4545
+      "durationMs": 4597
     },
     "seq.street.right.deuxieme+puis+street.left.premiere": {
       "file": "dispatcher/seq.street.right.deuxieme+puis+street.left.premiere.mp3",
       "text": "Prenez la deuxième rue à droite, puis prenez la première rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4624
+      "durationMs": 4780
     },
     "seq.street.right.deuxieme+puis+street.right.prochaine": {
       "file": "dispatcher/seq.street.right.deuxieme+puis+street.right.prochaine.mp3",
       "text": "Prenez la deuxième rue à droite, puis prenez la prochaine rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4702
+      "durationMs": 4571
     },
     "seq.street.right.deuxieme+puis+street.left.prochaine": {
       "file": "dispatcher/seq.street.right.deuxieme+puis+street.left.prochaine.mp3",
       "text": "Prenez la deuxième rue à droite, puis prenez la prochaine rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4389
+      "durationMs": 4676
+    },
+    "seq.street.right.deuxieme+puis+street.right.troisieme": {
+      "file": "dispatcher/seq.street.right.deuxieme+puis+street.right.troisieme.mp3",
+      "text": "Prenez la deuxième rue à droite, puis prenez la troisième rue à droite.",
+      "voice": "DISPATCHER",
+      "durationMs": 4519
+    },
+    "seq.street.right.deuxieme+puis+street.left.troisieme": {
+      "file": "dispatcher/seq.street.right.deuxieme+puis+street.left.troisieme.mp3",
+      "text": "Prenez la deuxième rue à droite, puis prenez la troisième rue à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 4597
     },
     "seq.street.right.deuxieme+puis+turn.right": {
       "file": "dispatcher/seq.street.right.deuxieme+puis+turn.right.mp3",
@@ -580,475 +1870,547 @@
       "file": "dispatcher/seq.street.right.deuxieme+puis+turn.left.mp3",
       "text": "Prenez la deuxième rue à droite, puis tournez à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 3500
+      "durationMs": 3579
     },
     "seq.street.right.deuxieme+puis+roundabout.deuxieme": {
       "file": "dispatcher/seq.street.right.deuxieme+puis+roundabout.deuxieme.mp3",
       "text": "Prenez la deuxième rue à droite, puis, au rond-point, prenez la deuxième sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 5277
+      "durationMs": 5616
     },
     "seq.street.right.deuxieme+puis+roundabout.premiere": {
       "file": "dispatcher/seq.street.right.deuxieme+puis+roundabout.premiere.mp3",
       "text": "Prenez la deuxième rue à droite, puis, au rond-point, prenez la première sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 5094
+      "durationMs": 5486
     },
     "seq.street.right.deuxieme+puis+roundabout.troisieme": {
       "file": "dispatcher/seq.street.right.deuxieme+puis+roundabout.troisieme.mp3",
       "text": "Prenez la deuxième rue à droite, puis, au rond-point, prenez la troisième sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 5172
+      "durationMs": 5590
     },
     "dir.street.right.deuxieme": {
       "file": "dispatcher/dir.street.right.deuxieme.mp3",
       "text": "Prenez la deuxième rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 2299
+      "durationMs": 2116
     },
     "seq.street.left.deuxieme+puis+street.right.deuxieme": {
       "file": "dispatcher/seq.street.left.deuxieme+puis+street.right.deuxieme.mp3",
       "text": "Prenez la deuxième rue à gauche, puis prenez la deuxième rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4467
+      "durationMs": 4676
     },
     "seq.street.left.deuxieme+puis+street.left.deuxieme": {
       "file": "dispatcher/seq.street.left.deuxieme+puis+street.left.deuxieme.mp3",
       "text": "Prenez la deuxième rue à gauche, puis prenez la deuxième rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4859
+      "durationMs": 4780
     },
     "seq.street.left.deuxieme+puis+street.right.premiere": {
       "file": "dispatcher/seq.street.left.deuxieme+puis+street.right.premiere.mp3",
       "text": "Prenez la deuxième rue à gauche, puis prenez la première rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4624
+      "durationMs": 4467
     },
     "seq.street.left.deuxieme+puis+street.left.premiere": {
       "file": "dispatcher/seq.street.left.deuxieme+puis+street.left.premiere.mp3",
       "text": "Prenez la deuxième rue à gauche, puis prenez la première rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4624
+      "durationMs": 4754
     },
     "seq.street.left.deuxieme+puis+street.right.prochaine": {
       "file": "dispatcher/seq.street.left.deuxieme+puis+street.right.prochaine.mp3",
       "text": "Prenez la deuxième rue à gauche, puis prenez la prochaine rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4467
+      "durationMs": 4415
     },
     "seq.street.left.deuxieme+puis+street.left.prochaine": {
       "file": "dispatcher/seq.street.left.deuxieme+puis+street.left.prochaine.mp3",
       "text": "Prenez la deuxième rue à gauche, puis prenez la prochaine rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4859
+      "durationMs": 4728
+    },
+    "seq.street.left.deuxieme+puis+street.right.troisieme": {
+      "file": "dispatcher/seq.street.left.deuxieme+puis+street.right.troisieme.mp3",
+      "text": "Prenez la deuxième rue à gauche, puis prenez la troisième rue à droite.",
+      "voice": "DISPATCHER",
+      "durationMs": 4467
+    },
+    "seq.street.left.deuxieme+puis+street.left.troisieme": {
+      "file": "dispatcher/seq.street.left.deuxieme+puis+street.left.troisieme.mp3",
+      "text": "Prenez la deuxième rue à gauche, puis prenez la troisième rue à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 4780
     },
     "seq.street.left.deuxieme+puis+turn.right": {
       "file": "dispatcher/seq.street.left.deuxieme+puis+turn.right.mp3",
       "text": "Prenez la deuxième rue à gauche, puis tournez à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 3500
+      "durationMs": 3448
     },
     "seq.street.left.deuxieme+puis+turn.left": {
       "file": "dispatcher/seq.street.left.deuxieme+puis+turn.left.mp3",
       "text": "Prenez la deuxième rue à gauche, puis tournez à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 3657
+      "durationMs": 3500
     },
     "seq.street.left.deuxieme+puis+roundabout.deuxieme": {
       "file": "dispatcher/seq.street.left.deuxieme+puis+roundabout.deuxieme.mp3",
       "text": "Prenez la deuxième rue à gauche, puis, au rond-point, prenez la deuxième sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 5172
+      "durationMs": 5642
     },
     "seq.street.left.deuxieme+puis+roundabout.premiere": {
       "file": "dispatcher/seq.street.left.deuxieme+puis+roundabout.premiere.mp3",
       "text": "Prenez la deuxième rue à gauche, puis, au rond-point, prenez la première sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 5015
+      "durationMs": 5486
     },
     "seq.street.left.deuxieme+puis+roundabout.troisieme": {
       "file": "dispatcher/seq.street.left.deuxieme+puis+roundabout.troisieme.mp3",
       "text": "Prenez la deuxième rue à gauche, puis, au rond-point, prenez la troisième sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 5355
+      "durationMs": 5512
     },
     "dir.street.left.deuxieme": {
       "file": "dispatcher/dir.street.left.deuxieme.mp3",
       "text": "Prenez la deuxième rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 2377
+      "durationMs": 2064
     },
     "seq.street.right.premiere+puis+street.right.deuxieme": {
       "file": "dispatcher/seq.street.right.premiere+puis+street.right.deuxieme.mp3",
       "text": "Prenez la première rue à droite, puis prenez la deuxième rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4389
+      "durationMs": 4362
     },
     "seq.street.right.premiere+puis+street.left.deuxieme": {
       "file": "dispatcher/seq.street.right.premiere+puis+street.left.deuxieme.mp3",
       "text": "Prenez la première rue à droite, puis prenez la deuxième rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4624
+      "durationMs": 4467
     },
     "seq.street.right.premiere+puis+street.right.premiere": {
       "file": "dispatcher/seq.street.right.premiere+puis+street.right.premiere.mp3",
       "text": "Prenez la première rue à droite, puis prenez la première rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4780
+      "durationMs": 4389
     },
     "seq.street.right.premiere+puis+street.left.premiere": {
       "file": "dispatcher/seq.street.right.premiere+puis+street.left.premiere.mp3",
       "text": "Prenez la première rue à droite, puis prenez la première rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4467
+      "durationMs": 4441
     },
     "seq.street.right.premiere+puis+street.right.prochaine": {
       "file": "dispatcher/seq.street.right.premiere+puis+street.right.prochaine.mp3",
       "text": "Prenez la première rue à droite, puis prenez la prochaine rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4467
+      "durationMs": 4389
     },
     "seq.street.right.premiere+puis+street.left.prochaine": {
       "file": "dispatcher/seq.street.right.premiere+puis+street.left.prochaine.mp3",
       "text": "Prenez la première rue à droite, puis prenez la prochaine rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4624
+      "durationMs": 4362
+    },
+    "seq.street.right.premiere+puis+street.right.troisieme": {
+      "file": "dispatcher/seq.street.right.premiere+puis+street.right.troisieme.mp3",
+      "text": "Prenez la première rue à droite, puis prenez la troisième rue à droite.",
+      "voice": "DISPATCHER",
+      "durationMs": 4963
+    },
+    "seq.street.right.premiere+puis+street.left.troisieme": {
+      "file": "dispatcher/seq.street.right.premiere+puis+street.left.troisieme.mp3",
+      "text": "Prenez la première rue à droite, puis prenez la troisième rue à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 4441
     },
     "seq.street.right.premiere+puis+turn.right": {
       "file": "dispatcher/seq.street.right.premiere+puis+turn.right.mp3",
       "text": "Prenez la première rue à droite, puis tournez à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 3657
+      "durationMs": 3500
     },
     "seq.street.right.premiere+puis+turn.left": {
       "file": "dispatcher/seq.street.right.premiere+puis+turn.left.mp3",
       "text": "Prenez la première rue à droite, puis tournez à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 3657
+      "durationMs": 3709
     },
     "seq.street.right.premiere+puis+roundabout.deuxieme": {
       "file": "dispatcher/seq.street.right.premiere+puis+roundabout.deuxieme.mp3",
       "text": "Prenez la première rue à droite, puis, au rond-point, prenez la deuxième sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 5172
+      "durationMs": 5198
     },
     "seq.street.right.premiere+puis+roundabout.premiere": {
       "file": "dispatcher/seq.street.right.premiere+puis+roundabout.premiere.mp3",
       "text": "Prenez la première rue à droite, puis, au rond-point, prenez la première sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 5277
+      "durationMs": 5068
     },
     "seq.street.right.premiere+puis+roundabout.troisieme": {
       "file": "dispatcher/seq.street.right.premiere+puis+roundabout.troisieme.mp3",
       "text": "Prenez la première rue à droite, puis, au rond-point, prenez la troisième sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 5172
+      "durationMs": 5564
     },
     "dir.street.right.premiere": {
       "file": "dispatcher/dir.street.right.premiere.mp3",
       "text": "Prenez la première rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 2299
+      "durationMs": 2142
     },
     "seq.street.left.premiere+puis+street.right.deuxieme": {
       "file": "dispatcher/seq.street.left.premiere+puis+street.right.deuxieme.mp3",
       "text": "Prenez la première rue à gauche, puis prenez la deuxième rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4389
+      "durationMs": 4232
     },
     "seq.street.left.premiere+puis+street.left.deuxieme": {
       "file": "dispatcher/seq.street.left.premiere+puis+street.left.deuxieme.mp3",
       "text": "Prenez la première rue à gauche, puis prenez la deuxième rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4624
+      "durationMs": 4336
     },
     "seq.street.left.premiere+puis+street.right.premiere": {
       "file": "dispatcher/seq.street.left.premiere+puis+street.right.premiere.mp3",
       "text": "Prenez la première rue à gauche, puis prenez la première rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4467
+      "durationMs": 4232
     },
     "seq.street.left.premiere+puis+street.left.premiere": {
       "file": "dispatcher/seq.street.left.premiere+puis+street.left.premiere.mp3",
       "text": "Prenez la première rue à gauche, puis prenez la première rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4780
+      "durationMs": 4702
     },
     "seq.street.left.premiere+puis+street.right.prochaine": {
       "file": "dispatcher/seq.street.left.premiere+puis+street.right.prochaine.mp3",
       "text": "Prenez la première rue à gauche, puis prenez la prochaine rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4545
+      "durationMs": 4206
     },
     "seq.street.left.premiere+puis+street.left.prochaine": {
       "file": "dispatcher/seq.street.left.premiere+puis+street.left.prochaine.mp3",
       "text": "Prenez la première rue à gauche, puis prenez la prochaine rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4624
+      "durationMs": 4284
+    },
+    "seq.street.left.premiere+puis+street.right.troisieme": {
+      "file": "dispatcher/seq.street.left.premiere+puis+street.right.troisieme.mp3",
+      "text": "Prenez la première rue à gauche, puis prenez la troisième rue à droite.",
+      "voice": "DISPATCHER",
+      "durationMs": 4258
+    },
+    "seq.street.left.premiere+puis+street.left.troisieme": {
+      "file": "dispatcher/seq.street.left.premiere+puis+street.left.troisieme.mp3",
+      "text": "Prenez la première rue à gauche, puis prenez la troisième rue à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 4362
     },
     "seq.street.left.premiere+puis+turn.right": {
       "file": "dispatcher/seq.street.left.premiere+puis+turn.right.mp3",
       "text": "Prenez la première rue à gauche, puis tournez à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 3500
+      "durationMs": 3709
     },
     "seq.street.left.premiere+puis+turn.left": {
       "file": "dispatcher/seq.street.left.premiere+puis+turn.left.mp3",
       "text": "Prenez la première rue à gauche, puis tournez à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 3657
+      "durationMs": 3474
     },
     "seq.street.left.premiere+puis+roundabout.deuxieme": {
       "file": "dispatcher/seq.street.left.premiere+puis+roundabout.deuxieme.mp3",
       "text": "Prenez la première rue à gauche, puis, au rond-point, prenez la deuxième sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 5172
+      "durationMs": 5120
     },
     "seq.street.left.premiere+puis+roundabout.premiere": {
       "file": "dispatcher/seq.street.left.premiere+puis+roundabout.premiere.mp3",
       "text": "Prenez la première rue à gauche, puis, au rond-point, prenez la première sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 5015
+      "durationMs": 4937
     },
     "seq.street.left.premiere+puis+roundabout.troisieme": {
       "file": "dispatcher/seq.street.left.premiere+puis+roundabout.troisieme.mp3",
       "text": "Prenez la première rue à gauche, puis, au rond-point, prenez la troisième sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 4937
+      "durationMs": 5042
     },
     "dir.street.left.premiere": {
       "file": "dispatcher/dir.street.left.premiere.mp3",
       "text": "Prenez la première rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2168
     },
     "seq.street.right.prochaine+puis+street.right.deuxieme": {
       "file": "dispatcher/seq.street.right.prochaine+puis+street.right.deuxieme.mp3",
       "text": "Prenez la prochaine rue à droite, puis prenez la deuxième rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4467
+      "durationMs": 4624
     },
     "seq.street.right.prochaine+puis+street.left.deuxieme": {
       "file": "dispatcher/seq.street.right.prochaine+puis+street.left.deuxieme.mp3",
       "text": "Prenez la prochaine rue à droite, puis prenez la deuxième rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4545
+      "durationMs": 4467
     },
     "seq.street.right.prochaine+puis+street.right.premiere": {
       "file": "dispatcher/seq.street.right.prochaine+puis+street.right.premiere.mp3",
       "text": "Prenez la prochaine rue à droite, puis prenez la première rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4545
+      "durationMs": 4859
     },
     "seq.street.right.prochaine+puis+street.left.premiere": {
       "file": "dispatcher/seq.street.right.prochaine+puis+street.left.premiere.mp3",
       "text": "Prenez la prochaine rue à droite, puis prenez la première rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4624
+      "durationMs": 4362
     },
     "seq.street.right.prochaine+puis+street.right.prochaine": {
       "file": "dispatcher/seq.street.right.prochaine+puis+street.right.prochaine.mp3",
       "text": "Prenez la prochaine rue à droite, puis prenez la prochaine rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4624
+      "durationMs": 4676
     },
     "seq.street.right.prochaine+puis+street.left.prochaine": {
       "file": "dispatcher/seq.street.right.prochaine+puis+street.left.prochaine.mp3",
       "text": "Prenez la prochaine rue à droite, puis prenez la prochaine rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4467
+      "durationMs": 4180
+    },
+    "seq.street.right.prochaine+puis+street.right.troisieme": {
+      "file": "dispatcher/seq.street.right.prochaine+puis+street.right.troisieme.mp3",
+      "text": "Prenez la prochaine rue à droite, puis prenez la troisième rue à droite.",
+      "voice": "DISPATCHER",
+      "durationMs": 4754
+    },
+    "seq.street.right.prochaine+puis+street.left.troisieme": {
+      "file": "dispatcher/seq.street.right.prochaine+puis+street.left.troisieme.mp3",
+      "text": "Prenez la prochaine rue à droite, puis prenez la troisième rue à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 4545
     },
     "seq.street.right.prochaine+puis+turn.right": {
       "file": "dispatcher/seq.street.right.prochaine+puis+turn.right.mp3",
       "text": "Prenez la prochaine rue à droite, puis tournez à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 3579
+      "durationMs": 3735
     },
     "seq.street.right.prochaine+puis+turn.left": {
       "file": "dispatcher/seq.street.right.prochaine+puis+turn.left.mp3",
       "text": "Prenez la prochaine rue à droite, puis tournez à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 3579
+      "durationMs": 3814
     },
     "seq.street.right.prochaine+puis+roundabout.deuxieme": {
       "file": "dispatcher/seq.street.right.prochaine+puis+roundabout.deuxieme.mp3",
       "text": "Prenez la prochaine rue à droite, puis, au rond-point, prenez la deuxième sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 5277
+      "durationMs": 4989
     },
     "seq.street.right.prochaine+puis+roundabout.premiere": {
       "file": "dispatcher/seq.street.right.prochaine+puis+roundabout.premiere.mp3",
       "text": "Prenez la prochaine rue à droite, puis, au rond-point, prenez la première sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 5094
+      "durationMs": 4989
     },
     "seq.street.right.prochaine+puis+roundabout.troisieme": {
       "file": "dispatcher/seq.street.right.prochaine+puis+roundabout.troisieme.mp3",
       "text": "Prenez la prochaine rue à droite, puis, au rond-point, prenez la troisième sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 5094
+      "durationMs": 5068
     },
     "dir.street.right.prochaine": {
       "file": "dispatcher/dir.street.right.prochaine.mp3",
       "text": "Prenez la prochaine rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 2299
+      "durationMs": 2064
     },
     "seq.street.left.prochaine+puis+street.right.deuxieme": {
       "file": "dispatcher/seq.street.left.prochaine+puis+street.right.deuxieme.mp3",
       "text": "Prenez la prochaine rue à gauche, puis prenez la deuxième rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4624
+      "durationMs": 4180
     },
     "seq.street.left.prochaine+puis+street.left.deuxieme": {
       "file": "dispatcher/seq.street.left.prochaine+puis+street.left.deuxieme.mp3",
       "text": "Prenez la prochaine rue à gauche, puis prenez la deuxième rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4624
+      "durationMs": 4258
     },
     "seq.street.left.prochaine+puis+street.right.premiere": {
       "file": "dispatcher/seq.street.left.prochaine+puis+street.right.premiere.mp3",
       "text": "Prenez la prochaine rue à gauche, puis prenez la première rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4624
+      "durationMs": 4806
     },
     "seq.street.left.prochaine+puis+street.left.premiere": {
       "file": "dispatcher/seq.street.left.prochaine+puis+street.left.premiere.mp3",
       "text": "Prenez la prochaine rue à gauche, puis prenez la première rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4859
+      "durationMs": 4284
     },
     "seq.street.left.prochaine+puis+street.right.prochaine": {
       "file": "dispatcher/seq.street.left.prochaine+puis+street.right.prochaine.mp3",
       "text": "Prenez la prochaine rue à gauche, puis prenez la prochaine rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4702
+      "durationMs": 4780
     },
     "seq.street.left.prochaine+puis+street.left.prochaine": {
       "file": "dispatcher/seq.street.left.prochaine+puis+street.left.prochaine.mp3",
       "text": "Prenez la prochaine rue à gauche, puis prenez la prochaine rue à gauche.",
       "voice": "DISPATCHER",
+      "durationMs": 4284
+    },
+    "seq.street.left.prochaine+puis+street.right.troisieme": {
+      "file": "dispatcher/seq.street.left.prochaine+puis+street.right.troisieme.mp3",
+      "text": "Prenez la prochaine rue à gauche, puis prenez la troisième rue à droite.",
+      "voice": "DISPATCHER",
       "durationMs": 4702
+    },
+    "seq.street.left.prochaine+puis+street.left.troisieme": {
+      "file": "dispatcher/seq.street.left.prochaine+puis+street.left.troisieme.mp3",
+      "text": "Prenez la prochaine rue à gauche, puis prenez la troisième rue à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 4310
     },
     "seq.street.left.prochaine+puis+turn.right": {
       "file": "dispatcher/seq.street.left.prochaine+puis+turn.right.mp3",
       "text": "Prenez la prochaine rue à gauche, puis tournez à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 3500
+      "durationMs": 3657
     },
     "seq.street.left.prochaine+puis+turn.left": {
       "file": "dispatcher/seq.street.left.prochaine+puis+turn.left.mp3",
       "text": "Prenez la prochaine rue à gauche, puis tournez à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 3579
+      "durationMs": 3709
     },
     "seq.street.left.prochaine+puis+roundabout.deuxieme": {
       "file": "dispatcher/seq.street.left.prochaine+puis+roundabout.deuxieme.mp3",
       "text": "Prenez la prochaine rue à gauche, puis, au rond-point, prenez la deuxième sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 5172
+      "durationMs": 4963
     },
     "seq.street.left.prochaine+puis+roundabout.premiere": {
       "file": "dispatcher/seq.street.left.prochaine+puis+roundabout.premiere.mp3",
       "text": "Prenez la prochaine rue à gauche, puis, au rond-point, prenez la première sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 5094
+      "durationMs": 4885
     },
     "seq.street.left.prochaine+puis+roundabout.troisieme": {
       "file": "dispatcher/seq.street.left.prochaine+puis+roundabout.troisieme.mp3",
       "text": "Prenez la prochaine rue à gauche, puis, au rond-point, prenez la troisième sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 5094
+      "durationMs": 4963
     },
     "dir.street.left.prochaine": {
       "file": "dispatcher/dir.street.left.prochaine.mp3",
       "text": "Prenez la prochaine rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 2299
+      "durationMs": 2612
     },
     "seq.street.right.troisieme+puis+street.right.deuxieme": {
       "file": "dispatcher/seq.street.right.troisieme+puis+street.right.deuxieme.mp3",
       "text": "Prenez la troisième rue à droite, puis prenez la deuxième rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4702
+      "durationMs": 4676
     },
     "seq.street.right.troisieme+puis+street.left.deuxieme": {
       "file": "dispatcher/seq.street.right.troisieme+puis+street.left.deuxieme.mp3",
       "text": "Prenez la troisième rue à droite, puis prenez la deuxième rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4545
+      "durationMs": 4493
     },
     "seq.street.right.troisieme+puis+street.right.premiere": {
       "file": "dispatcher/seq.street.right.troisieme+puis+street.right.premiere.mp3",
       "text": "Prenez la troisième rue à droite, puis prenez la première rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4545
+      "durationMs": 4780
     },
     "seq.street.right.troisieme+puis+street.left.premiere": {
       "file": "dispatcher/seq.street.right.troisieme+puis+street.left.premiere.mp3",
       "text": "Prenez la troisième rue à droite, puis prenez la première rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4624
+      "durationMs": 4441
     },
     "seq.street.right.troisieme+puis+street.right.prochaine": {
       "file": "dispatcher/seq.street.right.troisieme+puis+street.right.prochaine.mp3",
       "text": "Prenez la troisième rue à droite, puis prenez la prochaine rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4624
+      "durationMs": 4597
     },
     "seq.street.right.troisieme+puis+street.left.prochaine": {
       "file": "dispatcher/seq.street.right.troisieme+puis+street.left.prochaine.mp3",
       "text": "Prenez la troisième rue à droite, puis prenez la prochaine rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4467
+      "durationMs": 4806
+    },
+    "seq.street.right.troisieme+puis+street.right.troisieme": {
+      "file": "dispatcher/seq.street.right.troisieme+puis+street.right.troisieme.mp3",
+      "text": "Prenez la troisième rue à droite, puis prenez la troisième rue à droite.",
+      "voice": "DISPATCHER",
+      "durationMs": 4441
+    },
+    "seq.street.right.troisieme+puis+street.left.troisieme": {
+      "file": "dispatcher/seq.street.right.troisieme+puis+street.left.troisieme.mp3",
+      "text": "Prenez la troisième rue à droite, puis prenez la troisième rue à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 4780
     },
     "seq.street.right.troisieme+puis+turn.right": {
       "file": "dispatcher/seq.street.right.troisieme+puis+turn.right.mp3",
       "text": "Prenez la troisième rue à droite, puis tournez à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 3657
+      "durationMs": 3500
     },
     "seq.street.right.troisieme+puis+turn.left": {
       "file": "dispatcher/seq.street.right.troisieme+puis+turn.left.mp3",
       "text": "Prenez la troisième rue à droite, puis tournez à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 3657
+      "durationMs": 3866
     },
     "seq.street.right.troisieme+puis+roundabout.deuxieme": {
       "file": "dispatcher/seq.street.right.troisieme+puis+roundabout.deuxieme.mp3",
       "text": "Prenez la troisième rue à droite, puis, au rond-point, prenez la deuxième sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 5277
+      "durationMs": 5616
     },
     "seq.street.right.troisieme+puis+roundabout.premiere": {
       "file": "dispatcher/seq.street.right.troisieme+puis+roundabout.premiere.mp3",
       "text": "Prenez la troisième rue à droite, puis, au rond-point, prenez la première sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 5015
+      "durationMs": 5460
     },
     "seq.street.right.troisieme+puis+roundabout.troisieme": {
       "file": "dispatcher/seq.street.right.troisieme+puis+roundabout.troisieme.mp3",
       "text": "Prenez la troisième rue à droite, puis, au rond-point, prenez la troisième sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 5355
+      "durationMs": 5695
     },
     "dir.street.right.troisieme": {
       "file": "dispatcher/dir.street.right.troisieme.mp3",
       "text": "Prenez la troisième rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2142
     },
     "seq.street.left.troisieme+puis+street.right.deuxieme": {
       "file": "dispatcher/seq.street.left.troisieme+puis+street.right.deuxieme.mp3",
       "text": "Prenez la troisième rue à gauche, puis prenez la deuxième rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4624
+      "durationMs": 4754
     },
     "seq.street.left.troisieme+puis+street.left.deuxieme": {
       "file": "dispatcher/seq.street.left.troisieme+puis+street.left.deuxieme.mp3",
       "text": "Prenez la troisième rue à gauche, puis prenez la deuxième rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4624
+      "durationMs": 5015
     },
     "seq.street.left.troisieme+puis+street.right.premiere": {
       "file": "dispatcher/seq.street.left.troisieme+puis+street.right.premiere.mp3",
@@ -1060,13 +2422,13 @@
       "file": "dispatcher/seq.street.left.troisieme+puis+street.left.premiere.mp3",
       "text": "Prenez la troisième rue à gauche, puis prenez la première rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 4702
+      "durationMs": 5042
     },
     "seq.street.left.troisieme+puis+street.right.prochaine": {
       "file": "dispatcher/seq.street.left.troisieme+puis+street.right.prochaine.mp3",
       "text": "Prenez la troisième rue à gauche, puis prenez la prochaine rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 4780
+      "durationMs": 4650
     },
     "seq.street.left.troisieme+puis+street.left.prochaine": {
       "file": "dispatcher/seq.street.left.troisieme+puis+street.left.prochaine.mp3",
@@ -1074,59 +2436,71 @@
       "voice": "DISPATCHER",
       "durationMs": 4702
     },
+    "seq.street.left.troisieme+puis+street.right.troisieme": {
+      "file": "dispatcher/seq.street.left.troisieme+puis+street.right.troisieme.mp3",
+      "text": "Prenez la troisième rue à gauche, puis prenez la troisième rue à droite.",
+      "voice": "DISPATCHER",
+      "durationMs": 4754
+    },
+    "seq.street.left.troisieme+puis+street.left.troisieme": {
+      "file": "dispatcher/seq.street.left.troisieme+puis+street.left.troisieme.mp3",
+      "text": "Prenez la troisième rue à gauche, puis prenez la troisième rue à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 4806
+    },
     "seq.street.left.troisieme+puis+turn.right": {
       "file": "dispatcher/seq.street.left.troisieme+puis+turn.right.mp3",
       "text": "Prenez la troisième rue à gauche, puis tournez à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 3579
+      "durationMs": 3997
     },
     "seq.street.left.troisieme+puis+turn.left": {
       "file": "dispatcher/seq.street.left.troisieme+puis+turn.left.mp3",
       "text": "Prenez la troisième rue à gauche, puis tournez à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 3814
+      "durationMs": 4049
     },
     "seq.street.left.troisieme+puis+roundabout.deuxieme": {
       "file": "dispatcher/seq.street.left.troisieme+puis+roundabout.deuxieme.mp3",
       "text": "Prenez la troisième rue à gauche, puis, au rond-point, prenez la deuxième sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 5172
+      "durationMs": 5721
     },
     "seq.street.left.troisieme+puis+roundabout.premiere": {
       "file": "dispatcher/seq.street.left.troisieme+puis+roundabout.premiere.mp3",
       "text": "Prenez la troisième rue à gauche, puis, au rond-point, prenez la première sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 5277
+      "durationMs": 5512
     },
     "seq.street.left.troisieme+puis+roundabout.troisieme": {
       "file": "dispatcher/seq.street.left.troisieme+puis+roundabout.troisieme.mp3",
       "text": "Prenez la troisième rue à gauche, puis, au rond-point, prenez la troisième sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 5172
+      "durationMs": 5564
     },
     "dir.street.left.troisieme": {
       "file": "dispatcher/dir.street.left.troisieme.mp3",
       "text": "Prenez la troisième rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 2455
+      "durationMs": 2403
     },
     "dir.turn.right.apres.bus_stop": {
       "file": "dispatcher/dir.turn.right.apres.bus_stop.mp3",
       "text": "Tournez à droite après l'arrêt de bus.",
       "voice": "DISPATCHER",
-      "durationMs": 2534
+      "durationMs": 2351
     },
     "dir.turn.right.apres.school": {
       "file": "dispatcher/dir.turn.right.apres.school.mp3",
       "text": "Tournez à droite après l'école.",
       "voice": "DISPATCHER",
-      "durationMs": 2142
+      "durationMs": 2168
     },
     "dir.turn.right.apres.hospital": {
       "file": "dispatcher/dir.turn.right.apres.hospital.mp3",
       "text": "Tournez à droite après l'hôpital.",
       "voice": "DISPATCHER",
-      "durationMs": 2377
+      "durationMs": 2534
     },
     "dir.turn.right.apres.bank": {
       "file": "dispatcher/dir.turn.right.apres.bank.mp3",
@@ -1144,55 +2518,55 @@
       "file": "dispatcher/dir.turn.right.apres.bakery.mp3",
       "text": "Tournez à droite après la boulangerie.",
       "voice": "DISPATCHER",
-      "durationMs": 2377
+      "durationMs": 2351
     },
     "dir.turn.right.apres.bus_station": {
       "file": "dispatcher/dir.turn.right.apres.bus_station.mp3",
       "text": "Tournez à droite après la gare routière.",
       "voice": "DISPATCHER",
-      "durationMs": 3030
+      "durationMs": 2873
     },
     "dir.turn.right.apres.bookshop": {
       "file": "dispatcher/dir.turn.right.apres.bookshop.mp3",
       "text": "Tournez à droite après la librairie.",
       "voice": "DISPATCHER",
-      "durationMs": 2377
+      "durationMs": 2560
     },
     "dir.turn.right.apres.town_hall": {
       "file": "dispatcher/dir.turn.right.apres.town_hall.mp3",
       "text": "Tournez à droite après la mairie.",
       "voice": "DISPATCHER",
-      "durationMs": 2377
+      "durationMs": 2037
     },
     "dir.turn.right.apres.pharmacy": {
       "file": "dispatcher/dir.turn.right.apres.pharmacy.mp3",
       "text": "Tournez à droite après la pharmacie.",
       "voice": "DISPATCHER",
-      "durationMs": 2534
+      "durationMs": 2508
     },
     "dir.turn.right.apres.post_office": {
       "file": "dispatcher/dir.turn.right.apres.post_office.mp3",
       "text": "Tournez à droite après la poste.",
       "voice": "DISPATCHER",
-      "durationMs": 2299
+      "durationMs": 2351
     },
     "dir.turn.right.apres.gas_station": {
       "file": "dispatcher/dir.turn.right.apres.gas_station.mp3",
       "text": "Tournez à droite après la station-service.",
       "voice": "DISPATCHER",
-      "durationMs": 2795
+      "durationMs": 2952
     },
     "dir.turn.right.apres.cafe": {
       "file": "dispatcher/dir.turn.right.apres.cafe.mp3",
       "text": "Tournez à droite après le café.",
       "voice": "DISPATCHER",
-      "durationMs": 2064
+      "durationMs": 2142
     },
     "dir.turn.right.apres.shopping_centre": {
       "file": "dispatcher/dir.turn.right.apres.shopping_centre.mp3",
       "text": "Tournez à droite après le centre commercial.",
       "voice": "DISPATCHER",
-      "durationMs": 2952
+      "durationMs": 2769
     },
     "dir.turn.right.apres.police_station": {
       "file": "dispatcher/dir.turn.right.apres.police_station.mp3",
@@ -1204,109 +2578,109 @@
       "file": "dispatcher/dir.turn.right.apres.shop.mp3",
       "text": "Tournez à droite après le magasin.",
       "voice": "DISPATCHER",
-      "durationMs": 2455
+      "durationMs": 2194
     },
     "dir.turn.right.apres.market": {
       "file": "dispatcher/dir.turn.right.apres.market.mp3",
       "text": "Tournez à droite après le marché.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2351
     },
     "dir.turn.right.apres.museum": {
       "file": "dispatcher/dir.turn.right.apres.museum.mp3",
       "text": "Tournez à droite après le musée.",
       "voice": "DISPATCHER",
-      "durationMs": 2377
+      "durationMs": 2142
     },
     "dir.turn.right.apres.car_park": {
       "file": "dispatcher/dir.turn.right.apres.car_park.mp3",
       "text": "Tournez à droite après le parking.",
       "voice": "DISPATCHER",
-      "durationMs": 2377
+      "durationMs": 2273
     },
     "dir.turn.right.apres.restaurant": {
       "file": "dispatcher/dir.turn.right.apres.restaurant.mp3",
       "text": "Tournez à droite après le restaurant.",
       "voice": "DISPATCHER",
-      "durationMs": 2455
+      "durationMs": 2377
     },
     "dir.turn.right.apres.supermarket": {
       "file": "dispatcher/dir.turn.right.apres.supermarket.mp3",
       "text": "Tournez à droite après le supermarché.",
       "voice": "DISPATCHER",
-      "durationMs": 2534
+      "durationMs": 2847
     },
     "dir.turn.right.apres.theatre": {
       "file": "dispatcher/dir.turn.right.apres.theatre.mp3",
       "text": "Tournez à droite après le théâtre.",
       "voice": "DISPATCHER",
-      "durationMs": 2377
+      "durationMs": 2403
     },
     "dir.turn.right.avant.bus_stop": {
       "file": "dispatcher/dir.turn.right.avant.bus_stop.mp3",
       "text": "Tournez à droite avant l'arrêt de bus.",
       "voice": "DISPATCHER",
-      "durationMs": 2612
+      "durationMs": 2299
     },
     "dir.turn.right.avant.hotel": {
       "file": "dispatcher/dir.turn.right.avant.hotel.mp3",
       "text": "Tournez à droite avant l'hôtel.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2246
     },
     "dir.turn.right.avant.bus_station": {
       "file": "dispatcher/dir.turn.right.avant.bus_station.mp3",
       "text": "Tournez à droite avant la gare routière.",
       "voice": "DISPATCHER",
-      "durationMs": 2795
+      "durationMs": 2664
     },
     "dir.turn.right.avant.swimming_pool": {
       "file": "dispatcher/dir.turn.right.avant.swimming_pool.mp3",
       "text": "Tournez à droite avant la piscine.",
       "voice": "DISPATCHER",
-      "durationMs": 2377
+      "durationMs": 2351
     },
     "dir.turn.right.avant.cinema": {
       "file": "dispatcher/dir.turn.right.avant.cinema.mp3",
       "text": "Tournez à droite avant le cinéma.",
       "voice": "DISPATCHER",
-      "durationMs": 2377
+      "durationMs": 2403
     },
     "dir.turn.right.avant.market": {
       "file": "dispatcher/dir.turn.right.avant.market.mp3",
       "text": "Tournez à droite avant le marché.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2116
     },
     "dir.turn.right.avant.car_park": {
       "file": "dispatcher/dir.turn.right.avant.car_park.mp3",
       "text": "Tournez à droite avant le parking.",
       "voice": "DISPATCHER",
-      "durationMs": 2455
+      "durationMs": 2560
     },
     "dir.turn.right.avant.stadium": {
       "file": "dispatcher/dir.turn.right.avant.stadium.mp3",
       "text": "Tournez à droite avant le stade.",
       "voice": "DISPATCHER",
-      "durationMs": 2377
+      "durationMs": 2299
     },
     "dir.turn.right.avant.supermarket": {
       "file": "dispatcher/dir.turn.right.avant.supermarket.mp3",
       "text": "Tournez à droite avant le supermarché.",
       "voice": "DISPATCHER",
-      "durationMs": 2612
+      "durationMs": 2664
     },
     "dir.turn.right.devant.school": {
       "file": "dispatcher/dir.turn.right.devant.school.mp3",
       "text": "Tournez à droite devant l'école.",
       "voice": "DISPATCHER",
-      "durationMs": 2142
+      "durationMs": 2325
     },
     "dir.turn.right.devant.hospital": {
       "file": "dispatcher/dir.turn.right.devant.hospital.mp3",
       "text": "Tournez à droite devant l'hôpital.",
       "voice": "DISPATCHER",
-      "durationMs": 2299
+      "durationMs": 2403
     },
     "dir.turn.right.devant.hotel": {
       "file": "dispatcher/dir.turn.right.devant.hotel.mp3",
@@ -1318,19 +2692,19 @@
       "file": "dispatcher/dir.turn.right.devant.bank.mp3",
       "text": "Tournez à droite devant la banque.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2534
     },
     "dir.turn.right.devant.library": {
       "file": "dispatcher/dir.turn.right.devant.library.mp3",
       "text": "Tournez à droite devant la bibliothèque.",
       "voice": "DISPATCHER",
-      "durationMs": 2717
+      "durationMs": 2508
     },
     "dir.turn.right.devant.bakery": {
       "file": "dispatcher/dir.turn.right.devant.bakery.mp3",
       "text": "Tournez à droite devant la boulangerie.",
       "voice": "DISPATCHER",
-      "durationMs": 2455
+      "durationMs": 2482
     },
     "dir.turn.right.devant.bus_station": {
       "file": "dispatcher/dir.turn.right.devant.bus_station.mp3",
@@ -1342,217 +2716,241 @@
       "file": "dispatcher/dir.turn.right.devant.train_station.mp3",
       "text": "Tournez à droite devant la gare.",
       "voice": "DISPATCHER",
-      "durationMs": 2377
+      "durationMs": 2429
     },
     "dir.turn.right.devant.bookshop": {
       "file": "dispatcher/dir.turn.right.devant.bookshop.mp3",
       "text": "Tournez à droite devant la librairie.",
       "voice": "DISPATCHER",
-      "durationMs": 2455
+      "durationMs": 2429
     },
     "dir.turn.right.devant.town_hall": {
       "file": "dispatcher/dir.turn.right.devant.town_hall.mp3",
       "text": "Tournez à droite devant la mairie.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2273
     },
     "dir.turn.right.devant.pharmacy": {
       "file": "dispatcher/dir.turn.right.devant.pharmacy.mp3",
       "text": "Tournez à droite devant la pharmacie.",
       "voice": "DISPATCHER",
-      "durationMs": 2377
+      "durationMs": 2246
     },
     "dir.turn.right.devant.swimming_pool": {
       "file": "dispatcher/dir.turn.right.devant.swimming_pool.mp3",
       "text": "Tournez à droite devant la piscine.",
       "voice": "DISPATCHER",
-      "durationMs": 2455
+      "durationMs": 2273
     },
     "dir.turn.right.devant.square": {
       "file": "dispatcher/dir.turn.right.devant.square.mp3",
       "text": "Tournez à droite devant la place.",
       "voice": "DISPATCHER",
-      "durationMs": 2299
+      "durationMs": 2482
+    },
+    "dir.turn.right.devant.beach": {
+      "file": "dispatcher/dir.turn.right.devant.beach.mp3",
+      "text": "Tournez à droite devant la plage.",
+      "voice": "DISPATCHER",
+      "durationMs": 2403
     },
     "dir.turn.right.devant.post_office": {
       "file": "dispatcher/dir.turn.right.devant.post_office.mp3",
       "text": "Tournez à droite devant la poste.",
       "voice": "DISPATCHER",
-      "durationMs": 2299
+      "durationMs": 2508
     },
     "dir.turn.right.devant.gas_station": {
       "file": "dispatcher/dir.turn.right.devant.gas_station.mp3",
       "text": "Tournez à droite devant la station-service.",
       "voice": "DISPATCHER",
-      "durationMs": 2795
+      "durationMs": 2847
     },
     "dir.turn.right.devant.cafe": {
       "file": "dispatcher/dir.turn.right.devant.cafe.mp3",
       "text": "Tournez à droite devant le café.",
       "voice": "DISPATCHER",
-      "durationMs": 2142
+      "durationMs": 2273
     },
     "dir.turn.right.devant.shopping_centre": {
       "file": "dispatcher/dir.turn.right.devant.shopping_centre.mp3",
       "text": "Tournez à droite devant le centre commercial.",
       "voice": "DISPATCHER",
-      "durationMs": 2873
+      "durationMs": 2795
     },
     "dir.turn.right.devant.cinema": {
       "file": "dispatcher/dir.turn.right.devant.cinema.mp3",
       "text": "Tournez à droite devant le cinéma.",
       "voice": "DISPATCHER",
-      "durationMs": 2455
+      "durationMs": 2377
     },
     "dir.turn.right.devant.police_station": {
       "file": "dispatcher/dir.turn.right.devant.police_station.mp3",
       "text": "Tournez à droite devant le commissariat de police.",
       "voice": "DISPATCHER",
-      "durationMs": 3030
+      "durationMs": 3135
     },
     "dir.turn.right.devant.shop": {
       "file": "dispatcher/dir.turn.right.devant.shop.mp3",
       "text": "Tournez à droite devant le magasin.",
       "voice": "DISPATCHER",
-      "durationMs": 2299
+      "durationMs": 2508
     },
     "dir.turn.right.devant.market": {
       "file": "dispatcher/dir.turn.right.devant.market.mp3",
       "text": "Tournez à droite devant le marché.",
       "voice": "DISPATCHER",
-      "durationMs": 2377
+      "durationMs": 2534
     },
     "dir.turn.right.devant.museum": {
       "file": "dispatcher/dir.turn.right.devant.museum.mp3",
       "text": "Tournez à droite devant le musée.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2403
     },
     "dir.turn.right.devant.park": {
       "file": "dispatcher/dir.turn.right.devant.park.mp3",
       "text": "Tournez à droite devant le parc.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2273
     },
     "dir.turn.right.devant.car_park": {
       "file": "dispatcher/dir.turn.right.devant.car_park.mp3",
       "text": "Tournez à droite devant le parking.",
       "voice": "DISPATCHER",
-      "durationMs": 2455
+      "durationMs": 2429
     },
     "dir.turn.right.devant.restaurant": {
       "file": "dispatcher/dir.turn.right.devant.restaurant.mp3",
       "text": "Tournez à droite devant le restaurant.",
       "voice": "DISPATCHER",
-      "durationMs": 2455
+      "durationMs": 2534
     },
     "dir.turn.right.devant.stadium": {
       "file": "dispatcher/dir.turn.right.devant.stadium.mp3",
       "text": "Tournez à droite devant le stade.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2403
     },
     "dir.turn.right.devant.supermarket": {
       "file": "dispatcher/dir.turn.right.devant.supermarket.mp3",
       "text": "Tournez à droite devant le supermarché.",
       "voice": "DISPATCHER",
-      "durationMs": 2534
+      "durationMs": 2743
     },
     "dir.turn.right.devant.theatre": {
       "file": "dispatcher/dir.turn.right.devant.theatre.mp3",
       "text": "Tournez à droite devant le théâtre.",
       "voice": "DISPATCHER",
-      "durationMs": 2299
+      "durationMs": 2586
     },
     "seq.turn.right+puis+street.right.deuxieme": {
       "file": "dispatcher/seq.turn.right+puis+street.right.deuxieme.mp3",
       "text": "Tournez à droite, puis prenez la deuxième rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 3579
+      "durationMs": 3526
     },
     "seq.turn.right+puis+street.left.deuxieme": {
       "file": "dispatcher/seq.turn.right+puis+street.left.deuxieme.mp3",
       "text": "Tournez à droite, puis prenez la deuxième rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 3657
+      "durationMs": 3840
     },
     "seq.turn.right+puis+street.right.premiere": {
       "file": "dispatcher/seq.turn.right+puis+street.right.premiere.mp3",
       "text": "Tournez à droite, puis prenez la première rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 3657
+      "durationMs": 3683
     },
     "seq.turn.right+puis+street.left.premiere": {
       "file": "dispatcher/seq.turn.right+puis+street.left.premiere.mp3",
       "text": "Tournez à droite, puis prenez la première rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 3892
+      "durationMs": 3526
     },
     "seq.turn.right+puis+street.right.prochaine": {
       "file": "dispatcher/seq.turn.right+puis+street.right.prochaine.mp3",
       "text": "Tournez à droite, puis prenez la prochaine rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 3579
+      "durationMs": 3526
     },
     "seq.turn.right+puis+street.left.prochaine": {
       "file": "dispatcher/seq.turn.right+puis+street.left.prochaine.mp3",
       "text": "Tournez à droite, puis prenez la prochaine rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 3579
+      "durationMs": 3526
+    },
+    "seq.turn.right+puis+street.right.troisieme": {
+      "file": "dispatcher/seq.turn.right+puis+street.right.troisieme.mp3",
+      "text": "Tournez à droite, puis prenez la troisième rue à droite.",
+      "voice": "DISPATCHER",
+      "durationMs": 3553
+    },
+    "seq.turn.right+puis+street.left.troisieme": {
+      "file": "dispatcher/seq.turn.right+puis+street.left.troisieme.mp3",
+      "text": "Tournez à droite, puis prenez la troisième rue à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 3553
     },
     "seq.turn.right+puis+turn.right": {
       "file": "dispatcher/seq.turn.right+puis+turn.right.mp3",
       "text": "Tournez à droite, puis tournez à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 3265
+      "durationMs": 2638
     },
     "seq.turn.right+puis+turn.left": {
       "file": "dispatcher/seq.turn.right+puis+turn.left.mp3",
       "text": "Tournez à droite, puis tournez à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 3030
+      "durationMs": 2717
     },
     "seq.turn.right+puis+roundabout.deuxieme": {
       "file": "dispatcher/seq.turn.right+puis+roundabout.deuxieme.mp3",
       "text": "Tournez à droite, puis, au rond-point, prenez la deuxième sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 4389
+      "durationMs": 4624
     },
     "seq.turn.right+puis+roundabout.premiere": {
       "file": "dispatcher/seq.turn.right+puis+roundabout.premiere.mp3",
       "text": "Tournez à droite, puis, au rond-point, prenez la première sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 4467
+      "durationMs": 4702
     },
     "seq.turn.right+puis+roundabout.troisieme": {
       "file": "dispatcher/seq.turn.right+puis+roundabout.troisieme.mp3",
       "text": "Tournez à droite, puis, au rond-point, prenez la troisième sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 4467
+      "durationMs": 4806
     },
     "dir.turn.right": {
       "file": "dispatcher/dir.turn.right.mp3",
       "text": "Tournez à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 1593
+      "durationMs": 1411
     },
     "dir.turn.left.apres.bus_stop": {
       "file": "dispatcher/dir.turn.left.apres.bus_stop.mp3",
       "text": "Tournez à gauche après l'arrêt de bus.",
       "voice": "DISPATCHER",
-      "durationMs": 2534
+      "durationMs": 2508
     },
     "dir.turn.left.apres.school": {
       "file": "dispatcher/dir.turn.left.apres.school.mp3",
       "text": "Tournez à gauche après l'école.",
       "voice": "DISPATCHER",
-      "durationMs": 2142
+      "durationMs": 2090
+    },
+    "dir.turn.left.apres.hospital": {
+      "file": "dispatcher/dir.turn.left.apres.hospital.mp3",
+      "text": "Tournez à gauche après l'hôpital.",
+      "voice": "DISPATCHER",
+      "durationMs": 2220
     },
     "dir.turn.left.apres.hotel": {
       "file": "dispatcher/dir.turn.left.apres.hotel.mp3",
       "text": "Tournez à gauche après l'hôtel.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2116
     },
     "dir.turn.left.apres.bank": {
       "file": "dispatcher/dir.turn.left.apres.bank.mp3",
@@ -1564,13 +2962,13 @@
       "file": "dispatcher/dir.turn.left.apres.library.mp3",
       "text": "Tournez à gauche après la bibliothèque.",
       "voice": "DISPATCHER",
-      "durationMs": 2534
+      "durationMs": 2664
     },
     "dir.turn.left.apres.bakery": {
       "file": "dispatcher/dir.turn.left.apres.bakery.mp3",
       "text": "Tournez à gauche après la boulangerie.",
       "voice": "DISPATCHER",
-      "durationMs": 2534
+      "durationMs": 2325
     },
     "dir.turn.left.apres.bus_station": {
       "file": "dispatcher/dir.turn.left.apres.bus_station.mp3",
@@ -1582,31 +2980,31 @@
       "file": "dispatcher/dir.turn.left.apres.bookshop.mp3",
       "text": "Tournez à gauche après la librairie.",
       "voice": "DISPATCHER",
-      "durationMs": 2534
+      "durationMs": 2299
     },
     "dir.turn.left.apres.town_hall": {
       "file": "dispatcher/dir.turn.left.apres.town_hall.mp3",
       "text": "Tournez à gauche après la mairie.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2037
     },
     "dir.turn.left.apres.pharmacy": {
       "file": "dispatcher/dir.turn.left.apres.pharmacy.mp3",
       "text": "Tournez à gauche après la pharmacie.",
       "voice": "DISPATCHER",
-      "durationMs": 2534
+      "durationMs": 2299
     },
     "dir.turn.left.apres.swimming_pool": {
       "file": "dispatcher/dir.turn.left.apres.swimming_pool.mp3",
       "text": "Tournez à gauche après la piscine.",
       "voice": "DISPATCHER",
-      "durationMs": 2455
+      "durationMs": 2220
     },
     "dir.turn.left.apres.post_office": {
       "file": "dispatcher/dir.turn.left.apres.post_office.mp3",
       "text": "Tournez à gauche après la poste.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2194
     },
     "dir.turn.left.apres.gas_station": {
       "file": "dispatcher/dir.turn.left.apres.gas_station.mp3",
@@ -1618,187 +3016,193 @@
       "file": "dispatcher/dir.turn.left.apres.cafe.mp3",
       "text": "Tournez à gauche après le café.",
       "voice": "DISPATCHER",
-      "durationMs": 2377
+      "durationMs": 2220
     },
     "dir.turn.left.apres.shopping_centre": {
       "file": "dispatcher/dir.turn.left.apres.shopping_centre.mp3",
       "text": "Tournez à gauche après le centre commercial.",
       "voice": "DISPATCHER",
-      "durationMs": 3030
+      "durationMs": 2978
     },
     "dir.turn.left.apres.cinema": {
       "file": "dispatcher/dir.turn.left.apres.cinema.mp3",
       "text": "Tournez à gauche après le cinéma.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2299
     },
     "dir.turn.left.apres.police_station": {
       "file": "dispatcher/dir.turn.left.apres.police_station.mp3",
       "text": "Tournez à gauche après le commissariat de police.",
       "voice": "DISPATCHER",
-      "durationMs": 3109
+      "durationMs": 3004
     },
     "dir.turn.left.apres.shop": {
       "file": "dispatcher/dir.turn.left.apres.shop.mp3",
       "text": "Tournez à gauche après le magasin.",
       "voice": "DISPATCHER",
-      "durationMs": 2455
+      "durationMs": 2168
     },
     "dir.turn.left.apres.market": {
       "file": "dispatcher/dir.turn.left.apres.market.mp3",
       "text": "Tournez à gauche après le marché.",
       "voice": "DISPATCHER",
-      "durationMs": 2377
+      "durationMs": 2220
     },
     "dir.turn.left.apres.car_park": {
       "file": "dispatcher/dir.turn.left.apres.car_park.mp3",
       "text": "Tournez à gauche après le parking.",
       "voice": "DISPATCHER",
-      "durationMs": 2455
+      "durationMs": 2299
     },
     "dir.turn.left.apres.restaurant": {
       "file": "dispatcher/dir.turn.left.apres.restaurant.mp3",
       "text": "Tournez à gauche après le restaurant.",
       "voice": "DISPATCHER",
-      "durationMs": 2534
+      "durationMs": 2273
     },
     "dir.turn.left.apres.stadium": {
       "file": "dispatcher/dir.turn.left.apres.stadium.mp3",
       "text": "Tournez à gauche après le stade.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2194
     },
     "dir.turn.left.apres.supermarket": {
       "file": "dispatcher/dir.turn.left.apres.supermarket.mp3",
       "text": "Tournez à gauche après le supermarché.",
       "voice": "DISPATCHER",
-      "durationMs": 2717
+      "durationMs": 2508
     },
     "dir.turn.left.apres.theatre": {
       "file": "dispatcher/dir.turn.left.apres.theatre.mp3",
       "text": "Tournez à gauche après le théâtre.",
       "voice": "DISPATCHER",
-      "durationMs": 2299
+      "durationMs": 2220
     },
     "dir.turn.left.avant.bus_stop": {
       "file": "dispatcher/dir.turn.left.avant.bus_stop.mp3",
       "text": "Tournez à gauche avant l'arrêt de bus.",
       "voice": "DISPATCHER",
-      "durationMs": 2534
+      "durationMs": 2403
     },
     "dir.turn.left.avant.school": {
       "file": "dispatcher/dir.turn.left.avant.school.mp3",
       "text": "Tournez à gauche avant l'école.",
       "voice": "DISPATCHER",
-      "durationMs": 2142
+      "durationMs": 2246
     },
     "dir.turn.left.avant.hospital": {
       "file": "dispatcher/dir.turn.left.avant.hospital.mp3",
       "text": "Tournez à gauche avant l'hôpital.",
       "voice": "DISPATCHER",
-      "durationMs": 2299
+      "durationMs": 2377
     },
     "dir.turn.left.avant.bus_station": {
       "file": "dispatcher/dir.turn.left.avant.bus_station.mp3",
       "text": "Tournez à gauche avant la gare routière.",
       "voice": "DISPATCHER",
-      "durationMs": 2717
+      "durationMs": 2508
     },
     "dir.turn.left.avant.museum": {
       "file": "dispatcher/dir.turn.left.avant.museum.mp3",
       "text": "Tournez à gauche avant le musée.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2168
     },
     "dir.turn.left.avant.car_park": {
       "file": "dispatcher/dir.turn.left.avant.car_park.mp3",
       "text": "Tournez à gauche avant le parking.",
       "voice": "DISPATCHER",
-      "durationMs": 2377
+      "durationMs": 2194
     },
     "dir.turn.left.avant.supermarket": {
       "file": "dispatcher/dir.turn.left.avant.supermarket.mp3",
       "text": "Tournez à gauche avant le supermarché.",
       "voice": "DISPATCHER",
-      "durationMs": 2534
+      "durationMs": 2508
     },
     "dir.turn.left.devant.school": {
       "file": "dispatcher/dir.turn.left.devant.school.mp3",
       "text": "Tournez à gauche devant l'école.",
       "voice": "DISPATCHER",
-      "durationMs": 2299
+      "durationMs": 2246
     },
     "dir.turn.left.devant.hospital": {
       "file": "dispatcher/dir.turn.left.devant.hospital.mp3",
       "text": "Tournez à gauche devant l'hôpital.",
       "voice": "DISPATCHER",
-      "durationMs": 2455
+      "durationMs": 2325
     },
     "dir.turn.left.devant.hotel": {
       "file": "dispatcher/dir.turn.left.devant.hotel.mp3",
       "text": "Tournez à gauche devant l'hôtel.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2273
     },
     "dir.turn.left.devant.bank": {
       "file": "dispatcher/dir.turn.left.devant.bank.mp3",
       "text": "Tournez à gauche devant la banque.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2351
     },
     "dir.turn.left.devant.library": {
       "file": "dispatcher/dir.turn.left.devant.library.mp3",
       "text": "Tournez à gauche devant la bibliothèque.",
       "voice": "DISPATCHER",
-      "durationMs": 2534
+      "durationMs": 2664
     },
     "dir.turn.left.devant.bakery": {
       "file": "dispatcher/dir.turn.left.devant.bakery.mp3",
       "text": "Tournez à gauche devant la boulangerie.",
       "voice": "DISPATCHER",
-      "durationMs": 2534
+      "durationMs": 2429
     },
     "dir.turn.left.devant.bus_station": {
       "file": "dispatcher/dir.turn.left.devant.bus_station.mp3",
       "text": "Tournez à gauche devant la gare routière.",
       "voice": "DISPATCHER",
-      "durationMs": 2873
+      "durationMs": 2821
     },
     "dir.turn.left.devant.train_station": {
       "file": "dispatcher/dir.turn.left.devant.train_station.mp3",
       "text": "Tournez à gauche devant la gare.",
       "voice": "DISPATCHER",
-      "durationMs": 2377
+      "durationMs": 2429
     },
     "dir.turn.left.devant.bookshop": {
       "file": "dispatcher/dir.turn.left.devant.bookshop.mp3",
       "text": "Tournez à gauche devant la librairie.",
       "voice": "DISPATCHER",
-      "durationMs": 2534
+      "durationMs": 2455
     },
     "dir.turn.left.devant.town_hall": {
       "file": "dispatcher/dir.turn.left.devant.town_hall.mp3",
       "text": "Tournez à gauche devant la mairie.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2037
     },
     "dir.turn.left.devant.pharmacy": {
       "file": "dispatcher/dir.turn.left.devant.pharmacy.mp3",
       "text": "Tournez à gauche devant la pharmacie.",
       "voice": "DISPATCHER",
-      "durationMs": 2455
+      "durationMs": 2482
     },
     "dir.turn.left.devant.swimming_pool": {
       "file": "dispatcher/dir.turn.left.devant.swimming_pool.mp3",
       "text": "Tournez à gauche devant la piscine.",
       "voice": "DISPATCHER",
-      "durationMs": 2455
+      "durationMs": 2168
     },
     "dir.turn.left.devant.square": {
       "file": "dispatcher/dir.turn.left.devant.square.mp3",
       "text": "Tournez à gauche devant la place.",
       "voice": "DISPATCHER",
-      "durationMs": 2299
+      "durationMs": 2064
+    },
+    "dir.turn.left.devant.beach": {
+      "file": "dispatcher/dir.turn.left.devant.beach.mp3",
+      "text": "Tournez à gauche devant la plage.",
+      "voice": "DISPATCHER",
+      "durationMs": 2273
     },
     "dir.turn.left.devant.post_office": {
       "file": "dispatcher/dir.turn.left.devant.post_office.mp3",
@@ -1810,19 +3214,19 @@
       "file": "dispatcher/dir.turn.left.devant.gas_station.mp3",
       "text": "Tournez à gauche devant la station-service.",
       "voice": "DISPATCHER",
-      "durationMs": 2795
+      "durationMs": 2873
     },
     "dir.turn.left.devant.cafe": {
       "file": "dispatcher/dir.turn.left.devant.cafe.mp3",
       "text": "Tournez à gauche devant le café.",
       "voice": "DISPATCHER",
-      "durationMs": 2142
+      "durationMs": 2246
     },
     "dir.turn.left.devant.shopping_centre": {
       "file": "dispatcher/dir.turn.left.devant.shopping_centre.mp3",
       "text": "Tournez à gauche devant le centre commercial.",
       "voice": "DISPATCHER",
-      "durationMs": 2873
+      "durationMs": 2900
     },
     "dir.turn.left.devant.cinema": {
       "file": "dispatcher/dir.turn.left.devant.cinema.mp3",
@@ -1834,13 +3238,13 @@
       "file": "dispatcher/dir.turn.left.devant.police_station.mp3",
       "text": "Tournez à gauche devant le commissariat de police.",
       "voice": "DISPATCHER",
-      "durationMs": 3109
+      "durationMs": 3056
     },
     "dir.turn.left.devant.shop": {
       "file": "dispatcher/dir.turn.left.devant.shop.mp3",
       "text": "Tournez à gauche devant le magasin.",
       "voice": "DISPATCHER",
-      "durationMs": 2455
+      "durationMs": 2351
     },
     "dir.turn.left.devant.market": {
       "file": "dispatcher/dir.turn.left.devant.market.mp3",
@@ -1852,13 +3256,13 @@
       "file": "dispatcher/dir.turn.left.devant.museum.mp3",
       "text": "Tournez à gauche devant le musée.",
       "voice": "DISPATCHER",
-      "durationMs": 2377
+      "durationMs": 2299
     },
     "dir.turn.left.devant.park": {
       "file": "dispatcher/dir.turn.left.devant.park.mp3",
       "text": "Tournez à gauche devant le parc.",
       "voice": "DISPATCHER",
-      "durationMs": 2299
+      "durationMs": 2273
     },
     "dir.turn.left.devant.car_park": {
       "file": "dispatcher/dir.turn.left.devant.car_park.mp3",
@@ -1876,103 +3280,205 @@
       "file": "dispatcher/dir.turn.left.devant.stadium.mp3",
       "text": "Tournez à gauche devant le stade.",
       "voice": "DISPATCHER",
-      "durationMs": 2220
+      "durationMs": 2403
     },
     "dir.turn.left.devant.supermarket": {
       "file": "dispatcher/dir.turn.left.devant.supermarket.mp3",
       "text": "Tournez à gauche devant le supermarché.",
       "voice": "DISPATCHER",
-      "durationMs": 2717
+      "durationMs": 2612
     },
     "dir.turn.left.devant.theatre": {
       "file": "dispatcher/dir.turn.left.devant.theatre.mp3",
       "text": "Tournez à gauche devant le théâtre.",
       "voice": "DISPATCHER",
-      "durationMs": 2299
+      "durationMs": 2403
     },
     "seq.turn.left+puis+street.right.deuxieme": {
       "file": "dispatcher/seq.turn.left+puis+street.right.deuxieme.mp3",
       "text": "Tournez à gauche, puis prenez la deuxième rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 3422
+      "durationMs": 3553
     },
     "seq.turn.left+puis+street.left.deuxieme": {
       "file": "dispatcher/seq.turn.left+puis+street.left.deuxieme.mp3",
       "text": "Tournez à gauche, puis prenez la deuxième rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 3735
+      "durationMs": 3553
     },
     "seq.turn.left+puis+street.right.premiere": {
       "file": "dispatcher/seq.turn.left+puis+street.right.premiere.mp3",
       "text": "Tournez à gauche, puis prenez la première rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 3579
+      "durationMs": 3500
     },
     "seq.turn.left+puis+street.left.premiere": {
       "file": "dispatcher/seq.turn.left+puis+street.left.premiere.mp3",
       "text": "Tournez à gauche, puis prenez la première rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 3735
+      "durationMs": 3788
     },
     "seq.turn.left+puis+street.right.prochaine": {
       "file": "dispatcher/seq.turn.left+puis+street.right.prochaine.mp3",
       "text": "Tournez à gauche, puis prenez la prochaine rue à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 3657
+      "durationMs": 3762
     },
     "seq.turn.left+puis+street.left.prochaine": {
       "file": "dispatcher/seq.turn.left+puis+street.left.prochaine.mp3",
       "text": "Tournez à gauche, puis prenez la prochaine rue à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 3735
+      "durationMs": 3579
+    },
+    "seq.turn.left+puis+street.right.troisieme": {
+      "file": "dispatcher/seq.turn.left+puis+street.right.troisieme.mp3",
+      "text": "Tournez à gauche, puis prenez la troisième rue à droite.",
+      "voice": "DISPATCHER",
+      "durationMs": 3840
+    },
+    "seq.turn.left+puis+street.left.troisieme": {
+      "file": "dispatcher/seq.turn.left+puis+street.left.troisieme.mp3",
+      "text": "Tournez à gauche, puis prenez la troisième rue à gauche.",
+      "voice": "DISPATCHER",
+      "durationMs": 3605
     },
     "seq.turn.left+puis+turn.right": {
       "file": "dispatcher/seq.turn.left+puis+turn.right.mp3",
       "text": "Tournez à gauche, puis tournez à droite.",
       "voice": "DISPATCHER",
-      "durationMs": 3030
+      "durationMs": 2717
     },
     "seq.turn.left+puis+turn.left": {
       "file": "dispatcher/seq.turn.left+puis+turn.left.mp3",
       "text": "Tournez à gauche, puis tournez à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 3344
+      "durationMs": 2847
     },
     "seq.turn.left+puis+roundabout.deuxieme": {
       "file": "dispatcher/seq.turn.left+puis+roundabout.deuxieme.mp3",
       "text": "Tournez à gauche, puis, au rond-point, prenez la deuxième sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 4545
+      "durationMs": 4519
     },
     "seq.turn.left+puis+roundabout.premiere": {
       "file": "dispatcher/seq.turn.left+puis+roundabout.premiere.mp3",
       "text": "Tournez à gauche, puis, au rond-point, prenez la première sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 4389
+      "durationMs": 4780
     },
     "seq.turn.left+puis+roundabout.troisieme": {
       "file": "dispatcher/seq.turn.left+puis+roundabout.troisieme.mp3",
       "text": "Tournez à gauche, puis, au rond-point, prenez la troisième sortie.",
       "voice": "DISPATCHER",
-      "durationMs": 4624
+      "durationMs": 4833
     },
     "dir.turn.left": {
       "file": "dispatcher/dir.turn.left.mp3",
       "text": "Tournez à gauche.",
       "voice": "DISPATCHER",
-      "durationMs": 1515
+      "durationMs": 1306
     },
     "dir.wrong_street": {
       "file": "dispatcher/dir.wrong_street.mp3",
       "text": "Ce n'est pas la bonne rue.",
       "voice": "DISPATCHER",
-      "durationMs": 1672
+      "durationMs": 1411
     },
     "dir.u_turn": {
       "file": "dispatcher/dir.u_turn.mp3",
       "text": "Faites demi-tour.",
       "voice": "DISPATCHER",
+      "durationMs": 1254
+    },
+    "event.attention": {
+      "file": "dispatcher/event.attention.mp3",
+      "text": "Attention !",
+      "voice": "DISPATCHER",
+      "durationMs": 1071
+    },
+    "event.get_out": {
+      "file": "dispatcher/event.get_out.mp3",
+      "text": "Descendez de la voiture !",
+      "voice": "DISPATCHER",
+      "durationMs": 1750
+    },
+    "event.on_foot": {
+      "file": "dispatcher/event.on_foot.mp3",
+      "text": "Il est à pied !",
+      "voice": "DISPATCHER",
+      "durationMs": 993
+    },
+    "event.suspect_boards": {
+      "file": "dispatcher/event.suspect_boards.mp3",
+      "text": "Il monte dans une voiture !",
+      "voice": "DISPATCHER",
+      "durationMs": 1933
+    },
+    "event.changed_direction": {
+      "file": "dispatcher/event.changed_direction.mp3",
+      "text": "Le suspect a changé de direction.",
+      "voice": "DISPATCHER",
+      "durationMs": 2194
+    },
+    "event.crashed": {
+      "file": "dispatcher/event.crashed.mp3",
+      "text": "Le suspect a eu un accident !",
+      "voice": "DISPATCHER",
+      "durationMs": 1881
+    },
+    "event.vehicle.taxi": {
+      "file": "dispatcher/event.vehicle.taxi.mp3",
+      "text": "Le suspect est dans un taxi.",
+      "voice": "DISPATCHER",
+      "durationMs": 2064
+    },
+    "event.vehicle.van": {
+      "file": "dispatcher/event.vehicle.van.mp3",
+      "text": "Le suspect est dans une camionnette.",
+      "voice": "DISPATCHER",
+      "durationMs": 2220
+    },
+    "event.vehicle.white": {
+      "file": "dispatcher/event.vehicle.white.mp3",
+      "text": "Le suspect est dans une voiture blanche.",
+      "voice": "DISPATCHER",
+      "durationMs": 2455
+    },
+    "event.vehicle.blue": {
+      "file": "dispatcher/event.vehicle.blue.mp3",
+      "text": "Le suspect est dans une voiture bleue.",
+      "voice": "DISPATCHER",
+      "durationMs": 2403
+    },
+    "event.vehicle.black": {
+      "file": "dispatcher/event.vehicle.black.mp3",
+      "text": "Le suspect est dans une voiture noire.",
+      "voice": "DISPATCHER",
+      "durationMs": 2403
+    },
+    "event.vehicle.green": {
+      "file": "dispatcher/event.vehicle.green.mp3",
+      "text": "Le suspect est dans une voiture verte.",
+      "voice": "DISPATCHER",
+      "durationMs": 2377
+    },
+    "event.suspect_left_car": {
+      "file": "dispatcher/event.suspect_left_car.mp3",
+      "text": "Le suspect est sorti de la voiture.",
+      "voice": "DISPATCHER",
+      "durationMs": 2377
+    },
+    "event.get_in": {
+      "file": "dispatcher/event.get_in.mp3",
+      "text": "Montez dans la voiture !",
+      "voice": "DISPATCHER",
       "durationMs": 1515
+    },
+    "event.lost_signal": {
+      "file": "dispatcher/event.lost_signal.mp3",
+      "text": "Nous avons perdu le signal.",
+      "voice": "DISPATCHER",
+      "durationMs": 1802
     },
     "repeat.calm": {
       "file": "officer/repeat.calm.mp3",
@@ -1992,23 +3498,29 @@
       "voice": "OFFICER",
       "durationMs": 1593
     },
+    "event.go_faster": {
+      "file": "dispatcher/event.go_faster.mp3",
+      "text": "Allez ! Vite !",
+      "voice": "DISPATCHER",
+      "durationMs": 1384
+    },
     "outcome.captured": {
       "file": "dispatcher/outcome.captured.mp3",
       "text": "Le suspect est arrêté !",
       "voice": "DISPATCHER",
-      "durationMs": 1829
-    },
-    "event.moving_away": {
-      "file": "dispatcher/event.moving_away.mp3",
-      "text": "Le suspect s'éloigne.",
-      "voice": "DISPATCHER",
-      "durationMs": 1829
+      "durationMs": 1672
     },
     "outcome.escaped": {
       "file": "dispatcher/outcome.escaped.mp3",
-      "text": "Le suspect s'est échappé.",
+      "text": "Oh non ! Il s'est échappé !",
       "voice": "DISPATCHER",
-      "durationMs": 1907
+      "durationMs": 2325
+    },
+    "event.moving_away": {
+      "file": "dispatcher/event.moving_away.mp3",
+      "text": "Vite ! Le suspect s'éloigne !",
+      "voice": "DISPATCHER",
+      "durationMs": 2351
     }
   }
 }

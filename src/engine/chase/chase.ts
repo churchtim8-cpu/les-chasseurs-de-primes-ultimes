@@ -477,9 +477,10 @@ export class Chase {
     this.suspect.speedFactor = this.suspectSpeedFor(this.suspectStage);
     events.push({ type: 'SUSPECT_MODE', mode: stage.mode });
 
+    const crashed = stage.mode === 'FOOT' && this.scenario.transferCrashes[this.suspectStage - 1];
     const lines: SpokenText[] =
       stage.mode === 'FOOT'
-        ? [TRANSPORT_LINES.SUSPECT_LEFT_CAR, TRANSPORT_LINES.ON_FOOT]
+        ? [...(crashed ? [EVENT_LINES.CRASHED] : []), TRANSPORT_LINES.SUSPECT_LEFT_CAR, TRANSPORT_LINES.ON_FOOT]
         : [TRANSPORT_LINES.SUSPECT_BOARDS, ...vehicleLines(this.scenario.vehicles[this.suspectStage])];
     if (this.player.mode === stage.mode) {
       events.push({ type: 'ANNOUNCE', lines });
@@ -595,7 +596,10 @@ export class Chase {
     this.pending = { mode: 'FOOT', announced: true };
     this.crashHold = true;
     events.push({ type: 'SUSPECT_CRASH' }, { type: 'SUSPECT_MODE', mode: 'FOOT' });
-    events.push({ type: 'ANNOUNCE', lines: [TRANSPORT_LINES.SUSPECT_LEFT_CAR, TRANSPORT_LINES.ON_FOOT, TRANSPORT_LINES.GET_OUT] });
+    events.push({
+      type: 'ANNOUNCE',
+      lines: [EVENT_LINES.CRASHED, TRANSPORT_LINES.SUSPECT_LEFT_CAR, TRANSPORT_LINES.ON_FOOT, TRANSPORT_LINES.GET_OUT],
+    });
     return true;
   }
 
