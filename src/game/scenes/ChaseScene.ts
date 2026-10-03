@@ -324,8 +324,11 @@ export class ChaseScene extends Phaser.Scene {
         case 'WARNING':
           if (event.on) {
             this.hud.showToast('Le suspect s’éloigne !');
-            const call = this.warnings++ % 2 === 0 ? OUTCOME_LINES.WARNING : OUTCOME_LINES.HURRY;
-            void scannerAudio.play([{ audioId: call.audioId, radio: true }]);
+            // Only when the radio is free: a "Vite !" never holds up a direction.
+            if (event.speak) {
+              const call = this.warnings++ % 2 === 0 ? OUTCOME_LINES.WARNING : OUTCOME_LINES.HURRY;
+              void scannerAudio.play([{ audioId: call.audioId, radio: true }]);
+            }
           }
           break;
         case 'CAPTURED':
@@ -349,7 +352,7 @@ export class ChaseScene extends Phaser.Scene {
         }
         case 'ANNOUNCE': {
           const joined = event.after ? events[i - 1]?.type === 'TRANSMISSION' : events[i + 1]?.type === 'TRANSMISSION';
-          if (!joined) this.announce(event.lines);
+          if (!joined) this.announce(event.lines, event.interrupt);
           break;
         }
         case 'SIGHTING':
@@ -386,11 +389,12 @@ export class ChaseScene extends Phaser.Scene {
    * as text unless every line is recorded and the level is audio only; an
    * order also shows which button to press.
    */
-  private announce(lines: SpokenText[]): void {
+  private announce(lines: SpokenText[], interrupt = false): void {
     const difficulty = this.chase.scenario.difficulty;
     const text = lines.map((l) => l.text).join(' ');
     this.hud.showScanner(text, this.showsText(lines) ? Math.max(LANGUAGE_SETTINGS[difficulty].textSeconds, 4) : 0);
-    void scannerAudio.play(lines.map((l) => ({ audioId: l.audioId, radio: true })));
+    const spoken = lines.map((l) => ({ audioId: l.audioId, radio: true }));
+    void (interrupt ? scannerAudio.interrupt(spoken) : scannerAudio.play(spoken));
     this.orderToasts(lines);
     debugState.info.set('scanner', `EVENT: ${lines.map((l) => l.audioId).join(' + ')}`);
   }

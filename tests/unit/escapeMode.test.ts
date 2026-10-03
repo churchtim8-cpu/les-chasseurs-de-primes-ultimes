@@ -31,7 +31,7 @@ function play(seed: string, bot: 'LISTENER' | 'RANDOM', options: ScenarioOptions
   let lastEdge = '';
   let recoveries = 0;
   const said: string[] = [];
-  listener.hear(escape.openingCall());
+  // The bot hears the opening call in full before anything moves, as the game plays it.
   for (let t = 0; t < escape.timeLimit + 5 && escape.status.phase === 'PURSUIT'; t += 0.05) {
     let events;
     if (bot === 'LISTENER') events = listener.step(escape, 0.05);

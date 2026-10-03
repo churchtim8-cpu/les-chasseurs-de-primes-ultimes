@@ -36,11 +36,14 @@
  * directions resume, with the usual correction if the player went wrong.
  */
 
-import { EVENT_LINES, TRANSPORT_LINES } from '../audio/script';
+import { EVENT_LINES, OUTCOME_LINES, TRANSPORT_LINES } from '../audio/script';
+import { callSeconds, speechSeconds } from '../language/timing';
+import { SPEECH } from '../language/settings';
 import { sightingLine, vehicleLine } from '../language/sightings';
 import type { SightingCard } from './sightings';
 import { DIFFICULTY_SETTINGS } from '../difficulty';
-import { describable, type AudioCheck } from '../language/generate';
+import { actionIndices, describable, type AudioCheck } from '../language/generate';
+import { callable, planCalls, type CallContext } from '../language/callPlan';
 import { Navigator, planGuide, type Transmission } from '../language/navigator';
 import { Mover, type MoverStart } from '../movement/mover';
 import { BOARDING_DISTANCE, MOVEMENT } from '../movement/settings';
@@ -49,9 +52,10 @@ import { distance, lerp, type Point } from '../world/geometry';
 import { canTravel, type TownGraph, type TravelMode } from '../world/graph';
 import { roadDistance } from './distance';
 import { followProblem, generateRoute, pathLength, placeOnRoute, turnsOftenEnough } from './route';
-import type { ChaseScenario, ChaseStage, NearCapture } from './scenario';
+import { correctionPoint, stageCallContext, type ChaseScenario, type ChaseStage, type NearCapture } from './scenario';
 import { RepeatCounter, type RepeatResult } from '../audio/repeat';
 import {
+  CALL_ROUTES,
   CALL_TIMING,
   CHASE_SETTINGS,
   CRASH,
@@ -84,7 +88,8 @@ export type EscapeReason = 'TIME' | 'HIDEOUT';
 export type ChaseEvent =
   | { type: 'CAPTURED' }
   | { type: 'ESCAPED'; reason: EscapeReason }
-  | { type: 'WARNING'; on: boolean }
+  /** `speak`: the radio is free for a "Vite !" line (it never holds up a direction). */
+  | { type: 'WARNING'; on: boolean; speak?: boolean }
   | { type: 'SIGHTED'; on: boolean }
   | { type: 'SUSPECT_ARRIVED' }
   /** The police scanner speaks (directions, corrections). */
@@ -93,7 +98,8 @@ export type ChaseEvent =
    * The scanner announces an event or gives an order, such as "Il est à pied !".
    * `after`: spoken straight after the call just before it ("Nous avons perdu le signal.").
    */
-  | { type: 'ANNOUNCE'; lines: SpokenText[]; after?: boolean }
+  /** `interrupt`: urgent news that cuts off whatever the scanner is saying (the directions no longer apply). */
+  | { type: 'ANNOUNCE'; lines: SpokenText[]; after?: boolean; interrupt?: boolean }
   /** A sighting: the chase pauses while the player picks one of `cards` (`seconds` to answer). */
   | { type: 'SIGHTING'; line: SpokenText; cards: SightingCard[]; seconds: number }
   | { type: 'SIGHTING_RESULT'; correct: boolean; answer: number; chosen: number | null }
@@ -136,14 +142,13 @@ export interface ChaseStatus {
   signalLost: boolean;
 }
 
+/** Seconds between two "Vite ! Le suspect s'éloigne !" lines at least. */
+const WARNING_LINE_GAP = 8;
+
 function vehicleLines(vehicle: Vehicle | null | undefined): SpokenText[] {
   return vehicle ? [vehicleLine(vehicle)] : [];
 }
 
-/** Roughly how long a line takes to say (slow, clear French). */
-function speechSeconds(text: string): number {
-  return text ? CALL_TIMING.speechBaseSeconds + text.length / CALL_TIMING.speechCharsPerSecond : 0;
-}
 
 /** The first step of a call: "…, puis …" and "D'abord … Ensuite …" calls go on while the player moves. */
 function firstStep(text: string): string {
@@ -231,6 +236,14 @@ export class Chase {
   private escapeReason?: EscapeReason;
   /** The change of direction is still to come (it is dropped if the player is not on that stage yet). */
   private turnOffPending: boolean;
+  /** When the suspect was seen turning off (the correction may wait until it can be heard in time). */
+  private turnOffSeenAt: number | null = null;
+  /** The route index just after which the change of direction is said (see correctionPoint). */
+  private readonly turnOffCallAt: number | null;
+  /** Held just after a change of transport until the first direction is heard (armed: not said yet). */
+  private changeHold: { armed: boolean; until: number } | null = null;
+  /** When keepGoingAhead may next try to plan a way on. */
+  private nextAheadTry = 0;
   private readonly hasAudio: AudioCheck | undefined;
   private started = false;
   private nextSighting = 0;
@@ -243,8 +256,16 @@ export class Chase {
   private lostSignalPending: boolean;
   /** Elapsed time when the signal was lost, while it is. */
   private lostSince: number | null = null;
-  /** The latest direction: its junction and when it finishes being spoken (elapsed seconds). */
-  private call: { at: string; spokenBy: number } | null = null;
+  /**
+   * When the scanner's radio is next free (elapsed seconds), from every line
+   * the chase has had it say. Directions wait for it, so each is heard from
+   * where it was meant and in time (see Navigator.radioFreeIn).
+   */
+  private radioFreeAt = 0;
+  /** No "Vite !" line before this (elapsed seconds). */
+  private nextWarningLine = 0;
+  /** Events of the current update already counted in `radioFreeAt`. */
+  private radioCounted = 0;
 
   constructor(
     private readonly graph: TownGraph,
@@ -261,6 +282,12 @@ export class Chase {
     this.timeLeft = this.timeLimit;
     this.repeats = new RepeatCounter(DIFFICULTY_SETTINGS[scenario.difficulty].repeat);
     this.turnOffPending = scenario.turnOff !== null;
+    const turnOff = scenario.turnOff;
+    const turnOffStage = turnOff ? scenario.stages[turnOff.stage] : undefined;
+    this.turnOffCallAt =
+      turnOff && turnOffStage
+        ? correctionPoint(graph, turnOffStage.route, turnOff.at, turnOffStage.mode, scenario.difficulty, this.hasAudio)
+        : null;
     this.lostSignalPending = scenario.lostSignal;
     this.stages = scenario.stages.map((st) => ({ ...st, route: [...st.route] }));
     this.destination = scenario.destination;
@@ -318,20 +345,7 @@ export class Chase {
     const route = this.stages[turnOff.stage]!.route;
     const junction = route[turnOff.at] as string;
     const plan = this.suspect.remainingPlan();
-    // Seen turning off: about to reach the junction, or past it.
-    const seen =
-      !plan.includes(junction) ||
-      (plan[0] === junction &&
-        distance(this.suspect.snapshot(), this.graph.node(junction)) <= TURN_OFF.seenWithin[this.suspect.mode]);
-    if (!seen) return;
-    if (this.playerStage !== turnOff.stage || this.pending || this.autoStage !== null) {
-      this.turnOffPending = false;
-      return;
-    }
-    if (!this.clearOfJunctions()) return; // wait until there is time to take the correction in
-    this.turnOffPending = false;
-    events.push({ type: 'ANNOUNCE', lines: [EVENT_LINES.ATTENTION, EVENT_LINES.CHANGED_DIRECTION] });
-    // Still on the shared part of the route: the real route from here. Otherwise a way onto it.
+    // Where the player is on the shared part of the route, if they are on it.
     const here = this.player.location();
     const i = route.findIndex(
       (n, k) =>
@@ -339,10 +353,38 @@ export class Chase {
         here.towards === route[k + 1] &&
         this.graph.edgeBetween(n, route[k + 1] as string)?.id === here.edgeId,
     );
-    const transmissions =
-      i === -1
-        ? this.navigator.redirect(here, plan, this.destination)
-        : this.navigator.redirect(here, plan, this.destination, route.slice(i));
+    // Said just after the last turn both routes share (see correctionPoint), so the new turn is heard in time.
+    const callAt = this.turnOffCallAt;
+    const atCallPoint = callAt !== null && i !== -1 && i >= callAt && this.playerStage === turnOff.stage;
+    // Or once the suspect is seen turning off: about to reach the junction, or past it.
+    const k = plan.indexOf(junction);
+    const seen =
+      k === -1 ||
+      distance(this.suspect.snapshot(), this.graph.node(plan[0] as string)) + pathLength(this.graph, plan.slice(0, k + 1)) <=
+        TURN_OFF.seenWithin[this.suspect.mode];
+    if (!seen && !atCallPoint) return;
+    if (this.playerStage !== turnOff.stage || this.pending || this.autoStage !== null) {
+      this.turnOffPending = false;
+      return;
+    }
+    if (callAt !== null && i !== -1 && i < callAt) return; // the directions up to there are right
+    if (!atCallPoint && !this.clearOfJunctions()) return; // wait until there is time to take the correction in
+    // Wait (a little) until the new directions can be heard before their first turn.
+    const announce = callSeconds([EVENT_LINES.ATTENTION.text, EVENT_LINES.CHANGED_DIRECTION.text]);
+    let navigator = this.nav(events);
+    const onRoute = i !== -1 && navigator.canCallInTime(route.slice(i), here, announce);
+    this.turnOffSeenAt ??= this.elapsed;
+    const waited = this.elapsed - this.turnOffSeenAt;
+    // ...but not past the end of the directions the player is following, nor for ever.
+    const mustSay =
+      waited >= TURN_OFF.maxWaitSeconds || navigator.toGuideEnd(here) < TURN_OFF.guideEndSeconds * navigator.speed;
+    if (!onRoute && !mustSay && !navigator.canRedirectInTime(here, plan, announce)) return;
+    this.turnOffPending = false;
+    events.push({ type: 'ANNOUNCE', lines: [EVENT_LINES.ATTENTION, EVENT_LINES.CHANGED_DIRECTION] });
+    navigator = this.nav(events);
+    const transmissions = onRoute
+      ? navigator.redirect(here, plan, this.destination, route.slice(i))
+      : navigator.redirect(here, plan, this.destination);
     for (const transmission of transmissions) events.push({ type: 'TRANSMISSION', transmission });
   }
 
@@ -386,9 +428,44 @@ export class Chase {
     this.started = true;
     const vehicle = this.scenario.vehicles[0];
     if (vehicle) events.push({ type: 'ANNOUNCE', lines: [vehicleLine(vehicle)] });
+    // Heard in full before anything moves: the first direction needs no hurry, and waits for nothing.
+    this.navigator.firstCallBeforeStart = true;
+    this.navigator.radioFreeIn = 0;
     const transmissions = this.navigator.update(this.player.location(), this.suspect.remainingPlan());
     for (const transmission of transmissions) events.push({ type: 'TRANSMISSION', transmission });
+    this.navigator.firstCallBeforeStart = false; // any later call is timed as usual
+    this.radioCounted = 0;
+    this.hearRadio(events);
+    // The chase starts when the call is over.
+    this.radioFreeAt = 0;
     return events;
+  }
+
+  /** Count the lines in `events` not yet counted into `radioFreeAt` (the radio says them one after another). */
+  private hearRadio(events: readonly ChaseEvent[]): void {
+    for (let i = this.radioCounted; i < events.length; i++) {
+      const e = events[i] as ChaseEvent;
+      let texts: string[] = [];
+      if (e.type === 'TRANSMISSION') texts = e.transmission.instructions.flatMap((ins) => ins.clips.map((c) => c.text));
+      else if (e.type === 'ANNOUNCE') {
+        texts = e.lines.map((l) => l.text);
+        if (e.interrupt) this.radioFreeAt = Math.min(this.radioFreeAt, this.elapsed); // what was being said is cut off
+      }
+      else if (e.type === 'SIGHTING') texts = [e.line.text];
+      // The game says one of these when the suspect pulls away: allow for the longer.
+      else if (e.type === 'WARNING' && e.speak) texts = [OUTCOME_LINES.WARNING.text];
+      if (texts.length > 0) this.radioFreeAt = Math.max(this.elapsed, this.radioFreeAt) + callSeconds(texts);
+    }
+    this.radioCounted = events.length;
+  }
+
+  /** The navigator, told how soon the radio is free and how fast the player is going. */
+  private nav(events: readonly ChaseEvent[]): Navigator {
+    this.hearRadio(events);
+    this.navigator.radioFreeIn = this.radioFreeAt - this.elapsed;
+    const mode = this.player.mode;
+    this.navigator.speed = Math.max(MOVEMENT[mode].cruise, this.player.snapshot().speed);
+    return this.navigator;
   }
 
   /** Where the suspect changes transport at the end of the player's current stage. */
@@ -399,6 +476,13 @@ export class Chase {
 
   /** Advance the chase by `dt` seconds. The caller moves nothing itself. */
   update(dt: number): ChaseEvent[] {
+    this.radioCounted = 0;
+    const events = this.advance(dt);
+    this.hearRadio(events);
+    return events;
+  }
+
+  private advance(dt: number): ChaseEvent[] {
     const events: ChaseEvent[] = [];
     if (this.phase !== 'PURSUIT') return events;
     if (this.check) {
@@ -414,12 +498,11 @@ export class Chase {
       if (vehicle) events.push({ type: 'ANNOUNCE', lines: [vehicleLine(vehicle)] });
     }
 
-    const pace = this.callPace();
-    this.player.callAssist = pace;
-    this.suspect.callAssist = pace;
     this.elapsed += dt;
-    this.timeLeft = Math.max(0, this.timeLeft - dt * pace);
-    this.player.speedFactor = this.playerHeld() ? 0 : 1;
+    // The clock stops while the game holds the police still (waiting for the radio, a skid, a fall).
+    const held = this.playerHeld();
+    if (!held) this.timeLeft = Math.max(0, this.timeLeft - dt);
+    this.player.speedFactor = held ? 0 : 1;
     this.player.update(dt);
     this.suspect.update(dt);
     if (!this.suspectArrived && this.suspect.snapshot().waiting === 'ARRIVED') {
@@ -445,10 +528,10 @@ export class Chase {
         const foot = here.mode === 'FOOT';
         this.navigator.leadDistance = foot ? CALL_TIMING.footLeadSeconds[this.scenario.difficulty] * MOVEMENT.FOOT.cruise : Infinity;
         this.navigator.minLeadDistance = foot ? CALL_TIMING.footMinLeadSeconds * MOVEMENT.FOOT.cruise : 0;
-        const transmissions = this.navigator.update(here, ahead);
+        const transmissions = this.nav(events).update(here, ahead);
         for (const transmission of transmissions) events.push({ type: 'TRANSMISSION', transmission });
-        this.noteCall(transmissions);
         if (this.holdForNextCall && this.turnedRound()) this.waitForCall(transmissions);
+        this.holdForFirstCall(transmissions);
         this.maybeLoseSignal(transmissions, events);
       }
     }
@@ -465,7 +548,16 @@ export class Chase {
     const warning = !lost && this.distance >= s.warningDistance;
     if (warning !== this.warning) {
       this.warning = warning;
-      events.push({ type: 'WARNING', on: warning });
+      // "Vite ! Le suspect s'éloigne !" only when the radio is free, and not again and again.
+      this.hearRadio(events);
+      // ...nor when a direction is due before it would be over: that comes first.
+      const speak =
+        warning &&
+        this.radioFreeAt <= this.elapsed &&
+        this.elapsed >= this.nextWarningLine &&
+        this.nav(events).quietFor(this.player.location()) >= callSeconds([OUTCOME_LINES.WARNING.text]);
+      if (speak) this.nextWarningLine = this.elapsed + WARNING_LINE_GAP;
+      events.push({ type: 'WARNING', on: warning, ...(speak ? { speak } : {}) });
     }
 
     if (this.sprintUntil !== null && this.distance >= this.sprintUntil) {
@@ -505,11 +597,11 @@ export class Chase {
    */
   private keepGoing(events: ChaseEvent[]): void {
     let at = this.suspect.location();
-    let route = this.routeOnwards(at.towards, at.edgeId, at.mode);
+    let route = this.routeOnwards(at.towards, at.edgeId, at.mode, this.stages[this.suspectStage]!.route);
     let turnedRound = false;
     if (!route && this.suspect.uTurn()) {
       at = this.suspect.location();
-      route = this.routeOnwards(at.towards, at.edgeId, at.mode);
+      route = this.routeOnwards(at.towards, at.edgeId, at.mode); // a new start: corrected like a change of direction
       turnedRound = true;
     }
     if (!route) {
@@ -532,19 +624,37 @@ export class Chase {
     const plan = this.suspect.remainingPlan();
     const me = this.suspect.snapshot();
     const left = distance(me, this.graph.node(plan[0] as string)) + pathLength(this.graph, plan);
-    if (left > KEEP_GOING.aheadMetres) return;
+    if (left > KEEP_GOING.aheadMetres[me.mode]) return;
     const end = plan[plan.length - 1] as string;
     const before = plan.length >= 2 ? (plan[plan.length - 2] as string) : this.graph.other(this.graph.edge(me.edgeId), me.towards);
     const lastEdge = this.graph.edgeBetween(before, end);
-    if (!lastEdge) return;
-    const route = this.routeOnwards(end, lastEdge.id, me.mode);
-    if (!route) return; // on arrival, `keepGoing` tries again (turning round if it must)
+    if (!lastEdge || this.elapsed < this.nextAheadTry) return;
+    this.nextAheadTry = this.elapsed + KEEP_GOING.retrySeconds; // planning is costly: not every frame
+    const route = this.routeOnwards(end, lastEdge.id, me.mode, this.stages[this.suspectStage]!.route, true);
+    if (!route) {
+      // Boxed in for now: drive on straight one more block (no turn to call) and plan from there.
+      const straight = exitsAt(this.graph, lastEdge, end, me.mode).find((e) => e.kind === 'STRAIGHT');
+      const next = straight?.step.to;
+      if (!next || this.stages[this.suspectStage]!.route.includes(next)) return; // on arrival, `keepGoing` tries again (turning round if it must)
+      const block = { nodes: [end, next], length: this.graph.edgeLength(straight.step.edge), destination: this.destination };
+      this.suspect.followPlan([...plan, next]);
+      this.goOn(block, false, events);
+      this.nextAheadTry = this.elapsed;
+      return;
+    }
     this.suspect.followPlan([...plan, ...route.nodes.slice(1)]);
     this.goOn(route, false, events);
   }
 
   /** A fresh route on from `from` (not back along `avoidEdge`), away from the police: luck must not catch what listening would. */
-  private routeOnwards(from: string, avoidEdge: string, mode: TravelMode) {
+  private routeOnwards(
+    from: string,
+    avoidEdge: string,
+    mode: TravelMode,
+    before: readonly string[] = [],
+    /** Only ways on whose first turn can be called in time after the route so far. */
+    strict = false,
+  ) {
     const me = this.player.snapshot();
     const clear = this.settings.sightingDistance * KEEP_GOING.clearSightings;
     const away = (nodes: readonly string[]) => {
@@ -554,9 +664,20 @@ export class Chase {
     };
     const length = this.settings.stageLength[mode];
     return (
-      this.escapeRoute(from, avoidEdge, mode, length, away) ??
-      this.escapeRoute(from, avoidEdge, mode, [length[0] / 2, length[1]], away) ??
-      this.escapeRoute(from, avoidEdge, mode, [length[0] / 2, length[1]])
+      this.escapeRoute(from, avoidEdge, mode, length, away, before) ??
+      this.escapeRoute(from, avoidEdge, mode, [length[0] / 2, length[1]], away, before) ??
+      this.escapeRoute(from, avoidEdge, mode, [length[0] / 2, length[1]], undefined, before) ??
+      this.escapeRoute(from, avoidEdge, mode, [length[0] / 6, length[1]], undefined, before) ??
+      (strict ? null : this.looseRouteOnwards(from, avoidEdge, mode, length, before))
+    );
+  }
+
+  /** On arrival with no better way on: better a first turn called a little late than turning round. */
+  private looseRouteOnwards(from: string, avoidEdge: string, mode: TravelMode, length: [number, number], before: readonly string[]) {
+    return (
+      (before.length > 0 ? this.escapeRoute(from, avoidEdge, mode, [length[0] / 2, length[1]]) : null) ??
+      // A short way on still beats turning round into the police (it carries on again at its end).
+      this.escapeRoute(from, avoidEdge, mode, [length[0] / 6, length[1]])
     );
   }
 
@@ -570,8 +691,8 @@ export class Chase {
     // Driving on: the directions already given stand and the next ones follow the longer
     // route. Turned round: that is a change of direction, corrected like any other.
     const transmissions =
-      (turnedRound ? null : this.navigator.extend(here, route.nodes, this.destination)) ??
-      this.navigator.redirect(here, this.suspect.remainingPlan(), this.destination);
+      (turnedRound ? null : this.nav(events).extend(here, route.nodes, this.destination)) ??
+      this.nav(events).redirect(here, this.suspect.remainingPlan(), this.destination);
     if (turnedRound) events.push({ type: 'ANNOUNCE', lines: [EVENT_LINES.ATTENTION, EVENT_LINES.CHANGED_DIRECTION] });
     for (const transmission of transmissions) events.push({ type: 'TRANSMISSION', transmission });
   }
@@ -612,17 +733,40 @@ export class Chase {
     }
     this.pending = { mode: stage.mode, announced: false };
     if (stage.mode === 'CAR') {
-      // A colleague brings the police car to the nearest road.
-      this.parkedCar = nearestRoad(this.graph, this.player.snapshot());
+      // A colleague brings the police car to the road the officer will have reached by the time
+      // "Montez dans la voiture !" has been said: the chase does not stop for the radio.
+      lines.push(TRANSPORT_LINES.GET_IN);
+      this.hearRadio(events);
+      const heard = Math.max(0, this.radioFreeAt - this.elapsed) + callSeconds(lines.map((l) => l.text)) + SPEECH.reactSeconds;
+      const ahead = this.navigator.pointAhead(this.player.location(), heard * MOVEMENT.FOOT.cruise);
+      this.parkedCar = nearestRoad(this.graph, ahead);
       this.carBrought = true;
       this.pending.announced = true;
-      lines.push(TRANSPORT_LINES.GET_IN);
     }
     events.push({ type: 'ANNOUNCE', lines });
   }
 
+  /** Metres of road to where the suspect changed transport, along the directions (Infinity if off them). */
+  private roadToTransfer(): number {
+    const here = this.player.location();
+    if (!this.navigator.track(here)) return Infinity;
+    return this.navigator.distanceTo(here, this.transferNode);
+  }
+
   /** Held still after a dodge or a crash (see `held` and `crashHold`). */
   private playerHeld(): boolean {
+    // The police car pulls up where the suspect left its car, and waits there for the player to get out.
+    if (this.player.mode === 'CAR' && this.pending?.mode === 'FOOT' && this.autoStage === null) {
+      if (this.roadToTransfer() <= TRANSFER.pullUpWithin) return true;
+    }
+    if (this.changeHold) {
+      if (this.elapsed < this.changeHold.until) return true;
+      this.changeHold = null;
+    }
+    // On foot, the officer waits by the police car a colleague has brought ("Montez dans la voiture !").
+    if (this.player.mode === 'FOOT' && this.pending?.mode === 'CAR' && this.carBrought && this.parkedCar) {
+      if (distance(this.player.snapshot(), pointOf(this.graph, this.parkedCar)) <= TRANSFER.waitByCarWithin) return true;
+    }
     if (this.crashHold) {
       if (this.player.mode === 'CAR' && this.pending?.mode === 'FOOT') return true;
       this.crashHold = false;
@@ -673,8 +817,16 @@ export class Chase {
     mode: TravelMode,
     length: [number, number],
     extra: (nodes: readonly string[]) => boolean = () => true,
+    /** The route so far, ending at `from`, when this one carries it on (its turns must be called in time together). */
+    before: readonly string[] = [],
   ): { nodes: string[]; length: number; destination: string } | null {
+    // (reassigned below when it does not end at `from`)
     const { difficulty } = this.scenario;
+    // Every turn can be called in time at full speed (the chase never slows down for the French).
+    const ctx = stageCallContext(mode, difficulty, this.hasAudio);
+    if (before[before.length - 1] !== from) before = [];
+    const lastTurn = before.length > 1 ? Math.max(0, ...actionIndices(this.graph, before, mode)) : 0;
+    const tail = before.slice(lastTurn > 0 ? lastTurn - 1 : Math.max(0, before.length - 2));
     try {
       const route = generateRoute(
         this.graph,
@@ -685,7 +837,12 @@ export class Chase {
           from,
           avoidEdge,
           accept: (nodes) =>
-            turnsOftenEnough(this.graph, nodes, mode) && describable(this.graph, nodes, mode, difficulty) && extra(nodes),
+            turnsOftenEnough(this.graph, nodes, mode) &&
+            describable(this.graph, nodes, mode, difficulty) &&
+            extra(nodes) &&
+            (tail.length > 1 ? carriesOnCallable(this.graph, [...tail, ...nodes.slice(1)], ctx) : callable(this.graph, nodes, ctx)),
+          minTurnGap: CALL_ROUTES.minTurnGap[mode],
+          ...(lastTurn > 0 ? { sinceTurn: pathLength(this.graph, before.slice(lastTurn)) } : {}),
         },
         300,
       );
@@ -722,6 +879,7 @@ export class Chase {
     events.push({
       type: 'ANNOUNCE',
       lines: [EVENT_LINES.CRASHED, TRANSPORT_LINES.SUSPECT_LEFT_CAR, TRANSPORT_LINES.ON_FOOT, TRANSPORT_LINES.GET_OUT],
+      interrupt: true,
     });
     return true;
   }
@@ -765,7 +923,7 @@ export class Chase {
     this.correctionDue = true;
     this.downUntil = this.elapsed + DODGE.downSeconds[at.mode];
     events.push({ type: 'SUSPECT_DODGE', mode: at.mode });
-    events.push({ type: 'ANNOUNCE', lines: [EVENT_LINES.ATTENTION, EVENT_LINES.CHANGED_DIRECTION] });
+    events.push({ type: 'ANNOUNCE', lines: [EVENT_LINES.ATTENTION, EVENT_LINES.CHANGED_DIRECTION], interrupt: true });
     return true;
   }
 
@@ -792,56 +950,39 @@ export class Chase {
       followProblem(this.graph, guide, here.mode) === null &&
       describable(this.graph, guide, here.mode, this.scenario.difficulty);
     const corrections = fair
-      ? this.navigator.redirect(here, plan, this.destination, guide, onto!.uTurn)
-      : this.navigator.redirect(here, plan, this.destination);
+      ? this.nav(events).redirect(here, plan, this.destination, guide, onto!.uTurn)
+      : this.nav(events).redirect(here, plan, this.destination);
     for (const transmission of corrections) events.push({ type: 'TRANSMISSION', transmission });
     const turnRound = corrections.some((t) => t.instructions.some((i) => i.clauses.some((c) => c.action === 'U_TURN')));
-    const heard = speechSeconds(firstStep(corrections[0]?.text ?? '')) + CALL_TIMING.reactSeconds;
+    // The correction waits for anything the radio is still saying.
+    const wait = Math.max(0, this.radioFreeAt - this.elapsed);
+    const heard = wait + speechSeconds(firstStep(corrections[0]?.text ?? '')) + SPEECH.reactSeconds;
     this.holdForNextCall = turnRound;
     this.held = {
       edgeId: here.edgeId,
       towards: here.towards,
       minUntil: Math.max(this.downUntil, this.elapsed + (turnRound ? 0 : heard)),
-      maxUntil: this.elapsed + (turnRound ? DODGE.holdSeconds : 0),
+      maxUntil: this.elapsed + (turnRound ? wait + DODGE.holdSeconds : 0),
     };
   }
 
   /** Turned round after a dodge: stay put until the first call from here has been said. */
+  /** After a change of transport: stay put until the first direction (just said) has been heard. */
+  private holdForFirstCall(transmissions: readonly Transmission[]): void {
+    if (!this.changeHold?.armed) return;
+    const call = transmissions.find((t) => t.kind === 'DIRECTION' || t.kind === 'FILLER' || t.kind === 'FINAL');
+    if (!call) return;
+    const wait = Math.max(0, this.navigator.radioFreeIn - callSeconds(call.instructions.flatMap((i) => i.clips.map((c) => c.text))));
+    this.changeHold = { armed: false, until: this.elapsed + wait + speechSeconds(firstStep(call.text)) + SPEECH.reactSeconds };
+  }
+
   private waitForCall(transmissions: readonly Transmission[]): void {
     const call = transmissions.find((t) => t.kind === 'DIRECTION' || t.kind === 'FILLER');
     if (!call) return;
     this.holdForNextCall = false;
     const here = this.player.location();
-    const until = this.elapsed + speechSeconds(firstStep(call.text)) + CALL_TIMING.reactSeconds;
+    const until = this.elapsed + speechSeconds(firstStep(call.text)) + SPEECH.reactSeconds;
     this.held = { edgeId: here.edgeId, towards: here.towards, minUntil: until, maxUntil: 0 };
-  }
-
-  /** Remember the junction a new direction is about, and roughly when it will have been heard. */
-  private noteCall(transmissions: Transmission[]): void {
-    for (const t of transmissions) {
-      if (t.kind !== 'DIRECTION' || !t.at) continue;
-      // Only the first step has to be heard before the first junction ("…, puis …" and
-      // "D'abord … Ensuite …" calls go on while the player drives).
-      const speech = speechSeconds(firstStep(t.text));
-      this.call = { at: t.at, spokenBy: this.elapsed + speech };
-    }
-  }
-
-  /**
-   * Slow the chase just enough to hear the latest direction out and react
-   * before its junction (CALL_TIMING); 1 when there is time, or no call.
-   */
-  private callPace(): number {
-    if (!this.call || this.phase !== 'PURSUIT') return 1;
-    const here = this.player.location();
-    const toJunction = this.navigator.distanceTo(here, this.call.at);
-    if (!Number.isFinite(toJunction)) {
-      this.call = null;
-      return 1;
-    }
-    const needed = Math.max(0, this.call.spokenBy - this.elapsed) + CALL_TIMING.reactSeconds;
-    const cruise = MOVEMENT[here.mode].cruise * this.player.speedFactor;
-    return Math.min(1, Math.max(CALL_TIMING.minPace, toJunction / needed / cruise));
   }
 
   /**
@@ -871,6 +1012,13 @@ export class Chase {
 
   /** The player picks a sighting choice (index into the cards). Returns what follows. */
   answerSighting(choice: number): ChaseEvent[] {
+    this.radioCounted = 0;
+    const events = this.answerSightingNow(choice);
+    this.hearRadio(events);
+    return events;
+  }
+
+  private answerSightingNow(choice: number): ChaseEvent[] {
     const events: ChaseEvent[] = [];
     if (this.phase === 'PURSUIT' && this.check) this.resolveSighting(choice, events);
     return events;
@@ -925,7 +1073,7 @@ export class Chase {
     const lostFor = this.elapsed - (this.lostSince as number);
     if (!this.navigator.hasNews(here) && lostFor < LOST_SIGNAL.maxSeconds) return;
     this.restoreSignal(events);
-    for (const transmission of this.navigator.resume(here, ahead)) events.push({ type: 'TRANSMISSION', transmission });
+    for (const transmission of this.nav(events).resume(here, ahead)) events.push({ type: 'TRANSMISSION', transmission });
   }
 
   private restoreSignal(events: ChaseEvent[]): void {
@@ -936,7 +1084,15 @@ export class Chase {
   /** "Descendez de la voiture !" once the player has driven up to where the suspect got out. */
   private orderGetOut(events: ChaseEvent[]): void {
     if (!this.pending || this.pending.announced || this.pending.mode !== 'FOOT') return;
-    const near = distance(this.player.snapshot(), this.graph.node(this.transferNode)) <= TRANSFER.getOutWithin;
+    // Said so it is heard out, with time to react, as the car reaches the place (after anything
+    // the radio is still saying), and not long before: it means "now".
+    this.hearRadio(events);
+    const road = this.roadToTransfer();
+    const wait = Math.max(0, this.radioFreeAt - this.elapsed);
+    const needed = (wait + callSeconds([TRANSPORT_LINES.GET_OUT.text]) + SPEECH.reactSeconds) * MOVEMENT.CAR.cruise;
+    const near = Number.isFinite(road)
+      ? road <= needed + TRANSFER.getOutWithin
+      : distance(this.player.snapshot(), this.graph.node(this.transferNode)) <= TRANSFER.getOutWithin;
     if (!near) return;
     this.pending.announced = true;
     events.push({ type: 'ANNOUNCE', lines: [TRANSPORT_LINES.GET_OUT] });
@@ -947,6 +1103,13 @@ export class Chase {
    * the events that follow, such as the first direction of a new stage.
    */
   toggleMode(): { result: ModeChangeResult; events: ChaseEvent[] } {
+    this.radioCounted = 0;
+    const done = this.toggleModeNow();
+    this.hearRadio(done.events);
+    return done;
+  }
+
+  private toggleModeNow(): { result: ModeChangeResult; events: ChaseEvent[] } {
     const events: ChaseEvent[] = [];
     if (this.phase !== 'PURSUIT' || this.autoStage !== null) return { result: { ok: false, reason: 'NOT_HERE' }, events };
     if (this.player.mode === 'CAR') {
@@ -965,6 +1128,11 @@ export class Chase {
       this.carBrought = false;
     }
     if (this.pending && this.player.mode === this.suspect.mode) this.startPlayerStage(events);
+    // Just out of (or into) the car: wait for the first direction of the new stage to be heard.
+    if (this.autoStage === null && !this.changeHold) {
+      this.changeHold = { armed: true, until: this.elapsed + TRANSFER.firstCallWaitSeconds };
+    }
+    this.holdForFirstCall(events.flatMap((e) => (e.type === 'TRANSMISSION' ? [e.transmission] : [])));
     this.distance = this.measure();
     return { result: { ok: true }, events };
   }
@@ -996,8 +1164,11 @@ export class Chase {
     this.player.setSpeed(speed);
     this.navigator = this.navigatorFor(stage);
     this.navigator.preferSteps = this.lostSignalSteps;
-    const transmissions = this.navigator.update(this.player.location(), this.suspect.remainingPlan());
+    // A new stage: wait for its first direction to be heard.
+    this.changeHold = { armed: true, until: this.elapsed + TRANSFER.firstCallWaitSeconds };
+    const transmissions = this.nav(events).update(this.player.location(), this.suspect.remainingPlan());
     for (const transmission of transmissions) events.push({ type: 'TRANSMISSION', transmission });
+    this.holdForFirstCall(transmissions);
     this.maybeLoseSignal(transmissions, events);
   }
 
@@ -1035,7 +1206,12 @@ export class Chase {
     if (this.phase !== 'PURSUIT' || !this.navigator.last || this.lostSince !== null || this.check) return null;
     const status = this.status;
     const result = this.repeats.request(status.signal, status.warning);
-    if (result.allowed) this.timeLeft = Math.max(0, this.timeLeft - result.penaltySeconds);
+    if (result.allowed) {
+      this.timeLeft = Math.max(0, this.timeLeft - result.penaltySeconds);
+      // The call is said again: the next direction waits for it.
+      const last = this.navigator.last;
+      if (last) this.radioFreeAt = Math.max(this.elapsed, this.radioFreeAt) + callSeconds(last.instructions.flatMap((i) => i.clips.map((c) => c.text)));
+    }
     return result;
   }
 
@@ -1108,4 +1284,14 @@ export class Chase {
     const mode = this.player.mode === this.suspect.mode ? this.player.mode : 'FOOT';
     return roadDistance(this.graph, this.player.location(), this.suspect.location(), mode);
   }
+}
+
+/**
+ * A route that carries on from the last turn of an earlier one (`nodes`
+ * starts just before that turn, which has already been called): can every
+ * turn after it be called in time?
+ */
+function carriesOnCallable(graph: TownGraph, nodes: readonly string[], ctx: CallContext): boolean {
+  const plan = planCalls(graph, nodes, ctx);
+  return plan.solvable(plan.actions[0] === 1 ? 1 : 0);
 }

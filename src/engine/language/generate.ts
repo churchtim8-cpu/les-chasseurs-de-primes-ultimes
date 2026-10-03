@@ -191,8 +191,21 @@ export function instructionFor(
   /** Prefer calls covering at least this many turns when there are any (before a lost signal). */
   preferSteps = 0,
 ): Guided | null {
+  return pickInstruction(instructionOptions(graph, from, guide, a, next, difficulty, hasAudio), difficulty, rng, preferSteps);
+}
+
+/** Every true, unambiguous, recorded instruction the level allows for the action at `guide[a]`, heard at `from` (see `instructionFor`). */
+export function instructionOptions(
+  graph: TownGraph,
+  from: MoverStart,
+  guide: readonly string[],
+  a: number,
+  next: readonly number[],
+  difficulty: Difficulty,
+  hasAudio: AudioCheck = ANY_AUDIO,
+): Guided[] {
   const settings = LANGUAGE_SETTINGS[difficulty];
-  let options: Guided[] = [];
+  const options: Guided[] = [];
   const add = (clauses: Clause[], form: Form, covers: number[]) => {
     if (weightOf(clauses, difficulty, form) <= 0) return;
     const instruction = makeInstruction(clauses, difficulty, covers.map((i) => guide[i] as string), form);
@@ -242,6 +255,12 @@ export function instructionFor(
     }
   }
 
+  return options;
+}
+
+/** One of these options, by the level's template weights (calls of `preferSteps` turns first, when there are any). */
+export function pickInstruction(options: Guided[], difficulty: Difficulty, rng: Rng, preferSteps = 0): Guided | null {
+  const settings = LANGUAGE_SETTINGS[difficulty];
   if (options.length === 0) return null;
   if (preferSteps > 1 && options.some((o) => o.covers.length >= preferSteps)) {
     options = options.filter((o) => o.covers.length >= preferSteps);

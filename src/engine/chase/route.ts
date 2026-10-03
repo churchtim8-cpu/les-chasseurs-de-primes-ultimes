@@ -28,6 +28,14 @@ export interface RouteSpec {
    * location: a junction both modes can use.
    */
   transferTo?: TravelMode;
+  /**
+   * Metres of road the route keeps going after a turn before it turns again,
+   * so each turn can be announced in time at full speed (see CALL_ROUTES).
+   * The first turn may come at once: the opening call is heard before the chase starts.
+   */
+  minTurnGap?: number;
+  /** The route carries on an earlier one whose last turn was this many metres before `from` (so its first turn is not free). */
+  sinceTurn?: number;
 }
 
 export interface GeneratedRoute {
@@ -121,6 +129,19 @@ export function straightRuns(graph: TownGraph, nodes: readonly string[], mode: T
   return runs;
 }
 
+/** Junctions on a path where it turns (not counting its first and last nodes). */
+function actionCount(graph: TownGraph, nodes: readonly string[], mode: TravelMode): number {
+  let count = 0;
+  for (let i = 1; i < nodes.length - 1; i++) {
+    const arrived = graph.edgeBetween(nodes[i - 1] as string, nodes[i] as string);
+    if (!arrived) continue;
+    const exits = cachedExits(graph, arrived, nodes[i] as string, mode);
+    const exit = exits.find((e) => e.step.to === nodes[i + 1]);
+    if (exits.length > 1 && exit && exit.kind !== 'STRAIGHT') count++;
+  }
+  return count;
+}
+
 /** Does the route turn often enough: no run of junctions passed straight through beyond `STRAIGHT_RUNS`? */
 export function turnsOftenEnough(graph: TownGraph, nodes: readonly string[], mode: TravelMode): boolean {
   const { maxJunctions, maxMetres } = STRAIGHT_RUNS[mode];
@@ -152,6 +173,10 @@ export function turningPath(
   stop: string,
   mode: TravelMode,
   maxLength = Infinity,
+  /** No turn until this many metres after the previous one (roundabouts aside); see RouteSpec.minTurnGap. */
+  minTurnGap = 0,
+  /** The route carries on an earlier one whose last turn was this many metres before its start. */
+  sinceTurn?: number,
 ): string[] | null {
   const { maxJunctions, maxMetres } = STRAIGHT_RUNS[mode];
   const start = sofar[sofar.length - 1] as string;
@@ -166,11 +191,15 @@ export function turningPath(
     junctions: number;
     /** Metres since the last turn, up to this node. */
     since: number;
+    /** No turn yet on the whole route. */
+    first: boolean;
     cost: number;
     prev: Label | null;
   }
   const best = new Map<string, number>();
-  const key = (l: Pick<Label, 'node' | 'edge' | 'junctions'>) => `${l.node}|${l.edge.id}|${l.junctions}`;
+  // With a turn gap, how far since the last turn matters too (up to the gap).
+  const key = (l: Pick<Label, 'node' | 'edge' | 'junctions' | 'since' | 'first'>) =>
+    `${l.node}|${l.edge.id}|${l.junctions}|${l.first ? 'F' : Math.round(Math.min(l.since, minTurnGap) / 20)}`;
   const heap: Label[] = [];
   const push = (l: Label) => {
     const k = key(l);
@@ -203,11 +232,14 @@ export function turningPath(
     return top;
   };
 
+  const noTurnYet = actionCount(graph, sofar, mode) === 0;
   push({
     node: start,
     edge: firstEdge,
     junctions: last.junctions,
-    since: pathLength(graph, sofar.slice(last.from)),
+    since: (noTurnYet ? (sinceTurn ?? 0) : 0) + pathLength(graph, sofar.slice(last.from)),
+    // Before the route's first turn, the opening call has been heard with the car standing still.
+    first: noTurnYet && sinceTurn === undefined,
     cost: 0,
     prev: null,
   });
@@ -228,15 +260,18 @@ export function turningPath(
       if (at.cost + length > maxLength) continue;
       let junctions = at.junctions;
       let since = at.since + length;
+      let first = at.first;
       if (exits.length > 1 && exit.kind !== 'STRAIGHT') {
+        if (!ring && !at.first && at.since < minTurnGap) continue; // too soon after the last turn to be called in time
         junctions = 0; // a turn
         since = length;
+        first = false;
       } else if (exits.length > 1 && !ring) {
         // Straight through a junction.
         if (junctions + 1 > maxJunctions || at.since > maxMetres) continue;
         junctions++;
       }
-      push({ node: to, edge: exit.step.edge, junctions, since, cost: at.cost + length, prev: at });
+      push({ node: to, edge: exit.step.edge, junctions, since, first, cost: at.cost + length, prev: at });
     }
   }
   return null;
@@ -324,7 +359,7 @@ export function generateRoute(graph: TownGraph, rng: Rng, spec: RouteSpec, attem
     for (const stop of stops) {
       const at = nodes[nodes.length - 1] as string;
       if (stop === at) continue;
-      const segment = turningPath(graph, nodes, stop, spec.mode, spec.length[1] - pathLength(graph, nodes));
+      const segment = turningPath(graph, nodes, stop, spec.mode, spec.length[1] - pathLength(graph, nodes), spec.minTurnGap ?? 0, spec.sinceTurn);
       if (!segment) {
         ok = false;
         break;

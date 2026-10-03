@@ -24,6 +24,9 @@ import { isAt, isDecision, locationById, opensOn, passPoint, scanAhead } from '.
 import type { Clause } from '../../src/engine/language/instructions';
 import type { Transmission } from '../../src/engine/language/navigator';
 import { exitsAt } from '../../src/engine/movement/turns';
+import { readFileSync } from 'node:fs';
+import { SPEECH } from '../../src/engine/language/settings';
+import { heardTimes, speechSeconds, type ClipSeconds } from '../../src/engine/language/timing';
 import type { TownGraph } from '../../src/engine/world/graph';
 
 interface Task {
@@ -32,7 +35,24 @@ interface Task {
   travelled: number;
   target?: number;
   queued: boolean;
+  /** The step has been said (and taken in) from this time on. */
+  notBefore: number;
+  /** Which call it came in (calls are numbered in order). */
+  seq: number;
+  /** The edge the player was on when the call came: a junction passed just before it is not counted. */
+  pushedOn?: string;
 }
+
+/** The real recordings' lengths (seconds), so the bot hears the radio as a student does. */
+const RECORDED: Record<string, number> = (() => {
+  try {
+    const manifest = JSON.parse(readFileSync('public/audio/manifest.json', 'utf8')) as { clips: Record<string, { durationMs?: number }> };
+    return Object.fromEntries(Object.entries(manifest.clips).map(([id, c]) => [id, (c.durationMs ?? 0) / 1000]));
+  } catch {
+    return {};
+  }
+})();
+export const clipSeconds: ClipSeconds = (clip) => RECORDED[clip.audioId] || speechSeconds(clip.text);
 
 /** What the bot plays: the chase, or Escape Mode (the same French, the roles switched). */
 export interface Playable {
@@ -40,11 +60,26 @@ export interface Playable {
   update(dt: number): ChaseEvent[];
   toggleMode(): { result: ModeChangeResult; events: ChaseEvent[] };
   answerSighting(choice: number): ChaseEvent[];
+  /** The call given before anything moves (the game plays it in full, then starts). */
+  openingCall?(): ChaseEvent[];
 }
 
+/** Clauses that are not a turn at a junction. */
+const NOT_A_STEP = new Set(['WRONG_STREET', 'U_TURN', 'STRAIGHT', 'CONTINUE_UNTIL']);
+
 export class ListenerBot {
-  private heard: { at: number; seq: number; transmission: Transmission }[] = [];
+  private heard: { at: number; seq: number; clause: Clause }[] = [];
+  /** When the radio is free again. */
+  private radioFree = 0;
+  private opened = false;
   private seq = 0;
+  /** Every step heard, with when it has been taken in (said, plus reaction): for timing tests. */
+  readonly steps: { node: string; heardBy: number }[] = [];
+
+  /** The bot's clock (the opening call is heard before the chase starts). */
+  get now(): number {
+    return this.time;
+  }
   private orders: { at: number; audioId: string }[] = [];
   /** When the bot understands that the suspect changed direction, and which calls came before the warning. */
   private changes: { at: number; before: number }[] = [];
@@ -64,34 +99,103 @@ export class ListenerBot {
 
   constructor(
     private readonly graph: TownGraph,
-    /** Seconds between hearing a call and acting on it (listening + thinking time). */
-    private readonly reaction = 1.2,
+    /** Seconds between a step being said and acting on it (taking it in). */
+    private readonly reaction = 0.8,
   ) {}
 
-  hear(events: ChaseEvent[]): void {
-    for (const e of events) {
+  hear(events: ChaseEvent[], edge?: string): void {
+    for (const [i, e] of events.entries()) {
       if (e.type === 'TRANSMISSION') {
-        this.heard.push({ at: this.time + this.reaction, seq: this.seq++, transmission: e.transmission });
+        // A line just before it ("Attention ! …") is said first in the same call.
+        const previous = events[i - 1];
+        const lead = previous?.type === 'ANNOUNCE' && !previous.after ? previous.lines : [];
+        const start = Math.max(this.time, this.radioFree);
+        const times = heardTimes(e.transmission.instructions, lead, clipSeconds);
+        const seq = this.seq++;
+        let k = 0;
+        for (const instruction of e.transmission.instructions) {
+          const steps = instruction.clauses.filter((c) => !NOT_A_STEP.has(c.action));
+          for (const clause of instruction.clauses) {
+            const at = start + (times[k++] ?? 0) + this.reaction;
+            const j = steps.indexOf(clause);
+            const node = steps.length === instruction.atNodes.length ? instruction.atNodes[j] : undefined;
+            if (node && e.transmission.kind !== 'RECOVERY') this.steps.push({ node, heardBy: at });
+            if (clause.action === 'WRONG_STREET' || clause.action === 'U_TURN') this.heard.push({ at, seq, clause });
+            else if (clause.action !== 'STRAIGHT' && clause.action !== 'CONTINUE_UNTIL') {
+              this.tasks.push({ clause, count: 0, travelled: 0, queued: false, notBefore: at, seq, ...(edge ? { pushedOn: edge } : {}) });
+            }
+          }
+        }
+        const clips = [...lead, ...e.transmission.instructions.flatMap((ins) => ins.clips)];
+        this.radioFree = start + this.callLength(clips);
         this.log.push(e.transmission);
       } else if (e.type === 'ANNOUNCE') {
+        // Urgent news cuts off whatever was being said: the rest of it is never heard.
+        if (e.interrupt) {
+          this.radioFree = Math.min(this.radioFree, this.time);
+          this.tasks = this.tasks.filter((t) => t.notBefore - this.reaction <= this.time);
+          this.heard = this.heard.filter((h) => h.at - this.reaction <= this.time);
+        }
+        const joined = !e.after && events[i + 1]?.type === 'TRANSMISSION';
+        if (joined) continue; // said with the direction after it
+        const start = Math.max(this.time, this.radioFree);
+        let t = start + SPEECH.radioLeadSeconds;
         for (const line of e.lines) {
+          t += clipSeconds(line);
+          const at = t + this.reaction;
           if (line.audioId === TRANSPORT_LINES.GET_OUT.audioId || line.audioId === TRANSPORT_LINES.GET_IN.audioId) {
-            this.orders.push({ at: this.time + this.reaction, audioId: line.audioId });
+            this.orders.push({ at, audioId: line.audioId });
           }
-          if (line.audioId === EVENT_LINES.CHANGED_DIRECTION.audioId) {
-            this.changes.push({ at: this.time + this.reaction, before: this.seq });
-          }
+          if (line.audioId === EVENT_LINES.CHANGED_DIRECTION.audioId) this.changes.push({ at, before: this.seq });
           const told = VEHICLES.find((v) => vehicleLine(v).audioId === line.audioId);
           if (told) this.vehicle = told;
+          t += SPEECH.clipGapSeconds;
         }
+        this.radioFree = start + this.callLength(e.lines);
       } else if (e.type === 'SIGHTING') {
-        this.question = { at: this.time + this.reaction, cards: e.cards, audioId: e.line.audioId };
+        const start = Math.max(this.time, this.radioFree);
+        this.radioFree = start + this.callLength([e.line]);
+        this.question = { at: this.radioFree + this.reaction, cards: e.cards, audioId: e.line.audioId };
+      }
+    }
+    // "Attention ! Le suspect a changé de direction." said just before a direction, in the same call.
+    for (const [i, e] of events.entries()) {
+      if (e.type !== 'ANNOUNCE' || e.after || events[i + 1]?.type !== 'TRANSMISSION') continue;
+      for (const line of e.lines) {
+        if (line.audioId === TRANSPORT_LINES.GET_OUT.audioId || line.audioId === TRANSPORT_LINES.GET_IN.audioId) {
+          this.orders.push({ at: this.time + this.reaction, audioId: line.audioId });
+        }
+        // The corrected direction in the same call is kept (it comes after the warning).
+        if (line.audioId === EVENT_LINES.CHANGED_DIRECTION.audioId) this.changes.push({ at: this.time, before: this.seq - 1 });
+        const told = VEHICLES.find((v) => vehicleLine(v).audioId === line.audioId);
+        if (told) this.vehicle = told;
       }
     }
   }
 
+  /** Seconds the radio is busy with a call of these clips (beep, voice, gaps, click). */
+  private callLength(clips: readonly { audioId: string; text: string }[]): number {
+    if (clips.length === 0) return 0;
+    const voice = clips.reduce((sum, c) => sum + clipSeconds(c), 0);
+    return SPEECH.radioLeadSeconds + voice + SPEECH.clipGapSeconds * (clips.length - 1) + SPEECH.radioTailSeconds;
+  }
+
   /** Act, then advance the chase by dt. */
   step(chase: Playable, dt: number): ChaseEvent[] {
+    if (!this.opened) {
+      // The game plays the opening call in full before anything moves.
+      this.opened = true;
+      const opening = chase.openingCall?.() ?? [];
+      this.hear(opening);
+      if (opening.length > 0) {
+        this.time = this.radioFree;
+        for (const t of this.tasks) t.notBefore = Math.min(t.notBefore, this.time);
+        for (const h of this.heard) h.at = Math.min(h.at, this.time);
+        for (const o of this.orders) o.at = Math.min(o.at, this.time);
+        this.radioFree = this.time;
+      }
+      return opening;
+    }
     this.time += dt;
     if (this.question && this.question.at <= this.time) {
       const choice = this.answer(this.question.cards, this.question.audioId);
@@ -114,23 +218,18 @@ export class ListenerBot {
       // The directions it was following no longer apply, nor do any heard just
       // before the warning; the corrected ones that follow it are kept.
       const change = this.changes.shift()!;
-      this.tasks = [];
+      this.tasks = this.tasks.filter((t) => t.seq >= change.before);
       this.heard = this.heard.filter((h) => h.seq >= change.before);
       player.clearQueue();
     }
     while (this.heard.length > 0 && (this.heard[0]?.at ?? Infinity) <= this.time) {
-      const { transmission } = this.heard.shift()!;
-      for (const instruction of transmission.instructions) {
-        for (const clause of instruction.clauses) {
-          if (clause.action === 'WRONG_STREET') {
-            this.tasks = [];
-            player.clearQueue();
-          } else if (clause.action === 'U_TURN') {
-            player.uTurn();
-          } else if (clause.action !== 'STRAIGHT' && clause.action !== 'CONTINUE_UNTIL') {
-            this.tasks.push({ clause, count: 0, travelled: 0, queued: false });
-          }
-        }
+      const { clause, seq } = this.heard.shift()!;
+      if (clause.action === 'WRONG_STREET') {
+        // The directions from before this call no longer apply.
+        this.tasks = this.tasks.filter((t) => t.seq > seq);
+        player.clearQueue();
+      } else if (clause.action === 'U_TURN') {
+        player.uTurn();
       }
     }
 
@@ -145,16 +244,20 @@ export class ListenerBot {
     const task = this.tasks[0];
     if (task) {
       task.travelled += moved;
+      const counted = task.pushedOn === me.edgeId ? null : passedNode;
+      delete task.pushedOn;
       if (task.queued) {
         if (me.queued === null) this.tasks.shift(); // the turn has been made
-      } else if (this.ready(task, chase, passedNode, arrivedBy)) {
+      } else if (this.ready(task, chase, counted, arrivedBy) && this.time >= task.notBefore) {
         const side = task.clause.action === 'ROUNDABOUT_EXIT' ? 'RIGHT' : (task.clause as { side: 'LEFT' | 'RIGHT' }).side;
         player.queue(side);
         task.queued = true;
       }
     }
     const events = chase.update(dt);
-    this.hear(events);
+    // Changing transport puts the player on a new mover: that is not passing a junction.
+    if (chase.player !== player) this.lastEdge = '';
+    this.hear(events, chase.player.snapshot().edgeId);
     return events;
   }
 

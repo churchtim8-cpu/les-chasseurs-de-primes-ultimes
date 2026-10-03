@@ -38,6 +38,8 @@ export class ScannerAudio {
   private sources: AudioScheduledSourceNode[] = [];
   private busy: Promise<void> = Promise.resolve();
   private generation = 0;
+  /** Ends the wait for the call playing now (see stop). */
+  private wake: (() => void) | null = null;
   /** The radio filter can be switched off (?radio=0) to hear the clean recordings. */
   radioFilter = new URLSearchParams(window.location.search).get('radio') !== '0';
 
@@ -108,9 +110,17 @@ export class ScannerAudio {
     return this.ctx?.state === 'running';
   }
 
+  /** Urgent news: cut off whatever is being said and say this now. */
+  interrupt(lines: SpokenLine[]): Promise<void> {
+    this.stop();
+    return this.play(lines);
+  }
+
   /** Stop everything now (leaving the chase). */
   stop(): void {
     this.generation++;
+    this.wake?.();
+    this.wake = null;
     for (const source of this.sources) {
       try {
         source.stop();
@@ -187,7 +197,10 @@ export class ScannerAudio {
       }
     }
     if (radioAt !== -1) t = this.click(t);
-    await new Promise((resolve) => setTimeout(resolve, Math.max(0, (t - ctx.currentTime) * 1000)));
+    await new Promise<void>((resolve) => {
+      this.wake = resolve; // stop() ends the wait at once
+      setTimeout(resolve, Math.max(0, (t - ctx.currentTime) * 1000));
+    });
     if (ticket === this.generation) this.duck(false);
   }
 
