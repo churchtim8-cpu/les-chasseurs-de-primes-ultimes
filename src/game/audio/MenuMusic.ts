@@ -12,7 +12,8 @@ import type { ScannerAudio } from './ScannerAudio';
 
 const BPM = 96;
 const LEVEL = 0.3;
-const LOOKAHEAD = 0.15;
+/** Notes are booked this far ahead on the audio clock (s), so a busy computer does not make them late. */
+const LOOKAHEAD = 0.6;
 const MUTE_KEY = 'bellevue.music';
 
 const n = null;
@@ -100,6 +101,8 @@ export class MenuMusic {
       this.synth.noiseHit(this.nextTime, 0.16, 1.8, 'highpass', 4000);
     }
     const synth = this.synth;
+    // After a long stall (a hidden tab), skip the missed beats rather than play them all at once.
+    if (this.nextTime < synth.ctx.currentTime) this.nextTime = synth.ctx.currentTime + 0.05;
     while (this.nextTime < synth.ctx.currentTime + LOOKAHEAD) {
       this.playStep(this.nextTime);
       this.nextTime += 60 / BPM / 4;

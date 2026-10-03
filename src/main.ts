@@ -23,6 +23,9 @@ const game = new Phaser.Game({
   // Phaser holds game time to 60 fps for `panicMax` frames after a start or tab switch;
   // the default (120 frames) makes the chase crawl for seconds on slow school computers.
   fps: { panicMax: 20 },
+  // Every sound is made by our own Web Audio mixer (ScannerAudio); Phaser's
+  // sound system would only run a second, silent audio engine alongside it.
+  audio: { noAudio: true },
   // Boot (the loading screen) runs first, then the title screen.
   scene: [BootScene, TitleScene, CampaignScene, BriefingScene, PracticeScene, ChaseScene, ResultsScene, CaseClosedScene, FullscreenScene, DebugOverlayScene],
 });

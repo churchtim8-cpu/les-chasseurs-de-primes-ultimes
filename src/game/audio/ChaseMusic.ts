@@ -69,7 +69,12 @@ const GROOVES: Record<TravelMode, Groove[]> = {
 
 /** Overall music level (the French always comes first). */
 const LEVEL = 0.32;
-const LOOKAHEAD = 0.12;
+/**
+ * Notes are booked this far ahead on the audio clock (s). A slow school
+ * computer can leave the timer waiting several tenths of a second between
+ * ticks, so a short look-ahead made notes land late and the music stutter.
+ */
+const LOOKAHEAD = 0.6;
 const MUTE_KEY = 'bellevue.music';
 
 export class ChaseMusic {
@@ -173,6 +178,8 @@ export class ChaseMusic {
     }
     const { ctx, filter } = this.out!;
     filter.frequency.setTargetAtTime(1600 + this.intensity * 5000, ctx.currentTime, 0.5);
+    // After a long stall (a hidden tab), skip the missed beats rather than play them all at once.
+    if (this.nextTime < ctx.currentTime) this.nextTime = ctx.currentTime + 0.05;
     this.schedule(ctx.currentTime + LOOKAHEAD);
   }
 
