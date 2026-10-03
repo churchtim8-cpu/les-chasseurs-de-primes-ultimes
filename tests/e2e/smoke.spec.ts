@@ -196,3 +196,18 @@ test('campaign: case folder, briefing, mission, results, and on to the next susp
 
   expect(errors).toEqual([]);
 });
+
+test('the police station shows the rank, badges and case files, and the Boss opens with ?boss=1', async ({ page }) => {
+  const errors = watchErrors(page);
+  await page.goto('./?debug=1&boss=1');
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Title']));
+  await page.keyboard.press('o');
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Commissariat']));
+  // The Boss briefing, from the station.
+  await page.evaluate(() => window.__bellevue?.game.scene.getScene('Commissariat').scene.start('Briefing', { boss: 'boss' }));
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Briefing']));
+  expect(await info(page, 'mission')).toBe('BOSS');
+  await page.keyboard.press('Escape');
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Commissariat']));
+  expect(errors).toEqual([]);
+});

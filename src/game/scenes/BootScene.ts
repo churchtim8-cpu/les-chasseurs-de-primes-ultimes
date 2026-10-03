@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { MISSIONS } from '../../engine/campaign/campaign';
+import { SUSPECT_FILES } from '../../engine/campaign/profile';
 import { scannerAudio } from '../audio/ScannerAudio';
 import { preloadCanvaArt } from '../render/canvaArt';
 import { FONT_FAMILY, PALETTE, toCss } from '../palette';
@@ -42,7 +42,7 @@ export class BootScene extends Phaser.Scene {
 
     // Which French recordings exist (public/audio/manifest.json). Missing is fine: text only.
     if (!this.cache.json.exists('audio-manifest')) this.load.json('audio-manifest', `${import.meta.env.BASE_URL}audio/manifest.json`);
-    preloadScreenPictures(this, MISSIONS.map((m) => m.picture));
+    preloadScreenPictures(this, SUSPECT_FILES.map((s) => s.picture));
     preloadCanvaArt(this);
     this.load.once(Phaser.Loader.Events.COMPLETE, () => {
       bar.setSize(barWidth - 4, 18);

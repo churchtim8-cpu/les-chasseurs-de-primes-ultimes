@@ -172,3 +172,13 @@ export function roundaboutAhead(
   }
   return exits.length > 0 ? { roundaboutId, exits } : null;
 }
+
+/** The place nearest to a point (by distance to its footprint): where a suspect was arrested, for its file. */
+export function nearestLocation(graph: TownGraph, point: Point): MapLocation | undefined {
+  let best: { location: MapLocation; d: number } | undefined;
+  for (const location of graph.map.locations) {
+    const d = pointRectDistance(point, location.footprint);
+    if (!best || d < best.d) best = { location, d };
+  }
+  return best?.location;
+}

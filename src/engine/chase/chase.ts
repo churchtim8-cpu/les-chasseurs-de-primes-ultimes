@@ -213,6 +213,8 @@ export class Chase {
   private readonly settings: ChaseSettings;
   private phase: ChasePhase = 'PURSUIT';
   private elapsed = 0;
+  /** Seconds on the clock at the start (the level's limit, plus extra for each change of transport). */
+  readonly timeLimit: number;
   private timeLeft: number;
   private closeFor = 0;
   private distance: number;
@@ -247,12 +249,16 @@ export class Chase {
   constructor(
     private readonly graph: TownGraph,
     readonly scenario: ChaseScenario,
-    options: { hasAudio?: AudioCheck } = {},
+    options: { hasAudio?: AudioCheck; extraSeconds?: number; suspectPace?: number } = {},
   ) {
     this.hasAudio = options.hasAudio;
+    this.suspectPace = options.suspectPace ?? 1;
     this.settings = CHASE_SETTINGS[scenario.difficulty];
-    this.timeLeft =
-      DIFFICULTY_SETTINGS[scenario.difficulty].timeLimitSeconds + (scenario.stages.length - 1) * TRANSFER.extraSeconds;
+    this.timeLimit =
+      DIFFICULTY_SETTINGS[scenario.difficulty].timeLimitSeconds +
+      (scenario.stages.length - 1) * TRANSFER.extraSeconds +
+      (options.extraSeconds ?? 0);
+    this.timeLeft = this.timeLimit;
     this.repeats = new RepeatCounter(DIFFICULTY_SETTINGS[scenario.difficulty].repeat);
     this.turnOffPending = scenario.turnOff !== null;
     this.lostSignalPending = scenario.lostSignal;
@@ -268,10 +274,13 @@ export class Chase {
     this.distance = this.measure();
   }
 
+  /** The suspect's last-stage speed is scaled by this (a higher police rank meets quicker suspects). */
+  private readonly suspectPace: number;
+
   /** The suspect keeps pace until its last stage, where the police slowly close in. */
   private suspectSpeedFor(stage: number): number {
     const mode = this.stages[stage]!.mode;
-    return stage === this.lastStage ? this.settings.suspectSpeed[mode] : TRANSFER.suspectSpeedBeforeLastStage;
+    return stage === this.lastStage ? Math.min(0.97, this.settings.suspectSpeed[mode] * this.suspectPace) : TRANSFER.suspectSpeedBeforeLastStage;
   }
 
   private get lastStage(): number {

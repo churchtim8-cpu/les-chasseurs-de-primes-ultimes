@@ -10,7 +10,9 @@ import {
   totalScore,
 } from '../../engine/campaign/campaign';
 import type { Medal } from '../../engine/campaign/scoring';
+import { BOSSES, bossUnlocked } from '../../engine/campaign/profile';
 import { loadProgress, saveProgress } from '../campaignStore';
+import { bossForced, loadProfile } from '../profileStore';
 import { PALETTE, toCss } from '../palette';
 import { backdrop, medalBadge, Menu, paper, SCREEN_PICTURES, suspectPictureKey, text } from '../ui/ui';
 
@@ -77,6 +79,14 @@ export class CaseClosedScene extends Phaser.Scene {
     );
 
     const menu = new Menu(this);
+    // The hidden bosses, once found: one button each, side by side.
+    const profile = loadProfile();
+    const open = BOSSES.filter((b) => bossUnlocked(progress, profile, b.picture) || bossForced());
+    open.forEach((b, i) => {
+      const arrested = (profile.files[b.picture]?.arrests ?? 0) > 0;
+      const bx = width / 2 + (open.length === 1 ? 0 : (i === 0 ? -230 : 230));
+      menu.add(bx, 604, 440, 44, arrested ? `${b.nickname.toUpperCase()} : REJOUER  ▶` : `🔒 MISSION SPÉCIALE : ${b.nickname.toUpperCase()}  ▶`, () => this.scene.start('Briefing', { boss: b.picture }), { size: 19 });
+    });
     menu.add(width / 2 - 260, 660, 280, 60, 'DOSSIER', () => this.scene.start('Campaign'));
     menu.add(width / 2 + 40, 660, 260, 60, 'MENU', () => this.scene.start('Title'), { key: 'ESC' });
     const reset = menu.add(width / 2 + 330, 660, 300, 60, 'NOUVELLE CAMPAGNE', () => {

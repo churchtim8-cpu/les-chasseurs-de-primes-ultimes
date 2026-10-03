@@ -23,6 +23,9 @@ import { FootSounds } from '../audio/FootSounds';
 import { menuMusic } from '../audio/Jingles';
 import { loadProgress } from '../campaignStore';
 import { scenarioOptionsFromAddress } from '../scenarioOptions';
+import { loadProfile } from '../profileStore';
+import { BOSS, bossInfo, suspectPaceFor, type BossInfo } from '../../engine/campaign/profile';
+import { nearestLocation } from '../../engine/language/analysis';
 import type { ResultsData } from './ResultsScene';
 import { scannerAudio, type SpokenLine } from '../audio/ScannerAudio';
 import { CameraRig, MAP_FACINGS, type MapFacing } from '../camera/cameraRig';
@@ -51,6 +54,9 @@ export interface ChaseSceneData {
   seed: string;
   /** Campaign mission (0-based); absent for a practice chase. */
   mission?: number;
+  /** The secret ninth suspect: the longest kind of chase, with extra time. */
+  /** A hidden boss's picture id instead of a campaign mission. */
+  boss?: string;
 }
 
 type Stage = 'OPENING' | 'PURSUIT' | 'ARREST' | 'RESULTS';
@@ -135,6 +141,7 @@ export class ChaseScene extends Phaser.Scene {
   private burning = false;
   private seed = '';
   private mission: number | null = null;
+  private boss: BossInfo | null = null;
 
   constructor() {
     super(ChaseScene.KEY);
@@ -143,6 +150,7 @@ export class ChaseScene extends Phaser.Scene {
   init(data: ChaseSceneData): void {
     this.seed = data.seed;
     this.mission = typeof data.mission === 'number' ? data.mission : null;
+    this.boss = data.boss ? bossInfo(data.boss) ?? BOSS : null;
     this.stage = 'OPENING';
     this.burnoutUntil = 0;
     this.launchAt = 0;
@@ -160,8 +168,12 @@ export class ChaseScene extends Phaser.Scene {
   create(): void {
     this.graph = new TownGraph(BELLEVUE);
     this.lanes = { me: new LanePosition(this.graph), suspect: new LanePosition(this.graph) };
-    this.chase = new Chase(this.graph, generateScenario(this.graph, this.seed, scenarioOptionsFromAddress()), {
+    const options = this.boss ? { ...scenarioOptionsFromAddress(), chaseType: this.boss.chaseType } : scenarioOptionsFromAddress();
+    this.chase = new Chase(this.graph, generateScenario(this.graph, this.seed, options), {
       hasAudio: audioCheck(scannerAudio.library),
+      // Suspects move a touch faster at each police rank the player has earned.
+      suspectPace: suspectPaceFor(loadProfile().points),
+      ...(this.boss ? { extraSeconds: this.boss.extraSeconds } : {}),
     });
     scannerAudio.preload(
       [
@@ -226,7 +238,7 @@ export class ChaseScene extends Phaser.Scene {
     this.rig.setFacing(loadFacing());
     this.controls = new Controls(this);
     this.controls.onAction((action) => this.handleAction(action));
-    this.hud = new Hud(this, this.mission === null ? 'ENTRAÎNEMENT' : `MISSION ${this.mission + 1} / ${MISSION_COUNT}`);
+    this.hud = new Hud(this, this.boss ? this.boss.nickname.toUpperCase() : this.mission === null ? 'ENTRAÎNEMENT' : `MISSION ${this.mission + 1} / ${MISSION_COUNT}`);
     this.hud.onRepeat(() => this.repeat());
     this.hud.onMusic(() => this.toggleMusic());
     this.hud.setMusic(!this.music.isMuted);
@@ -717,10 +729,18 @@ export class ChaseScene extends Phaser.Scene {
       sightingsRight: status.sightingsRight,
       transportChanges: this.chase.playerStage,
     };
+    const scenario = this.chase.scenario;
     const data: ResultsData = {
       seed: this.seed,
       mission: this.mission,
+      boss: this.boss?.picture ?? null,
       stats,
+      timeLimit: this.chase.timeLimit,
+      night: nightOn(),
+      mode: this.chase.player.mode,
+      lastSeen: nearestLocation(this.graph, this.chase.suspect.snapshot())?.id ?? scenario.destination,
+      vehicle: scenario.vehicles[0] ?? null,
+      chaseType: scenario.chaseType,
       ...(status.escapeReason ? { escapeReason: status.escapeReason } : {}),
     };
     debugState.info.set('wrong turns', String(stats.wrongTurns));
