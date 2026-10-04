@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { menuMusic } from '../audio/Jingles';
 import { nightOn, setNight } from '../render/night';
+import { cycleFestival, festivalLabel } from '../render/festival';
+import { cycleWeather, weatherChoice, WEATHER_ICONS, WEATHER_NAMES } from '../render/weather';
 import { titleBackdropFx, titleFrontFx } from '../render/titleFx';
 import { parseSeed, type ChaseSeed } from '../../engine';
 import type { AudioManifest } from '../../engine/audio/manifest';
@@ -82,8 +84,20 @@ export class TitleScene extends Phaser.Scene {
       night.label.setText(nightLabel());
     }, { key: 'N', size: 19 });
     // The garage (what the police drive and wear) and the wanted posters wall.
+    menu.add(GAME_WIDTH / 2 - 432, top + 162, 276, 44, '📅 DAILY CHALLENGE (D)', () => this.scene.start('Daily'), { key: 'D', size: 18 });
     menu.add(GAME_WIDTH / 2 - 144, top + 162, 276, 44, '🔧 GARAGE (G)', () => this.scene.start('Garage', { back: 'Title' }), { key: 'G', size: 19 });
     menu.add(GAME_WIDTH / 2 + 144, top + 162, 276, 44, '📜 POSTERS (W)', () => this.scene.start('Wanted', { back: 'Title' }), { key: 'W', size: 19 });
+    // Rain and fog hide more of the town, so the French matters even more (T for "temps").
+    const weatherLabel = () => `${WEATHER_ICONS[weatherChoice()]} WEATHER: ${WEATHER_NAMES[weatherChoice()].toUpperCase()}`;
+    const weather = menu.add(GAME_WIDTH / 2 + 432, top + 162, 276, 44, weatherLabel(), () => {
+      cycleWeather();
+      weather.label.setText(weatherLabel());
+    }, { key: 'T', size: 18 });
+    // Bellevue en fête: Carnival and Christmas decorations (by the calendar unless chosen).
+    const fete = menu.add(GAME_WIDTH / 2, top + 216, 400, 40, festivalLabel(), () => {
+      cycleFestival();
+      fete.label.setText(festivalLabel());
+    }, { size: 17 });
   }
 
   private replay(seed: ChaseSeed): void {

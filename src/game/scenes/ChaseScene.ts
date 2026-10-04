@@ -47,12 +47,18 @@ import { arrestEffect, victoryPose } from '../render/celebrate';
 import { currentLook } from '../lookStore';
 import { liveryLook, type CosmeticSlot } from '../../engine/campaign/cosmetics';
 import { drawNight, nightOn } from '../render/night';
+import { currentFestival, drawFestival } from '../render/festival';
+import { drawWeather, onScreen, weatherFor } from '../render/weather';
 import { LanePosition } from '../render/lanes';
 import { EscapeEffects } from '../render/escapes';
 import { RoundaboutGuide } from '../render/roundaboutGuide';
 import { preloadCanvaArt } from '../render/canvaArt';
 import { drawTown, type TownLayers } from '../render/townRenderer';
 import { TownLife } from '../render/townLife';
+import { dailyChase, hasPlayed, markPlayed } from '../../engine/campaign/daily';
+import { CHASE_SETTINGS } from '../../engine/chase/settings';
+import { WEATHER, type Weather } from '../../engine/world/weather';
+import { loadBoard, saveBoard } from '../dailyStore';
 
 export interface ChaseSceneData {
   seed: string;
@@ -61,6 +67,8 @@ export interface ChaseSceneData {
   /** The secret ninth suspect: the longest kind of chase, with extra time. */
   /** A hidden boss's picture id instead of a campaign mission. */
   boss?: string;
+  /** Le défi du jour: the date (YYYY-MM-DD) of the daily chase being played. */
+  daily?: string;
 }
 
 type Stage = 'OPENING' | 'PURSUIT' | 'ARREST' | 'RESULTS';
@@ -154,6 +162,9 @@ export class ChaseScene extends Phaser.Scene {
   private seed = '';
   private mission: number | null = null;
   private boss: BossInfo | null = null;
+  private daily: string | null = null;
+  private dailyOfficial = false;
+  private weather: Weather = 'CLEAR';
 
   constructor() {
     super(ChaseScene.KEY);
@@ -163,6 +174,10 @@ export class ChaseScene extends Phaser.Scene {
     this.seed = data.seed;
     this.mission = typeof data.mission === 'number' ? data.mission : null;
     this.boss = data.boss ? bossInfo(data.boss) ?? BOSS : null;
+    this.daily = data.daily ?? null;
+    // Only the first try at the daily chase counts on the class board; starting it uses that try.
+    this.dailyOfficial = this.daily !== null && !hasPlayed(loadBoard(), this.daily);
+    if (this.daily && this.dailyOfficial) saveBoard(markPlayed(loadBoard(), this.daily));
     this.stage = 'OPENING';
     this.burnoutUntil = 0;
     this.arrival = null;
@@ -211,6 +226,8 @@ export class ChaseScene extends Phaser.Scene {
       this.footsteps.stop();
     });
     this.layers = drawTown(this, this.graph);
+    // Bellevue en fête: Carnival or Christmas decorations, by the calendar or the title-screen choice.
+    drawFestival(this, this.graph, currentFestival(), nightOn());
     if (nightOn()) drawNight(this, this.graph);
     if (new URLSearchParams(window.location.search).get('life') !== '0') {
       this.life = new TownLife(this, this.graph, {
@@ -254,7 +271,7 @@ export class ChaseScene extends Phaser.Scene {
     this.rig.setFacing(loadFacing());
     this.controls = new Controls(this);
     this.controls.onAction((action) => this.handleAction(action));
-    this.hud = new Hud(this, this.boss ? this.boss.nickname.toUpperCase() : this.mission === null ? 'PRACTICE' : `MISSION ${this.mission + 1} / ${MISSION_COUNT}`, 'SIGNAL', look.HUD);
+    this.hud = new Hud(this, this.boss ? this.boss.nickname.toUpperCase() : this.daily ? 'DAILY CHALLENGE' : this.mission === null ? 'PRACTICE' : `MISSION ${this.mission + 1} / ${MISSION_COUNT}`, 'SIGNAL', look.HUD);
     this.hud.onRepeat(() => this.repeat());
     this.hud.onMusic(() => this.toggleMusic());
     this.hud.setMusic(!this.music.isMuted);
@@ -265,6 +282,9 @@ export class ChaseScene extends Phaser.Scene {
     ui.ignore(worldObjects);
     this.uiCamera = ui;
     this.cameras.main.ignore([...this.hud.objects, ...this.controls.uiObjects]);
+    // Rain or fog over the town (drawing only), under the HUD; the daily chase has everybody's weather.
+    this.weather = this.daily ? dailyChase(this.daily).weather : weatherFor(this.seed);
+    this.cameras.main.ignore(drawWeather(this, this.weather, () => this.playerOnScreen()));
 
     this.bindKeys();
     this.syncDebug();
@@ -281,6 +301,12 @@ export class ChaseScene extends Phaser.Scene {
     debugState.info.set('audio', `${scannerAudio.clipCount} clips`);
     this.hud.update(this.chase.status, me.mode);
     this.opening();
+  }
+
+  /** Where the player is on screen, for the fog to stay clear around them. */
+  private playerOnScreen(): { x: number; y: number } {
+    const me = this.chase.player.snapshot();
+    return onScreen(this.cameras.main, me.x, me.y);
   }
 
   override update(_time: number, delta: number): void {
@@ -561,7 +587,9 @@ export class ChaseScene extends Phaser.Scene {
     const ease = this.escapes.spinning ? 320 : 90;
     this.suspectHeading += Phaser.Math.Angle.Wrap(suspect.heading - this.suspectHeading) * Math.min(1, delta / ease);
     // The suspect is only on the map when close (a sighting), just after an escape, or at the end; debug always shows it.
-    const visible = debugState.isEnabled || this.chase.status.suspectVisible || this.escapes.revealing || this.stage === 'RESULTS';
+    // In rain or fog the suspect is only drawn once it is closer still.
+    const seen = this.chase.status.suspectVisible && this.chase.status.distance <= CHASE_SETTINGS[this.chase.scenario.difficulty].sightingDistance * WEATHER.seeFactor[this.weather];
+    const visible = debugState.isEnabled || seen || this.escapes.revealing || this.stage === 'RESULTS';
     const shown = this.suspectSprite();
     const stage = this.chase.suspectStage;
     const stages = this.chase.scenario.stages;
@@ -770,6 +798,7 @@ export class ChaseScene extends Phaser.Scene {
     const data: ResultsData = {
       seed: this.seed,
       mission: this.mission,
+      ...(this.daily ? { daily: this.daily, dailyOfficial: this.dailyOfficial } : {}),
       boss: this.boss?.picture ?? null,
       stats,
       timeLimit: this.chase.timeLimit,
@@ -843,8 +872,8 @@ export class ChaseScene extends Phaser.Scene {
     if (this.stage === 'RESULTS' || !this.scene.isActive()) return;
     const data: PauseSceneData = {
       returnTo: this.scene.key,
-      retry: () => this.scene.start(ChaseScene.KEY, { seed: this.seed, ...(this.mission !== null ? { mission: this.mission } : {}), ...(this.boss ? { boss: this.boss.picture } : {}) }),
-      quit: () => this.scene.start(this.mission === null ? 'Title' : 'Campaign'),
+      retry: () => this.scene.start(ChaseScene.KEY, { seed: this.seed, ...(this.mission !== null ? { mission: this.mission } : {}), ...(this.boss ? { boss: this.boss.picture } : {}), ...(this.daily ? { daily: this.daily } : {}) }),
+      quit: () => this.scene.start(this.daily ? 'Daily' : this.mission === null ? 'Title' : 'Campaign'),
       liveryChanged: () => this.redrawPolice(),
     };
     this.scene.launch(PauseScene.KEY, data);
@@ -998,4 +1027,5 @@ export function loadFacing(): MapFacing {
     // storage unavailable
   }
   return 'FOOT';
+
 }

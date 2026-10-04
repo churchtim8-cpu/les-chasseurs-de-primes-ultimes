@@ -249,3 +249,27 @@ test('escape mode: the player is the fugitive, guided to the hideout, and reachi
   await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Results']));
   expect(errors).toEqual([]);
 });
+
+test('le défi du jour: names, the same chase for everybody, first try counts; rain and Christmas draw without errors', async ({ page }) => {
+  const errors = watchErrors(page);
+  await page.goto('./?debug=1&weather=rain&fete=christmas');
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Title']));
+  await page.keyboard.press('d');
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Daily']));
+  const code = await info(page, 'daily');
+  expect(code).toMatch(/^BV-[EIHX]-[0-9A-Z]{4}-[0-9A-Z]{4}$/);
+
+  // PLAY asks for a nickname and class first, then opens today's chase.
+  await page.keyboard.press('Enter');
+  await expect(page.locator('input').first()).toBeVisible(SLOW);
+  await page.locator('input').nth(0).fill('Ti Jean');
+  await page.locator('input').nth(1).fill('4b');
+  await page.locator('input').nth(1).press('Enter');
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Chase']));
+  expect(await info(page, 'seed')).toBe(code);
+  const board = await page.evaluate(() => JSON.parse(window.localStorage.getItem('chasseurs.daily') ?? '{}'));
+  expect(board.nickname).toBe('TI JEAN');
+  expect(board.classCode).toBe('4B');
+  expect(board.played).toHaveLength(1);
+  expect(errors).toEqual([]);
+});

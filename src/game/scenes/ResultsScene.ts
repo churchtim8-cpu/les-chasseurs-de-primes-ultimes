@@ -11,6 +11,8 @@ import { loadProgress, saveProgress } from '../campaignStore';
 import { lookContext } from '../lookStore';
 import { loadProfile, saveProfile, today } from '../profileStore';
 import { debugState } from '../debug/debugState';
+import { addEntry, boardFor, scoreCode } from '../../engine/campaign/daily';
+import { loadBoard, saveBoard } from '../dailyStore';
 import { PALETTE, toCss } from '../palette';
 import { backdrop, MEDAL_NAMES, medalBadge, Menu, paper, rankLine, SCREEN_PICTURES, text } from '../ui/ui';
 
@@ -31,6 +33,9 @@ export interface ResultsData {
   escapeReason?: EscapeReason;
   /** Escape Mode: the player was the fugitive, and `stats.captured` means they reached the hideout. */
   escape?: boolean;
+  /** Le défi du jour: the day of the daily chase, and whether this was the try that counts. */
+  daily?: string;
+  dailyOfficial?: boolean;
 }
 
 const LINE_LABELS: Record<ScoreLine['key'], (count: number) => string> = {
@@ -102,6 +107,7 @@ export class ResultsScene extends Phaser.Scene {
     });
     saveProfile(recorded.profile);
     if (boss && captured) best = score.total > previousBest;
+    const daily = this.result.daily ? this.recordDaily(this.result.daily, score.total, starsFor(stats)) : null;
     const unlocked = newlyEarned(lookBefore, lookContext()).map((c) => `${SLOT_NAMES[c.slot]}: ${c.name}`);
 
     // Escape Mode shows the getaway for a win, the arrest for a loss.
@@ -110,7 +116,7 @@ export class ResultsScene extends Phaser.Scene {
     const x = 628;
     paper(this, x, 30, 600, 600, 0.95);
     const left = x + 32;
-    text(this, left, 50, escape ? 'ESCAPE' : boss ? `SPECIAL MISSION: ${boss.nickname.toUpperCase()}` : mission === null ? 'PRACTICE' : `MISSION ${mission + 1} / ${MISSION_COUNT}`, 22, {
+    text(this, left, 50, escape ? 'ESCAPE' : daily ? 'DAILY CHALLENGE' : boss ? `SPECIAL MISSION: ${boss.nickname.toUpperCase()}` : mission === null ? 'PRACTICE' : `MISSION ${mission + 1} / ${MISSION_COUNT}`, 22, {
       bold: true,
       color: toCss(PALETTE.seaDeep),
     });
@@ -187,7 +193,11 @@ export class ResultsScene extends Phaser.Scene {
     rankLine(this, left, 562, recorded.profile.points, 536);
 
     const menu = new Menu(this);
-    if (escape) {
+    if (daily) {
+      this.dailyCard(daily);
+      menu.add(x + 300, 680, 340, 60, 'CLASS BOARD  ▶', () => this.scene.start('Daily'), { size: 22 });
+      menu.add(x - 330, 680, 220, 60, 'MENU', () => this.scene.start('Title'), { key: 'ESC', size: 22 });
+    } else if (escape) {
       menu.add(x + 300, 680, 340, 60, 'NEW ESCAPE', () => this.scene.start('Practice', { autostart: true, escape: true }), { size: 22 });
       menu.add(x - 60, 680, 240, 60, 'REPLAY (R)', () => this.scene.start('Escape', { seed: this.result.seed }), { key: 'R', size: 22 });
       menu.add(x - 330, 680, 220, 60, 'MENU', () => this.scene.start('Title'), { key: 'ESC', size: 22 });
@@ -212,4 +222,41 @@ export class ResultsScene extends Phaser.Scene {
     }
     text(this, 24, 24, `${escape ? 'Escape' : 'Chase'} ${this.result.seed}`, 16, { color: toCss(PALETTE.cream), backgroundColor: 'rgba(22, 50, 61, 0.7)', padding: { x: 8, y: 4 } });
   }
+
+  /** The daily chase's first try goes on this device's class board, with a score code for the teacher. */
+  private recordDaily(date: string, total: number, stars: number): DailyResult {
+    const board = loadBoard();
+    if (!this.result.dailyOfficial || !board.nickname || !board.classCode) return { date, official: false, code: null, place: null };
+    const after = addEntry(board, { date, nickname: board.nickname, classCode: board.classCode, score: total, stars, local: true });
+    saveBoard(after);
+    const list = boardFor(after, date, board.classCode);
+    const place = list.findIndex((e) => e.local && e.nickname === board.nickname) + 1;
+    return {
+      date,
+      official: true,
+      code: scoreCode(date, board.nickname, board.classCode, { score: total, stars }),
+      place: place > 0 ? { place, of: list.length, classCode: board.classCode, nickname: board.nickname } : null,
+    };
+  }
+
+  /** The score code, large enough to read across a classroom, on the left of the results sheet. */
+  private dailyCard(daily: DailyResult): void {
+    paper(this, 40, 404, 548, 236, 0.95);
+    text(this, 64, 420, 'LE DÉFI DU JOUR', 24, { bold: true, color: toCss(PALETTE.terracotta) });
+    if (!daily.official || !daily.code) {
+      text(this, 64, 460, 'Practice try: only your first try of the day goes on the class board. Come back tomorrow for a new chase!', 21, { wordWrap: { width: 500 } });
+      return;
+    }
+    text(this, 64, 458, `${daily.place?.nickname ?? ''}  ·  class ${daily.place?.classCode ?? ''}`, 20);
+    text(this, 64, 490, 'Score code:', 20);
+    text(this, 314, 520, daily.code, 54, { bold: true, color: toCss(PALETTE.seaDeep), letterSpacing: 4 }).setOrigin(0.5, 0);
+    text(this, 64, 590, daily.place ? `Place ${daily.place.place} of ${daily.place.of} on this device · show the code to your teacher` : 'Show the code to your teacher', 17, { wordWrap: { width: 500 } });
+  }
+}
+
+interface DailyResult {
+  date: string;
+  official: boolean;
+  code: string | null;
+  place: { place: number; of: number; classCode: string; nickname: string } | null;
 }
