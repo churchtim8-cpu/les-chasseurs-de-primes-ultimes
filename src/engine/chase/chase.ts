@@ -231,6 +231,12 @@ export class Chase {
   /** The player must change to this mode; `announced` once the order has been given. */
   private pending: { mode: TravelMode; announced: boolean } | null = null;
   private carBrought = false;
+
+  /** The police car on foot was brought by a colleague ("Montez dans la voiture !"), not left by the player. */
+  get colleagueCar(): boolean {
+    return this.carBrought;
+  }
+
   /** Set while the player is being taken to the start of this stage. */
   private autoStage: number | null = null;
   private escapeReason?: EscapeReason;

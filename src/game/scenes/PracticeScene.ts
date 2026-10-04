@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { openCommands } from './CommandsScene';
 import { jingles, menuMusic } from '../audio/Jingles';
 import { DIFFICULTIES, DIFFICULTY_SETTINGS, type ChaseSeed, type Difficulty } from '../../engine';
 import { debugState } from '../debug/debugState';
@@ -148,8 +149,21 @@ export class PracticeScene extends Phaser.Scene {
     keyboard?.on('keydown-ENTER', () => this.start());
     keyboard?.on('keydown-SPACE', () => this.start());
     keyboard?.on('keydown-ESC', () => this.scene.start('Title'));
+    keyboard?.on('keydown-H', () => openCommands(this));
+    const commands = this.add
+      .text(GAME_WIDTH / 2, 548, '🎮  VOIR LES COMMANDES (H)', {
+        fontFamily: FONT_FAMILY,
+        fontSize: '20px',
+        fontStyle: 'bold',
+        color: toCss(PALETTE.cream),
+        backgroundColor: toCss(PALETTE.ink),
+        padding: { x: 16, y: 8 },
+      })
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true });
+    commands.on('pointerdown', () => openCommands(this));
     this.add
-      .text(GAME_WIDTH / 2, 540, 'ÉCHAP : retour au menu', { fontFamily: FONT_FAMILY, fontSize: '18px', color: toCss(PALETTE.ink) })
+      .text(GAME_WIDTH / 2, 600, 'ÉCHAP : retour au menu', { fontFamily: FONT_FAMILY, fontSize: '18px', color: toCss(PALETTE.ink) })
       .setOrigin(0.5);
   }
 

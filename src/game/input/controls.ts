@@ -6,14 +6,17 @@ import { FONT_FAMILY, PALETTE, toCss } from '../palette';
  *
  *   Left / Right   choose the next turn (held until a junction allows it)
  *   Up             go straight on at the next junction; hold to speed up
- *   Down           hold to slow down and stop
- *   Space          turn around (faire demi-tour)
- *   E              get out of / back into the car
+ *   Down           hold to slow down and stop; tap twice quickly to turn around
+ *   U              turn around (faire demi-tour)
+ *   Space or E     get out of / back into the car
  *   M              map overview (debug and practice)
  *   B              music on or off (handled by the chase scene)
  */
 
 export type ControlAction = 'LEFT' | 'RIGHT' | 'STRAIGHT' | 'U_TURN' | 'TOGGLE_MODE' | 'OVERVIEW';
+
+/** Two taps of ▼ this close together (ms) turn around (Mr Henry, 2026-10-03). */
+export const DOUBLE_TAP_MS = 320;
 
 export interface ControlState {
   accelerate: boolean;
@@ -48,8 +51,20 @@ export class Controls {
     on(['LEFT', 'A'], 'LEFT');
     on(['RIGHT', 'D'], 'RIGHT');
     on(['UP', 'W'], 'STRAIGHT');
-    on(['SPACE', 'U'], 'U_TURN');
-    on(['E'], 'TOGGLE_MODE');
+    on(['U'], 'U_TURN');
+    on(['SPACE', 'E'], 'TOGGLE_MODE');
+    // ▼ twice quickly: turn around (a held key's repeats do not count).
+    let lastDown = -Infinity;
+    for (const key of ['DOWN', 'S']) {
+      keyboard.on(`keydown-${key}`, (event: KeyboardEvent) => {
+        if (event.repeat) return;
+        const now = this.scene.time.now;
+        if (now - lastDown <= DOUBLE_TAP_MS) {
+          lastDown = -Infinity;
+          this.emit('U_TURN');
+        } else lastDown = now;
+      });
+    }
     on(['M'], 'OVERVIEW');
 
     const hold = (keys: string[], field: keyof ControlState) => {
@@ -104,6 +119,7 @@ export class Controls {
       this.state.accelerate = true;
       this.emit('STRAIGHT');
     }, () => (this.state.accelerate = false));
+    // Touch keeps its own ⟲ button for turning round, so a nervous double brake never spins the car.
     button(right, bottom, '▼', () => (this.state.brake = true), () => (this.state.brake = false));
     button(right - size - gap, bottom, '⟲', () => this.emit('U_TURN'));
     button(right - size - gap, bottom - size - gap, '⇄', () => this.emit('TOGGLE_MODE'));

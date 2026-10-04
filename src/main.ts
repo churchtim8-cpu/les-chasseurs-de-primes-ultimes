@@ -12,6 +12,8 @@ import { CommissariatScene } from './game/scenes/CommissariatScene';
 import { ChaseScene } from './game/scenes/ChaseScene';
 import { EscapeScene } from './game/scenes/EscapeScene';
 import { PracticeScene } from './game/scenes/PracticeScene';
+import { PauseScene } from './game/scenes/PauseScene';
+import { CommandsScene } from './game/scenes/CommandsScene';
 import { ResultsScene } from './game/scenes/ResultsScene';
 import { TitleScene } from './game/scenes/TitleScene';
 
@@ -29,7 +31,7 @@ const game = new Phaser.Game({
   // sound system would only run a second, silent audio engine alongside it.
   audio: { noAudio: true },
   // Boot (the loading screen) runs first, then the title screen.
-  scene: [BootScene, TitleScene, CampaignScene, BriefingScene, PracticeScene, ChaseScene, EscapeScene, ResultsScene, CaseClosedScene, CommissariatScene, FullscreenScene, DebugOverlayScene],
+  scene: [BootScene, TitleScene, CampaignScene, BriefingScene, PracticeScene, ChaseScene, EscapeScene, ResultsScene, CaseClosedScene, CommissariatScene, PauseScene, CommandsScene, FullscreenScene, DebugOverlayScene],
 });
 
 // The overlay runs on top of every other scene.

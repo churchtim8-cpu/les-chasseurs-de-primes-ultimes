@@ -37,6 +37,7 @@ import { TownLife } from '../render/townLife';
 import { scenarioOptionsFromAddress } from '../scenarioOptions';
 import { loadFacing, nextFacing } from './ChaseScene';
 import type { ResultsData } from './ResultsScene';
+import { PauseScene, type PauseSceneData } from './PauseScene';
 
 export interface EscapeSceneData {
   seed: string;
@@ -288,8 +289,8 @@ export class EscapeScene extends Phaser.Scene {
 
   private orderToasts(lines: SpokenText[]): void {
     const ids = lines.map((l) => l.audioId);
-    if (ids.includes(TRANSPORT_LINES.GET_OUT.audioId)) this.hud.showToast('⇄ (E) : descendre de la voiture', 3500);
-    if (ids.includes(TRANSPORT_LINES.GET_IN.audioId)) this.hud.showToast('⇄ (E) : monter dans la voiture', 3500);
+    if (ids.includes(TRANSPORT_LINES.GET_OUT.audioId)) this.hud.showToast('⇄ (ESPACE) : descendre de la voiture', 3500);
+    if (ids.includes(TRANSPORT_LINES.GET_IN.audioId)) this.hud.showToast('⇄ (ESPACE) : monter dans la voiture', 3500);
   }
 
   private showTransmission(transmission: Transmission, before: SpokenLine[] = [], lead: SpokenText[] = [], tail: SpokenText[] = []): void {
@@ -303,6 +304,18 @@ export class EscapeScene extends Phaser.Scene {
     this.speech = scannerAudio.play([...before, ...clips.map((c) => ({ audioId: c.audioId, radio: true }))]);
     const detail = [...lead.map((l) => l.audioId), ...transmission.instructions.map((i) => `${i.template} ${i.audioId}`), ...tail.map((l) => l.audioId)].join(' + ');
     debugState.info.set('scanner', `${transmission.kind}: ${detail}`);
+  }
+
+  /** ÉCHAP: everything freezes under the pause menu (the new police colours show from the next escape). */
+  private pause(): void {
+    if (this.stage === 'RESULTS' || !this.scene.isActive()) return;
+    const data: PauseSceneData = {
+      returnTo: this.scene.key,
+      retry: () => this.scene.start(EscapeScene.KEY, { seed: this.seed }),
+      quit: () => this.scene.start('Title'),
+    };
+    this.scene.launch(PauseScene.KEY, data);
+    this.scene.pause();
   }
 
   private handleAction(action: ControlAction): void {
@@ -533,7 +546,9 @@ export class EscapeScene extends Phaser.Scene {
   private bindKeys(): void {
     const keyboard = this.input.keyboard;
     if (!keyboard) return;
-    keyboard.on('keydown-ESC', () => this.scene.start('Title'));
+    keyboard.on('keydown-ESC', () => this.pause());
+    keyboard.addCapture('TAB');
+    keyboard.on('keydown-TAB', () => this.hud.toggle());
     keyboard.on('keydown-R', () => this.repeat());
     keyboard.on('keydown-K', () => {
       if (debugState.isEnabled && this.stage === 'PURSUIT') this.handleEvents(this.escape.forceOutcome('CAPTURED'));

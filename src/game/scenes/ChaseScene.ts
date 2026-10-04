@@ -27,6 +27,7 @@ import { loadProfile } from '../profileStore';
 import { BOSS, bossInfo, suspectPaceFor, type BossInfo } from '../../engine/campaign/profile';
 import { nearestLocation } from '../../engine/language/analysis';
 import type { ResultsData } from './ResultsScene';
+import { PauseScene, type PauseSceneData } from './PauseScene';
 import { scannerAudio, type SpokenLine } from '../audio/ScannerAudio';
 import { CameraRig, MAP_FACINGS, type MapFacing } from '../camera/cameraRig';
 import { debugState } from '../debug/debugState';
@@ -42,6 +43,7 @@ import {
 } from '../render/actors';
 import { arrestKind, playArrest } from '../render/arrest';
 import { BURNOUT_SMOKE, DriftEffects } from '../render/drift';
+import { ColleagueArrival } from '../render/colleague';
 import { drawNight, nightOn } from '../render/night';
 import { LanePosition } from '../render/lanes';
 import { EscapeEffects } from '../render/escapes';
@@ -137,6 +139,10 @@ export class ChaseScene extends Phaser.Scene {
   private speech: Promise<void> = Promise.resolve();
   /** The burnout at "GO !" lasts until this scene time; the car only moves off from `launchAt`. */
   private burnoutUntil = 0;
+  /** The colleague bringing the police car, while it drives up (see colleagueDrivesUp). */
+  private arrival: ColleagueArrival | null = null;
+  /** The camera that draws only the HUD (world objects made later must be hidden from it). */
+  private uiCamera: Phaser.Cameras.Scene2D.Camera | null = null;
   private launchAt = 0;
   private burning = false;
   private seed = '';
@@ -153,6 +159,7 @@ export class ChaseScene extends Phaser.Scene {
     this.boss = data.boss ? bossInfo(data.boss) ?? BOSS : null;
     this.stage = 'OPENING';
     this.burnoutUntil = 0;
+    this.arrival = null;
     this.launchAt = 0;
     this.burning = false;
     this.staged = false;
@@ -247,6 +254,7 @@ export class ChaseScene extends Phaser.Scene {
 
     const ui = this.cameras.add(0, 0, this.scale.width, this.scale.height);
     ui.ignore(worldObjects);
+    this.uiCamera = ui;
     this.cameras.main.ignore([...this.hud.objects, ...this.controls.uiObjects]);
 
     this.bindKeys();
@@ -423,8 +431,8 @@ export class ChaseScene extends Phaser.Scene {
   /** An order also shows which button to press. */
   private orderToasts(lines: SpokenText[]): void {
     const ids = lines.map((l) => l.audioId);
-    if (ids.includes(TRANSPORT_LINES.GET_OUT.audioId)) this.hud.showToast('⇄ (E) : descendre de la voiture', 3500);
-    if (ids.includes(TRANSPORT_LINES.GET_IN.audioId)) this.hud.showToast('⇄ (E) : monter dans la voiture', 3500);
+    if (ids.includes(TRANSPORT_LINES.GET_OUT.audioId)) this.hud.showToast('⇄ (ESPACE) : descendre de la voiture', 3500);
+    if (ids.includes(TRANSPORT_LINES.GET_IN.audioId)) this.hud.showToast('⇄ (ESPACE) : monter dans la voiture', 3500);
   }
 
   /**
@@ -527,6 +535,7 @@ export class ChaseScene extends Phaser.Scene {
     this.driving.update({ driving: me.mode === 'CAR' && this.stage === 'PURSUIT', speed: me.speed, heading: me.heading }, delta);
     this.footsteps.update({ running: me.mode === 'FOOT' && this.stage === 'PURSUIT', speed: me.speed, stride: this.stride }, delta);
     this.placeParked(this.car, me.mode === 'CAR' ? null : this.chase.parkedCar, me.mode === 'CAR');
+    this.colleagueDrivesUp(me.mode, delta);
     // After a crash the wreck stands for the abandoned car (and any car left earlier stays where it is).
     if (this.wrecked.size === 0) this.placeParked(this.abandonedCar, this.chase.abandonedCar, false);
     // Above the player on screen, whichever way the map is turned.
@@ -687,6 +696,27 @@ export class ChaseScene extends Phaser.Scene {
     this.hud.setMusic(!muted);
   }
 
+  /**
+   * When the suspect jumps into a car, a colleague races the police car up the
+   * road and screeches to a halt beside the officer ("Montez dans la voiture !"),
+   * instead of the car simply appearing where it parks.
+   */
+  private colleagueDrivesUp(mode: TravelMode, delta: number): void {
+    const parked = mode === 'FOOT' && this.chase.colleagueCar ? this.chase.parkedCar : null;
+    if (!parked) {
+      if (this.arrival) this.drift.lift('colleague');
+      this.arrival = null;
+      return;
+    }
+    if (this.arrival?.parked !== parked) this.arrival = new ColleagueArrival(this.graph, parked);
+    if (this.arrival.done) return;
+    const at = this.arrival.update(delta);
+    this.car.setVisible(true).setPosition(at.x, at.y).setRotation(at.rotation);
+    if (at.screech) actionSounds.screech(1.1, 0.22);
+    if (at.braking) this.drift.tyres('colleague', at.x, at.y, at.rotation, 0.9, delta / 1000);
+    else this.drift.lift('colleague');
+  }
+
   /** A parked car (the police car while on foot, or the one the suspect left), or hidden. */
   private placeParked(sprite: Phaser.GameObjects.Container, at: MoverStart | null, inUse: boolean): void {
     if (inUse) {
@@ -782,6 +812,32 @@ export class ChaseScene extends Phaser.Scene {
     });
   }
 
+  /** ÉCHAP: everything freezes under the pause menu (see PauseScene). */
+  private pause(): void {
+    if (this.stage === 'RESULTS' || !this.scene.isActive()) return;
+    const data: PauseSceneData = {
+      returnTo: this.scene.key,
+      retry: () => this.scene.start(ChaseScene.KEY, { seed: this.seed, ...(this.mission !== null ? { mission: this.mission } : {}), ...(this.boss ? { boss: this.boss.picture } : {}) }),
+      quit: () => this.scene.start(this.mission === null ? 'Title' : 'Campaign'),
+      liveryChanged: () => this.redrawPolice(),
+    };
+    this.scene.launch(PauseScene.KEY, data);
+    this.scene.pause();
+  }
+
+  /** New police colours from the pause menu: the car and officer are drawn again where they are. */
+  private redrawPolice(): void {
+    const colours = livery(loadProgress().livery);
+    const swap = (old: Phaser.GameObjects.Container, made: Phaser.GameObjects.Container) => {
+      made.setPosition(old.x, old.y).setRotation(old.rotation).setVisible(old.visible).setAlpha(old.alpha);
+      this.uiCamera?.ignore(made);
+      old.destroy();
+      return made;
+    };
+    this.car = swap(this.car, createPoliceCar(this, colours));
+    this.officer = swap(this.officer, createOfficer(this, colours));
+  }
+
   private nextChase(): void {
     this.scene.start('Practice', { autostart: true });
   }
@@ -789,7 +845,10 @@ export class ChaseScene extends Phaser.Scene {
   private bindKeys(): void {
     const keyboard = this.input.keyboard;
     if (!keyboard) return;
-    keyboard.on('keydown-ESC', () => this.scene.start(this.mission === null ? 'Title' : 'Campaign'));
+    keyboard.on('keydown-ESC', () => this.pause());
+    // TAB hides or shows the HUD (the browser would otherwise move the focus).
+    keyboard.addCapture('TAB');
+    keyboard.on('keydown-TAB', () => this.hud.toggle());
     keyboard.on('keydown-R', () => this.repeat());
     keyboard.on('keydown-C', () => {
       if (debugState.isEnabled && this.stage === 'PURSUIT') this.chase.teleportPlayerToSuspect();
