@@ -28,6 +28,8 @@ import { arrestKind, playArrest } from '../render/arrest';
 import { BURNOUT_SMOKE, DriftEffects } from '../render/drift';
 import { LanePosition } from '../render/lanes';
 import { drawNight, nightOn } from '../render/night';
+import { currentFestival, drawFestival } from '../render/festival';
+import { drawWeather, onScreen, weatherFor } from '../render/weather';
 import { RoundaboutGuide } from '../render/roundaboutGuide';
 import { preloadCanvaArt } from '../render/canvaArt';
 import { drawTown, type TownLayers } from '../render/townRenderer';
@@ -132,6 +134,8 @@ export class EscapeScene extends Phaser.Scene {
       this.footsteps.stop();
     });
     this.layers = drawTown(this, this.graph);
+    // Bellevue en fête: Carnival or Christmas decorations, by the calendar or the title-screen choice.
+    drawFestival(this, this.graph, currentFestival(), nightOn());
     if (nightOn()) drawNight(this, this.graph);
     if (new URLSearchParams(window.location.search).get('life') !== '0') {
       this.life = new TownLife(this, this.graph, {
@@ -174,6 +178,8 @@ export class EscapeScene extends Phaser.Scene {
     const ui = this.cameras.add(0, 0, this.scale.width, this.scale.height);
     ui.ignore(worldObjects);
     this.cameras.main.ignore([...this.hud.objects, ...this.controls.uiObjects]);
+    // Rain or fog over the town (drawing only), under the HUD.
+    this.cameras.main.ignore(drawWeather(this, weatherFor(this.seed), () => this.playerOnScreen()));
 
     this.bindKeys();
     this.syncDebug();
@@ -191,6 +197,12 @@ export class EscapeScene extends Phaser.Scene {
     debugState.info.set('audio', `${scannerAudio.clipCount} clips`);
     this.hud.update(this.escape.status, me.mode);
     this.opening();
+  }
+
+  /** Where the player is on screen, for the fog to stay clear around them. */
+  private playerOnScreen(): { x: number; y: number } {
+    const me = this.escape.player.snapshot();
+    return onScreen(this.cameras.main, me.x, me.y);
   }
 
   override update(_time: number, delta: number): void {
@@ -618,4 +630,5 @@ export class EscapeScene extends Phaser.Scene {
     this.layers?.debug.setVisible(on);
     this.routeOverlay?.setVisible(on);
   }
+
 }
