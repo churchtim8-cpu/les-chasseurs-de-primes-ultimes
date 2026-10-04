@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { jingles, menuMusic } from '../audio/Jingles';
+import { OFFICERS } from '../../engine/campaign/officers';
 import { nextRank, rankFor } from '../../engine/campaign/profile';
 import { FONT_FAMILY, PALETTE, toCss } from '../palette';
 
@@ -9,6 +10,9 @@ export const SCREEN_PICTURES = {
   captured: 'm8-captured',
   escaped: 'm8-escaped',
   caseClosed: 'm8-caseclosed',
+  /** Escape Mode, from the fugitive's side: got away, or caught. */
+  escapeWon: 'm8-escape-won',
+  escapeCaught: 'm8-escape-caught',
 } as const;
 
 const SCREEN_FILES: Record<string, string> = {
@@ -16,9 +20,12 @@ const SCREEN_FILES: Record<string, string> = {
   'm8-captured': 'captured.jpg',
   'm8-escaped': 'escaped.jpg',
   'm8-caseclosed': 'caseclosed.jpg',
+  'm8-escape-won': 'escape-won.jpg',
+  'm8-escape-caught': 'escape-caught.jpg',
 };
 
 export const suspectPictureKey = (picture: string) => `m8-suspect-${picture}`;
+export const officerPictureKey = (id: string) => `m8-officer-${id}`;
 
 /** Queues every M8 picture that is not loaded yet (the loading screen calls this). */
 export function preloadScreenPictures(scene: Phaser.Scene, suspects: readonly string[]): void {
@@ -29,6 +36,10 @@ export function preloadScreenPictures(scene: Phaser.Scene, suspects: readonly st
   for (const picture of suspects) {
     const key = suspectPictureKey(picture);
     if (!scene.textures.exists(key)) scene.load.image(key, `${base}suspect-${picture}.jpg`);
+  }
+  for (const officer of OFFICERS) {
+    const key = officerPictureKey(officer.id);
+    if (!scene.textures.exists(key)) scene.load.image(key, `${base}officer-${officer.id}.jpg`);
   }
 }
 

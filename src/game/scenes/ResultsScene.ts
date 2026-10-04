@@ -13,6 +13,9 @@ import { loadProfile, saveProfile, today } from '../profileStore';
 import { debugState } from '../debug/debugState';
 import { addEntry, boardFor, scoreCode } from '../../engine/campaign/daily';
 import { loadBoard, saveBoard } from '../dailyStore';
+import { onlineOn, submitScore } from '../online/onlineBoard';
+import { loadEscapeProgress, newEscapeSeed, saveEscapeProgress } from '../escapeStore';
+import { nextOfficer, officerInfo, officerUnlocked, OFFICERS, recordEscape, type OfficerInfo } from '../../engine/campaign/officers';
 import { PALETTE, toCss } from '../palette';
 import { backdrop, MEDAL_NAMES, medalBadge, Menu, paper, rankLine, SCREEN_PICTURES, text } from '../ui/ui';
 
@@ -33,6 +36,8 @@ export interface ResultsData {
   escapeReason?: EscapeReason;
   /** Escape Mode: the player was the fugitive, and `stats.captured` means they reached the hideout. */
   escape?: boolean;
+  /** The escape campaign's officer (officers.ts id), when the escape was from one. */
+  officer?: string;
   /** Le défi du jour: the day of the daily chase, and whether this was the try that counts. */
   daily?: string;
   dailyOfficial?: boolean;
@@ -109,19 +114,29 @@ export class ResultsScene extends Phaser.Scene {
     if (boss && captured) best = score.total > previousBest;
     const daily = this.result.daily ? this.recordDaily(this.result.daily, score.total, starsFor(stats)) : null;
     const unlocked = newlyEarned(lookBefore, lookContext()).map((c) => `${SLOT_NAMES[c.slot]}: ${c.name}`);
+    // The escape campaign: the officer's file, and any officer this opened.
+    const officer = escape ? officerInfo(this.result.officer) ?? null : null;
+    let opened: OfficerInfo[] = [];
+    if (officer) {
+      const before = loadEscapeProgress();
+      const after = recordEscape(before, officer.id, { escaped: captured, score: score.total, stars: starsFor(stats) });
+      saveEscapeProgress(after);
+      best = captured && score.total > (before.records[officer.id]?.bestScore ?? -1) && before.records[officer.id] !== undefined;
+      opened = OFFICERS.filter((o) => !officerUnlocked(before, o.id) && officerUnlocked(after, o.id));
+    }
 
-    // Escape Mode shows the getaway for a win, the arrest for a loss.
-    backdrop(this, captured !== escape ? SCREEN_PICTURES.captured : SCREEN_PICTURES.escaped);
+    // Escape Mode shows the fugitive's side: the getaway for a win, the arrest for a loss.
+    backdrop(this, escape ? (captured ? SCREEN_PICTURES.escapeWon : SCREEN_PICTURES.escapeCaught) : captured ? SCREEN_PICTURES.captured : SCREEN_PICTURES.escaped);
     // Clear of the full-screen button in the top-right corner.
     const x = 628;
     paper(this, x, 30, 600, 600, 0.95);
     const left = x + 32;
-    text(this, left, 50, escape ? 'ESCAPE' : daily ? 'DAILY CHALLENGE' : boss ? `SPECIAL MISSION: ${boss.nickname.toUpperCase()}` : mission === null ? 'PRACTICE' : `MISSION ${mission + 1} / ${MISSION_COUNT}`, 22, {
+    text(this, left, 50, officer ? `ESCAPE: ${officer.nickname.toUpperCase()}` : escape ? 'ESCAPE' : daily ? 'DAILY CHALLENGE' : boss ? `SPECIAL MISSION: ${boss.nickname.toUpperCase()}` : mission === null ? 'PRACTICE' : `MISSION ${mission + 1} / ${MISSION_COUNT}`, 22, {
       bold: true,
       color: toCss(PALETTE.seaDeep),
     });
     // Stars for the chase (★ caught, ★★ no wrong turn, ★★★ no repeat): replaying for all three means more listening.
-    if (!escape) {
+    if (!escape || officer) {
       const stars = starsFor(stats);
       for (let i = 0; i < 3; i++) {
         const on = i < stars;
@@ -137,10 +152,14 @@ export class ResultsScene extends Phaser.Scene {
     const nickname = boss ? ` « ${boss.nickname} »` : mission !== null ? ` « ${MISSIONS[mission]!.nickname} »` : '';
     const detail = escape
       ? captured
-        ? 'You reached the hideout.'
+        ? officer
+          ? `${officer.nickname} lost your trail!`
+          : 'You reached the hideout.'
         : this.result.escapeReason === 'TIME'
           ? 'Time is up: the roadblocks were in place.'
-          : 'The police caught you.'
+          : officer
+            ? `${officer.nickname} caught you.`
+            : 'The police caught you.'
       : captured
         ? `You caught the suspect${nickname}!`
         : 'Time is up.';
@@ -180,6 +199,14 @@ export class ResultsScene extends Phaser.Scene {
       const line = text(this, left, note, `Garage 🔓 ${shown}`, 19, { bold: true, color: toCss(0x2e8b57), wordWrap: { width: 536 } });
       note += line.height + 6;
     }
+    if (opened.length > 0) {
+      const line = text(this, left, note, `${opened.some((o) => o.hidden) ? '🏍️ Secret squad open' : '🔓 New officer'}: ${opened.map((o) => o.nickname).join(', ')}`, 20, {
+        bold: true,
+        color: toCss(PALETTE.terracotta),
+        wordWrap: { width: 536 },
+      });
+      note += line.height + 6;
+    }
     if (recorded.newBadges.length > 0) {
       const one = recorded.newBadges.length === 1;
       const list = recorded.newBadges.map((b) => `${b.icon} ${b.name}`).join('   ');
@@ -197,6 +224,11 @@ export class ResultsScene extends Phaser.Scene {
       this.dailyCard(daily);
       menu.add(x + 300, 680, 340, 60, 'CLASS BOARD  ▶', () => this.scene.start('Daily'), { size: 22 });
       menu.add(x - 330, 680, 220, 60, 'MENU', () => this.scene.start('Title'), { key: 'ESC', size: 22 });
+    } else if (officer) {
+      const next = nextOfficer(loadEscapeProgress(), officer.id);
+      menu.add(x + 300, 680, 340, 60, next ? 'NEXT OFFICER  ▶' : 'OFFICERS  ▶', () => this.scene.start('Officers', next ? { show: next.id } : {}), { size: 22 });
+      menu.add(x - 60, 680, 240, 60, 'TRY AGAIN (R)', () => this.scene.start('Escape', { seed: newEscapeSeed(officer), officer: officer.id }), { key: 'R', size: 22 });
+      menu.add(x - 330, 680, 220, 60, 'OFFICERS', () => this.scene.start('Officers'), { key: 'ESC', size: 22 });
     } else if (escape) {
       menu.add(x + 300, 680, 340, 60, 'NEW ESCAPE', () => this.scene.start('Practice', { autostart: true, escape: true }), { size: 22 });
       menu.add(x - 60, 680, 240, 60, 'REPLAY (R)', () => this.scene.start('Escape', { seed: this.result.seed }), { key: 'R', size: 22 });
@@ -226,9 +258,10 @@ export class ResultsScene extends Phaser.Scene {
   /** The daily chase's first try goes on this device's class board, with a score code for the teacher. */
   private recordDaily(date: string, total: number, stars: number): DailyResult {
     const board = loadBoard();
-    if (!this.result.dailyOfficial || !board.nickname || !board.classCode) return { date, official: false, code: null, place: null };
+    if (!this.result.dailyOfficial || !board.nickname || !board.classCode) return { date, official: false, code: null, place: null, sent: null };
     const after = addEntry(board, { date, nickname: board.nickname, classCode: board.classCode, score: total, stars, local: true });
     saveBoard(after);
+    const sent = onlineOn() ? submitScore({ date, nickname: board.nickname, classCode: board.classCode, score: total, stars }) : null;
     const list = boardFor(after, date, board.classCode);
     const place = list.findIndex((e) => e.local && e.nickname === board.nickname) + 1;
     return {
@@ -236,6 +269,7 @@ export class ResultsScene extends Phaser.Scene {
       official: true,
       code: scoreCode(date, board.nickname, board.classCode, { score: total, stars }),
       place: place > 0 ? { place, of: list.length, classCode: board.classCode, nickname: board.nickname } : null,
+      sent,
     };
   }
 
@@ -250,7 +284,12 @@ export class ResultsScene extends Phaser.Scene {
     text(this, 64, 458, `${daily.place?.nickname ?? ''}  ·  class ${daily.place?.classCode ?? ''}`, 20);
     text(this, 64, 490, 'Score code:', 20);
     text(this, 314, 520, daily.code, 54, { bold: true, color: toCss(PALETTE.seaDeep), letterSpacing: 4 }).setOrigin(0.5, 0);
-    text(this, 64, 590, daily.place ? `Place ${daily.place.place} of ${daily.place.of} on this device · show the code to your teacher` : 'Show the code to your teacher', 17, { wordWrap: { width: 500 } });
+    const where = daily.place ? `Place ${daily.place.place} of ${daily.place.of} on this device · show the code to your teacher` : 'Show the code to your teacher';
+    const line = text(this, 64, 590, daily.sent ? '🌐 Sending to the online class board…' : where, 17, { wordWrap: { width: 500 } });
+    void daily.sent?.then((ok) => {
+      if (!line.active) return;
+      line.setText(ok ? '🌐 On the online class board ✓  (keep the code as a backup)' : 'Could not reach the online board: it will try again later. Show the code to your teacher.');
+    });
   }
 }
 
@@ -259,4 +298,6 @@ interface DailyResult {
   official: boolean;
   code: string | null;
   place: { place: number; of: number; classCode: string; nickname: string } | null;
+  /** The send to the online board (true once it arrived), or null when the online board is off. */
+  sent: Promise<boolean> | null;
 }
