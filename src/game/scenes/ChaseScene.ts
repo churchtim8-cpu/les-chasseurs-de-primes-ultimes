@@ -42,6 +42,7 @@ import {
 } from '../render/actors';
 import { arrestKind, playArrest } from '../render/arrest';
 import { BURNOUT_SMOKE, DriftEffects } from '../render/drift';
+import { ColleagueArrival } from '../render/colleague';
 import { drawNight, nightOn } from '../render/night';
 import { LanePosition } from '../render/lanes';
 import { EscapeEffects } from '../render/escapes';
@@ -137,6 +138,8 @@ export class ChaseScene extends Phaser.Scene {
   private speech: Promise<void> = Promise.resolve();
   /** The burnout at "GO !" lasts until this scene time; the car only moves off from `launchAt`. */
   private burnoutUntil = 0;
+  /** The colleague bringing the police car, while it drives up (see colleagueDrivesUp). */
+  private arrival: ColleagueArrival | null = null;
   private launchAt = 0;
   private burning = false;
   private seed = '';
@@ -153,6 +156,7 @@ export class ChaseScene extends Phaser.Scene {
     this.boss = data.boss ? bossInfo(data.boss) ?? BOSS : null;
     this.stage = 'OPENING';
     this.burnoutUntil = 0;
+    this.arrival = null;
     this.launchAt = 0;
     this.burning = false;
     this.staged = false;
@@ -527,6 +531,7 @@ export class ChaseScene extends Phaser.Scene {
     this.driving.update({ driving: me.mode === 'CAR' && this.stage === 'PURSUIT', speed: me.speed, heading: me.heading }, delta);
     this.footsteps.update({ running: me.mode === 'FOOT' && this.stage === 'PURSUIT', speed: me.speed, stride: this.stride }, delta);
     this.placeParked(this.car, me.mode === 'CAR' ? null : this.chase.parkedCar, me.mode === 'CAR');
+    this.colleagueDrivesUp(me.mode, delta);
     // After a crash the wreck stands for the abandoned car (and any car left earlier stays where it is).
     if (this.wrecked.size === 0) this.placeParked(this.abandonedCar, this.chase.abandonedCar, false);
     // Above the player on screen, whichever way the map is turned.
@@ -685,6 +690,27 @@ export class ChaseScene extends Phaser.Scene {
   private toggleMusic(): void {
     const muted = this.music.toggleMute();
     this.hud.setMusic(!muted);
+  }
+
+  /**
+   * When the suspect jumps into a car, a colleague races the police car up the
+   * road and screeches to a halt beside the officer ("Montez dans la voiture !"),
+   * instead of the car simply appearing where it parks.
+   */
+  private colleagueDrivesUp(mode: TravelMode, delta: number): void {
+    const parked = mode === 'FOOT' && this.chase.colleagueCar ? this.chase.parkedCar : null;
+    if (!parked) {
+      if (this.arrival) this.drift.lift('colleague');
+      this.arrival = null;
+      return;
+    }
+    if (this.arrival?.parked !== parked) this.arrival = new ColleagueArrival(this.graph, parked);
+    if (this.arrival.done) return;
+    const at = this.arrival.update(delta);
+    this.car.setVisible(true).setPosition(at.x, at.y).setRotation(at.rotation);
+    if (at.screech) actionSounds.screech(1.1, 0.22);
+    if (at.braking) this.drift.tyres('colleague', at.x, at.y, at.rotation, 0.9, delta / 1000);
+    else this.drift.lift('colleague');
   }
 
   /** A parked car (the police car while on foot, or the one the suspect left), or hidden. */
