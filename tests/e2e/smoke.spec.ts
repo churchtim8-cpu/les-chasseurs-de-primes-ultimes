@@ -39,9 +39,26 @@ test('title screen starts a chase; drive, get out and debug toggle work', async 
   // The scanner gives the first French instruction as the chase starts.
   await expect.poll(() => info(page, 'scanner'), SLOW).toMatch(/^(DIRECTION|FILLER|FINAL): /);
 
-  // Getting out switches to foot mode, and the camera zooms in.
+  // ÉCHAP pauses: the clock stops under the pause menu; the controls open from it; ÉCHAP carries on.
+  await page.keyboard.press('Escape');
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Pause']));
+  const clock = () => page.evaluate(() => (window.__bellevue?.game.scene.getScene('Chase') as unknown as { chase: { status: { timeLeft: number } } }).chase.status.timeLeft);
+  const frozen = await clock();
+  await page.waitForTimeout(800);
+  expect(await clock()).toBe(frozen);
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Commands']));
+  await page.keyboard.press('Escape');
+  await expect.poll(() => activeScenes(page), SLOW).not.toContain('Commands');
+  await page.keyboard.press('Escape');
+  await expect.poll(() => activeScenes(page), SLOW).not.toContain('Pause');
+  await expect.poll(clock, SLOW).toBeLessThan(frozen);
+
+  // Getting out (ESPACE) switches to foot mode, and the camera zooms in.
   const carZoom = Number(await info(page, 'zoom'));
-  await page.keyboard.press('e');
+  await page.keyboard.press('Space');
   await expect.poll(() => info(page, 'mode')).toBe('FOOT');
   await expect.poll(async () => Number(await info(page, 'zoom')), SLOW).toBeGreaterThan(carZoom * 1.5);
   // On foot the map turns so the officer faces up the screen (a screen angle of -90°).

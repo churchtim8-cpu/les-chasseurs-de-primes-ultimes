@@ -52,6 +52,8 @@ export class ScannerAudio {
   private cancelled = 0;
   /** Calls queued that have not started yet. */
   private waiting = 0;
+  /** The game is paused: sound stays frozen until it carries on (see pause). */
+  private paused = false;
   /** Ends the wait for the call playing now (see stop). */
   private wake: (() => void) | null = null;
   /** The radio filter can be switched off (?radio=0) to hear the clean recordings. */
@@ -96,6 +98,7 @@ export class ScannerAudio {
   /** Start the sound again if it was paused (another app took the speakers, a power saver, a hidden tab). */
   private resume(): void {
     const ctx = this.ctx;
+    if (this.paused) return;
     if (ctx && ctx.state !== 'running' && ctx.state !== 'closed') ctx.resume().catch(() => undefined);
   }
 
@@ -139,6 +142,22 @@ export class ScannerAudio {
   /** True once the browser lets the game make sound. */
   get running(): boolean {
     return this.ctx?.state === 'running';
+  }
+
+  /**
+   * The pause menu freezes every sound where it is (a call carries on
+   * mid-word afterwards); `pause(false)` lets it play on.
+   */
+  pause(on: boolean): void {
+    this.paused = on;
+    const ctx = this.ctx;
+    if (!ctx || ctx.state === 'closed') return;
+    if (on) ctx.suspend().catch(() => undefined);
+    else this.resume();
+  }
+
+  get isPaused(): boolean {
+    return this.paused;
   }
 
   /** Urgent news: cut off whatever is being said and say this now. */
@@ -244,7 +263,13 @@ export class ScannerAudio {
     if (radioAt !== -1) t = this.click(t);
     await new Promise<void>((resolve) => {
       this.wake = resolve; // stop() ends the wait at once
-      setTimeout(resolve, Math.max(0, (t - ctx.currentTime) * 1000));
+      // Measured on the sound clock, so a paused game (see pause) keeps waiting until the call is really over.
+      const check = () => {
+        const left = t - ctx.currentTime;
+        if (left <= 0.005) resolve();
+        else setTimeout(check, left * 1000 + 15);
+      };
+      check();
     });
     // The music comes back up only when no other call follows straight on (no pumping between calls).
     if (ticket > this.cancelled && this.waiting === 0) this.duck(false);

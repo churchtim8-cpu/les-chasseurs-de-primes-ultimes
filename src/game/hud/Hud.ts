@@ -7,126 +7,164 @@ import type { TravelMode } from '../../engine/world/graph';
 import { FONT_FAMILY, PALETTE, toCss } from '../palette';
 import { FULLSCREEN_BUTTON } from '../layout';
 
+/** The HUD's dark glass panels, edged in pale blue like a police tablet. */
+const GLASS = { fill: 0x0b1d26, alpha: 0.84, edge: PALETTE.lightBlue, edgeAlpha: 0.55, radius: 10 } as const;
+const RED = 0xe0463a;
+const BLUE = 0x2f7de1;
+const GREEN = 0x6fcf7c;
+const AMBER = 0xe8c547;
+/** The last seconds of the clock flash red. */
+const HURRY_SECONDS = 15;
+/** Left column: mission badge, the radar with the signal, then the buttons. */
+const LEFT = { x: 16, w: 300 } as const;
+const RADAR = { y: 70, h: 92, r: 34 } as const;
+const BUTTONS = { y: 174, h: 36, gap: 8 } as const;
+
+function glass(g: Phaser.GameObjects.Graphics, x: number, y: number, w: number, h: number, edge: number = GLASS.edge): void {
+  g.fillStyle(0x000000, 0.3).fillRoundedRect(x + 3, y + 4, w, h, GLASS.radius);
+  g.fillStyle(GLASS.fill, GLASS.alpha).fillRoundedRect(x, y, w, h, GLASS.radius);
+  g.lineStyle(2, edge, GLASS.edgeAlpha).strokeRoundedRect(x, y, w, h, GLASS.radius);
+}
+
+interface HudButton {
+  panel: Phaser.GameObjects.Graphics;
+  hit: Phaser.GameObjects.Zone;
+  key: Phaser.GameObjects.Text;
+  label: Phaser.GameObjects.Text;
+}
+
 /**
- * Chase HUD (blueprint section 19): mission number, timer, signal strength,
- * transport mode and short messages. The map keeps most of the screen; the
- * correct route is never drawn and there is no "CORRECT!" feedback.
+ * Chase HUD (blueprint section 19, made more immersive at Mr Henry's request,
+ * 2026-10-03): a police tablet's dark glass panels. Top left the mission
+ * badge, then a radar sweeping for the suspect's signal, then the buttons
+ * (Répéter, Musique, Carte) with their keys; the clock in the middle with
+ * flashing lights and a draining bar; the transport top right; the scanner
+ * call along the bottom like a radio read-out. TAB hides the panels (the
+ * scanner, messages and questions still show). The correct route is never
+ * drawn and there is no "CORRECT!" feedback.
  */
 export class Hud {
   readonly objects: Phaser.GameObjects.GameObject[] = [];
   private readonly timer: Phaser.GameObjects.Text;
+  private readonly timerLights: Phaser.GameObjects.Rectangle[];
+  private readonly timeBar: Phaser.GameObjects.Rectangle;
+  private readonly timeBarWidth = 168;
+  private longest = 0;
   private readonly mode: Phaser.GameObjects.Text;
+  private readonly modeIcon: Phaser.GameObjects.Graphics;
+  private shownMode: TravelMode | null = null;
+  private readonly signalPanel: Phaser.GameObjects.Graphics;
+  private readonly radar: Phaser.GameObjects.Graphics;
   private readonly signalBars: Phaser.GameObjects.Rectangle[] = [];
   private readonly signalLabel: Phaser.GameObjects.Text;
+  private readonly signalState: Phaser.GameObjects.Text;
+  private warningShown: boolean | null = null;
   private readonly toast: Phaser.GameObjects.Text;
   private readonly banner: Phaser.GameObjects.Text;
   private readonly scanner: Phaser.GameObjects.Text;
-  private readonly repeat: Phaser.GameObjects.Text;
-  private readonly music: Phaser.GameObjects.Text;
-  private readonly facing: Phaser.GameObjects.Text;
+  private readonly scannerPanel: Phaser.GameObjects.Graphics;
+  private readonly scannerTag: Phaser.GameObjects.Text;
+  private readonly scannerLed: Phaser.GameObjects.Arc;
+  private readonly repeat: HudButton;
+  private readonly music: HudButton;
+  private readonly facing: HudButton;
   private readonly sighting: SightingPanel;
+  /** The panels TAB hides (the scanner call, banners, messages and questions always show). */
+  private readonly chrome: Phaser.GameObjects.GameObject[] = [];
+  private shown = true;
 
   constructor(
     private readonly scene: Phaser.Scene,
     /** Top-left label, e.g. "MISSION 4 / 8" (or "ENTRAÎNEMENT" in practice). */
     missionLabel: string,
-    /** What the signal bars measure: the suspect's signal, or "POLICE" in Escape Mode. */
+    /** What the signal measures: the suspect's signal, or "POLICE" in Escape Mode. */
     private readonly signalName = 'SIGNAL',
   ) {
-    const { width } = scene.scale;
-    const panel = (x: number, y: number, text: string, origin: [number, number], size = 20) =>
-      this.add(
-        scene.add
-          .text(x, y, text, {
-            fontFamily: FONT_FAMILY,
-            fontSize: `${size}px`,
-            fontStyle: 'bold',
-            color: toCss(PALETTE.cream),
-            backgroundColor: 'rgba(22, 50, 61, 0.85)',
-            padding: { x: 12, y: 6 },
-          })
-          .setOrigin(...origin),
-      );
+    const { width, height } = scene.scale;
+    const label = (x: number, y: number, value: string, size: number, colour: number = PALETTE.cream) =>
+      scene.add.text(x, y, value, { fontFamily: FONT_FAMILY, fontSize: `${size}px`, fontStyle: 'bold', color: toCss(colour) });
 
-    panel(16, 16, missionLabel, [0, 0]);
-    this.timer = panel(width / 2, 16, '0:00', [0.5, 0], 26);
-    // Left of the full-screen button.
-    this.mode = panel(width - FULLSCREEN_BUTTON.size - 28, 16, '', [1, 0]);
+    // Mission badge: a gold police shield and the mission.
+    const badge = this.chromed(scene.add.graphics());
+    glass(badge, LEFT.x, 14, LEFT.w, 44);
+    badge.fillStyle(AMBER).fillPoints(shield(LEFT.x + 24, 36, 13), true);
+    badge.fillStyle(0x9c7a12).fillCircle(LEFT.x + 24, 34, 4);
+    this.chromed(label(LEFT.x + 46, 36, missionLabel, 19)).setOrigin(0, 0.5);
 
-    this.signalLabel = this.add(
-      scene.add.text(16, 62, 'SIGNAL', {
-        fontFamily: FONT_FAMILY,
-        fontSize: '15px',
-        fontStyle: 'bold',
-        color: toCss(PALETTE.cream),
-        backgroundColor: 'rgba(22, 50, 61, 0.85)',
-        padding: { x: 8, y: 5 },
-      }),
-    );
+    // The radar: a sweep turning round, the suspect's blip, the signal bars beside it.
+    this.signalPanel = this.chromed(scene.add.graphics());
+    this.radar = this.chromed(scene.add.graphics());
+    this.signalLabel = this.chromed(label(LEFT.x + 98, RADAR.y + 14, signalName, 15, PALETTE.lightBlue));
+    this.signalState = this.chromed(label(LEFT.x + 98, RADAR.y + 66, '', 13, PALETTE.cream));
     for (let i = 0; i < 5; i++) {
-      this.signalBars.push(this.add(scene.add.rectangle(92 + i * 14, 88, 10, 10 + i * 4, PALETTE.cream).setOrigin(0, 1)));
+      this.signalBars.push(this.chromed(scene.add.rectangle(LEFT.x + 100 + i * 18, RADAR.y + 60, 12, 10 + i * 6, PALETTE.cream).setOrigin(0, 1)));
     }
 
-    // The Repeat button (blueprint sections 16 and 19); R on the keyboard.
-    this.repeat = this.add(
-      scene.add.text(16, 102, '', {
-        fontFamily: FONT_FAMILY,
-        fontSize: '17px',
-        fontStyle: 'bold',
-        color: toCss(PALETTE.cream),
-        backgroundColor: 'rgba(22, 50, 61, 0.85)',
-        padding: { x: 10, y: 7 },
-      }),
-    ).setInteractive({ useHandCursor: true });
+    // The buttons, each with its key.
+    const button = (row: number): HudButton => {
+      const y = BUTTONS.y + row * (BUTTONS.h + BUTTONS.gap);
+      const panel = this.chromed(scene.add.graphics());
+      glass(panel, LEFT.x, y, LEFT.w, BUTTONS.h);
+      panel.fillStyle(PALETTE.cream).fillRoundedRect(LEFT.x + 6, y + 5, 26, BUTTONS.h - 10, 5);
+      const key = this.chromed(label(LEFT.x + 19, y + BUTTONS.h / 2, '', 15, PALETTE.ink)).setOrigin(0.5);
+      const text = this.chromed(label(LEFT.x + 42, y + BUTTONS.h / 2, '', 15)).setOrigin(0, 0.5);
+      const hit = this.chromed(scene.add.zone(LEFT.x, y, LEFT.w, BUTTONS.h).setOrigin(0).setInteractive({ useHandCursor: true }));
+      hit.on('pointerover', () => text.setColor(toCss(PALETTE.paleYellow)));
+      hit.on('pointerout', () => text.setColor(toCss(PALETTE.cream)));
+      return { panel, hit, key, label: text };
+    };
+    this.repeat = button(0);
+    this.repeat.key.setText('R');
+    this.music = button(1);
+    this.music.key.setText('B');
+    this.facing = button(2);
+    this.facing.key.setText('V');
 
-    // Background music on or off; B on the keyboard.
-    this.music = this.add(
-      scene.add.text(16, 146, '', {
-        fontFamily: FONT_FAMILY,
-        fontSize: '15px',
-        fontStyle: 'bold',
-        color: toCss(PALETTE.cream),
-        backgroundColor: 'rgba(22, 50, 61, 0.85)',
-        padding: { x: 10, y: 6 },
-      }),
-    ).setInteractive({ useHandCursor: true });
+    // The clock: red and blue lights either side, a bar draining underneath.
+    const pod = this.chromed(scene.add.graphics());
+    glass(pod, width / 2 - 110, 8, 220, 56);
+    this.timerLights = [
+      this.chromed(scene.add.rectangle(width / 2 - 96, 34, 8, 34, RED).setOrigin(0.5)),
+      this.chromed(scene.add.rectangle(width / 2 + 96, 34, 8, 34, BLUE).setOrigin(0.5)),
+    ];
+    this.timer = this.chromed(label(width / 2, 31, '0:00', 32)).setOrigin(0.5);
+    this.chromed(scene.add.rectangle(width / 2, 55, this.timeBarWidth, 5, 0x33464f).setOrigin(0.5));
+    this.timeBar = this.chromed(scene.add.rectangle(width / 2 - this.timeBarWidth / 2, 55, this.timeBarWidth, 5, GREEN).setOrigin(0, 0.5));
 
-    // Which way the map faces; V on the keyboard.
-    this.facing = this.add(
-      scene.add.text(16, 184, '', {
-        fontFamily: FONT_FAMILY,
-        fontSize: '15px',
-        fontStyle: 'bold',
-        color: toCss(PALETTE.cream),
-        backgroundColor: 'rgba(22, 50, 61, 0.85)',
-        padding: { x: 10, y: 6 },
-      }),
-    ).setInteractive({ useHandCursor: true });
+    // How the player travels, left of the full-screen button.
+    const modeRight = width - FULLSCREEN_BUTTON.size - 28;
+    const modePanel = this.chromed(scene.add.graphics());
+    glass(modePanel, modeRight - 196, 14, 196, 44);
+    this.modeIcon = this.chromed(scene.add.graphics().setPosition(modeRight - 168, 36));
+    this.mode = this.chromed(label(modeRight - 140, 36, '', 18)).setOrigin(0, 0.5);
 
     this.toast = this.add(
       scene.add
-        .text(width / 2, 74, '', {
+        .text(width / 2, 78, '', {
           fontFamily: FONT_FAMILY,
           fontSize: '22px',
+          fontStyle: 'bold',
           color: toCss(PALETTE.ink),
-          backgroundColor: 'rgba(246, 236, 210, 0.95)',
-          padding: { x: 14, y: 8 },
+          backgroundColor: 'rgba(243, 214, 112, 0.96)',
+          padding: { x: 16, y: 8 },
         })
         .setOrigin(0.5, 0)
         .setVisible(false),
     );
     // The police scanner: the French instruction as text, for as long as the level allows.
+    this.scannerPanel = this.add(scene.add.graphics().setVisible(false));
+    this.scannerTag = this.add(label(0, 0, 'SCANNER', 13, GREEN).setVisible(false));
+    this.scannerLed = this.add(scene.add.circle(0, 0, 5, GREEN).setVisible(false));
     this.scanner = this.add(
       scene.add
-        .text(width / 2, scene.scale.height - 28, '', {
+        .text(width / 2, height - 30, '', {
           fontFamily: FONT_FAMILY,
           fontSize: '28px',
           fontStyle: 'bold',
           color: toCss(PALETTE.cream),
-          backgroundColor: 'rgba(22, 50, 61, 0.92)',
-          padding: { x: 20, y: 12 },
+          padding: { x: 24, y: 14 },
           align: 'center',
-          wordWrap: { width: width - 120 },
+          wordWrap: { width: width - 160 },
         })
         .setOrigin(0.5, 1)
         .setVisible(false),
@@ -134,13 +172,14 @@ export class Hud {
     this.sighting = new SightingPanel(scene, (o) => this.add(o));
     this.banner = this.add(
       scene.add
-        .text(width / 2, scene.scale.height / 2, '', {
+        .text(width / 2, height / 2, '', {
           fontFamily: FONT_FAMILY,
           fontSize: '96px',
           fontStyle: 'bold',
           color: toCss(PALETTE.cream),
           stroke: toCss(PALETTE.ink),
           strokeThickness: 10,
+          shadow: { offsetX: 0, offsetY: 6, color: '#000000', blur: 12, fill: true, stroke: true },
         })
         .setOrigin(0.5)
         .setVisible(false),
@@ -148,44 +187,110 @@ export class Hud {
   }
 
   update(status: ChaseStatus, mode: TravelMode): void {
+    const now = this.scene.time.now;
     const seconds = Math.ceil(status.timeLeft);
+    const hurry = seconds <= HURRY_SECONDS;
     this.timer.setText(`${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`);
-    this.timer.setColor(seconds <= 15 ? '#ffb4a2' : toCss(PALETTE.cream));
-    this.mode.setText(mode === 'CAR' ? 'EN VOITURE' : 'À PIED');
+    this.timer.setColor(hurry ? '#ffb4a2' : toCss(PALETTE.cream));
+    // The lights take turns, faster and brighter in the last seconds.
+    const beat = Math.floor(now / (hurry ? 180 : 520)) % 2;
+    this.timerLights.forEach((light, i) => light.setAlpha(i === beat ? (hurry ? 1 : 0.85) : 0.18));
+    this.longest = Math.max(this.longest, status.timeLeft);
+    const share = this.longest > 0 ? Math.max(0, status.timeLeft / this.longest) : 0;
+    this.timeBar.width = this.timeBarWidth * share;
+    this.timeBar.setFillStyle(share > 0.5 ? GREEN : share > 0.2 ? AMBER : RED);
 
-    const lit = status.signalLost ? 0 : Math.ceil(status.signal * 5);
-    const colour = status.signal > 0.6 ? 0x6fcf7c : status.signal > 0.3 ? 0xe8c547 : 0xe0463a;
-    this.signalBars.forEach((bar, i) => bar.setFillStyle(i < lit ? colour : 0x55656b, 1));
-    const blink = (status.warning || status.signalLost) && Math.floor(this.scene.time.now / 300) % 2 === 0;
-    this.signalLabel.setText(status.signalLost ? 'SIGNAL PERDU' : this.signalName);
-    this.signalLabel.setColor(blink ? '#ffb4a2' : toCss(PALETTE.cream));
-    this.signalBars.forEach((bar) => bar.setVisible(!status.signalLost));
+    if (mode !== this.shownMode) {
+      this.shownMode = mode;
+      this.mode.setText(mode === 'CAR' ? 'EN VOITURE' : 'À PIED');
+      this.modeIcon.clear();
+      if (mode === 'CAR') {
+        this.modeIcon.setScale(1.5);
+        this.modeIcon.fillStyle(0xf7f7f2).fillRoundedRect(-9, -4.8, 18, 9.6, 2.5);
+        this.modeIcon.fillStyle(0x1f4e9c).fillRect(-9, -1.4, 18, 2.8);
+        this.modeIcon.fillStyle(0x27323a).fillRoundedRect(1.5, -3.8, 3.5, 7.6, 1);
+        this.modeIcon.fillStyle(RED).fillRect(-2, -4.8, 2, 2.4).fillStyle(BLUE).fillRect(-2, 2.4, 2, 2.4);
+      } else {
+        // A running figure, like a road sign.
+        this.modeIcon.setScale(1);
+        this.modeIcon.fillStyle(PALETTE.cream).fillCircle(3, -12, 3.6);
+        this.modeIcon.lineStyle(3.4, PALETTE.cream);
+        this.modeIcon.lineBetween(1, -7, -2, 3); // body
+        this.modeIcon.lineBetween(-2, 3, 5, 7).lineBetween(5, 7, 4, 13); // front leg
+        this.modeIcon.lineBetween(-2, 3, -6, 9).lineBetween(-6, 9, -11, 9); // back leg
+        this.modeIcon.lineBetween(0, -5, 7, -2).lineBetween(0, -5, -6, -1); // arms
+      }
+    }
+
+    this.drawRadar(status, now);
     if (status.sighting) this.sighting.tick(status.sighting.secondsLeft);
 
     const left = status.repeatsLeft;
-    this.repeat.setText(left === null ? '⟳ RÉPÉTER (R)' : `⟳ RÉPÉTER (R) · ${left}`);
-    this.repeat.setAlpha(left === 0 || status.signalLost ? 0.45 : 1);
+    this.repeat.label.setText(left === null ? '⟳  RÉPÉTER' : `⟳  RÉPÉTER  ·  ${left}`);
+    const off = left === 0 || status.signalLost;
+    [this.repeat.label, this.repeat.key].forEach((o) => o.setAlpha(off ? 0.45 : 1));
+  }
+
+  /** The radar sweep, the suspect's blip (brighter with a stronger signal) and the bars. */
+  private drawRadar(status: ChaseStatus, now: number): void {
+    const warn = status.warning || status.signalLost;
+    if (warn !== this.warningShown) {
+      this.warningShown = warn;
+      this.signalPanel.clear();
+      glass(this.signalPanel, LEFT.x, RADAR.y, LEFT.w, RADAR.h, warn ? RED : GLASS.edge);
+    }
+    const cx = LEFT.x + 50;
+    const cy = RADAR.y + RADAR.h / 2;
+    const r = RADAR.r;
+    const g = this.radar.clear();
+    g.fillStyle(0x0d3324, 0.95).fillCircle(cx, cy, r);
+    g.lineStyle(1, GREEN, 0.35).strokeCircle(cx, cy, r * 0.66).strokeCircle(cx, cy, r * 0.33);
+    g.lineBetween(cx - r, cy, cx + r, cy).lineBetween(cx, cy - r, cx, cy + r);
+    g.lineStyle(2, GREEN, 0.8).strokeCircle(cx, cy, r);
+    if (!status.signalLost) {
+      // The sweep, with a fading trail behind it.
+      const angle = (now / 1400) * Math.PI * 2;
+      for (let k = 0; k < 6; k++) {
+        const a = angle - k * 0.12;
+        g.lineStyle(2, GREEN, 0.75 - k * 0.12).lineBetween(cx, cy, cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+      }
+      // The blip: nearer the middle as the signal grows, glowing as the sweep passes.
+      const blipAngle = -0.9;
+      const blipR = r * (0.85 - 0.6 * status.signal);
+      const since = (((angle - blipAngle) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+      const glow = Math.max(0.25, 1 - since / Math.PI);
+      g.fillStyle(status.warning ? RED : 0xb8ffbf, glow).fillCircle(cx + Math.cos(blipAngle) * blipR, cy + Math.sin(blipAngle) * blipR, 4);
+    } else {
+      g.fillStyle(GREEN, 0.25 + 0.2 * Math.random()).fillCircle(cx, cy, r - 2);
+    }
+
+    const lit = status.signalLost ? 0 : Math.ceil(status.signal * 5);
+    const colour = status.signal > 0.6 ? GREEN : status.signal > 0.3 ? AMBER : RED;
+    this.signalBars.forEach((bar, i) => bar.setFillStyle(i < lit ? colour : 0x55656b, 1).setVisible(this.shown && !status.signalLost));
+    const blink = warn && Math.floor(now / 300) % 2 === 0;
+    this.signalLabel.setText(status.signalLost ? 'SIGNAL PERDU' : this.signalName);
+    this.signalLabel.setColor(blink ? '#ffb4a2' : toCss(PALETTE.lightBlue));
+    this.signalState.setText(status.signalLost ? '' : status.warning ? 'IL S’ÉLOIGNE !' : lit >= 4 ? 'TOUT PRÈS' : '');
+    this.signalState.setColor(status.warning ? '#ffb4a2' : toCss(GREEN));
   }
 
   /** Called when the Repeat button is clicked or tapped. */
   onRepeat(listener: () => void): void {
-    this.repeat.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
-      listener();
-    });
+    this.onPress(this.repeat, listener);
   }
 
   /** Called when the music button is clicked or tapped. */
   onMusic(listener: () => void): void {
-    this.music.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
-      listener();
-    });
+    this.onPress(this.music, listener);
   }
 
   /** Called when the map facing button is clicked or tapped. */
   onFacing(listener: () => void): void {
-    this.facing.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
+    this.onPress(this.facing, listener);
+  }
+
+  private onPress(button: HudButton, listener: () => void): void {
+    button.hit.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, event: Phaser.Types.Input.EventData) => {
       event.stopPropagation();
       listener();
     });
@@ -193,28 +298,38 @@ export class Hud {
 
   setFacing(facing: 'FOOT' | 'ALWAYS' | 'NORTH'): void {
     const label = { FOOT: 'TOURNE À PIED', ALWAYS: 'TOURNE TOUJOURS', NORTH: 'FIXE' }[facing];
-    this.facing.setText(`🧭 CARTE (V) · ${label}`);
+    this.facing.label.setText(`🧭  CARTE  ·  ${label}`);
   }
 
   setMusic(on: boolean): void {
-    this.music.setText(on ? '♪ MUSIQUE (B)' : '♪ MUSIQUE (B) · NON').setAlpha(on ? 1 : 0.6);
+    this.music.label.setText(on ? '♪  MUSIQUE' : '♪  MUSIQUE  ·  NON').setAlpha(on ? 1 : 0.6);
   }
 
   showToast(message: string, ms = 1600): void {
-    this.toast.setText(message).setVisible(true).setAlpha(1);
+    this.toast.setText(message).setVisible(true).setAlpha(1).setScale(1.12);
     this.scene.tweens.killTweensOf(this.toast);
+    this.scene.tweens.add({ targets: this.toast, scale: 1, duration: 160, ease: 'Back.easeOut' });
     this.scene.tweens.add({ targets: this.toast, alpha: 0, delay: ms, duration: 400 });
   }
 
-  /** Show a scanner call ("SCANNER : Tournez à gauche.") for `seconds`; 0 hides the text (audio only). */
+  /** Show a scanner call for `seconds`, like a radio read-out; 0 hides the text (audio only). */
   showScanner(text: string, seconds: number): void {
-    this.scene.tweens.killTweensOf(this.scanner);
+    const parts = [this.scanner, this.scannerPanel, this.scannerTag, this.scannerLed];
+    this.scene.tweens.killTweensOf(parts);
     if (seconds <= 0) {
-      this.scanner.setVisible(false);
+      parts.forEach((p) => p.setVisible(false));
       return;
     }
-    this.scanner.setText(`SCANNER : ${text}`).setVisible(true).setAlpha(1);
-    this.scene.tweens.add({ targets: this.scanner, alpha: 0, delay: seconds * 1000, duration: 400 });
+    this.scanner.setText(text);
+    const b = this.scanner.getBounds();
+    this.scannerPanel.clear();
+    glass(this.scannerPanel, b.x, b.y, b.width, b.height, GREEN);
+    this.scannerPanel.fillStyle(GREEN, 0.9).fillRect(b.x + 10, b.y, 70, 3);
+    this.scannerTag.setPosition(b.x + 28, b.y - 20);
+    this.scannerLed.setPosition(b.x + 16, b.y - 12);
+    parts.forEach((p) => p.setVisible(true).setAlpha(1));
+    this.scene.tweens.add({ targets: this.scannerLed, alpha: 0.2, duration: 260, yoyo: true, repeat: 3 });
+    this.scene.tweens.add({ targets: parts, alpha: 0, delay: seconds * 1000, duration: 400 });
   }
 
   /** Ask where the suspect is: one card per choice; `onPick` gets the card index. */
@@ -227,9 +342,30 @@ export class Hud {
     this.sighting.resolve(answer, chosen, result);
   }
 
-  /** Big centred text, e.g. the 3-2-1-GO countdown. Empty string hides it. */
+  /** Big centred text, e.g. "PRÊT…" and "GO !": it lands with a punch. Empty string hides it. */
   showBanner(text: string): void {
+    const changed = text !== this.banner.text;
     this.banner.setText(text).setVisible(text !== '');
+    if (changed && text !== '') {
+      this.scene.tweens.killTweensOf(this.banner);
+      this.banner.setScale(1.7).setAlpha(0.2);
+      this.scene.tweens.add({ targets: this.banner, scale: 1, alpha: 1, duration: 260, ease: 'Back.easeOut' });
+    }
+  }
+
+  /** TAB: hide or show the panels (mission, radar, buttons, clock, transport) for a clearer view of the town. */
+  toggle(): void {
+    this.shown = !this.shown;
+    for (const o of this.chrome) (o as unknown as Phaser.GameObjects.Components.Visible).setVisible(this.shown);
+    for (const o of [this.repeat, this.music, this.facing]) {
+      if (this.shown) o.hit.setInteractive({ useHandCursor: true });
+      else o.hit.disableInteractive();
+    }
+  }
+
+  private chromed<T extends Phaser.GameObjects.GameObject>(object: T): T {
+    this.chrome.push(object);
+    return this.add(object);
   }
 
   private add<T extends Phaser.GameObjects.GameObject>(object: T): T {
@@ -238,6 +374,13 @@ export class Hud {
     return object;
   }
 }
+
+/** A police shield's outline around (x, y). */
+function shield(x: number, y: number, size: number): Phaser.Math.Vector2[] {
+  const p = (dx: number, dy: number) => new Phaser.Math.Vector2(x + dx * size, y + dy * size);
+  return [p(-0.8, -0.9), p(0, -1.05), p(0.8, -0.9), p(0.8, 0.1), p(0, 1), p(-0.8, 0.1)];
+}
+
 
 const CARD_W = 150;
 const CARD_H = 104;

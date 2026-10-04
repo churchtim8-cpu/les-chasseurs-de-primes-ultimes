@@ -27,6 +27,7 @@ import { loadProfile } from '../profileStore';
 import { BOSS, bossInfo, suspectPaceFor, type BossInfo } from '../../engine/campaign/profile';
 import { nearestLocation } from '../../engine/language/analysis';
 import type { ResultsData } from './ResultsScene';
+import { PauseScene, type PauseSceneData } from './PauseScene';
 import { scannerAudio, type SpokenLine } from '../audio/ScannerAudio';
 import { CameraRig, MAP_FACINGS, type MapFacing } from '../camera/cameraRig';
 import { debugState } from '../debug/debugState';
@@ -140,6 +141,8 @@ export class ChaseScene extends Phaser.Scene {
   private burnoutUntil = 0;
   /** The colleague bringing the police car, while it drives up (see colleagueDrivesUp). */
   private arrival: ColleagueArrival | null = null;
+  /** The camera that draws only the HUD (world objects made later must be hidden from it). */
+  private uiCamera: Phaser.Cameras.Scene2D.Camera | null = null;
   private launchAt = 0;
   private burning = false;
   private seed = '';
@@ -251,6 +254,7 @@ export class ChaseScene extends Phaser.Scene {
 
     const ui = this.cameras.add(0, 0, this.scale.width, this.scale.height);
     ui.ignore(worldObjects);
+    this.uiCamera = ui;
     this.cameras.main.ignore([...this.hud.objects, ...this.controls.uiObjects]);
 
     this.bindKeys();
@@ -427,8 +431,8 @@ export class ChaseScene extends Phaser.Scene {
   /** An order also shows which button to press. */
   private orderToasts(lines: SpokenText[]): void {
     const ids = lines.map((l) => l.audioId);
-    if (ids.includes(TRANSPORT_LINES.GET_OUT.audioId)) this.hud.showToast('⇄ (E) : descendre de la voiture', 3500);
-    if (ids.includes(TRANSPORT_LINES.GET_IN.audioId)) this.hud.showToast('⇄ (E) : monter dans la voiture', 3500);
+    if (ids.includes(TRANSPORT_LINES.GET_OUT.audioId)) this.hud.showToast('⇄ (ESPACE) : descendre de la voiture', 3500);
+    if (ids.includes(TRANSPORT_LINES.GET_IN.audioId)) this.hud.showToast('⇄ (ESPACE) : monter dans la voiture', 3500);
   }
 
   /**
@@ -808,6 +812,32 @@ export class ChaseScene extends Phaser.Scene {
     });
   }
 
+  /** ÉCHAP: everything freezes under the pause menu (see PauseScene). */
+  private pause(): void {
+    if (this.stage === 'RESULTS' || !this.scene.isActive()) return;
+    const data: PauseSceneData = {
+      returnTo: this.scene.key,
+      retry: () => this.scene.start(ChaseScene.KEY, { seed: this.seed, ...(this.mission !== null ? { mission: this.mission } : {}), ...(this.boss ? { boss: this.boss.picture } : {}) }),
+      quit: () => this.scene.start(this.mission === null ? 'Title' : 'Campaign'),
+      liveryChanged: () => this.redrawPolice(),
+    };
+    this.scene.launch(PauseScene.KEY, data);
+    this.scene.pause();
+  }
+
+  /** New police colours from the pause menu: the car and officer are drawn again where they are. */
+  private redrawPolice(): void {
+    const colours = livery(loadProgress().livery);
+    const swap = (old: Phaser.GameObjects.Container, made: Phaser.GameObjects.Container) => {
+      made.setPosition(old.x, old.y).setRotation(old.rotation).setVisible(old.visible).setAlpha(old.alpha);
+      this.uiCamera?.ignore(made);
+      old.destroy();
+      return made;
+    };
+    this.car = swap(this.car, createPoliceCar(this, colours));
+    this.officer = swap(this.officer, createOfficer(this, colours));
+  }
+
   private nextChase(): void {
     this.scene.start('Practice', { autostart: true });
   }
@@ -815,7 +845,10 @@ export class ChaseScene extends Phaser.Scene {
   private bindKeys(): void {
     const keyboard = this.input.keyboard;
     if (!keyboard) return;
-    keyboard.on('keydown-ESC', () => this.scene.start(this.mission === null ? 'Title' : 'Campaign'));
+    keyboard.on('keydown-ESC', () => this.pause());
+    // TAB hides or shows the HUD (the browser would otherwise move the focus).
+    keyboard.addCapture('TAB');
+    keyboard.on('keydown-TAB', () => this.hud.toggle());
     keyboard.on('keydown-R', () => this.repeat());
     keyboard.on('keydown-C', () => {
       if (debugState.isEnabled && this.stage === 'PURSUIT') this.chase.teleportPlayerToSuspect();
