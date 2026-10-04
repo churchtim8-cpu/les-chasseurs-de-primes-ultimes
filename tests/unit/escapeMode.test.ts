@@ -10,6 +10,7 @@ import { Rng } from '../../src/engine/rng/prng';
 import { createSeed } from '../../src/engine/rng/seedCode';
 import { TownGraph } from '../../src/engine/world/graph';
 import { ListenerBot } from './listenerBot';
+import { OFFICERS } from '../../src/engine/campaign/officers';
 
 /**
  * Escape Mode: the player is the suspect, guided to the hideout by the
@@ -24,8 +25,8 @@ function seeds(difficulty: Difficulty, count: number, label = 'escape'): string[
   return Array.from({ length: count }, () => createSeed(difficulty, (n) => rng.int(0, n - 1)).code);
 }
 
-function play(seed: string, bot: 'LISTENER' | 'RANDOM', options: ScenarioOptions = PLAIN) {
-  const escape = new Escape(graph, generateScenario(graph, seed, options));
+function play(seed: string, bot: 'LISTENER' | 'RANDOM', options: ScenarioOptions = PLAIN, policeSpeed?: number) {
+  const escape = new Escape(graph, generateScenario(graph, seed, options), policeSpeed === undefined ? {} : { policeSpeed });
   const listener = new ListenerBot(graph);
   const rng = Rng.fromSeed(`bot-${seed}`);
   let lastEdge = '';
@@ -126,5 +127,17 @@ describe('Escape Mode', () => {
       }
       expect(worst, seed).toBeLessThan(16);
     }
+  }, 180_000);
+
+  // The escape campaign's officers (Mr Henry, 2026-10-04): slower at the easy levels, faster up to the
+  // hidden motorcycle squad; listening still always gets away, turning at random does not.
+  it.each(OFFICERS.map((o) => [o.nickname, o] as const))('a listener gets away from %s; a random driver mostly does not', (_name, officer) => {
+    const options = { ...PLAIN, ...(officer.chaseType ? { chaseType: officer.chaseType } : {}) };
+    const listened = seeds(officer.difficulty, 24, `officer-${officer.id}`).map((s) => play(s, 'LISTENER', options, officer.speed));
+    expect(listened.flatMap((r) => r.failedOrders)).toEqual([]);
+    const away = listened.filter((r) => r.status.phase === 'ESCAPED').length;
+    expect(away / listened.length).toBeGreaterThanOrEqual(officer.hidden ? 0.9 : 0.95);
+    const random = seeds(officer.difficulty, 30, `officer-luck-${officer.id}`).map((s) => play(s, 'RANDOM', { ...options, chaseType: officer.chaseType ?? 'CAR_CAR' }, officer.speed));
+    expect(random.filter((r) => r.status.phase === 'ESCAPED').length / random.length).toBeLessThanOrEqual(0.25);
   }, 180_000);
 });

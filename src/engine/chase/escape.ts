@@ -112,13 +112,16 @@ export class Escape {
    */
   private policeBehind = 0;
   private escapeReason?: ChaseStatus['escapeReason'];
+  /** The police's speed as a share of the player's: the level's, or the officer's in the escape campaign. */
+  private readonly policeSpeed: number;
 
   constructor(
     private readonly graph: TownGraph,
     readonly scenario: ChaseScenario,
-    options: { hasAudio?: AudioCheck } = {},
+    options: { hasAudio?: AudioCheck; policeSpeed?: number } = {},
   ) {
     this.hasAudio = options.hasAudio;
+    this.policeSpeed = options.policeSpeed ?? ESCAPE.policeSpeed[scenario.difficulty];
     this.settings = CHASE_SETTINGS[scenario.difficulty];
     this.stages = scenario.stages.map((st) => ({ ...st, route: [...st.route] }));
     this.destination = scenario.destination;
@@ -175,7 +178,7 @@ export class Escape {
     }
     this.policeBehind = Math.max(0, headStart - length);
     const police = new Mover(this.graph, tail.length > 1 ? placeOnRoute(this.graph, tail, length - headStart + this.policeBehind, mode).start : this.player.location());
-    police.speedFactor = ESCAPE.policeSpeed[this.scenario.difficulty];
+    police.speedFactor = this.policeSpeed;
     if (tail.length > 2) {
       try {
         police.followPlan(tail.slice(tail.indexOf(police.snapshot().towards)));
@@ -387,7 +390,7 @@ export class Escape {
     if (cop.waiting) {
       // Boxed in, or a plan it could not take: start again from here, turning round if there is no other way.
       this.police = new Mover(this.graph, this.police.location());
-      this.police.speedFactor = ESCAPE.policeSpeed[this.scenario.difficulty];
+      this.police.speedFactor = this.policeSpeed;
       if (!this.pursue()) {
         this.police.uTurn();
         this.pursue();
@@ -502,7 +505,7 @@ export class Escape {
     // The officer leaves the car to follow on foot; a colleague brings it up again when the player drives off.
     this.policeParked = change.mode === 'FOOT' ? left : null;
     this.policeStage = this.stage;
-    this.police.speedFactor = ESCAPE.policeSpeed[this.scenario.difficulty];
+    this.police.speedFactor = this.policeSpeed;
     this.pursue();
   }
 
@@ -722,6 +725,16 @@ export class Escape {
   /** The police are on the map (not still on their way to the start). */
   get policeOnMap(): boolean {
     return this.policeBehind <= 0;
+  }
+
+  /**
+   * The police are close enough to be shown (Mr Henry, 2026-10-04): from far
+   * off, so the player watches them drop back until they are lost, and sees
+   * them come back after a mistake. Drawing only: how the police hunt depends
+   * on seeWithin, not on this.
+   */
+  get policeInView(): boolean {
+    return this.policeOnMap && this.distance <= ESCAPE.showWithin[this.player.mode];
   }
 
   /** Metres of route still to travel to the hideout (for the debug overlay and tests). */

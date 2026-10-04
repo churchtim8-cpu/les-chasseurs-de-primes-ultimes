@@ -1,10 +1,11 @@
 import Phaser from 'phaser';
 import { menuMusic } from '../audio/Jingles';
 import { DIFFICULTY_SETTINGS } from '../../engine';
-import { addEntry, boardFor, cleanName, DAILY, dailyChase, hasPlayed, readScoreCode } from '../../engine/campaign/daily';
+import { addEntry, boardFor, cleanName, DAILY, dailyChase, hasPlayed, mergeBoard, readScoreCode, type DailyEntry } from '../../engine/campaign/daily';
 import { loadBoard, saveBoard } from '../dailyStore';
 import { debugState } from '../debug/debugState';
 import { PALETTE, toCss } from '../palette';
+import { fetchBoard, flushScores, onlineOn, removeScore } from '../online/onlineBoard';
 import { today } from '../profileStore';
 import { WEATHER_ICONS, WEATHER_NAMES } from '../render/weather';
 import { askText } from '../ui/textForm';
@@ -21,10 +22,12 @@ function longDate(date: string): string {
  * student, and the class board for the class code typed on this device. The
  * first try counts; a finished first try gives a score code, and the teacher
  * can type students' codes in here (ADD SCORE CODE) to gather the whole class
- * on one device.
+ * on one device. With the online board switched on, the board also shows the
+ * whole class from the server, and the teacher can remove a name with a PIN.
  */
 export class DailyScene extends Phaser.Scene {
   static readonly KEY = 'Daily';
+  private boardLayer?: Phaser.GameObjects.Container;
 
   constructor() {
     super(DailyScene.KEY);
@@ -62,27 +65,62 @@ export class DailyScene extends Phaser.Scene {
     text(this, 66, 330, status, 20, { wordWrap: { width: 508 }, lineSpacing: 6 });
     text(this, 66, 444, 'Tomorrow brings a new chase.\nMon Easy · Tue Intermediate · Wed Hard · Thu Intermediate\nFri Expert · Sat Easy · Sun Hard', 16, { color: toCss(PALETTE.seaDeep), lineSpacing: 4 });
 
-    // The class board.
-    this.drawBoard(date, board.classCode);
+    // The class board: this device's at once, then the online one when it arrives.
+    paper(this, 640, 104, 600, 500);
+    const online = onlineOn() && board.classCode !== '';
+    this.drawBoard(date, board.classCode, null, online ? 'loading' : 'device');
+    if (online) void this.loadOnline(date, board.classCode);
 
     const menu = new Menu(this);
     menu.add(320, 552, 300, 58, played ? 'PRACTICE AGAIN  ▶' : 'PLAY  ▶', () => void this.play(date), { size: 24 });
-    menu.add(width / 2 - 330, 668, 300, 50, '✏️ NAME & CLASS (N)', () => void this.editNames(), { key: 'N', size: 19 });
-    menu.add(width / 2, 668, 300, 50, '➕ ADD SCORE CODE (A)', () => void this.addCode(date), { key: 'A', size: 19 });
-    menu.add(width / 2 + 330, 668, 300, 50, 'BACK', () => this.scene.start('Title'), { key: 'ESC', size: 20 });
+    if (onlineOn()) {
+      menu.add(width / 2 - 465, 668, 290, 50, '✏️ NAME & CLASS (N)', () => void this.editNames(), { key: 'N', size: 18 });
+      menu.add(width / 2 - 155, 668, 290, 50, '➕ ADD SCORE CODE (A)', () => void this.addCode(date), { key: 'A', size: 18 });
+      menu.add(width / 2 + 155, 668, 290, 50, '🗑️ REMOVE A NAME (X)', () => void this.removeName(date), { key: 'X', size: 18 });
+      menu.add(width / 2 + 465, 668, 290, 50, 'BACK', () => this.scene.start('Title'), { key: 'ESC', size: 20 });
+      if (board.classCode) menu.add(1176, 128, 108, 36, '⟳ (R)', () => void this.loadOnline(date, board.classCode), { key: 'R', size: 16 });
+    } else {
+      menu.add(width / 2 - 330, 668, 300, 50, '✏️ NAME & CLASS (N)', () => void this.editNames(), { key: 'N', size: 19 });
+      menu.add(width / 2, 668, 300, 50, '➕ ADD SCORE CODE (A)', () => void this.addCode(date), { key: 'A', size: 19 });
+      menu.add(width / 2 + 330, 668, 300, 50, 'BACK', () => this.scene.start('Title'), { key: 'ESC', size: 20 });
+    }
   }
 
-  private drawBoard(date: string, classCode: string): void {
+  /** Sends any first tries still waiting, then shows the whole class from the server. */
+  private async loadOnline(date: string, classCode: string): Promise<void> {
+    this.drawBoard(date, classCode, null, 'loading');
+    await flushScores();
+    const rows = await fetchBoard(date, classCode);
+    if (!this.scene.isActive()) return;
+    debugState.info.set('dailyOnline', rows ? String(rows.length) : 'offline');
+    this.drawBoard(date, classCode, rows, rows ? 'online' : 'offline');
+  }
+
+  /**
+   * The class board. `source` says where it comes from: this device only, the
+   * online board (still loading, reached, or out of reach).
+   */
+  private drawBoard(date: string, classCode: string, online: DailyEntry[] | null, source: 'device' | 'loading' | 'online' | 'offline'): void {
+    this.boardLayer?.destroy();
+    const layer = this.add.container(0, 0);
+    this.boardLayer = layer;
     const x = 640;
-    paper(this, x, 104, 600, 500);
     if (!classCode) {
-      text(this, x + 300, 300, 'Type your class code\n(✏️ NAME & CLASS) to see\nyour class board.', 24, { align: 'center', lineSpacing: 8 }).setOrigin(0.5);
+      layer.add(text(this, x + 300, 300, 'Type your class code\n(✏️ NAME & CLASS) to see\nyour class board.', 24, { align: 'center', lineSpacing: 8 }).setOrigin(0.5));
       return;
     }
-    text(this, x + 26, 122, `CLASS ${classCode}  ·  TODAY`, 26, { bold: true });
-    const list = boardFor(loadBoard(), date, classCode);
+    layer.add(text(this, x + 26, 122, `CLASS ${classCode}  ·  TODAY`, 26, { bold: true }));
+    const note = {
+      device: 'Scores played or added on this device',
+      loading: '🌐 Getting the online board…',
+      online: '🌐 Online board: the whole class',
+      offline: 'Online board out of reach: this device only. Score codes still work.',
+    }[source];
+    layer.add(text(this, x + 26, 576, note, 15, { color: toCss(source === 'offline' ? PALETTE.terracotta : PALETTE.seaDeep) }));
+    const device = boardFor(loadBoard(), date, classCode);
+    const list = online ? mergeBoard(device, online) : device;
     if (list.length === 0) {
-      text(this, x + 300, 330, 'No scores yet today.\nBe the first!', 24, { align: 'center', lineSpacing: 8 }).setOrigin(0.5);
+      layer.add(text(this, x + 300, 330, source === 'loading' ? '…' : 'No scores yet today.\nBe the first!', 24, { align: 'center', lineSpacing: 8 }).setOrigin(0.5));
       return;
     }
     // Two columns of up to 15 names.
@@ -92,12 +130,14 @@ export class DailyScene extends Phaser.Scene {
       const cx = x + 26 + col * 290;
       const cy = 166 + row * 28;
       const medal = i === 0 ? 0xd4a017 : i === 1 ? 0x9aa5ad : i === 2 ? 0xb06a3b : PALETTE.ink;
-      const me = e.local && e.nickname === loadBoard().nickname;
-      if (me) this.add.rectangle(cx - 6, cy - 3, 284, 26, PALETTE.paleYellow).setOrigin(0);
-      text(this, cx + 34, cy, e.nickname, 18, { bold: i < 3 || me, color: toCss(me ? PALETTE.terracotta : PALETTE.ink) });
-      text(this, cx, cy, `${i + 1}.`, 18, { bold: true, color: toCss(medal) });
-      text(this, cx + 170, cy, '★'.repeat(e.stars) + '☆'.repeat(3 - e.stars), 15, { color: toCss(0x9c7a12) });
-      text(this, cx + 270, cy, String(e.score), 18, { bold: true }).setOrigin(1, 0);
+      const me = e.nickname === loadBoard().nickname;
+      if (me) layer.add(this.add.rectangle(cx - 6, cy - 3, 284, 26, PALETTE.paleYellow).setOrigin(0));
+      layer.add([
+        text(this, cx + 34, cy, e.nickname, 18, { bold: i < 3 || me, color: toCss(me ? PALETTE.terracotta : PALETTE.ink) }),
+        text(this, cx, cy, `${i + 1}.`, 18, { bold: true, color: toCss(medal) }),
+        text(this, cx + 170, cy, '★'.repeat(e.stars) + '☆'.repeat(3 - e.stars), 15, { color: toCss(0x9c7a12) }),
+        text(this, cx + 270, cy, String(e.score), 18, { bold: true }).setOrigin(1, 0),
+      ]);
     });
   }
 
@@ -157,6 +197,37 @@ export class DailyScene extends Phaser.Scene {
     if (!loadBoard().classCode) saveBoard({ ...loadBoard(), classCode: cleanName(classCode, DAILY.maxClassCode) });
     this.scene.restart();
     this.events.once(Phaser.Scenes.Events.CREATE, () => this.toast(`Added ${cleanName(nickname, DAILY.maxNickname)}: ${result.score} points.`, 0x2e8b57));
+  }
+
+  /** For the teacher: takes a silly or fake name off today's online class board (needs the teacher PIN). */
+  private async removeName(date: string): Promise<void> {
+    const values = await askText(
+      this,
+      'Remove a name from the online board',
+      [
+        { label: 'Nickname to remove', max: DAILY.maxNickname },
+        { label: 'Class code', value: loadBoard().classCode, max: DAILY.maxClassCode },
+        { label: 'Teacher PIN', max: 20 },
+      ],
+      "For the teacher only. It removes that name from today's board for everyone.",
+    );
+    if (!values || !this.scene.isActive()) return;
+    const nickname = cleanName(values[0] ?? '', DAILY.maxNickname);
+    const classCode = cleanName(values[1] ?? '', DAILY.maxClassCode);
+    const result = nickname && classCode ? await removeScore(date, classCode, nickname, (values[2] ?? '').trim()) : 'wrong';
+    if (!this.scene.isActive()) return;
+    // The device's own copy goes too, so the name does not come straight back.
+    if (result === 'removed') {
+      const board = loadBoard();
+      saveBoard({ ...board, entries: board.entries.filter((e) => !(e.date === date && e.classCode === classCode && e.nickname === nickname)) });
+    }
+    this.scene.restart();
+    const message = {
+      removed: [`Removed ${nickname} from class ${classCode}.`, 0x2e8b57],
+      wrong: ['Nothing removed: check the nickname, class and PIN.', PALETTE.terracotta],
+      offline: ['The online board is out of reach. Try again later.', PALETTE.terracotta],
+    }[result] as [string, number];
+    this.events.once(Phaser.Scenes.Events.CREATE, () => this.toast(message[0], message[1]));
   }
 
   private toast(message: string, colour: number): void {

@@ -395,10 +395,16 @@ export const CHASE_SETTINGS: Record<Difficulty, ChaseSettings> = {
  * Right turns keep the gap; a detour or a wait lets the police close in.
  */
 export const ESCAPE = {
-  /** Police speed as a fraction of the player's cruising speed, by level: a little slower, so listening wins. */
-  policeSpeed: { EASY: 0.86, INTERMEDIATE: 0.88, HARD: 0.9, EXPERT: 0.91 } as Record<Difficulty, number>,
-  /** The police are on the map when this close (metres of road), by the player's mode. */
+  /** Police speed as a fraction of the player's cruising speed, by level, for practice escapes (the campaign's officers have their own, see officers.ts): a little slower, so listening wins. */
+  policeSpeed: { EASY: 0.8, INTERMEDIATE: 0.85, HARD: 0.89, EXPERT: 0.92 } as Record<Difficulty, number>,
+  /** The police see the player (and take the shortest way to them) when this close (metres of road), by the player's mode. */
   seeWithin: { CAR: 170, FOOT: 90 } as Record<TravelMode, number>,
+  /**
+   * The player sees the police from this far (metres of road): far, so they
+   * watch them drop back until they are gone, and see them come back after a
+   * mistake. Off the screen they show as a marker at its edge with the distance.
+   */
+  showWithin: { CAR: 480, FOOT: 240 } as Record<TravelMode, number>,
   /** "Attention ! La police est juste derrière vous." when this close (metres of road)... */
   closeWithin: { CAR: 95, FOOT: 50 } as Record<TravelMode, number>,
   /** ...said again only once they have fallen back to this many times that distance. */

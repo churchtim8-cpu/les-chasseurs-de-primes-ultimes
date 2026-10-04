@@ -9,10 +9,11 @@ import { pickWeather, type Weather } from '../world/weather';
  * and can compare scores. Only the first try counts on the class board (later
  * tries are practice: by then the route is known).
  *
- * There is no server, so each device keeps its own board, per class code. A
- * finished daily chase shows a short score code that proves the score for that
- * nickname, class and day; the teacher can type codes into their own device to
- * gather the whole class on one board.
+ * Each device keeps its own board, per class code. A finished daily chase
+ * shows a short score code that proves the score for that nickname, class and
+ * day; the teacher can type codes into their own device to gather the whole
+ * class on one board. When the online board is switched on, first tries are
+ * also sent there and every device sees the whole class.
  */
 export const DAILY = {
   /** The level of the day, Sunday first (Date.getDay() order). */
@@ -196,8 +197,76 @@ export function addEntry(board: DailyBoard, entry: DailyEntry): DailyBoard {
 /** One class's board for one day, best first (score, then stars, then name). */
 export function boardFor(board: DailyBoard, date: string, classCode: string): DailyEntry[] {
   const code = cleanName(classCode, DAILY.maxClassCode);
-  return board.entries
-    .filter((e) => e.date === date && e.classCode === code)
-    .sort((a, b) => b.score - a.score || b.stars - a.stars || a.nickname.localeCompare(b.nickname))
-    .slice(0, DAILY.boardSize);
+  return sortBoard(board.entries.filter((e) => e.date === date && e.classCode === code));
+}
+
+// ---------------------------------------------------------- the online board
+
+/** The online class board (Mr Henry chose it, 2026-10-04): limits it accepts, matching docs/online-board-setup.md. */
+export const DAILY_ONLINE = {
+  /** Give up on the server after this long (ms); the device board and score codes still work. */
+  timeoutMs: 6000,
+  /** Unsent first tries are retried for this many days (the server takes yesterday, today and tomorrow). */
+  retryDays: 1,
+  maxScore: 8191,
+} as const;
+
+function sortBoard(list: DailyEntry[]): DailyEntry[] {
+  return [...list].sort((a, b) => b.score - a.score || b.stars - a.stars || a.nickname.localeCompare(b.nickname)).slice(0, DAILY.boardSize);
+}
+
+/** Rows from the online board, checked and cleaned; anything odd is left out. */
+export function parseOnlineRows(rows: unknown, date: string, classCode: string): DailyEntry[] {
+  if (!Array.isArray(rows)) return [];
+  const code = cleanName(classCode, DAILY.maxClassCode);
+  const out: DailyEntry[] = [];
+  for (const row of rows) {
+    if (!row || typeof row !== 'object') continue;
+    const r = row as Record<string, unknown>;
+    const nickname = typeof r.nickname === 'string' ? cleanName(r.nickname, DAILY.maxNickname) : '';
+    const score = typeof r.score === 'number' && Number.isInteger(r.score) ? r.score : -1;
+    const stars = typeof r.stars === 'number' && Number.isInteger(r.stars) ? r.stars : -1;
+    if (!nickname || score < 0 || score > DAILY_ONLINE.maxScore || stars < 0 || stars > 3) continue;
+    if (out.some((e) => e.nickname === nickname)) continue;
+    out.push({ date, nickname, classCode: code, score, stars, local: false });
+  }
+  return out;
+}
+
+/**
+ * The class board with the online scores added: one line per nickname. This
+ * device's own entries win (so the player's line stays marked), and codes the
+ * teacher typed in still count when the student is missing online.
+ */
+export function mergeBoard(device: DailyEntry[], online: DailyEntry[]): DailyEntry[] {
+  const seen = new Set(device.map((e) => e.nickname));
+  return sortBoard([...device, ...online.filter((e) => !seen.has(e.nickname))]);
+}
+
+/** A first try waiting to be sent to the online board. */
+export interface PendingScore extends DailyScore {
+  date: string;
+  nickname: string;
+  classCode: string;
+}
+
+/** The waiting list with one more try added (one per student, class and day), and days too old for the server dropped. */
+export function queueScore(queue: PendingScore[], score: PendingScore, today: string): PendingScore[] {
+  const fresh = (p: PendingScore) => dayNumber(today) - dayNumber(p.date) <= DAILY_ONLINE.retryDays;
+  const same = (p: PendingScore) => p.date === score.date && p.nickname === score.nickname && p.classCode === score.classCode;
+  return [...queue.filter((p) => fresh(p) && !same(p)), score].filter(fresh);
+}
+
+/** Reads the saved waiting list back. */
+export function parseQueue(raw: string | null): PendingScore[] {
+  try {
+    const data: unknown = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(data)) return [];
+    return data.filter(
+      (p): p is PendingScore =>
+        !!p && typeof p === 'object' && typeof p.date === 'string' && DATE.test(p.date) && typeof p.nickname === 'string' && typeof p.classCode === 'string' && Number.isInteger(p.score) && Number.isInteger(p.stars),
+    );
+  } catch {
+    return [];
+  }
 }

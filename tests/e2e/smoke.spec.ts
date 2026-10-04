@@ -234,6 +234,8 @@ test('escape mode: the player is the fugitive, guided to the hideout, and reachi
   await page.goto('./?debug=1&type=CAR_CAR&turnoff=0&sightings=0');
   await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Title']));
   await page.keyboard.press('e');
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Officers']));
+  await page.keyboard.press('p');
   await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Practice']));
   await page.keyboard.press('Enter');
   await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Escape', 'DebugOverlay']));
@@ -271,5 +273,67 @@ test('le défi du jour: names, the same chase for everybody, first try counts; r
   expect(board.nickname).toBe('TI JEAN');
   expect(board.classCode).toBe('4B');
   expect(board.played).toHaveLength(1);
+  expect(errors).toEqual([]);
+});
+
+test('online class board: waiting first tries are sent, the whole class shows, the teacher can remove a name', async ({ page }) => {
+  const errors = watchErrors(page);
+  const posted: unknown[] = [];
+  const removed: unknown[] = [];
+  await page.route('https://board.test/rest/v1/**', async (route) => {
+    const req = route.request();
+    if (req.url().includes('/rpc/remove_daily_score')) {
+      removed.push(req.postDataJSON());
+      return route.fulfill({ status: 200, contentType: 'application/json', body: 'true' });
+    }
+    if (req.method() === 'POST') {
+      posted.push(req.postDataJSON());
+      return route.fulfill({ status: 201, body: '' });
+    }
+    expect(req.headers().apikey).toBe('test');
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ nickname: 'BEN', score: 1400, stars: 3 }, { nickname: 'ANA', score: 800, stars: 1 }]) });
+  });
+  await page.addInitScript(() => {
+    const d = new Date();
+    const day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    window.localStorage.setItem('chasseurs.daily', JSON.stringify({ version: 1, nickname: 'TI JEAN', classCode: '4B', entries: [], played: [day] }));
+    window.localStorage.setItem('chasseurs.daily.unsent', JSON.stringify([{ date: day, nickname: 'TI JEAN', classCode: '4B', score: 1000, stars: 2 }]));
+  });
+  await page.goto('./?debug=1&online=https://board.test');
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Title']));
+  await page.keyboard.press('d');
+  await expect.poll(() => info(page, 'dailyOnline'), SLOW).toBe('2');
+  expect(posted).toEqual([expect.objectContaining({ class_code: '4B', nickname: 'TI JEAN', score: 1000, stars: 2 })]);
+  expect(await page.evaluate(() => window.localStorage.getItem('chasseurs.daily.unsent'))).toBeNull();
+
+  await page.keyboard.press('x');
+  await expect(page.locator('input').first()).toBeVisible(SLOW);
+  await page.locator('input').nth(0).fill('ana');
+  await page.locator('input').nth(2).fill('1234');
+  await page.locator('input').nth(2).press('Enter');
+  await expect.poll(() => removed.length, SLOW).toBe(1);
+  expect(removed[0]).toEqual(expect.objectContaining({ p_class: '4B', p_nickname: 'ANA', p_pin: '1234' }));
+  expect(errors).toEqual([]);
+});
+
+test('escape campaign: the officers wall, a dossier, an escape from Agent Escargot, and the next officer opens', async ({ page }) => {
+  const errors = watchErrors(page);
+  await page.goto('./?debug=1&turnoff=0&sightings=0');
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Title']));
+  await page.keyboard.press('e');
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Officers']));
+  // NEXT: AGENT ESCARGOT opens the dossier; ESCAPE starts.
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(500);
+  await page.keyboard.press('Enter');
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Escape']));
+  expect(await info(page, 'mission')).toBe('ESCAPE escargot');
+  expect(await info(page, 'difficulty')).toBe('EASY');
+  await expect.poll(() => info(page, 'scanner'), SLOW).toMatch(/^(DIRECTION|FILLER|FINAL): /);
+  await expect.poll(async () => Number(await info(page, 'speed')), SLOW).toBeGreaterThan(10);
+  await page.keyboard.press('x');
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Results']));
+  const progress = await page.evaluate(() => JSON.parse(window.localStorage.getItem('chasseurs.escape') ?? '{}'));
+  expect(progress.records.escargot).toEqual(expect.objectContaining({ escaped: true, attempts: 1 }));
   expect(errors).toEqual([]);
 });

@@ -40,9 +40,14 @@ import type { ResultsData } from './ResultsScene';
 import { PauseScene, type PauseSceneData } from './PauseScene';
 import { currentLook } from '../lookStore';
 import { liveryLook } from '../../engine/campaign/cosmetics';
+import { officerInfo } from '../../engine/campaign/officers';
+import { FONT_FAMILY } from '../palette';
+import { ESCAPE } from '../../engine/chase/settings';
 
 export interface EscapeSceneData {
   seed: string;
+  /** The escape campaign's officer (officers.ts id), or none for a practice escape. */
+  officer?: string;
 }
 
 type Stage = 'OPENING' | 'PURSUIT' | 'ARREST' | 'RESULTS';
@@ -96,6 +101,9 @@ export class EscapeScene extends Phaser.Scene {
   private launchAt = 0;
   private burning = false;
   private seed = '';
+  private officerId: string | undefined;
+  /** Where the police are when they are off the screen but still in view: a flashing marker at its edge. */
+  private policeMarker!: Phaser.GameObjects.Container;
 
   constructor() {
     super(EscapeScene.KEY);
@@ -103,6 +111,7 @@ export class EscapeScene extends Phaser.Scene {
 
   init(data: EscapeSceneData): void {
     this.seed = data.seed;
+    this.officerId = officerInfo(data.officer)?.id;
     this.stage = 'OPENING';
     this.burnoutUntil = 0;
     this.launchAt = 0;
@@ -117,8 +126,11 @@ export class EscapeScene extends Phaser.Scene {
   create(): void {
     this.graph = new TownGraph(BELLEVUE);
     this.lanes = { me: new LanePosition(this.graph), police: new LanePosition(this.graph) };
-    this.escape = new Escape(this.graph, generateScenario(this.graph, this.seed, scenarioOptionsFromAddress()), {
+    const officer = officerInfo(this.officerId);
+    const options = officer?.chaseType ? { ...scenarioOptionsFromAddress(), chaseType: officer.chaseType } : scenarioOptionsFromAddress();
+    this.escape = new Escape(this.graph, generateScenario(this.graph, this.seed, options), {
       hasAudio: audioCheck(scannerAudio.library),
+      ...(officer ? { policeSpeed: officer.speed } : {}),
     });
     scannerAudio.preload([...Object.values(ESCAPE_LINES), ...Object.values(TRANSPORT_LINES)].map((l) => l.audioId));
     menuMusic.stop();
@@ -149,9 +161,10 @@ export class EscapeScene extends Phaser.Scene {
     this.runner = createSuspectRunner(this).setVisible(false);
     this.drift = new DriftEffects(this);
     const look = currentLook();
-    const colours = liveryLook(look.LIVERY);
-    this.policeCar = createPoliceCar(this, colours, look.VEHICLE).setVisible(false);
-    this.officer = createOfficer(this, colours, look.OUTFIT).setVisible(false);
+    // A campaign officer drives their own vehicle and colours; a practice escape has the garage's choice.
+    const colours = liveryLook(officer?.livery ?? look.LIVERY);
+    this.policeCar = createPoliceCar(this, colours, officer?.vehicle ?? look.VEHICLE).setVisible(false);
+    this.officer = createOfficer(this, colours, officer?.outfit ?? look.OUTFIT).setVisible(false);
     this.badge = createIntentBadge(this);
     this.roundabout = new RoundaboutGuide(this, this.graph, () =>
       this.hud.showToast('Roundabout: ◀ ▶ to choose the exit', 2600),
@@ -168,7 +181,7 @@ export class EscapeScene extends Phaser.Scene {
     this.rig.setFacing(loadFacing());
     this.controls = new Controls(this);
     this.controls.onAction((action) => this.handleAction(action));
-    this.hud = new Hud(this, 'ESCAPE', 'POLICE', look.HUD);
+    this.hud = new Hud(this, officer ? officer.nickname.toUpperCase() : 'ESCAPE', 'POLICE', look.HUD);
     this.hud.onRepeat(() => this.repeat());
     this.hud.onMusic(() => this.toggleMusic());
     this.hud.setMusic(!this.music.isMuted);
@@ -180,6 +193,8 @@ export class EscapeScene extends Phaser.Scene {
     this.cameras.main.ignore([...this.hud.objects, ...this.controls.uiObjects]);
     // Rain or fog over the town (drawing only), under the HUD.
     this.cameras.main.ignore(drawWeather(this, weatherFor(this.seed), () => this.playerOnScreen()));
+    this.policeMarker = createPoliceMarker(this);
+    this.cameras.main.ignore(this.policeMarker);
 
     this.bindKeys();
     this.syncDebug();
@@ -190,7 +205,7 @@ export class EscapeScene extends Phaser.Scene {
     const destination = LOCATION_WORD_BY_ID.get(scenario.destination);
     debugState.info.set('seed', this.seed);
     debugState.info.set('difficulty', scenario.difficulty);
-    debugState.info.set('mission', 'ESCAPE');
+    debugState.info.set('mission', officer ? `ESCAPE ${officer.id}` : 'ESCAPE');
     debugState.info.set('destination', destination ? withArticle(destination) : scenario.destination);
     debugState.info.set('chase', scenario.chaseType);
     debugState.info.set('route', scenario.stages.map((st) => `${st.mode === 'CAR' ? 'car' : 'foot'} ${Math.round(st.length)} m`).join(' → '));
@@ -326,8 +341,8 @@ export class EscapeScene extends Phaser.Scene {
     if (this.stage === 'RESULTS' || !this.scene.isActive()) return;
     const data: PauseSceneData = {
       returnTo: this.scene.key,
-      retry: () => this.scene.start(EscapeScene.KEY, { seed: this.seed }),
-      quit: () => this.scene.start('Title'),
+      retry: () => this.scene.start(EscapeScene.KEY, { seed: this.seed, ...(this.officerId ? { officer: this.officerId } : {}) }),
+      quit: () => this.scene.start(this.officerId ? 'Officers' : 'Title'),
     };
     this.scene.launch(PauseScene.KEY, data);
     this.scene.pause();
@@ -412,10 +427,14 @@ export class EscapeScene extends Phaser.Scene {
     this.music.setIntensity(status.signal);
     this.roundabout.update(this.escape.player, this.stage === 'PURSUIT' && !status.followingTracks);
 
-    // The police: on the map only when close (or always in debug mode), with the car left behind on foot.
+    // The police: in view from far off (or always in debug mode), fading as they drop back out of
+    // range, with the car left behind on foot; off the screen, a marker at its edge.
     const cop = this.escape.police.snapshot();
     this.policeHeading += Phaser.Math.Angle.Wrap(cop.heading - this.policeHeading) * Math.min(1, delta / 90);
-    const visible = this.escape.policeOnMap && (debugState.isEnabled || status.suspectVisible || this.stage !== 'PURSUIT');
+    const inView = this.escape.policeInView;
+    const visible = this.escape.policeOnMap && (debugState.isEnabled || inView || this.stage !== 'PURSUIT');
+    const range = ESCAPE.showWithin[me.mode];
+    const fade = this.stage === 'PURSUIT' ? Phaser.Math.Clamp((range - status.distance) / (range * ESCAPE_VIEW.fadeShare), 0.15, 1) : 1;
     const shown = this.policeSprite();
     const theirs = this.lanes.police.update(cop, traffic, delta);
     if (!this.staged) {
@@ -424,9 +443,10 @@ export class EscapeScene extends Phaser.Scene {
         this.policeStride += (delta / 1000) * cop.speed * 0.75;
         animateRunner(this.officer, this.policeStride, cop.speed > 1);
       }
-      const alpha = shown.alpha + ((visible ? 1 : 0) - shown.alpha) * Math.min(1, delta / 250);
+      const alpha = shown.alpha + ((visible ? fade : 0) - shown.alpha) * Math.min(1, delta / 250);
       shown.setAlpha(alpha).setVisible(alpha > 0.02);
     }
+    this.placeMarker(shown, this.stage === 'PURSUIT' && inView, status.distance, fade);
     if (shown === this.officer) this.placeParked(this.policeCar, visible ? this.escape.policeParked : null);
     else this.officer.setVisible(false);
 
@@ -434,6 +454,34 @@ export class EscapeScene extends Phaser.Scene {
     this.rig.update(framed ? { x: (avatar.x + framed.x) / 2, y: (avatar.y + framed.y) / 2, heading: this.policeHeading } : me, delta);
     this.scaleLabels();
     this.keepUpright();
+  }
+
+  /**
+   * The police marker: hidden while the police are on the screen; otherwise at
+   * the edge of the screen in their direction, with how far back they are, so
+   * the player watches the gap grow (or shrink after a mistake).
+   */
+  private placeMarker(police: Phaser.GameObjects.Container, inView: boolean, metres: number, fade: number): void {
+    const marker = this.policeMarker;
+    const { width, height } = this.scale;
+    const at = onScreen(this.cameras.main, police.x, police.y);
+    const inset = ESCAPE_VIEW.markerInset;
+    const onTheScreen = at.x > inset.side && at.x < width - inset.side && at.y > inset.top && at.y < height - inset.bottom;
+    if (!inView || onTheScreen) {
+      marker.setVisible(false);
+      return;
+    }
+    // From the middle of the screen towards the police, stopped at the edge of the safe area.
+    const from = { x: width / 2, y: (inset.top + height - inset.bottom) / 2 };
+    const dx = at.x - from.x;
+    const dy = at.y - from.y;
+    const sx = dx > 0 ? (width - inset.side - from.x) / dx : dx < 0 ? (inset.side - from.x) / dx : Infinity;
+    const sy = dy > 0 ? (height - inset.bottom - from.y) / dy : dy < 0 ? (inset.top - from.y) / dy : Infinity;
+    const k = Math.max(0, Math.min(sx, sy, 1));
+    marker.setPosition(from.x + dx * k, from.y + dy * k).setVisible(true).setAlpha(Math.max(0.45, fade));
+    const [arrow, , label] = marker.list as [Phaser.GameObjects.Triangle, Phaser.GameObjects.Arc, Phaser.GameObjects.Text];
+    arrow.setRotation(Math.atan2(dy, dx) + Math.PI / 2);
+    label.setText(`${Math.round(metres / 10) * 10} m`);
   }
 
   /** "GO !" in the car: the getaway car peels off in a cloud of tyre smoke. */
@@ -534,6 +582,7 @@ export class EscapeScene extends Phaser.Scene {
       mission: null,
       boss: null,
       escape: true,
+      ...(this.officerId ? { officer: this.officerId } : {}),
       stats,
       timeLimit: this.escape.timeLimit,
       night: nightOn(),
@@ -631,4 +680,26 @@ export class EscapeScene extends Phaser.Scene {
     this.routeOverlay?.setVisible(on);
   }
 
+}
+
+/** How the far-off police are shown (screen pixels and shares; drawing only). */
+const ESCAPE_VIEW = {
+  /** The police fade over the last share of the distance they can be seen from. */
+  fadeShare: 0.25,
+  /** The marker stays this far inside the screen edges (clear of the HUD panels). */
+  markerInset: { side: 60, top: 120, bottom: 110 },
+} as const;
+
+/** A round flashing police marker with an arrow pointing at the police and the distance under it. */
+function createPoliceMarker(scene: Phaser.Scene): Phaser.GameObjects.Container {
+  const arrow = scene.add.triangle(0, 0, 0, -38, -11, -22, 11, -22, 0xffffff).setStrokeStyle(2, 0x10202a);
+  const disc = scene.add.circle(0, 0, 20, 0xd62828).setStrokeStyle(3, 0xffffff);
+  const label = scene.add
+    .text(0, 30, '', { fontFamily: FONT_FAMILY, fontSize: '16px', fontStyle: 'bold', color: '#ffffff', backgroundColor: 'rgba(16, 32, 42, 0.8)', padding: { x: 6, y: 2 } })
+    .setOrigin(0.5, 0);
+  const icon = scene.add.text(0, 0, '🚓', { fontSize: '20px' }).setOrigin(0.5);
+  const marker = scene.add.container(0, 0, [arrow, disc, label, icon]).setDepth(140).setScrollFactor(0).setVisible(false);
+  // Red and blue, like the light bar.
+  scene.time.addEvent({ delay: 260, loop: true, callback: () => disc.setFillStyle(disc.fillColor === 0xd62828 ? 0x1f5bd6 : 0xd62828) });
+  return marker;
 }

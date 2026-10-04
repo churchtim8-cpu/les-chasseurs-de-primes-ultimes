@@ -84,3 +84,50 @@ describe('Bellevue en fête', () => {
     expect(festivalOn('2026-10-04')).toBeNull();
   });
 });
+
+describe('the online class board', () => {
+  it('reads server rows safely and merges them with this device', async () => {
+    const { mergeBoard, parseOnlineRows } = await import('../../src/engine/campaign/daily');
+    const day = '2026-10-04';
+    const rows = parseOnlineRows(
+      [
+        { nickname: 'ben', score: 1200, stars: 3 },
+        { nickname: 'ana', score: 900, stars: 2 },
+        { nickname: 'BEN', score: 5, stars: 0 }, // a second line for the same name is ignored
+        { nickname: '', score: 10, stars: 1 },
+        { nickname: 'hack', score: 999999, stars: 3 },
+        { nickname: 'odd', score: '12', stars: 1 },
+        null,
+      ],
+      day,
+      '4b',
+    );
+    expect(rows.map((r) => [r.nickname, r.score, r.classCode, r.local])).toEqual([
+      ['BEN', 1200, '4B', false],
+      ['ANA', 900, '4B', false],
+    ]);
+    expect(parseOnlineRows({ error: 'nope' }, day, '4B')).toEqual([]);
+    const device = [
+      { date: day, nickname: 'ANA', classCode: '4B', score: 900, stars: 2, local: true },
+      { date: day, nickname: 'CLEO', classCode: '4B', score: 1500, stars: 3, local: false },
+    ];
+    const merged = mergeBoard(device, rows);
+    expect(merged.map((e) => [e.nickname, e.local])).toEqual([
+      ['CLEO', false],
+      ['BEN', false],
+      ['ANA', true],
+    ]);
+  });
+
+  it('keeps unsent first tries for a day, one per student', async () => {
+    const { parseQueue, queueScore } = await import('../../src/engine/campaign/daily');
+    const a = { date: '2026-10-03', nickname: 'ANA', classCode: '4B', score: 900, stars: 2 };
+    let q = queueScore([], a, '2026-10-03');
+    q = queueScore(q, { ...a, score: 950 }, '2026-10-03');
+    expect(q).toEqual([{ ...a, score: 950 }]);
+    q = queueScore(q, { ...a, nickname: 'BEN', date: '2026-10-05' }, '2026-10-05');
+    expect(q.map((p) => p.nickname)).toEqual(['BEN']); // two days old: the server would refuse it
+    expect(parseQueue(JSON.stringify(q))).toEqual(q);
+    expect(parseQueue('{oops')).toEqual([]);
+  });
+});
