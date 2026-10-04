@@ -86,6 +86,11 @@ export class MenuMusic {
   }
 
   private tick(): void {
+    // The sound system was rebuilt (see ScannerAudio's watchdog): start again on the new one.
+    if (this.synth && !this.audio.owns(this.synth.ctx)) {
+      this.synth = null;
+      this.gain = null;
+    }
     if (!this.synth) {
       const output = this.audio.musicOutput();
       if (!output) return;

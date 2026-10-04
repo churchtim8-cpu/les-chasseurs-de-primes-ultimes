@@ -25,11 +25,78 @@ const MIX = {
    * has to act: when it did, calls and music audibly dipped and distorted.
    */
   master: 0.72,
-  /** A clip that has not downloaded by then is given up on (the call still shows as text). */
+  /**
+   * A call waits this long for its clips to download; one still on its way is
+   * left out this time (the call still shows as text) and kept for next time.
+   */
   fetchSeconds: 5,
+  /** Unpacked clips kept ready (the rest are downloaded again, from the browser's cache, when needed). */
+  keepClips: 120,
+  /** A download that has not even started answering by then is given up on. */
+  connectSeconds: 15,
   /** At most this many calls wait their turn; older waiting ones are dropped. */
   maxWaiting: 2,
+  /**
+   * A call is waited on by the sound clock, but never more than this much
+   * longer by the wall clock: if the computer's sound output stalls, later
+   * calls are not held up behind it.
+   */
+  waitSpareSeconds: 1.5,
+  /** A call that is cut off fades out over this long, without a click. */
+  cutSeconds: 0.06,
 } as const;
+
+/**
+ * The sound watchdog (Mr Henry, 2026-10-04: "after playing for a while the
+ * audio becomes distorted and then cuts out for long periods"). Once a
+ * second it checks that the sound clock is still moving with real time; if
+ * the computer's sound output has stalled while the game is on screen, it
+ * restarts the sound, then rebuilds it from scratch if that did not help.
+ */
+const WATCH = {
+  everyMs: 1000,
+  /** The sound clock moving at less than this share of real time counts as stalled... */
+  slowShare: 0.5,
+  /** ...and after this long stalled, the sound is restarted. */
+  stalledSeconds: 2,
+  /** A second stall this soon after a restart rebuilds the sound from scratch. */
+  rebuildWithin: 20,
+  /** At most this many rebuilds in this many seconds. */
+  rebuildTries: 3,
+  rebuildBackoff: 60,
+  /** The page itself frozen this long (the computer busy) is noted in the sound check. */
+  freezeSeconds: 0.5,
+  /** The safety limiter squeezing harder than this (dB) means the mix is too loud: it distorts. */
+  squashDb: -3,
+} as const;
+
+/** What the sound check (?soundcheck=1) shows: see soundCheck.ts. */
+export interface SoundReport {
+  state: string;
+  sampleRate: number;
+  latencyMs: number;
+  /** Times the sound clock stalled, and for how long in all. */
+  stalls: number;
+  stalledSeconds: number;
+  restarts: number;
+  rebuilds: number;
+  /** The page frozen (computer busy): how often, and the longest. */
+  freezes: number;
+  longestFreeze: number;
+  /** Seconds the safety limiter squeezed hard (sounds distorted). */
+  squashedSeconds: number;
+  /** Seconds the output reached full scale (clipping). */
+  clippedSeconds: number;
+  callsPlayed: number;
+  /** Calls not heard: sound not running, or too many waiting. */
+  callsSkipped: number;
+  clipsFailed: number;
+  /** Sounds playing right now. */
+  playing: number;
+  /** Loud moments: the output's peak level over the last second (1 = full scale). */
+  peak: number;
+  log: string[];
+}
 
 /**
  * The police scanner's sound (blueprint section 17): radio beep, a little
@@ -56,6 +123,29 @@ export class ScannerAudio {
   private paused = false;
   /** Ends the wait for the call playing now (see stop). */
   private wake: (() => void) | null = null;
+  /** The current call's volume controls, faded out if it is cut off (see stop). */
+  private fades: GainNode[] = [];
+  /** The sound watchdog's findings (see WATCH and soundReport). */
+  private readonly report = {
+    stalls: 0,
+    stalledSeconds: 0,
+    restarts: 0,
+    rebuilds: 0,
+    freezes: 0,
+    longestFreeze: 0,
+    squashedSeconds: 0,
+    clippedSeconds: 0,
+    callsPlayed: 0,
+    callsSkipped: 0,
+    clipsFailed: 0,
+    peak: 0,
+    log: [] as string[],
+  };
+  private watchTimer: number | null = null;
+  private limiter: DynamicsCompressorNode | null = null;
+  private meter: AnalyserNode | null = null;
+  private lastRestart = -Infinity;
+  private rebuiltAt: number[] = [];
   /** The radio filter can be switched off (?radio=0) to hear the clean recordings. */
   radioFilter = new URLSearchParams(window.location.search).get('radio') !== '0';
 
@@ -118,7 +208,11 @@ export class ScannerAudio {
     // (Two calls sent at once used to drop the first: an announcement just before a direction.)
     this.busy = this.busy.then(() => {
       this.waiting--;
-      if (ticket <= this.cancelled || this.waiting >= MIX.maxWaiting) return undefined;
+      if (ticket <= this.cancelled) return undefined;
+      if (this.waiting >= MIX.maxWaiting) {
+        this.report.callsSkipped++;
+        return undefined;
+      }
       return this.sequence(lines, ticket);
     });
     return this.busy;
@@ -137,6 +231,24 @@ export class ScannerAudio {
   effectsOutput(): { ctx: AudioContext; bus: GainNode } | null {
     if (!this.ctx || !this.buses || this.ctx.state !== 'running') return null;
     return { ctx: this.ctx, bus: this.buses.effects };
+  }
+
+  /** True when `ctx` is the sound system in use (it is rebuilt if the computer's sound output stalls). */
+  owns(ctx: BaseAudioContext): boolean {
+    return ctx === this.ctx;
+  }
+
+  /** The sound watchdog's findings so far, for the sound check (?soundcheck=1). */
+  soundReport(): SoundReport {
+    const ctx = this.ctx;
+    return {
+      ...this.report,
+      log: [...this.report.log],
+      state: ctx?.state ?? 'not started',
+      sampleRate: ctx?.sampleRate ?? 0,
+      latencyMs: ctx ? Math.round(((ctx.baseLatency ?? 0) + (ctx.outputLatency ?? 0)) * 1000) : 0,
+      playing: this.sources.length,
+    };
   }
 
   /** True once the browser lets the game make sound. */
@@ -172,9 +284,14 @@ export class ScannerAudio {
     this.duck(false);
     this.wake?.();
     this.wake = null;
+    // A call cut off fades out over a few hundredths of a second: stopping a recording
+    // mid-wave makes a click, and the dispatcher now cuts in often after wrong turns.
+    const now = this.ctx?.currentTime ?? 0;
+    for (const fade of this.fades) fade.gain.setTargetAtTime(0, now, MIX.cutSeconds / 3);
+    this.fades = [];
     for (const source of this.sources) {
       try {
-        source.stop();
+        source.stop(now + MIX.cutSeconds);
       } catch {
         // already stopped
       }
@@ -195,6 +312,8 @@ export class ScannerAudio {
     }
     // If the browser or computer pauses the sound, start it again as soon as it is allowed.
     ctx.addEventListener('statechange', () => {
+      if (ctx !== this.ctx) return;
+      this.note(`sound ${ctx.state}${this.paused ? ' (pause menu)' : ''}`);
       if (ctx.state !== 'running' && ctx.state !== 'closed') this.resume();
     });
     // A last-moment safety limiter for rare peaks, after plenty of headroom (MIX.master).
@@ -205,6 +324,12 @@ export class ScannerAudio {
     limiter.attack.value = 0.003;
     limiter.release.value = 0.25;
     limiter.connect(ctx.destination);
+    // The sound check's level meter listens after the limiter (what reaches the speakers).
+    const meter = ctx.createAnalyser();
+    meter.fftSize = 2048;
+    limiter.connect(meter);
+    this.limiter = limiter;
+    this.meter = meter;
     const master = ctx.createGain();
     master.gain.value = MIX.master;
     master.connect(limiter);
@@ -237,13 +362,17 @@ export class ScannerAudio {
     high.frequency.value = MIX.radioHighCut;
     low.connect(high).connect(scanner);
     this.buses = { scanner, effects, music, radio: low, chirps };
+    this.watch(ctx);
     return ctx;
   }
 
   private async sequence(lines: SpokenLine[], ticket: number): Promise<void> {
     const ctx = this.ctx;
-    if (!ctx || !this.buses || ctx.state !== 'running') return;
-    const buffers = await Promise.all(lines.map((line) => this.buffer(line.audioId)));
+    if (!ctx || !this.buses || ctx.state !== 'running') {
+      this.report.callsSkipped++;
+      return;
+    }
+    const buffers = await Promise.all(lines.map((line) => this.bufferWithin(line.audioId, MIX.fetchSeconds)));
     if (ticket <= this.cancelled) return;
 
     this.duck(true);
@@ -255,24 +384,129 @@ export class ScannerAudio {
       if (buffer) {
         const source = ctx.createBufferSource();
         source.buffer = buffer;
-        source.connect(line.radio && this.radioFilter ? this.buses.radio : this.buses.scanner);
+        source.connect(this.fadeInto(line.radio && this.radioFilter ? this.buses.radio : this.buses.scanner));
         this.track(source).start(t);
         t += buffer.duration + MIX.gapSeconds;
       }
     }
     if (radioAt !== -1) t = this.click(t);
+    this.report.callsPlayed++;
     await new Promise<void>((resolve) => {
       this.wake = resolve; // stop() ends the wait at once
-      // Measured on the sound clock, so a paused game (see pause) keeps waiting until the call is really over.
+      // Measured on the sound clock, so a paused game (see pause) keeps waiting until the call is really over;
+      // but if the sound clock stops while the game is not paused (the computer's sound output stalled),
+      // real time runs the wait out, so the calls after it are not held up behind it.
+      let spare = t - ctx.currentTime + MIX.waitSpareSeconds;
+      let last = performance.now();
       const check = () => {
+        const now = performance.now();
+        if (!this.paused) spare -= (now - last) / 1000;
+        last = now;
         const left = t - ctx.currentTime;
-        if (left <= 0.005) resolve();
-        else setTimeout(check, left * 1000 + 15);
+        if (left <= 0.005 || spare <= 0 || ctx !== this.ctx) resolve();
+        else setTimeout(check, Math.min(left, Math.max(spare, 0.05)) * 1000 + 15);
       };
       check();
     });
+    // Calls play one at a time, so this call's fades are all of them: done with.
+    if (ticket > this.cancelled) this.fades = [];
     // The music comes back up only when no other call follows straight on (no pumping between calls).
     if (ticket > this.cancelled && this.waiting === 0) this.duck(false);
+  }
+
+  /**
+   * Once a second: is the sound clock still moving with real time? A stall
+   * while the game is on screen and not paused means the computer's sound
+   * output has stopped: restart it, or rebuild the sound if a restart did not
+   * help. Also notes page freezes and how hard the limiter is squeezing.
+   */
+  private watch(ctx: AudioContext): void {
+    if (this.watchTimer !== null) window.clearInterval(this.watchTimer);
+    let lastWall = performance.now();
+    let lastAudio = ctx.currentTime;
+    let stalledFor = 0;
+    let stalled = false;
+    const level = new Float32Array(this.meter?.fftSize ?? 2048);
+    this.watchTimer = window.setInterval(() => {
+      if (ctx !== this.ctx) return;
+      const now = performance.now();
+      const wall = (now - lastWall) / 1000;
+      const moved = ctx.currentTime - lastAudio;
+      lastWall = now;
+      lastAudio = ctx.currentTime;
+      const late = wall - WATCH.everyMs / 1000;
+      if (late >= WATCH.freezeSeconds) {
+        this.report.freezes++;
+        this.report.longestFreeze = Math.max(this.report.longestFreeze, Math.round(late * 10) / 10);
+      }
+      const watching = ctx.state === 'running' && !this.paused && document.visibilityState === 'visible';
+      if (!watching) {
+        stalledFor = 0;
+        stalled = false;
+        return;
+      }
+      if (moved < wall * WATCH.slowShare) {
+        if (!stalled) this.report.stalls++;
+        stalled = true;
+        stalledFor += wall;
+        this.report.stalledSeconds += wall - Math.max(0, moved);
+        if (stalledFor >= WATCH.stalledSeconds) {
+          stalledFor = 0;
+          this.restartSound(ctx);
+        }
+      } else {
+        stalledFor = 0;
+        stalled = false;
+      }
+      if (this.limiter && this.limiter.reduction < WATCH.squashDb) this.report.squashedSeconds += wall;
+      if (this.meter) {
+        this.meter.getFloatTimeDomainData(level);
+        let peak = 0;
+        for (const v of level) peak = Math.max(peak, Math.abs(v));
+        this.report.peak = Math.round(peak * 100) / 100;
+        if (peak >= 0.99) this.report.clippedSeconds += wall;
+      }
+    }, WATCH.everyMs);
+  }
+
+  /** The sound clock stalled: nudge the sound back on, or rebuild it from scratch the second time. */
+  private restartSound(ctx: AudioContext): void {
+    const now = performance.now() / 1000;
+    if (now - this.lastRestart > WATCH.rebuildWithin) {
+      this.lastRestart = now;
+      this.report.restarts++;
+      this.note('sound stalled: restarted');
+      ctx
+        .suspend()
+        .then(() => (this.paused || ctx !== this.ctx ? undefined : ctx.resume()))
+        .catch(() => undefined);
+      return;
+    }
+    // A sound output that stays dead (headphones unplugged, another app holding it) is not
+    // rebuilt over and over: a few tries, then once in a while.
+    this.rebuiltAt = this.rebuiltAt.filter((at) => now - at < WATCH.rebuildBackoff);
+    if (this.rebuiltAt.length >= WATCH.rebuildTries) return;
+    this.rebuiltAt.push(now);
+    this.lastRestart = -Infinity;
+    this.report.rebuilds++;
+    this.note('sound stalled again: rebuilt');
+    // The music, engine and footsteps notice the new sound system (see owns) and reconnect to it.
+    this.stop();
+    this.ctx = null;
+    this.buses = undefined;
+    void ctx.close().catch(() => undefined);
+    try {
+      this.ctx = this.createContext();
+      this.resume();
+    } catch {
+      this.ctx = null;
+    }
+  }
+
+  private note(line: string): void {
+    const at = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    this.report.log.push(`${at} ${line}`);
+    if (this.report.log.length > 5) this.report.log.shift();
   }
 
   private duck(on: boolean): void {
@@ -328,19 +562,42 @@ export class ScannerAudio {
     this.track(source).start(t);
   }
 
+  /** A volume control into `bus` for one recording, so a cut-off call can fade out (see stop). */
+  private fadeInto(bus: AudioNode): GainNode {
+    const fade = this.ctx!.createGain();
+    fade.connect(bus);
+    this.fades.push(fade);
+    return fade;
+  }
+
   private track<T extends AudioScheduledSourceNode>(source: T): T {
     this.sources.push(source);
     source.onended = () => (this.sources = this.sources.filter((s) => s !== source));
     return source;
   }
 
+  /** A clip, or null if it is not ready in time (it carries on downloading for next time). */
+  private bufferWithin(audioId: string, seconds: number): Promise<AudioBuffer | null> {
+    return Promise.race([this.buffer(audioId), new Promise<null>((resolve) => window.setTimeout(() => resolve(null), seconds * 1000))]);
+  }
+
   private buffer(audioId: string): Promise<AudioBuffer | null> {
     const clip = this.manifest.clips[audioId];
     if (!clip || !this.ctx) return Promise.resolve(null);
     let pending = this.buffers.get(audioId);
-    if (!pending) {
+    if (pending) {
+      // Most recently used last, so the oldest clips are the ones let go.
+      this.buffers.delete(audioId);
+      this.buffers.set(audioId, pending);
+    } else {
       pending = this.decode(`${this.baseUrl}audio/${clip.file}`);
       this.buffers.set(audioId, pending);
+      // Unpacked clips take a lot of memory (about 0.4 MB each, 600 clips in all): keep the
+      // recent ones only, so a long session does not fill up a school laptop's memory.
+      for (const oldest of this.buffers.keys()) {
+        if (this.buffers.size <= MIX.keepClips) break;
+        this.buffers.delete(oldest);
+      }
       // A clip that failed (a slow or dropped connection) is tried again next time.
       void pending.then((buffer) => {
         if (!buffer) this.buffers.delete(audioId);
@@ -350,16 +607,25 @@ export class ScannerAudio {
   }
 
   private async decode(url: string): Promise<AudioBuffer | null> {
-    // A stalled download must not hold up every call after it.
+    // A server that never answers is given up on. Once it answers, the clip is never cut off:
+    // the old 5-second limit on the whole download fired whenever the page froze for a moment
+    // (a slow computer drawing the town), throwing away clips that had all but arrived, so
+    // calls lost their voice (found with the sound check, 2026-10-04).
     const abort = new AbortController();
-    const timer = window.setTimeout(() => abort.abort(), MIX.fetchSeconds * 1000);
+    const timer = window.setTimeout(() => abort.abort(), MIX.connectSeconds * 1000);
     try {
       const response = await fetch(url, { signal: abort.signal });
-      if (!response.ok) return null;
-      const data = await response.arrayBuffer();
       window.clearTimeout(timer);
-      return await this.ctx!.decodeAudioData(data);
+      if (!response.ok) {
+        this.report.clipsFailed++;
+        return null;
+      }
+      const data = await response.arrayBuffer();
+      const ctx = this.ctx;
+      if (!ctx) return null;
+      return await ctx.decodeAudioData(data);
     } catch {
+      this.report.clipsFailed++;
       return null; // a missing, slow or broken clip falls back to text
     } finally {
       window.clearTimeout(timer);
