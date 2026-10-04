@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { scannerAudio } from './game/audio/ScannerAudio';
+import { startSoundCheck } from './game/audio/soundCheck';
 import { DebugOverlayScene } from './game/debug/DebugOverlayScene';
 import { FullscreenScene } from './game/scenes/FullscreenScene';
 import { debugState } from './game/debug/debugState';
@@ -53,3 +54,6 @@ declare global {
   }
 }
 window.__bellevue = { game, debug: debugState, audio: scannerAudio };
+
+// ?soundcheck=1: a live box of what the sound watchdog sees on this computer.
+startSoundCheck(scannerAudio, game);

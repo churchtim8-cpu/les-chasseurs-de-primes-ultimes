@@ -50,6 +50,12 @@ export interface Transmission {
   text: string;
   /** For a direction: the junction it is about (the first turn it covers). */
   at?: string;
+  /**
+   * The first call of a way back after a wrong turn (Mr Henry, 2026-10-04:
+   * "prioritize getting you back on track"): it cuts off whatever the radio
+   * is still saying, which is out of date now, instead of waiting behind it.
+   */
+  urgent?: true;
 }
 
 /** Driving this far past the end of the route (where the suspect stops) counts as overshooting. */
@@ -66,7 +72,7 @@ const U_TURN_PENALTY = 40;
 const EARLY_ARRIVAL = 30;
 
 /** At most this many streets go by after a wrong turn before the way back is given, in time or not. */
-const MAX_DEFERRALS = 2;
+const MAX_DEFERRALS = 1;
 
 /** A way back should share at least this much of the suspect's route (metres). */
 const SHARED_ROUTE = 150;
@@ -481,6 +487,15 @@ export class Navigator {
 
   /** The player has left the guide: say so, and plan a way back to the suspect. */
   private recover(player: MoverStart, suspectRoute: readonly string[], out: Transmission[]): void {
+    const first = out.length;
+    // The way back cuts in on the radio at once (see Transmission.urgent): plan it as heard from now.
+    this.radioFreeIn = 0;
+    this.recoverFrom(player, suspectRoute, out);
+    const lead = out[first];
+    if (lead) lead.urgent = true;
+  }
+
+  private recoverFrom(player: MoverStart, suspectRoute: readonly string[], out: Transmission[]): void {
     const edge = this.graph.edge(player.edgeId);
     const origin = this.graph.other(edge, player.towards);
     const fromIndex = this.guide.indexOf(origin);

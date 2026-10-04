@@ -276,6 +276,7 @@ export class ChaseScene extends Phaser.Scene {
     this.hud.onMusic(() => this.toggleMusic());
     this.hud.setMusic(!this.music.isMuted);
     this.hud.onFacing(() => this.cycleFacing());
+    this.hud.onPause(() => this.pause());
     this.hud.setFacing(loadFacing());
 
     const ui = this.cameras.add(0, 0, this.scale.width, this.scale.height);
@@ -490,7 +491,9 @@ export class ChaseScene extends Phaser.Scene {
     const seconds = LANGUAGE_SETTINGS[difficulty].textSeconds + 2 * (clips.length - 1);
     this.hud.showScanner(clips.map((c) => c.text).join(' '), audioOnly ? 0 : seconds);
     this.orderToasts(lead);
-    this.speech = scannerAudio.play([...before, ...clips.map((c) => ({ audioId: c.audioId, radio: true }))]);
+    // A way back after a wrong turn cuts off anything still on the radio (it is out of date now).
+    const spoken = [...before, ...clips.map((c) => ({ audioId: c.audioId, radio: true }))];
+    this.speech = transmission.urgent && lead.length === 0 ? scannerAudio.interrupt(spoken) : scannerAudio.play(spoken);
     const detail = [
       ...lead.map((l) => l.audioId),
       ...transmission.instructions.map((i) => `${i.template} ${i.audioId}`),

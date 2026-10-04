@@ -464,8 +464,11 @@ export class Chase {
     for (let i = this.radioCounted; i < events.length; i++) {
       const e = events[i] as ChaseEvent;
       let texts: string[] = [];
-      if (e.type === 'TRANSMISSION') texts = e.transmission.instructions.flatMap((ins) => ins.clips.map((c) => c.text));
-      else if (e.type === 'ANNOUNCE') {
+      if (e.type === 'TRANSMISSION') {
+        texts = e.transmission.instructions.flatMap((ins) => ins.clips.map((c) => c.text));
+        // A way back cuts off what the radio was saying (the scene interrupts it), unless an announcement leads into it.
+        if (e.transmission.urgent && !leadsInto(events[i - 1])) this.radioFreeAt = Math.min(this.radioFreeAt, this.elapsed);
+      } else if (e.type === 'ANNOUNCE') {
         texts = e.lines.map((l) => l.text);
         if (e.interrupt) this.radioFreeAt = Math.min(this.radioFreeAt, this.elapsed); // what was being said is cut off
       }
@@ -1382,4 +1385,9 @@ export class Chase {
 function carriesOnCallable(graph: TownGraph, nodes: readonly string[], ctx: CallContext): boolean {
   const plan = planCalls(graph, nodes, ctx);
   return plan.solvable(plan.actions[0] === 1 ? 1 : 0);
+}
+
+/** Is this event spoken just before the next one, in the same call (see the scenes)? */
+function leadsInto(event: ChaseEvent | undefined): boolean {
+  return event?.type === 'ANNOUNCE' && !event.after;
 }

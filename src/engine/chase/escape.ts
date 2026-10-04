@@ -235,7 +235,7 @@ export class Escape {
       if (e.type === 'TRANSMISSION') texts = e.transmission.instructions.flatMap((ins) => ins.clips.map((c) => c.text));
       else if (e.type === 'ANNOUNCE') texts = e.lines.map((l) => l.text);
       // A way back cuts off whatever the radio was still saying (the scene interrupts it): it does not queue behind it.
-      const fresh = e.type === 'TRANSMISSION' && e.transmission.kind === 'RECOVERY' && !['TRANSMISSION', 'ANNOUNCE'].includes(events[i - 1]?.type ?? '');
+      const fresh = e.type === 'TRANSMISSION' && e.transmission.urgent === true && events[i - 1]?.type !== 'ANNOUNCE';
       if (texts.length > 0) this.radioFreeAt = (fresh ? this.elapsed : Math.max(this.elapsed, this.radioFreeAt)) + callSeconds(texts);
     }
     this.radioCounted = events.length;

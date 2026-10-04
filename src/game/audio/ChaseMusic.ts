@@ -172,6 +172,8 @@ export class ChaseMusic {
   }
 
   private tick(): void {
+    // The sound system was rebuilt (see ScannerAudio's watchdog): start again on the new one.
+    if (this.out && this.audio && !this.audio.owns(this.out.ctx)) this.out = null;
     if (!this.out) {
       const output = this.audio?.musicOutput();
       if (!output) return;

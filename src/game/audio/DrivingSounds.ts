@@ -68,6 +68,8 @@ export class DrivingSounds {
    * when they are close.
    */
   update(state: { driving: boolean; speed: number; heading: number; siren?: boolean }, deltaMs: number): void {
+    // The sound system was rebuilt (see ScannerAudio's watchdog): reconnect to the new one.
+    if (this.out && !this.audio.owns(this.out.ctx)) this.out = null;
     const out = this.out ?? this.connect();
     if (!out) return;
     const { ctx, gain, engine, tone } = out;
