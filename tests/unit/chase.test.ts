@@ -149,7 +149,7 @@ describe('pursuit balance (comprehension must beat luck)', () => {
     const results = seeds(difficulty, 80, 'balance').map((s) => play(s, 'RANDOM'));
     const captured = results.filter((r) => r.phase === 'CAPTURED').length;
     expect(captured / results.length).toBeLessThanOrEqual(LUCK_LIMIT[difficulty]);
-  }, 300_000); // a random driver now plays out the whole clock: the suspect only escapes at time-out
+  }, 600_000); // a random driver plays out the whole clock (the suspect only escapes at time-out); 80 of them took 334 s on a slow runner
 
   it('one wrong turn costs distance but is recoverable', () => {
     // Follow the route but take one detour early, then return to following.
