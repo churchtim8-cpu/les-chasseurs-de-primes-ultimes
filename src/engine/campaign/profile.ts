@@ -62,24 +62,24 @@ export type BadgeId = (typeof BADGE_IDS)[number];
 export interface Badge {
   id: BadgeId;
   name: string;
-  /** How it is earned, in French (shown while locked). */
+  /** How it is earned (shown while locked). The badge names stay French, like the ranks. */
   how: string;
   /** Emoji drawn on the badge. */
   icon: string;
 }
 
 export const BADGES: readonly Badge[] = [
-  { id: 'PREMIERE', name: 'Première arrestation', how: 'Arrêtez votre premier suspect.', icon: '⭐' },
-  { id: 'SANS_FAUTE', name: 'Sans faute', how: 'Une poursuite sans aucune mauvaise direction.', icon: '🎯' },
-  { id: 'ECLAIR', name: 'Éclair', how: 'Arrêtez un suspect avec plus de la moitié du temps restant.', icon: '⚡' },
-  { id: 'OREILLE_D_OR', name: 'Oreille d’or', how: 'Une arrestation au niveau Expert sans répétition.', icon: '👂' },
-  { id: 'PIED_LEGER', name: 'Pied léger', how: 'Arrêtez un suspect à pied.', icon: '👟' },
-  { id: 'NOCTAMBULE', name: 'Noctambule', how: `${10} arrestations en mode nuit.`, icon: '🌙' },
-  { id: 'MARATHONIEN', name: 'Marathonien', how: `${25} arrestations en tout.`, icon: '🏃' },
-  { id: 'CHASSEUR_ULTIME', name: 'Chasseur ultime', how: 'Une médaille d’or pour les 8 suspects de la campagne.', icon: '🏆' },
-  { id: 'BOSS', name: 'Le Boss sous les verrous', how: 'Arrêtez le Boss.', icon: '🐻' },
-  { id: 'PATRONNE', name: 'La Patronne sous les verrous', how: 'Arrêtez la Patronne.', icon: '🐆' },
-  { id: 'INSAISISSABLE', name: 'Insaisissable', how: 'Semez la police en mode Évasion.', icon: '🏃' },
+  { id: 'PREMIERE', name: 'Première arrestation', how: 'Arrest your first suspect.', icon: '⭐' },
+  { id: 'SANS_FAUTE', name: 'Sans faute', how: 'A chase without a single wrong turn.', icon: '🎯' },
+  { id: 'ECLAIR', name: 'Éclair', how: 'Arrest a suspect with more than half the time left.', icon: '⚡' },
+  { id: 'OREILLE_D_OR', name: 'Oreille d’or', how: 'An Expert arrest without a repeat.', icon: '👂' },
+  { id: 'PIED_LEGER', name: 'Pied léger', how: 'Arrest a suspect on foot.', icon: '👟' },
+  { id: 'NOCTAMBULE', name: 'Noctambule', how: `${10} arrests in night mode.`, icon: '🌙' },
+  { id: 'MARATHONIEN', name: 'Marathonien', how: `${25} arrests in all.`, icon: '🏃' },
+  { id: 'CHASSEUR_ULTIME', name: 'Chasseur ultime', how: 'A gold medal for all 8 campaign suspects.', icon: '🏆' },
+  { id: 'BOSS', name: 'Le Boss sous les verrous', how: 'Arrest Le Boss.', icon: '🐻' },
+  { id: 'PATRONNE', name: 'La Patronne sous les verrous', how: 'Arrest La Patronne.', icon: '🐆' },
+  { id: 'INSAISISSABLE', name: 'Insaisissable', how: 'Lose the police in Escape mode.', icon: '🏃' },
 ];
 
 /** Captures needed for the counting badges. */
@@ -100,13 +100,13 @@ export interface BossInfo {
   chaseType: ChaseType;
   /** Extra seconds on the clock for the longer chase. */
   extraSeconds: number;
-  /** How it is found, in French (shown while locked). */
+  /** How it is found (shown while locked). */
   unlock: string;
 }
 
 export const BOSSES: readonly BossInfo[] = [
-  { nickname: 'Le Boss', picture: 'boss', difficulty: 'EXPERT', chaseType: 'CAR_FOOT_CAR', extraSeconds: 30, unlock: 'Une médaille d’or pour les 8 suspects' },
-  { nickname: 'La Patronne', picture: 'patronne', difficulty: 'EXPERT', chaseType: 'FOOT_CAR_FOOT', extraSeconds: 30, unlock: 'Le Boss arrêté' },
+  { nickname: 'Le Boss', picture: 'boss', difficulty: 'EXPERT', chaseType: 'CAR_FOOT_CAR', extraSeconds: 30, unlock: 'A gold medal for all 8 suspects' },
+  { nickname: 'La Patronne', picture: 'patronne', difficulty: 'EXPERT', chaseType: 'FOOT_CAR_FOOT', extraSeconds: 30, unlock: 'Arrest Le Boss' },
 ];
 
 export const BOSS = BOSSES[0] as BossInfo;

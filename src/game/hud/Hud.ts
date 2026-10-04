@@ -211,7 +211,7 @@ export class Hud {
 
     if (mode !== this.shownMode) {
       this.shownMode = mode;
-      this.mode.setText(mode === 'CAR' ? 'EN VOITURE' : 'À PIED');
+      this.mode.setText(mode === 'CAR' ? 'IN THE CAR' : 'ON FOOT');
       this.modeIcon.clear();
       if (mode === 'CAR') {
         this.modeIcon.setScale(1.5);
@@ -235,7 +235,7 @@ export class Hud {
     if (status.sighting) this.sighting.tick(status.sighting.secondsLeft);
 
     const left = status.repeatsLeft;
-    this.repeat.label.setText(left === null ? '⟳  RÉPÉTER' : `⟳  RÉPÉTER  ·  ${left}`);
+    this.repeat.label.setText(left === null ? '⟳  REPEAT' : `⟳  REPEAT  ·  ${left}`);
     const off = left === 0 || status.signalLost;
     [this.repeat.label, this.repeat.key].forEach((o) => o.setAlpha(off ? 0.45 : 1));
   }
@@ -277,9 +277,9 @@ export class Hud {
     const colour = status.signal > 0.6 ? GREEN : status.signal > 0.3 ? AMBER : RED;
     this.signalBars.forEach((bar, i) => bar.setFillStyle(i < lit ? colour : 0x55656b, 1).setVisible(this.shown && !status.signalLost));
     const blink = warn && Math.floor(now / 300) % 2 === 0;
-    this.signalLabel.setText(status.signalLost ? 'SIGNAL PERDU' : this.signalName);
+    this.signalLabel.setText(status.signalLost ? 'SIGNAL LOST' : this.signalName);
     this.signalLabel.setColor(blink ? '#ffb4a2' : toCss(GLASS.label));
-    this.signalState.setText(status.signalLost ? '' : status.warning ? 'IL S’ÉLOIGNE !' : lit >= 4 ? 'TOUT PRÈS' : '');
+    this.signalState.setText(status.signalLost ? '' : status.warning ? 'GETTING AWAY!' : lit >= 4 ? 'VERY CLOSE' : '');
     this.signalState.setColor(status.warning ? '#ffb4a2' : toCss(GREEN));
   }
 
@@ -306,12 +306,12 @@ export class Hud {
   }
 
   setFacing(facing: 'FOOT' | 'ALWAYS' | 'NORTH'): void {
-    const label = { FOOT: 'TOURNE À PIED', ALWAYS: 'TOURNE TOUJOURS', NORTH: 'FIXE' }[facing];
-    this.facing.label.setText(`🧭  CARTE  ·  ${label}`);
+    const label = { FOOT: 'TURNS ON FOOT', ALWAYS: 'ALWAYS TURNS', NORTH: 'FIXED' }[facing];
+    this.facing.label.setText(`🧭  MAP  ·  ${label}`);
   }
 
   setMusic(on: boolean): void {
-    this.music.label.setText(on ? '♪  MUSIQUE' : '♪  MUSIQUE  ·  NON').setAlpha(on ? 1 : 0.6);
+    this.music.label.setText(on ? '♪  MUSIC' : '♪  MUSIC  ·  OFF').setAlpha(on ? 1 : 0.6);
   }
 
   showToast(message: string, ms = 1600): void {

@@ -40,12 +40,12 @@ export class CampaignScene extends Phaser.Scene {
     const { width } = this.scale;
     backdrop(this, SCREEN_PICTURES.briefing, 0.45);
 
-    text(this, width / 2, 24, 'DOSSIER : LES 8 SUSPECTS', 34, { bold: true, color: toCss(PALETTE.cream) }).setOrigin(0.5, 0);
+    text(this, width / 2, 24, 'CASE FILE: THE 8 SUSPECTS', 34, { bold: true, color: toCss(PALETTE.cream) }).setOrigin(0.5, 0);
     text(
       this,
       width / 2,
       68,
-      `${capturedCount(progress)} / ${MISSION_COUNT} arrêtés   ·   Score total : ${totalScore(progress)}`,
+      `${capturedCount(progress)} / ${MISSION_COUNT} arrested   ·   Total score: ${totalScore(progress)}`,
       22,
       { color: toCss(PALETTE.paleYellow) },
     ).setOrigin(0.5, 0);
@@ -54,13 +54,13 @@ export class CampaignScene extends Phaser.Scene {
 
     const menu = new Menu(this);
     const done = isComplete(progress);
-    menu.add(width / 2 - 360, 660, 300, 56, done ? 'AFFAIRE CLASSÉE' : `MISSION ${progress.current + 1}  ▶`, () =>
+    menu.add(width / 2 - 360, 660, 300, 56, done ? 'CASE CLOSED' : `MISSION ${progress.current + 1}  ▶`, () =>
       done ? this.scene.start('CaseClosed') : this.scene.start('Briefing', { mission: progress.current }),
     );
     menu.add(width / 2, 660, 340, 56, '🔧 GARAGE (G)', () => this.scene.start('Garage', { back: 'Campaign' }), { key: 'G', size: 22 });
-    const reset = menu.add(width / 2 + 300, 660, 200, 56, 'RECOMMENCER', () => this.reset(reset.label), { size: 20 });
+    const reset = menu.add(width / 2 + 300, 660, 200, 56, 'START AGAIN', () => this.reset(reset.label), { size: 20 });
     menu.add(width / 2 + 500, 660, 160, 56, 'MENU', () => this.scene.start('Title'), { key: 'ESC', size: 20 });
-    menu.add(width / 2 - 360, 600, 300, 44, '🏅 COMMISSARIAT (O)', () => this.scene.start('Commissariat'), { key: 'O', size: 18 });
+    menu.add(width / 2 - 360, 600, 300, 44, '🏅 POLICE STATION (O)', () => this.scene.start('Commissariat'), { key: 'O', size: 18 });
     menu.add(width / 2 + 400, 600, 300, 44, '📜 WANTED POSTERS (W)', () => this.scene.start('Wanted', { back: 'Campaign' }), { key: 'W', size: 18 });
     this.drawCar();
   }
@@ -82,10 +82,10 @@ export class CampaignScene extends Phaser.Scene {
     }
     this.add.rectangle(x + 14, y + 14, 130, 130).setOrigin(0).setStrokeStyle(2, PALETTE.ink);
     text(this, x + 156, y + 16, `N° ${index + 1}`, 20, { bold: true, color: toCss(PALETTE.terracotta) });
-    text(this, x + 156, y + 44, DIFFICULTY_SETTINGS[mission.difficulty].label.fr, 18);
-    text(this, x + 14, y + 154, open ? `« ${mission.nickname} »` : 'Suspect inconnu', 22, { bold: true });
+    text(this, x + 156, y + 44, DIFFICULTY_SETTINGS[mission.difficulty].label.en, 18);
+    text(this, x + 14, y + 154, open ? `« ${mission.nickname} »` : 'Unknown suspect', 22, { bold: true });
 
-    const status = record?.captured ? 'ARRÊTÉ' : record ? 'ÉCHAPPÉ' : index === progress.current ? 'À ARRÊTER' : '';
+    const status = record?.captured ? 'ARRESTED' : record ? 'GOT AWAY' : index === progress.current ? 'WANTED' : '';
     const colour = record?.captured ? 0x2e8b57 : record ? PALETTE.terracotta : PALETTE.seaDeep;
     if (status) {
       text(this, x + 14, y + 188, status, 20, { bold: true, color: toCss(colour) });
@@ -116,7 +116,7 @@ export class CampaignScene extends Phaser.Scene {
   private reset(label: Phaser.GameObjects.Text): void {
     if (!this.resetArmed) {
       this.resetArmed = true;
-      label.setText('SÛR ? ENCORE');
+      label.setText('SURE? AGAIN');
       return;
     }
     saveProgress(newCampaign(loadProgress()));

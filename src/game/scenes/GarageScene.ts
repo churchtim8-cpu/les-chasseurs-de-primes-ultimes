@@ -77,7 +77,7 @@ export class GarageScene extends Phaser.Scene {
     if (this.opts.overlayOf) this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x05121a, 0.5);
     this.label(GAME_WIDTH / 2, 20, 'GARAGE', 40, PALETTE.cream).setOrigin(0.5, 0);
     const profile = loadProfile();
-    const summary = `★ ${totalStars(profile)} étoiles   ·   ${profile.arrests} arrestations   ·   Grade : ${rankFor(profile.points).name}`;
+    const summary = `★ ${totalStars(profile)} stars   ·   ${profile.arrests} arrests   ·   Rank: ${rankFor(profile.points).name}`;
     this.label(GAME_WIDTH / 2, 68, summary, 18, PALETTE.paleYellow).setOrigin(0.5, 0);
 
     // The turntable under the preview, and the camera that films it.
@@ -103,10 +103,10 @@ export class GarageScene extends Phaser.Scene {
     });
 
     const back = this.add.rectangle(GAME_WIDTH / 2, 660, 260, 50, PALETTE.terracotta).setStrokeStyle(3, PALETTE.cream).setInteractive({ useHandCursor: true });
-    const backLabel = this.label(GAME_WIDTH / 2, 660, 'RETOUR (ÉCHAP)', 20, PALETTE.cream).setOrigin(0.5);
+    const backLabel = this.label(GAME_WIDTH / 2, 660, 'BACK (ESC)', 20, PALETTE.cream).setOrigin(0.5);
     back.on('pointerdown', () => this.close());
     this.camera.ignore([back, backLabel]);
-    const hint = this.label(GAME_WIDTH / 2, 616, '◀ ▶ : catégorie   ·   ▲ ▼ : choisir   ·   ENTRÉE : équiper', 16, PALETTE.cream).setOrigin(0.5);
+    const hint = this.label(GAME_WIDTH / 2, 616, '◀ ▶: category   ·   ▲ ▼: choose   ·   ENTER: equip', 16, PALETTE.cream).setOrigin(0.5);
     this.camera.ignore(hint);
 
     const keyboard = this.input.keyboard;
@@ -215,7 +215,7 @@ export class GarageScene extends Phaser.Scene {
       if (!big) name.setOrigin(0, 0.5);
       const parts: Phaser.GameObjects.GameObject[] = [box, name];
       if (big) {
-        const how = item.id === worn ? 'Équipé' : earned ? 'Débloqué : ENTRÉE pour équiper' : `À gagner : ${item.unlock}`;
+        const how = item.id === worn ? 'Equipped' : earned ? 'Unlocked: ENTER to equip' : `To earn: ${item.unlock}`;
         parts.push(this.label(x + 14, y + 32, how, 14, earned ? PALETTE.seaDeep : PALETTE.terracotta));
       } else if (!earned) {
         parts.push(this.label(x + w - 12, y + (rowH - 6) / 2, item.unlock, 13, PALETTE.terracotta).setOrigin(1, 0.5));

@@ -65,15 +65,15 @@ export class PauseScene extends Phaser.Scene {
     const bh = 54;
     let y = top + 132;
     const step = 68;
-    menu.add(cx, y, bw, bh, 'REPRENDRE (ÉCHAP)', () => this.carryOn(), { size: 22 });
-    menu.add(cx, (y += step), bw, bh, 'RECOMMENCER', () => this.leave(this.opts.retry), { size: 22 });
-    menu.add(cx, (y += step), bw, bh, 'COMMANDES', () => openCommands(this), { size: 22 });
+    menu.add(cx, y, bw, bh, 'RESUME (ESC)', () => this.carryOn(), { size: 22 });
+    menu.add(cx, (y += step), bw, bh, 'RESTART', () => this.leave(this.opts.retry), { size: 22 });
+    menu.add(cx, (y += step), bw, bh, 'CONTROLS', () => openCommands(this), { size: 22 });
     menu.add(cx, (y += step), bw, bh, 'GARAGE  ▶', () =>
       openGarage(this, () => {
         this.showPreview(this.preview?.x ?? 0, this.preview?.y ?? 0);
         this.opts.liveryChanged?.();
       }), { size: 22 });
-    menu.add(cx, (y += step), bw, bh, 'QUITTER LA POURSUITE', () => this.leave(this.opts.quit), { size: 22 });
+    menu.add(cx, (y += step), bw, bh, 'QUIT THE CHASE', () => this.leave(this.opts.quit), { size: 22 });
     this.showPreview(cx + bw / 2 + 38, top + 132 + 3 * step);
     this.input.keyboard?.on('keydown-ESC', () => this.carryOn());
   }

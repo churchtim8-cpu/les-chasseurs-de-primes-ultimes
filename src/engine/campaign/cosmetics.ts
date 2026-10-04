@@ -14,13 +14,13 @@ export type CosmeticSlot = (typeof COSMETIC_SLOTS)[number];
 
 /** Slot names shown in the garage, in French. */
 export const SLOT_NAMES: Record<CosmeticSlot, string> = {
-  VEHICLE: 'Véhicule',
-  LIVERY: 'Couleurs',
-  OUTFIT: 'Agent',
-  POSE: 'Victoire',
-  SMOKE: 'Fumée',
-  ARREST: 'Arrestation',
-  HUD: 'Écran',
+  VEHICLE: 'Vehicle',
+  LIVERY: 'Colours',
+  OUTFIT: 'Officer',
+  POSE: 'Victory',
+  SMOKE: 'Smoke',
+  ARREST: 'Arrest',
+  HUD: 'Screen',
 };
 
 /** What the rules can look at. */
@@ -36,7 +36,7 @@ export interface Cosmetic {
   id: string;
   /** Shown in the garage, in French. */
   name: string;
-  /** How it is earned, in French ('' when free). */
+  /** How it is earned ('' when free). */
   unlock: string;
   unlocked: (ctx: CosmeticContext) => boolean;
 }
@@ -60,14 +60,14 @@ const rankName = (id: RankId) => RANKS.find((r) => r.id === id)!.name;
 /** The garage's extra colours, after the campaign's six (see campaign.ts). */
 export const EXTRA_LIVERIES: readonly (LiveryLook & { name: string; unlock: string; unlocked: Cosmetic['unlocked'] })[] = [
   // School house colours: free, so every house can drive its own.
-  { id: 'MAISON_ROUGE', name: 'Maison rouge', body: 0xd23b30, stripe: 0xf7f7f2, uniform: 0x9c2a22, unlock: '', unlocked: free },
-  { id: 'MAISON_BLEUE', name: 'Maison bleue', body: 0x2f6fd6, stripe: 0xf7f7f2, uniform: 0x1f4e9c, unlock: '', unlocked: free },
-  { id: 'MAISON_VERTE', name: 'Maison verte', body: 0x2e9e5b, stripe: 0xf7f7f2, uniform: 0x1f6e40, unlock: '', unlocked: free },
-  { id: 'MAISON_JAUNE', name: 'Maison jaune', body: 0xf2c230, stripe: 0x21313a, uniform: 0xb38a12, unlock: '', unlocked: free },
-  { id: 'DRAPEAU', name: 'Drapeau', body: 0xd0212d, stripe: 0x111111, uniform: 0x111111, pattern: 'FLAG', unlock: '3 arrestations', unlocked: arrests(3) },
-  { id: 'CARNAVAL', name: 'Carnaval', body: 0x7b2fbe, stripe: 0xf2c230, uniform: 0x5a1f8c, pattern: 'CARNIVAL', unlock: '10 étoiles', unlocked: stars(10) },
-  { id: 'NEON', name: 'Néon', body: 0x1a1d29, stripe: 0x29f0ff, uniform: 0x1a1d29, pattern: 'NEON', unlock: '3 arrestations de nuit', unlocked: (ctx) => ctx.profile.nightArrests >= 3 },
-  { id: 'CAMOUFLAGE', name: 'Camouflage', body: 0x5f6b3a, stripe: 0x2f3420, uniform: 0x4a5430, pattern: 'CAMO', unlock: `grade ${rankName('LIEUTENANT')}`, unlocked: rankAtLeast('LIEUTENANT') },
+  { id: 'MAISON_ROUGE', name: 'Red house', body: 0xd23b30, stripe: 0xf7f7f2, uniform: 0x9c2a22, unlock: '', unlocked: free },
+  { id: 'MAISON_BLEUE', name: 'Blue house', body: 0x2f6fd6, stripe: 0xf7f7f2, uniform: 0x1f4e9c, unlock: '', unlocked: free },
+  { id: 'MAISON_VERTE', name: 'Green house', body: 0x2e9e5b, stripe: 0xf7f7f2, uniform: 0x1f6e40, unlock: '', unlocked: free },
+  { id: 'MAISON_JAUNE', name: 'Yellow house', body: 0xf2c230, stripe: 0x21313a, uniform: 0xb38a12, unlock: '', unlocked: free },
+  { id: 'DRAPEAU', name: 'Flag', body: 0xd0212d, stripe: 0x111111, uniform: 0x111111, pattern: 'FLAG', unlock: '3 arrests', unlocked: arrests(3) },
+  { id: 'CARNAVAL', name: 'Carnival', body: 0x7b2fbe, stripe: 0xf2c230, uniform: 0x5a1f8c, pattern: 'CARNIVAL', unlock: '10 stars', unlocked: stars(10) },
+  { id: 'NEON', name: 'Neon', body: 0x1a1d29, stripe: 0x29f0ff, uniform: 0x1a1d29, pattern: 'NEON', unlock: '3 night arrests', unlocked: (ctx) => ctx.profile.nightArrests >= 3 },
+  { id: 'CAMOUFLAGE', name: 'Camouflage', body: 0x5f6b3a, stripe: 0x2f3420, uniform: 0x4a5430, pattern: 'CAMO', unlock: `rank ${rankName('LIEUTENANT')}`, unlocked: rankAtLeast('LIEUTENANT') },
 ];
 
 const campaignLiveries: Cosmetic[] = CAMPAIGN_LIVERIES.map((l) => ({
@@ -80,52 +80,52 @@ const campaignLiveries: Cosmetic[] = CAMPAIGN_LIVERIES.map((l) => ({
 
 export const COSMETICS: readonly Cosmetic[] = [
   // Vehicles: each drawn the same size as every other car in town (the motorbike smaller).
-  { slot: 'VEHICLE', id: 'BERLINE', name: 'Berline de police', unlock: '', unlocked: free },
-  { slot: 'VEHICLE', id: 'MOTO', name: 'Moto de police', unlock: `grade ${rankName('AGENT')}`, unlocked: rankAtLeast('AGENT') },
-  { slot: 'VEHICLE', id: 'BANALISEE', name: 'Voiture banalisée', unlock: '5 arrestations', unlocked: arrests(5) },
-  { slot: 'VEHICLE', id: 'VINTAGE', name: 'Classique des années 70', unlock: 'badge Sans faute', unlocked: (ctx) => ctx.profile.badges.SANS_FAUTE !== undefined },
-  { slot: 'VEHICLE', id: 'GENDARMERIE', name: '4x4 de la gendarmerie', unlock: `grade ${rankName('BRIGADIER')}`, unlocked: rankAtLeast('BRIGADIER') },
-  { slot: 'VEHICLE', id: 'PRESTIGE', name: 'Voiture du commissaire', unlock: `grade ${rankName('COMMISSAIRE')}`, unlocked: rankAtLeast('COMMISSAIRE') },
+  { slot: 'VEHICLE', id: 'BERLINE', name: 'Police saloon', unlock: '', unlocked: free },
+  { slot: 'VEHICLE', id: 'MOTO', name: 'Police motorbike', unlock: `rank ${rankName('AGENT')}`, unlocked: rankAtLeast('AGENT') },
+  { slot: 'VEHICLE', id: 'BANALISEE', name: 'Unmarked car', unlock: '5 arrests', unlocked: arrests(5) },
+  { slot: 'VEHICLE', id: 'VINTAGE', name: '1970s classic', unlock: 'Sans faute badge', unlocked: (ctx) => ctx.profile.badges.SANS_FAUTE !== undefined },
+  { slot: 'VEHICLE', id: 'GENDARMERIE', name: 'Gendarmerie 4x4', unlock: `rank ${rankName('BRIGADIER')}`, unlocked: rankAtLeast('BRIGADIER') },
+  { slot: 'VEHICLE', id: 'PRESTIGE', name: 'Commissaire’s car', unlock: `rank ${rankName('COMMISSAIRE')}`, unlocked: rankAtLeast('COMMISSAIRE') },
 
   ...campaignLiveries,
   ...EXTRA_LIVERIES.map((l): Cosmetic => ({ slot: 'LIVERY', id: l.id, name: l.name, unlock: l.unlock, unlocked: l.unlocked })),
 
   // The officer's look, seen on foot and in the garage.
-  { slot: 'OUTFIT', id: 'CASQUETTE', name: 'Casquette', unlock: '', unlocked: free },
-  { slot: 'OUTFIT', id: 'LUNETTES', name: 'Lunettes de soleil', unlock: '1 arrestation', unlocked: arrests(1) },
-  { slot: 'OUTFIT', id: 'CASQUE', name: 'Casque de moto', unlock: `grade ${rankName('AGENT')}`, unlocked: rankAtLeast('AGENT') },
-  { slot: 'OUTFIT', id: 'BERET', name: 'Béret', unlock: `grade ${rankName('BRIGADIER')}`, unlocked: rankAtLeast('BRIGADIER') },
-  { slot: 'OUTFIT', id: 'CARNAVAL', name: 'Coiffe de Carnaval', unlock: '15 étoiles', unlocked: stars(15) },
-  { slot: 'OUTFIT', id: 'NOEL', name: 'Bonnet de Noël', unlock: 'en décembre, ou 20 étoiles', unlocked: (ctx) => ctx.month === 12 || totalStars(ctx.profile) >= 20 },
+  { slot: 'OUTFIT', id: 'CASQUETTE', name: 'Cap', unlock: '', unlocked: free },
+  { slot: 'OUTFIT', id: 'LUNETTES', name: 'Sunglasses', unlock: '1 arrest', unlocked: arrests(1) },
+  { slot: 'OUTFIT', id: 'CASQUE', name: 'Motorbike helmet', unlock: `rank ${rankName('AGENT')}`, unlocked: rankAtLeast('AGENT') },
+  { slot: 'OUTFIT', id: 'BERET', name: 'Beret', unlock: `rank ${rankName('BRIGADIER')}`, unlocked: rankAtLeast('BRIGADIER') },
+  { slot: 'OUTFIT', id: 'CARNAVAL', name: 'Carnival headdress', unlock: '15 stars', unlocked: stars(15) },
+  { slot: 'OUTFIT', id: 'NOEL', name: 'Christmas hat', unlock: 'in December, or 20 stars', unlocked: (ctx) => ctx.month === 12 || totalStars(ctx.profile) >= 20 },
 
   // What the officer does after an arrest.
-  { slot: 'POSE', id: 'SALUT', name: 'Salut', unlock: '', unlocked: free },
-  { slot: 'POSE', id: 'POING', name: 'Poing levé', unlock: 'badge Éclair', unlocked: (ctx) => ctx.profile.badges.ECLAIR !== undefined },
-  { slot: 'POSE', id: 'DANSE', name: 'Petite danse', unlock: '24 étoiles', unlocked: stars(24) },
+  { slot: 'POSE', id: 'SALUT', name: 'Salute', unlock: '', unlocked: free },
+  { slot: 'POSE', id: 'POING', name: 'Fist pump', unlock: 'Éclair badge', unlocked: (ctx) => ctx.profile.badges.ECLAIR !== undefined },
+  { slot: 'POSE', id: 'DANSE', name: 'Little dance', unlock: '24 stars', unlocked: stars(24) },
 
   // Tyre smoke and skid marks.
-  { slot: 'SMOKE', id: 'CLASSIQUE', name: 'Classique', unlock: '', unlocked: free },
-  { slot: 'SMOKE', id: 'BLEUE', name: 'Fumée bleue', unlock: `grade ${rankName('AGENT')}`, unlocked: rankAtLeast('AGENT') },
-  { slot: 'SMOKE', id: 'ARC_EN_CIEL', name: 'Arc-en-ciel', unlock: '12 étoiles', unlocked: stars(12) },
-  { slot: 'SMOKE', id: 'FLAMMES', name: 'Flammes dorées', unlock: `grade ${rankName('CAPITAINE')}`, unlocked: rankAtLeast('CAPITAINE') },
+  { slot: 'SMOKE', id: 'CLASSIQUE', name: 'Classic', unlock: '', unlocked: free },
+  { slot: 'SMOKE', id: 'BLEUE', name: 'Blue smoke', unlock: `rank ${rankName('AGENT')}`, unlocked: rankAtLeast('AGENT') },
+  { slot: 'SMOKE', id: 'ARC_EN_CIEL', name: 'Rainbow', unlock: '12 stars', unlocked: stars(12) },
+  { slot: 'SMOKE', id: 'FLAMMES', name: 'Gold flames', unlock: `rank ${rankName('CAPITAINE')}`, unlocked: rankAtLeast('CAPITAINE') },
 
   // The effect when the suspect is caught.
-  { slot: 'ARREST', id: 'TAMPON', name: 'Tampon « ARRÊTÉ ! »', unlock: '', unlocked: free },
-  { slot: 'ARREST', id: 'CONFETTIS', name: 'Confettis', unlock: '2 arrestations', unlocked: arrests(2) },
-  { slot: 'ARREST', id: 'ETINCELLES', name: 'Menottes étincelantes', unlock: 'badge Pied léger', unlocked: (ctx) => ctx.profile.badges.PIED_LEGER !== undefined },
+  { slot: 'ARREST', id: 'TAMPON', name: '« ARRÊTÉ ! » stamp', unlock: '', unlocked: free },
+  { slot: 'ARREST', id: 'CONFETTIS', name: 'Confetti', unlock: '2 arrests', unlocked: arrests(2) },
+  { slot: 'ARREST', id: 'ETINCELLES', name: 'Sparkling handcuffs', unlock: 'Pied léger badge', unlocked: (ctx) => ctx.profile.badges.PIED_LEGER !== undefined },
   {
     slot: 'ARREST',
     id: 'TOUT',
-    name: 'Les trois à la fois',
-    unlock: `8 médailles d’or, ou grade ${rankName('CAPITAINE')}`,
+    name: 'All three at once',
+    unlock: `8 gold medals, or rank ${rankName('CAPITAINE')}`,
     unlocked: (ctx) => ctx.progress.missions.every((m) => medalAtLeast(m?.medal ?? null, 'GOLD')) || rankAtLeast('CAPITAINE')(ctx),
   },
 
   // The chase screen's colours.
-  { slot: 'HUD', id: 'TABLETTE', name: 'Tablette de police', unlock: '', unlocked: free },
-  { slot: 'HUD', id: 'RETRO', name: 'Écran rétro', unlock: '4 suspects de la campagne arrêtés', unlocked: (ctx) => capturedCount(ctx.progress) >= 4 },
-  { slot: 'HUD', id: 'CARNAVAL', name: 'Carnaval', unlock: '10 étoiles', unlocked: stars(10) },
-  { slot: 'HUD', id: 'OR', name: 'Or', unlock: `grade ${rankName('COMMISSAIRE')}`, unlocked: rankAtLeast('COMMISSAIRE') },
+  { slot: 'HUD', id: 'TABLETTE', name: 'Police tablet', unlock: '', unlocked: free },
+  { slot: 'HUD', id: 'RETRO', name: 'Retro screen', unlock: '4 campaign suspects arrested', unlocked: (ctx) => capturedCount(ctx.progress) >= 4 },
+  { slot: 'HUD', id: 'CARNAVAL', name: 'Carnival', unlock: '10 stars', unlocked: stars(10) },
+  { slot: 'HUD', id: 'OR', name: 'Gold', unlock: `rank ${rankName('COMMISSAIRE')}`, unlocked: rankAtLeast('COMMISSAIRE') },
 ];
 
 /** The free first choice in each slot. */

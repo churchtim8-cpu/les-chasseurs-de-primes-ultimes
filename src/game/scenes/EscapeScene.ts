@@ -150,7 +150,7 @@ export class EscapeScene extends Phaser.Scene {
     this.officer = createOfficer(this, colours, look.OUTFIT).setVisible(false);
     this.badge = createIntentBadge(this);
     this.roundabout = new RoundaboutGuide(this, this.graph, () =>
-      this.hud.showToast('Rond-point : ◀ ▶ pour choisir la sortie', 2600),
+      this.hud.showToast('Roundabout: ◀ ▶ to choose the exit', 2600),
     );
     const me = this.escape.player.snapshot();
     this.displayHeading = me.heading;
@@ -164,7 +164,7 @@ export class EscapeScene extends Phaser.Scene {
     this.rig.setFacing(loadFacing());
     this.controls = new Controls(this);
     this.controls.onAction((action) => this.handleAction(action));
-    this.hud = new Hud(this, 'ÉVASION', 'POLICE', look.HUD);
+    this.hud = new Hud(this, 'ESCAPE', 'POLICE', look.HUD);
     this.hud.onRepeat(() => this.repeat());
     this.hud.onMusic(() => this.toggleMusic());
     this.hud.setMusic(!this.music.isMuted);
@@ -222,13 +222,13 @@ export class EscapeScene extends Phaser.Scene {
 
   /** "Allez à la planque ! La police arrive." and the first direction are heard in full, then "GO !". */
   private opening(): void {
-    this.hud.showBanner('PRÊT…');
+    this.hud.showBanner('READY…');
     this.handleEvents(this.escape.openingCall());
     const minWait = new Promise<void>((resolve) => this.time.delayedCall(OPENING.minMs, () => resolve()));
     const maxWait = new Promise<void>((resolve) => this.time.delayedCall(OPENING.maxMs, () => resolve()));
     void Promise.race([Promise.all([this.speech, minWait]), maxWait]).then(() => {
       if (!this.scene.isActive() || this.stage !== 'OPENING') return;
-      this.hud.showBanner('GO !');
+      this.hud.showBanner('GO!');
       this.stage = 'PURSUIT';
       if (this.escape.player.mode === 'CAR') {
         this.launchAt = this.time.now + BURNOUT.holdMs;
@@ -243,10 +243,10 @@ export class EscapeScene extends Phaser.Scene {
     for (const [i, event] of events.entries()) {
       switch (event.type) {
         case 'SIGHTED':
-          if (event.on) this.hud.showToast('Police en vue !');
+          if (event.on) this.hud.showToast('Police in sight!');
           break;
         case 'WARNING':
-          if (event.on) this.hud.showToast('La police se rapproche !');
+          if (event.on) this.hud.showToast('The police are getting closer!');
           break;
         case 'CAPTURED':
           this.arrest();
@@ -290,8 +290,8 @@ export class EscapeScene extends Phaser.Scene {
 
   private orderToasts(lines: SpokenText[]): void {
     const ids = lines.map((l) => l.audioId);
-    if (ids.includes(TRANSPORT_LINES.GET_OUT.audioId)) this.hud.showToast('⇄ (ESPACE) : descendre de la voiture', 3500);
-    if (ids.includes(TRANSPORT_LINES.GET_IN.audioId)) this.hud.showToast('⇄ (ESPACE) : monter dans la voiture', 3500);
+    if (ids.includes(TRANSPORT_LINES.GET_OUT.audioId)) this.hud.showToast('⇄ (SPACE): get out of the car', 3500);
+    if (ids.includes(TRANSPORT_LINES.GET_IN.audioId)) this.hud.showToast('⇄ (SPACE): get in the car', 3500);
   }
 
   private showTransmission(transmission: Transmission, before: SpokenLine[] = [], lead: SpokenText[] = [], tail: SpokenText[] = []): void {
@@ -335,11 +335,11 @@ export class EscapeScene extends Phaser.Scene {
         player.queue(action);
         break;
       case 'U_TURN':
-        if (!player.uTurn()) this.hud.showToast('Sens interdit !');
+        if (!player.uTurn()) this.hud.showToast('No entry!');
         break;
       case 'TOGGLE_MODE': {
         const { result, events } = this.escape.toggleMode();
-        if (!result.ok && result.reason !== 'NOT_HERE') this.hud.showToast('La voiture est trop loin.');
+        if (!result.ok && result.reason !== 'NOT_HERE') this.hud.showToast('The car is too far away.');
         this.handleEvents(events);
         break;
       }
@@ -435,7 +435,7 @@ export class EscapeScene extends Phaser.Scene {
 
   private flashMode(mode: TravelMode): void {
     if (this.stage !== 'PURSUIT') return;
-    this.hud.showBanner(mode === 'FOOT' ? 'À PIED !' : 'EN VOITURE !');
+    this.hud.showBanner(mode === 'FOOT' ? 'ON FOOT!' : 'IN THE CAR!');
     this.time.delayedCall(1100, () => this.stage === 'PURSUIT' && this.hud.showBanner(''));
     this.cameras.main.flash(180, 255, 255, 255, false);
   }
@@ -464,7 +464,7 @@ export class EscapeScene extends Phaser.Scene {
 
   /** Safe: "Bravo ! Vous avez semé la police !" */
   private hideout(): void {
-    this.showResults(scannerAudio.play([{ audioId: ESCAPE_LINES.WON.audioId, radio: true }]), 'Vous avez semé la police !');
+    this.showResults(scannerAudio.play([{ audioId: ESCAPE_LINES.WON.audioId, radio: true }]), 'You lost the police!');
   }
 
   /**
@@ -476,7 +476,7 @@ export class EscapeScene extends Phaser.Scene {
     if (this.stage === 'ARREST' || this.stage === 'RESULTS') return;
     const said = () => scannerAudio.play([{ audioId: ESCAPE_LINES.ARRESTED.audioId, radio: true }]);
     if (this.escape.status.escapeReason === 'TIME' || !this.escape.policeOnMap) {
-      this.showResults(said(), 'Barrages en place : vous êtes arrêté !');
+      this.showResults(said(), 'Roadblocks up: you are under arrest!');
       return;
     }
     this.stage = 'ARREST';
@@ -493,7 +493,7 @@ export class EscapeScene extends Phaser.Scene {
       suspectSpeed: me.speed,
       kind: arrestKind(this.escape.police.mode, me.mode === 'CAR'),
     }).then(() => {
-      if (this.scene.isActive()) this.showResults(said(), 'Vous êtes arrêté !');
+      if (this.scene.isActive()) this.showResults(said(), 'You are under arrest!');
     });
   }
 
@@ -571,7 +571,7 @@ export class EscapeScene extends Phaser.Scene {
     const result = this.escape.requestRepeat();
     if (!result || !last) return;
     if (!result.allowed) {
-      this.hud.showToast('Plus de répétitions !');
+      this.hud.showToast('No repeats left!');
       return;
     }
     const request = REPEAT_LINES[result.urgency];

@@ -55,28 +55,28 @@ export class TitleScene extends Phaser.Scene {
     const progress = loadProgress();
     const played = progress.missions.filter((m) => m !== null).length;
     const campaignLabel =
-      played === 0 ? 'CAMPAGNE' : isComplete(progress) ? 'CAMPAGNE  ✓' : `CAMPAGNE  ·  mission ${progress.current + 1} / ${MISSION_COUNT}`;
+      played === 0 ? 'CAMPAIGN' : isComplete(progress) ? 'CAMPAIGN  ✓' : `CAMPAIGN  ·  mission ${progress.current + 1} / ${MISSION_COUNT}`;
 
     const menu = new Menu(this);
     const replay = this.seedFromAddress();
     if (replay) {
-      menu.add(GAME_WIDTH / 2, 352, 560, 56, `REJOUER LA POURSUITE ${replay.code}`, () => this.replay(replay), { size: 22 });
+      menu.add(GAME_WIDTH / 2, 352, 560, 56, `REPLAY CHASE ${replay.code}`, () => this.replay(replay), { size: 22 });
     }
     const top = replay ? 420 : 370;
     menu.add(GAME_WIDTH / 2 - 210, top, 400, 64, campaignLabel, () => this.scene.start('Campaign'), { key: 'C', size: 22 });
-    menu.add(GAME_WIDTH / 2 + 210, top, 400, 64, 'ENTRAÎNEMENT', () => this.scene.start('Practice'), { key: 'P' });
+    menu.add(GAME_WIDTH / 2 + 210, top, 400, 64, 'PRACTICE', () => this.scene.start('Practice'), { key: 'P' });
     const profile = loadProfile();
     const rank = rankFor(profile.points);
     const detail =
       played === 0
-        ? '8 suspects, du niveau Facile au niveau Expert   ·   C : campagne   ·   P : entraînement   ·   E : évasion'
-        : `${capturedCount(progress)} / ${MISSION_COUNT} suspects arrêtés   ·   Grade : ${rank.name} (${profile.points.toLocaleString('fr-FR')} pts)`;
+        ? '8 suspects, from Easy to Expert   ·   C: campaign   ·   P: practice   ·   E: escape'
+        : `${capturedCount(progress)} / ${MISSION_COUNT} suspects arrested   ·   Rank: ${rank.name} (${profile.points.toLocaleString('en-GB')} pts)`;
     text(this, GAME_WIDTH / 2, top + 62, detail, 19).setOrigin(0.5);
     // The police station (rank, badges, case files), Escape Mode (the player is the fugitive), and day or night in the town.
-    menu.add(GAME_WIDTH / 2 - 432, top + 108, 276, 44, '🏅 COMMISSARIAT (O)', () => this.scene.start('Commissariat'), { key: 'O', size: 19 });
-    menu.add(GAME_WIDTH / 2 - 144, top + 108, 276, 44, '🏃 ÉVASION (E)', () => this.scene.start('Practice', { escape: true }), { key: 'E', size: 19 });
-    const nightLabel = () => `🌙 NUIT : ${nightOn() ? 'OUI' : 'NON'}`;
-    menu.add(GAME_WIDTH / 2 + 144, top + 108, 276, 44, '🎮 COMMANDES (H)', () => openCommands(this), { key: 'H', size: 19 });
+    menu.add(GAME_WIDTH / 2 - 432, top + 108, 276, 44, '🏅 POLICE STATION (O)', () => this.scene.start('Commissariat'), { key: 'O', size: 19 });
+    menu.add(GAME_WIDTH / 2 - 144, top + 108, 276, 44, '🏃 ESCAPE (E)', () => this.scene.start('Practice', { escape: true }), { key: 'E', size: 19 });
+    const nightLabel = () => `🌙 NIGHT: ${nightOn() ? 'ON' : 'OFF'}`;
+    menu.add(GAME_WIDTH / 2 + 144, top + 108, 276, 44, '🎮 CONTROLS (H)', () => openCommands(this), { key: 'H', size: 19 });
     const night = menu.add(GAME_WIDTH / 2 + 432, top + 108, 276, 44, nightLabel(), () => {
       setNight(!nightOn());
       night.label.setText(nightLabel());

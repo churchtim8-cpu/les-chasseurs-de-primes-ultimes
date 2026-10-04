@@ -240,7 +240,7 @@ export class ChaseScene extends Phaser.Scene {
     this.officer = createOfficer(this, colours, look.OUTFIT).setVisible(false);
     this.badge = createIntentBadge(this);
     this.roundabout = new RoundaboutGuide(this, this.graph, () =>
-      this.hud.showToast('Rond-point : ◀ ▶ pour choisir la sortie', 2600),
+      this.hud.showToast('Roundabout: ◀ ▶ to choose the exit', 2600),
     );
     const me = this.chase.player.snapshot();
     this.displayHeading = me.heading;
@@ -254,7 +254,7 @@ export class ChaseScene extends Phaser.Scene {
     this.rig.setFacing(loadFacing());
     this.controls = new Controls(this);
     this.controls.onAction((action) => this.handleAction(action));
-    this.hud = new Hud(this, this.boss ? this.boss.nickname.toUpperCase() : this.mission === null ? 'ENTRAÎNEMENT' : `MISSION ${this.mission + 1} / ${MISSION_COUNT}`, 'SIGNAL', look.HUD);
+    this.hud = new Hud(this, this.boss ? this.boss.nickname.toUpperCase() : this.mission === null ? 'PRACTICE' : `MISSION ${this.mission + 1} / ${MISSION_COUNT}`, 'SIGNAL', look.HUD);
     this.hud.onRepeat(() => this.repeat());
     this.hud.onMusic(() => this.toggleMusic());
     this.hud.setMusic(!this.music.isMuted);
@@ -315,13 +315,13 @@ export class ChaseScene extends Phaser.Scene {
    * then "GO !" and the chase begins (in the car with a burnout).
    */
   private opening(): void {
-    this.hud.showBanner('PRÊT…');
+    this.hud.showBanner('READY…');
     this.handleEvents(this.chase.openingCall());
     const minWait = new Promise<void>((resolve) => this.time.delayedCall(OPENING.minMs, () => resolve()));
     const maxWait = new Promise<void>((resolve) => this.time.delayedCall(OPENING.maxMs, () => resolve()));
     void Promise.race([Promise.all([this.speech, minWait]), maxWait]).then(() => {
       if (!this.scene.isActive() || this.stage !== 'OPENING') return;
-      this.hud.showBanner('GO !');
+      this.hud.showBanner('GO!');
       this.stage = 'PURSUIT';
       if (this.chase.player.mode === 'CAR') {
         this.launchAt = this.time.now + BURNOUT.holdMs;
@@ -336,11 +336,11 @@ export class ChaseScene extends Phaser.Scene {
     for (const [i, event] of events.entries()) {
       switch (event.type) {
         case 'SIGHTED':
-          if (event.on) this.hud.showToast('Suspect en vue !');
+          if (event.on) this.hud.showToast('Suspect in sight!');
           break;
         case 'WARNING':
           if (event.on) {
-            this.hud.showToast('Le suspect s’éloigne !');
+            this.hud.showToast('The suspect is getting away!');
             // Only when the radio is free: a "Vite !" never holds up a direction.
             if (event.speak) {
               const call = this.warnings++ % 2 === 0 ? OUTCOME_LINES.WARNING : OUTCOME_LINES.HURRY;
@@ -380,14 +380,14 @@ export class ChaseScene extends Phaser.Scene {
             event.answer,
             event.chosen,
             event.correct
-              ? `Bravo ! (+${SIGHTING.bonusSeconds} s)`
+              ? `Well done! (+${SIGHTING.bonusSeconds} s)`
               : event.chosen === null
-                ? `Trop tard ! (−${SIGHTING.penaltySeconds} s)`
-                : `Ce n’est pas le suspect. (−${SIGHTING.penaltySeconds} s)`,
+                ? `Too late! (−${SIGHTING.penaltySeconds} s)`
+                : `That is not the suspect. (−${SIGHTING.penaltySeconds} s)`,
           );
           break;
         case 'SIGNAL':
-          this.hud.showToast(event.lost ? 'SIGNAL PERDU' : 'SIGNAL RÉTABLI', 2000);
+          this.hud.showToast(event.lost ? 'SIGNAL LOST' : 'SIGNAL BACK', 2000);
           break;
         case 'SUSPECT_MODE':
           break;
@@ -440,8 +440,8 @@ export class ChaseScene extends Phaser.Scene {
   /** An order also shows which button to press. */
   private orderToasts(lines: SpokenText[]): void {
     const ids = lines.map((l) => l.audioId);
-    if (ids.includes(TRANSPORT_LINES.GET_OUT.audioId)) this.hud.showToast('⇄ (ESPACE) : descendre de la voiture', 3500);
-    if (ids.includes(TRANSPORT_LINES.GET_IN.audioId)) this.hud.showToast('⇄ (ESPACE) : monter dans la voiture', 3500);
+    if (ids.includes(TRANSPORT_LINES.GET_OUT.audioId)) this.hud.showToast('⇄ (SPACE): get out of the car', 3500);
+    if (ids.includes(TRANSPORT_LINES.GET_IN.audioId)) this.hud.showToast('⇄ (SPACE): get in the car', 3500);
   }
 
   /**
@@ -488,7 +488,7 @@ export class ChaseScene extends Phaser.Scene {
         player.queue(action);
         break;
       case 'U_TURN':
-        if (!player.uTurn()) this.hud.showToast('Sens interdit !');
+        if (!player.uTurn()) this.hud.showToast('No entry!');
         break;
       case 'TOGGLE_MODE':
         this.toggleMode();
@@ -501,7 +501,7 @@ export class ChaseScene extends Phaser.Scene {
 
   private toggleMode(): void {
     const { result, events } = this.chase.toggleMode();
-    if (!result.ok && result.reason !== 'NOT_HERE') this.hud.showToast('La voiture est trop loin.');
+    if (!result.ok && result.reason !== 'NOT_HERE') this.hud.showToast('The car is too far away.');
     this.handleEvents(events);
   }
 
@@ -688,7 +688,7 @@ export class ChaseScene extends Phaser.Scene {
   /** "À PIED !" / "EN VOITURE !" across the screen when the player changes transport. */
   private flashMode(mode: TravelMode): void {
     if (this.stage !== 'PURSUIT') return;
-    this.hud.showBanner(mode === 'FOOT' ? 'À PIED !' : 'EN VOITURE !');
+    this.hud.showBanner(mode === 'FOOT' ? 'ON FOOT!' : 'IN THE CAR!');
     this.time.delayedCall(1100, () => this.stage === 'PURSUIT' && this.hud.showBanner(''));
     this.cameras.main.flash(180, 255, 255, 255, false);
   }
@@ -753,7 +753,7 @@ export class ChaseScene extends Phaser.Scene {
     this.music.stop();
     const status = this.chase.status;
     const captured = status.phase === 'CAPTURED';
-    this.hud.showBanner(captured ? 'Le suspect est arrêté !' : 'Le suspect s’est échappé.');
+    this.hud.showBanner(captured ? 'Suspect arrested!' : 'The suspect got away.');
     const history = this.chase.navigator.history;
     const stats: MissionStats = {
       difficulty: this.chase.scenario.difficulty,
@@ -906,7 +906,7 @@ export class ChaseScene extends Phaser.Scene {
   private repeat(): void {
     if (this.stage !== 'PURSUIT') return;
     if (this.chase.status.signalLost) {
-      this.hud.showToast('Pas de signal !');
+      this.hud.showToast('No signal!');
       return;
     }
     // While a sighting question is open, R repeats that call (free: the chase is paused).
@@ -918,7 +918,7 @@ export class ChaseScene extends Phaser.Scene {
     const result = this.chase.requestRepeat();
     if (!result || !last) return;
     if (!result.allowed) {
-      this.hud.showToast('Plus de répétitions !');
+      this.hud.showToast('No repeats left!');
       return;
     }
     const request = REPEAT_LINES[result.urgency];

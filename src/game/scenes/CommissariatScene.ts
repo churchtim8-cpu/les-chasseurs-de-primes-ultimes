@@ -4,7 +4,7 @@ import { DIFFICULTY_SETTINGS } from '../../engine';
 import { capturedCount, MISSION_COUNT } from '../../engine/campaign/campaign';
 import { BADGES, BOSSES, bossInfo, bossUnlocked, EMPTY_FILE, SUSPECT_FILES, suspectPaceFor, type Badge, type BossInfo } from '../../engine/campaign/profile';
 import { CHASE_TYPE_MODES } from '../../engine/chase/settings';
-import { LOCATION_WORD_BY_ID, withPreposition } from '../../engine/language/locations';
+import { LOCATION_WORD_BY_ID } from '../../engine/language/locations';
 import { VEHICLE_WORDS } from '../../engine/language/sightings';
 import { loadProgress } from '../campaignStore';
 import { PALETTE, toCss } from '../palette';
@@ -32,16 +32,16 @@ export class CommissariatScene extends Phaser.Scene {
     const progress = loadProgress();
     backdrop(this, SCREEN_PICTURES.briefing, 0.5);
 
-    text(this, width / 2, 26, 'COMMISSARIAT DE BELLEVUE CITY', 28, { bold: true, color: toCss(PALETTE.cream) }).setOrigin(0.5, 0);
+    text(this, width / 2, 26, 'BELLEVUE CITY POLICE STATION', 28, { bold: true, color: toCss(PALETTE.cream) }).setOrigin(0.5, 0);
 
     // Rank and points, top left.
     paper(this, 40, 72, 560, 124);
     rankLine(this, 62, 88, profile.points, 516);
     const captured = capturedCount(progress);
-    text(this, 62, 150, `${profile.arrests} arrestation${profile.arrests === 1 ? '' : 's'} en tout   ·   ${profile.nightArrests} de nuit   ·   campagne : ${captured} / ${MISSION_COUNT}`, 17);
+    text(this, 62, 150, `${profile.arrests} arrest${profile.arrests === 1 ? '' : 's'} in all   ·   ${profile.nightArrests} at night   ·   campaign: ${captured} / ${MISSION_COUNT}`, 17);
     // Suspects move a little faster at each rank: say so under the counts.
     const pace = Math.round((suspectPaceFor(profile.points) - 1) * 100);
-    text(this, 62, 174, pace > 0 ? `À votre grade, les suspects sont ${pace} % plus rapides.` : 'Les suspects seront plus rapides à chaque grade.', 14, { fontStyle: 'italic', color: toCss(PALETTE.terracotta) });
+    text(this, 62, 174, pace > 0 ? `At your rank, suspects are ${pace}% faster.` : 'Suspects get faster at every rank.', 14, { fontStyle: 'italic', color: toCss(PALETTE.terracotta) });
 
     // Badges, top right.
     paper(this, 620, 72, 620, 124);
@@ -59,7 +59,7 @@ export class CommissariatScene extends Phaser.Scene {
 
     // Bottom row: the campaign file, a button per boss that has been found, and the menu.
     const menu = new Menu(this);
-    menu.add(190, 672, 300, 52, 'CAMPAGNE (C)', () => this.scene.start('Campaign'), { key: 'C', size: 20 });
+    menu.add(190, 672, 300, 52, 'CAMPAIGN (C)', () => this.scene.start('Campaign'), { key: 'C', size: 20 });
     const bosses = BOSSES.filter((b) => open(b.picture));
     bosses.forEach((b, i) => {
       const bx = bosses.length === 1 ? 650 : 490 + i * 320;
@@ -77,7 +77,7 @@ export class CommissariatScene extends Phaser.Scene {
     const disc = this.add.circle(x, y, 26, earned ? PALETTE.paleYellow : PALETTE.stone).setStrokeStyle(3, earned ? 0x9c7a12 : 0x8a8a8a);
     const icon = text(this, x, y, earned ? b.icon : '🔒', 24).setOrigin(0.5).setAlpha(earned ? 1 : 0.55);
     const tip = this.add.container(0, 0).setVisible(false).setDepth(60);
-    const lines = earned ? `${b.name}\nObtenu le ${earnedOn}` : `${b.name}\n${b.how}`;
+    const lines = earned ? `${b.name}\nEarned on ${earnedOn}` : `${b.name}\n${b.how}`;
     const label = text(this, 0, 0, lines, 16, { align: 'center', wordWrap: { width: 300 } }).setOrigin(0.5, 1);
     const back = this.add.rectangle(0, 0, label.width + 24, label.height + 16, PALETTE.cream).setOrigin(0.5, 1).setStrokeStyle(2, PALETTE.ink);
     label.setPosition(0, -8);
@@ -107,27 +107,27 @@ export class CommissariatScene extends Phaser.Scene {
     }
     this.add.rectangle(x + 12, y + 12, 76, 76).setOrigin(0).setStrokeStyle(2, PALETTE.ink);
     const name = text(this, x + 96, y + 10, locked ? '« ??? »' : `« ${nickname} »`, 16, { bold: true, wordWrap: { width: 124 } });
-    const level = DIFFICULTY_SETTINGS[difficulty as keyof typeof DIFFICULTY_SETTINGS]?.label.fr ?? difficulty;
+    const level = DIFFICULTY_SETTINGS[difficulty as keyof typeof DIFFICULTY_SETTINGS]?.label.en ?? difficulty;
     const levelY = y + 10 + name.height + 2;
     text(this, x + 96, levelY, level, 14, { color: toCss(PALETTE.seaDeep) });
-    const status = f.arrests > 0 ? 'ARRÊTÉ' : known ? 'EN FUITE' : 'RECHERCHÉ';
+    const status = f.arrests > 0 ? 'ARRESTED' : known ? 'ON THE RUN' : 'WANTED';
     text(this, x + 96, levelY + 19, status, 14, { bold: true, color: toCss(f.arrests > 0 ? 0x2e8b57 : PALETTE.terracotta) });
     if (f.medal) medalBadge(this, x + 78, y + 78, f.medal, 11);
 
     const lines: string[] = [];
     if (locked) {
-      lines.push(`Dossier secret.`, `Pour l’ouvrir : ${boss?.unlock.toLowerCase() ?? '?'}.`);
+      lines.push(`Secret file.`, `To open it: ${boss?.unlock ?? "?"}.`);
     } else if (!known) {
-      lines.push('Aucune information.', boss ? 'Cliquez ici pour lancer la poursuite.' : 'Jouez la mission pour ouvrir le dossier.');
+      lines.push('No information.', boss ? 'Click here to start the chase.' : 'Play the mission to open the file.');
     } else {
-      lines.push(`Arrestations : ${f.arrests}  ·  Fuites : ${f.escapes}`);
-      if (f.quickest !== null) lines.push(`Plus rapide : ${f.quickest} s  ·  ${f.bestScore} pts`);
+      lines.push(`Arrests: ${f.arrests}  ·  Escapes: ${f.escapes}`);
+      if (f.quickest !== null) lines.push(`Quickest: ${f.quickest} s  ·  ${f.bestScore} pts`);
       const place = f.lastSeen ? LOCATION_WORD_BY_ID.get(f.lastSeen) : undefined;
-      if (place) lines.push(`${f.arrests > 0 ? 'Arrêté' : 'Vu'} ${withPreposition('près de', place)}`);
-      const how = f.vehicle ? VEHICLE_WORDS[f.vehicle].indefinite : 'à pied';
+      if (place) lines.push(`${f.arrests > 0 ? 'Arrested' : 'Seen'} near the ${place.en}`);
+      const how = f.vehicle ? `by ${VEHICLE_WORDS[f.vehicle].en}` : 'on foot';
       const modes = f.chaseType ? CHASE_TYPE_MODES[f.chaseType].map((m) => (m === 'CAR' ? '🚗' : '🏃')).join('→') : '';
-      lines.push(`Fuite : ${how} ${modes}`);
-      if (f.firstArrest) lines.push(`Depuis le ${f.firstArrest}`);
+      lines.push(`Getaway: ${how} ${modes}`);
+      if (f.firstArrest) lines.push(`Since ${f.firstArrest}`);
     }
     let ly = y + 98;
     for (const line of lines) ly += text(this, x + 12, ly, line, 13.5, { wordWrap: { width: w - 24 } }).height + 1;

@@ -15,24 +15,24 @@ interface Row {
 }
 
 const DRIVING: Row[] = [
-  { keys: ['◀', '▶'], what: 'Choisir le prochain virage (au rond-point : la sortie)' },
-  { keys: ['▲'], what: 'Tout droit · maintenir pour accélérer' },
-  { keys: ['▼'], what: 'Maintenir pour freiner' },
-  { keys: ['▼', '▼'], what: 'Deux fois vite : faire demi-tour (ou U)' },
-  { keys: ['ESPACE'], what: 'Descendre de la voiture / monter (ou E)' },
+  { keys: ['◀', '▶'], what: 'Choose the next turn (at a roundabout: the exit)' },
+  { keys: ['▲'], what: 'Straight on · hold to speed up' },
+  { keys: ['▼'], what: 'Hold to brake' },
+  { keys: ['▼', '▼'], what: 'Twice quickly: U-turn (or U)' },
+  { keys: ['SPACE'], what: 'Get out of the car / get in (or E)' },
 ];
 
 const RADIO: Row[] = [
-  { keys: ['R'], what: 'Répéter le dernier appel' },
-  { keys: ['1', '2', '3', '4'], what: '« Où est le suspect ? » : choisir la carte' },
-  { keys: ['ÉCHAP'], what: 'Pause : reprendre, recommencer, voiture, quitter' },
-  { keys: ['TAB'], what: 'Cacher / afficher l’écran de bord' },
-  { keys: ['B'], what: 'Musique   ·   V : sens de la carte   ·   F : plein écran' },
+  { keys: ['R'], what: 'Repeat the last call' },
+  { keys: ['1', '2', '3', '4'], what: '"Where is the suspect?": pick the card' },
+  { keys: ['ESC'], what: 'Pause: resume, restart, garage, quit' },
+  { keys: ['TAB'], what: 'Hide / show the dashboard' },
+  { keys: ['B'], what: 'Music   ·   V: map direction   ·   F: full screen' },
 ];
 
 /** The ZQSD/WASD letters work like the arrows. */
-const LETTERS = 'Les lettres W A S D marchent comme les flèches.';
-const TOUCH = 'Sur tablette : boutons ◀ ▶ ▲ ▼ en bas, ⟲ demi-tour, ⇄ voiture.';
+const LETTERS = 'The W A S D keys work like the arrows.';
+const TOUCH = 'On a tablet: ◀ ▶ ▲ ▼ buttons at the bottom, ⟲ U-turn, ⇄ car.';
 
 /**
  * The controls sheet ("COMMANDES"), opened over the title, practice screen or
@@ -63,10 +63,10 @@ export class CommandsScene extends Phaser.Scene {
     const blue = this.add.rectangle(x + w / 2, y, w / 2, 6, 0x2f7de1).setOrigin(0).setAlpha(0.25);
     this.tweens.add({ targets: red, alpha: 0.25, duration: 420, yoyo: true, repeat: -1 });
     this.tweens.add({ targets: blue, alpha: 1, duration: 420, yoyo: true, repeat: -1 });
-    this.label(GAME_WIDTH / 2, y + 26, 'COMMANDES', 40, PALETTE.cream).setOrigin(0.5, 0);
+    this.label(GAME_WIDTH / 2, y + 26, 'CONTROLS', 40, PALETTE.cream).setOrigin(0.5, 0);
 
-    this.column(x + 34, y + 160, 'AU VOLANT ET À PIED', DRIVING);
-    this.column(x + w / 2 + 14, y + 160, 'RADIO ET ÉCRAN', RADIO);
+    this.column(x + 34, y + 160, 'DRIVING AND ON FOOT', DRIVING);
+    this.column(x + w / 2 + 14, y + 160, 'RADIO AND SCREEN', RADIO);
     this.label(GAME_WIDTH / 2, y + h - 104, LETTERS, 17, PALETTE.lightBlue).setOrigin(0.5, 0);
     this.label(GAME_WIDTH / 2, y + h - 78, TOUCH, 17, PALETTE.lightBlue).setOrigin(0.5, 0);
 
@@ -74,7 +74,7 @@ export class CommandsScene extends Phaser.Scene {
       .rectangle(GAME_WIDTH / 2, y + h - 34, 260, 44, PALETTE.terracotta)
       .setStrokeStyle(3, PALETTE.cream, 0.9)
       .setInteractive({ useHandCursor: true });
-    this.label(GAME_WIDTH / 2, y + h - 34, 'RETOUR (ÉCHAP)', 20, PALETTE.cream).setOrigin(0.5);
+    this.label(GAME_WIDTH / 2, y + h - 34, 'BACK (ESC)', 20, PALETTE.cream).setOrigin(0.5);
     back.on('pointerdown', () => this.close());
     for (const key of ['ESC', 'ENTER', 'SPACE']) this.input.keyboard?.on(`keydown-${key}`, () => this.close());
   }
