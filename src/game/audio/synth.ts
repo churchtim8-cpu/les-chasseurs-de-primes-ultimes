@@ -103,3 +103,17 @@ export const note = (base: number, semitones: number): number => base * 2 ** (se
 export const D2 = 73.42;
 export const D3 = 146.83;
 export const D4 = 293.66;
+
+const lastTargets = new WeakMap<AudioParam, number>();
+
+/**
+ * Glide an audio setting towards `value`, but only when it has really
+ * changed: called every frame, a new glide each time piled up work for the
+ * sound thread on slow computers.
+ */
+export function glide(param: AudioParam, value: number, now: number, seconds: number): void {
+  const last = lastTargets.get(param);
+  if (last !== undefined && Math.abs(value - last) <= Math.max(1e-4, Math.abs(last) * 0.01)) return;
+  lastTargets.set(param, value);
+  param.setTargetAtTime(value, now, seconds);
+}

@@ -1,4 +1,5 @@
 import type { ScannerAudio } from './ScannerAudio';
+import { glide } from './synth';
 
 /**
  * Foot-chase sounds, synthesised live with Web Audio: a soft footstep with
@@ -61,8 +62,8 @@ export class FootSounds {
     this.phase = (this.phase + deltaMs / 1000 / seconds) % 1;
     const shape = Math.pow(Math.sin(this.phase * Math.PI * 2) ** 2, 1.5);
     const level = state.running ? BREATH.level * (BREATH.walking + (1 - BREATH.walking) * effort) * shape : 0;
-    breath.gain.setTargetAtTime(level, now, 0.03);
-    breathBand.frequency.setTargetAtTime(this.phase < 0.5 ? BREATH.inHz : BREATH.outHz, now, 0.05);
+    glide(breath.gain, level, now, 0.03);
+    glide(breathBand.frequency, this.phase < 0.5 ? BREATH.inHz : BREATH.outHz, now, 0.05);
   }
 
   stop(): void {

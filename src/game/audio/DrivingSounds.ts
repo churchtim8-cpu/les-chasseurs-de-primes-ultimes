@@ -1,4 +1,5 @@
 import type { ScannerAudio } from './ScannerAudio';
+import { glide } from './synth';
 
 /**
  * Car sounds, synthesised live with Web Audio: an engine hum whose pitch
@@ -72,13 +73,13 @@ export class DrivingSounds {
     const { ctx, gain, engine, tone } = out;
     const now = ctx.currentTime;
     const speed = state.driving ? state.speed : 0;
-    gain.gain.setTargetAtTime(state.driving ? ENGINE.level : 0, now, 0.15);
+    glide(gain.gain, state.driving ? ENGINE.level : 0, now, 0.15);
     const share = Math.min(1, speed / ENGINE.topSpeed);
     const hz = ENGINE.idleHz + (ENGINE.topHz - ENGINE.idleHz) * share;
-    engine[0]!.frequency.setTargetAtTime(hz, now, 0.12);
-    engine[1]!.frequency.setTargetAtTime(hz * 2.01, now, 0.12);
-    tone.frequency.setTargetAtTime(300 + share * 900, now, 0.2);
-    out.siren.gain.setTargetAtTime((state.siren ?? state.driving) ? SIREN.level : 0, now, 0.25);
+    glide(engine[0]!.frequency, hz, now, 0.12);
+    glide(engine[1]!.frequency, hz * 2.01, now, 0.12);
+    glide(tone.frequency, 300 + share * 900, now, 0.2);
+    glide(out.siren.gain, (state.siren ?? state.driving) ? SIREN.level : 0, now, 0.25);
 
     if (this.lastHeading !== null && state.driving && deltaMs > 0) {
       let turn = state.heading - this.lastHeading;
