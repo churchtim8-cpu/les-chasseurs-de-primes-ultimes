@@ -148,7 +148,8 @@ export class PracticeScene extends Phaser.Scene {
     keyboard?.on('keydown-RIGHT', () => step(1));
     keyboard?.on('keydown-ENTER', () => this.start());
     keyboard?.on('keydown-SPACE', () => this.start());
-    keyboard?.on('keydown-ESC', () => this.scene.start('Title'));
+    // ÉCHAP goes back a screen: to the officers' files for an escape, else the title.
+    keyboard?.on('keydown-ESC', () => this.scene.start(this.escape ? 'Officers' : 'Title'));
     keyboard?.on('keydown-H', () => openCommands(this));
     const commands = this.add
       .text(GAME_WIDTH / 2, 548, '🎮  SEE THE CONTROLS (H)', {

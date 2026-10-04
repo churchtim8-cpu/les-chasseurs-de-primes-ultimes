@@ -76,6 +76,7 @@ export class PauseScene extends Phaser.Scene {
     menu.add(cx, (y += step), bw, bh, 'QUIT THE CHASE', () => this.leave(this.opts.quit), { size: 22 });
     this.showPreview(cx + bw / 2 + 38, top + 132 + 3 * step);
     this.input.keyboard?.on('keydown-ESC', () => this.carryOn());
+    this.input.keyboard?.on('keydown-P', () => this.carryOn());
   }
 
   /** The police car in the chosen colours, turning slowly beside its button. */

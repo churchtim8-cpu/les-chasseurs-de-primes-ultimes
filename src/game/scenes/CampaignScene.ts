@@ -60,7 +60,7 @@ export class CampaignScene extends Phaser.Scene {
     menu.add(width / 2, 660, 340, 56, '🔧 GARAGE (G)', () => this.scene.start('Garage', { back: 'Campaign' }), { key: 'G', size: 22 });
     const reset = menu.add(width / 2 + 300, 660, 200, 56, 'START AGAIN', () => this.reset(reset.label), { size: 20 });
     menu.add(width / 2 + 500, 660, 160, 56, 'MENU', () => this.scene.start('Title'), { key: 'ESC', size: 20 });
-    menu.add(width / 2 - 360, 600, 300, 44, '🏅 POLICE STATION (O)', () => this.scene.start('Commissariat'), { key: 'O', size: 18 });
+    menu.add(width / 2 - 360, 600, 300, 44, '🏅 POLICE STATION (O)', () => this.scene.start('Commissariat', { back: 'Campaign' }), { key: 'O', size: 18 });
     menu.add(width / 2 + 400, 600, 300, 44, '📜 WANTED POSTERS (W)', () => this.scene.start('Wanted', { back: 'Campaign' }), { key: 'W', size: 18 });
     this.drawCar();
   }

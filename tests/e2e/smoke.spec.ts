@@ -73,6 +73,17 @@ test('title screen starts a chase; drive, get out and debug toggle work', async 
   await page.keyboard.press('Escape');
   await expect.poll(() => activeScenes(page), SLOW).not.toContain('Pause');
 
+  // P pauses and resumes too (Firefox and Safari keep ÉCHAP for leaving full screen),
+  // and leaving full screen mid-chase pauses.
+  await page.keyboard.press('p');
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Pause']));
+  await page.keyboard.press('p');
+  await expect.poll(() => activeScenes(page), SLOW).not.toContain('Pause');
+  await page.evaluate(() => window.__bellevue?.game.scale.emit('leavefullscreen'));
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Pause']));
+  await page.keyboard.press('Escape');
+  await expect.poll(() => activeScenes(page), SLOW).not.toContain('Pause');
+
   // Getting out (ESPACE) switches to foot mode, and the camera zooms in.
   const carZoom = Number(await info(page, 'zoom'));
   await page.keyboard.press('Space');
@@ -243,6 +254,9 @@ test('the police station shows the rank, badges and case files, and the Boss ope
   expect(await info(page, 'mission')).toBe('BOSS');
   await page.keyboard.press('Escape');
   await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Commissariat']));
+  // ÉCHAP keeps going back a screen, out to the title.
+  await page.keyboard.press('Escape');
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Title']));
   expect(errors).toEqual([]);
 });
 
