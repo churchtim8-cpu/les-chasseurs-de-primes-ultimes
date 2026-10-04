@@ -74,6 +74,8 @@ export class Hud {
   private readonly repeat: HudButton;
   private readonly music: HudButton;
   private readonly facing: HudButton;
+  /** Pause (ÉCHAP on a keyboard): a button too, for phones and tablets (Mr Henry, 2026-10-04). */
+  private readonly pauseButton: HudButton;
   private readonly sighting: SightingPanel;
   /** The panels TAB hides (the scanner call, banners, messages and questions always show). */
   private readonly chrome: Phaser.GameObjects.GameObject[] = [];
@@ -128,6 +130,9 @@ export class Hud {
     this.music.key.setText('B');
     this.facing = button(2);
     this.facing.key.setText('V');
+    this.pauseButton = button(3);
+    this.pauseButton.key.setText('ESC').setFontSize(10);
+    this.pauseButton.label.setText('❙❙  PAUSE');
 
     // The clock: red and blue lights either side, a bar draining underneath.
     const pod = this.chromed(scene.add.graphics());
@@ -291,6 +296,11 @@ export class Hud {
   /** Called when the music button is clicked or tapped. */
   onMusic(listener: () => void): void {
     this.onPress(this.music, listener);
+  }
+
+  /** Called when the pause button is clicked or tapped. */
+  onPause(listener: () => void): void {
+    this.onPress(this.pauseButton, listener);
   }
 
   /** Called when the map facing button is clicked or tapped. */

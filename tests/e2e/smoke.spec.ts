@@ -56,6 +56,23 @@ test('title screen starts a chase; drive, get out and debug toggle work', async 
   await expect.poll(() => activeScenes(page), SLOW).not.toContain('Pause');
   await expect.poll(clock, SLOW).toBeLessThan(frozen);
 
+  // Phones and tablets have no ÉCHAP key: the PAUSE button pauses too.
+  const pausePoint = await page.evaluate(() => {
+    const scene = window.__bellevue?.game.scene.getScene('Chase') as unknown as {
+      hud: { pauseButton: { hit: { x: number; y: number; width: number; height: number } } };
+      scale: { width: number };
+      game: { canvas: HTMLCanvasElement };
+    };
+    const hit = scene.hud.pauseButton.hit;
+    const box = scene.game.canvas.getBoundingClientRect();
+    const k = box.width / scene.scale.width;
+    return { x: box.left + (hit.x + hit.width / 2) * k, y: box.top + (hit.y + hit.height / 2) * k };
+  });
+  await page.mouse.click(pausePoint.x, pausePoint.y);
+  await expect.poll(() => activeScenes(page), SLOW).toEqual(expect.arrayContaining(['Pause']));
+  await page.keyboard.press('Escape');
+  await expect.poll(() => activeScenes(page), SLOW).not.toContain('Pause');
+
   // Getting out (ESPACE) switches to foot mode, and the camera zooms in.
   const carZoom = Number(await info(page, 'zoom'));
   await page.keyboard.press('Space');

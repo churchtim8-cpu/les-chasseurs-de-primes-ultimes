@@ -176,8 +176,10 @@ describe('changing transport in a chase', () => {
       }
     }
     // (Foot chases that start along the seafront promenade, with few side streets, let a lucky runner
-    // follow for a while: 11-18 of these 108 runs, depending on how the routes fall.)
-    expect(results.filter((p) => p === 'CAPTURED').length / results.length).toBeLessThanOrEqual(0.18);
+    // follow for a while: 11-18 of these 108 runs, depending on how the routes fall. Since the way back
+    // after a wrong turn cuts in at once (2026-10-04), every wrong turn costs less time, a lucky
+    // runner's included: 22 of 108. A listener still catches 95% or more.)
+    expect(results.filter((p) => p === 'CAPTURED').length / results.length).toBeLessThanOrEqual(0.22);
   }, 180_000);
 });
 

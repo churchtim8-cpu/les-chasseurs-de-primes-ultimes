@@ -186,6 +186,7 @@ export class EscapeScene extends Phaser.Scene {
     this.hud.onMusic(() => this.toggleMusic());
     this.hud.setMusic(!this.music.isMuted);
     this.hud.onFacing(() => this.cycleFacing());
+    this.hud.onPause(() => this.pause());
     this.hud.setFacing(loadFacing());
 
     const ui = this.cameras.add(0, 0, this.scale.width, this.scale.height);
@@ -331,7 +332,7 @@ export class EscapeScene extends Phaser.Scene {
     this.orderToasts(lead);
     // A way back after a wrong turn replaces anything still queued on the radio (it is out of date now).
     const spoken = [...before, ...clips.map((c) => ({ audioId: c.audioId, radio: true }))];
-    this.speech = transmission.kind === 'RECOVERY' && lead.length === 0 ? scannerAudio.interrupt(spoken) : scannerAudio.play(spoken);
+    this.speech = transmission.urgent && lead.length === 0 ? scannerAudio.interrupt(spoken) : scannerAudio.play(spoken);
     const detail = [...lead.map((l) => l.audioId), ...transmission.instructions.map((i) => `${i.template} ${i.audioId}`), ...tail.map((l) => l.audioId)].join(' + ');
     debugState.info.set('scanner', `${transmission.kind}: ${detail}`);
   }

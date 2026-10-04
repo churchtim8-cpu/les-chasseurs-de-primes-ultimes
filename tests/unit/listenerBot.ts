@@ -109,6 +109,8 @@ export class ListenerBot {
         // A line just before it ("Attention ! …") is said first in the same call.
         const previous = events[i - 1];
         const lead = previous?.type === 'ANNOUNCE' && !previous.after ? previous.lines : [];
+        // A way back after a wrong turn cuts off what the radio was saying, as the game plays it.
+        if (e.transmission.urgent && lead.length === 0) this.cutOff();
         const start = Math.max(this.time, this.radioFree);
         const times = heardTimes(e.transmission.instructions, lead, clipSeconds);
         const seq = this.seq++;
@@ -131,11 +133,7 @@ export class ListenerBot {
         this.log.push(e.transmission);
       } else if (e.type === 'ANNOUNCE') {
         // Urgent news cuts off whatever was being said: the rest of it is never heard.
-        if (e.interrupt) {
-          this.radioFree = Math.min(this.radioFree, this.time);
-          this.tasks = this.tasks.filter((t) => t.notBefore - this.reaction <= this.time);
-          this.heard = this.heard.filter((h) => h.at - this.reaction <= this.time);
-        }
+        if (e.interrupt) this.cutOff();
         const joined = !e.after && events[i + 1]?.type === 'TRANSMISSION';
         if (joined) continue; // said with the direction after it
         const start = Math.max(this.time, this.radioFree);
@@ -171,6 +169,13 @@ export class ListenerBot {
         if (told) this.vehicle = told;
       }
     }
+  }
+
+  /** Whatever the radio was still saying is cut off: the rest of it is never heard. */
+  private cutOff(): void {
+    this.radioFree = Math.min(this.radioFree, this.time);
+    this.tasks = this.tasks.filter((t) => t.notBefore - this.reaction <= this.time);
+    this.heard = this.heard.filter((h) => h.at - this.reaction <= this.time);
   }
 
   /** Seconds the radio is busy with a call of these clips (beep, voice, gaps, click). */
