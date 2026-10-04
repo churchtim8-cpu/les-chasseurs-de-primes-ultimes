@@ -153,6 +153,8 @@ export interface CaseFile {
   chaseType: ChaseType | null;
   /** The date (YYYY-MM-DD) of the first arrest. */
   firstArrest: string | null;
+  /** Best stars won against this suspect (0-3, see starsFor). */
+  stars: number;
 }
 
 export const EMPTY_FILE: CaseFile = {
@@ -165,7 +167,23 @@ export const EMPTY_FILE: CaseFile = {
   vehicle: null,
   chaseType: null,
   firstArrest: null,
+  stars: 0,
 };
+
+/**
+ * Stars for one chase (Mr Henry, 2026-10-04): ★ the suspect is caught,
+ * ★★ with no wrong turn, ★★★ with no repeat asked for. Students replay a
+ * mission for all three, which means more listening.
+ */
+export function starsFor(stats: Pick<MissionStats, 'captured' | 'wrongTurns' | 'repeatsUsed'>): number {
+  if (!stats.captured) return 0;
+  return 1 + (stats.wrongTurns === 0 ? 1 : 0) + (stats.repeatsUsed === 0 ? 1 : 0);
+}
+
+/** Stars won over every suspect (best per suspect): the campaign's eight and the bosses. */
+export function totalStars(profile: Profile): number {
+  return Object.values(profile.files).reduce((sum, f) => sum + f.stars, 0);
+}
 
 export interface Profile {
   version: 1;
@@ -178,10 +196,12 @@ export interface Profile {
   badges: Partial<Record<BadgeId, string>>;
   /** Case files by suspect picture id ("renard" … "requin", "boss", "patronne"). */
   files: Record<string, CaseFile>;
+  /** The garage choices by slot (see cosmetics.ts, which checks they are earned). */
+  look: Partial<Record<string, string>>;
 }
 
 export function newProfile(): Profile {
-  return { version: 1, points: 0, arrests: 0, nightArrests: 0, badges: {}, files: {} };
+  return { version: 1, points: 0, arrests: 0, nightArrests: 0, badges: {}, files: {}, look: {} };
 }
 
 /** Everything about one finished chase that the record keeps. */
@@ -241,6 +261,7 @@ export function recordChase(before: Profile, outcome: ChaseOutcome): Recorded {
       vehicle: outcome.vehicle,
       chaseType: outcome.chaseType,
       firstArrest: file.firstArrest ?? (captured ? outcome.date : null),
+      stars: Math.max(file.stars, starsFor({ ...stats, captured })),
     };
   }
   const newBadges = BADGES.filter((b) => !before.badges[b.id] && earned(b.id, profile, outcome));
@@ -312,10 +333,15 @@ export function parseProfile(json: string | null): Profile {
           vehicle: typeof f.vehicle === 'string' ? (f.vehicle as Vehicle) : null,
           chaseType: typeof f.chaseType === 'string' ? (f.chaseType as ChaseType) : null,
           firstArrest: typeof f.firstArrest === 'string' ? f.firstArrest : null,
+          stars: Math.min(3, count(f.stars)),
         };
       }
     }
-    return { version: 1, points: count(data.points), arrests: count(data.arrests), nightArrests: count(data.nightArrests), badges, files };
+    const look: Partial<Record<string, string>> = {};
+    if (data.look && typeof data.look === 'object') {
+      for (const [slot, id] of Object.entries(data.look as Record<string, unknown>)) if (typeof id === 'string') look[slot] = id;
+    }
+    return { version: 1, points: count(data.points), arrests: count(data.arrests), nightArrests: count(data.nightArrests), badges, files, look };
   } catch {
     return newProfile();
   }

@@ -102,4 +102,29 @@ describe('Escape Mode', () => {
     const lost = listened.filter((r) => r.said.includes(ESCAPE_LINES.POLICE_LOST.audioId)).length;
     expect(lost).toBeGreaterThan(0);
   }, 180_000);
+  it.each(DIFFICULTIES)('the partner never goes quiet on a player who is lost, stopped or has not changed transport (%s)', (difficulty) => {
+    // A player who mostly listens but now and then turns the wrong way (Mr Henry, 2026-10-04: "no one giving any orders at all").
+    for (const seed of seeds(difficulty, 12, 'quiet')) {
+      const escape = new Escape(graph, generateScenario(graph, seed, PLAIN));
+      const listener = new ListenerBot(graph);
+      const rng = Rng.fromSeed(`sloppy-${seed}`);
+      let lastEdge = '';
+      let heard = 0;
+      let worst = 0;
+      for (let t = 0; t < escape.timeLimit && escape.status.phase === 'PURSUIT'; t += 0.05) {
+        const me = escape.player.snapshot();
+        let events;
+        if (me.edgeId !== lastEdge && rng.next() < 0.2 && escape.status.switchTo === null && !escape.status.followingTracks) {
+          const exits = exitsAt(graph, graph.edge(me.edgeId), me.towards, me.mode);
+          if (exits.length > 0) escape.player.queue(rng.pick(exits).kind as TurnIntent);
+          events = escape.update(0.05);
+        } else events = listener.step(escape, 0.05);
+        lastEdge = me.edgeId;
+        if (events.some((e) => e.type === 'TRANSMISSION' || e.type === 'ANNOUNCE')) heard = t;
+        const stuck = escape.player.snapshot().waiting === 'JUNCTION' || escape.status.switchTo !== null;
+        if (stuck) worst = Math.max(worst, t - heard);
+      }
+      expect(worst, seed).toBeLessThan(16);
+    }
+  }, 180_000);
 });

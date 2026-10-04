@@ -78,6 +78,12 @@ export class Escape {
   private lostNews: SpokenText | null = null;
   /** The player must change to this mode; `announced` once the order has been given. */
   private pending: { mode: TravelMode; announced: boolean } | null = null;
+  /** When the order to change transport was last said (elapsed seconds), and how long the player has been stopped at a junction. */
+  private orderSaidAt = 0;
+  private stoppedFor = 0;
+  /** When a direction was last given, and when the partner last spoke up for a stuck player (elapsed seconds). */
+  private heardAt = 0;
+  private promptedAt = -Infinity;
   /** Set while the player is being taken to the start of this stage. */
   private autoStage: number | null = null;
   /** Where the player last changed transport, for the police to do the same. */
@@ -225,7 +231,9 @@ export class Escape {
       let texts: string[] = [];
       if (e.type === 'TRANSMISSION') texts = e.transmission.instructions.flatMap((ins) => ins.clips.map((c) => c.text));
       else if (e.type === 'ANNOUNCE') texts = e.lines.map((l) => l.text);
-      if (texts.length > 0) this.radioFreeAt = Math.max(this.elapsed, this.radioFreeAt) + callSeconds(texts);
+      // A way back cuts off whatever the radio was still saying (the scene interrupts it): it does not queue behind it.
+      const fresh = e.type === 'TRANSMISSION' && e.transmission.kind === 'RECOVERY' && !['TRANSMISSION', 'ANNOUNCE'].includes(events[i - 1]?.type ?? '');
+      if (texts.length > 0) this.radioFreeAt = (fresh ? this.elapsed : Math.max(this.elapsed, this.radioFreeAt)) + callSeconds(texts);
     }
     this.radioCounted = events.length;
   }
@@ -276,10 +284,15 @@ export class Escape {
     this.timeLeft = Math.max(0, this.timeLeft - dt);
     const wasOn = this.player.location().edgeId;
     const passed = this.player.update(dt);
+    // Progress along the route counts only when driven along it: crossing a later
+    // junction of the route from a side street must not skip the rest of it
+    // (the way back is planned onto what is left).
     const route = this.stages[this.stage]!.route;
+    let from = passed.length > 0 ? this.graph.other(this.graph.edge(wasOn), passed[0] as string) : '';
     for (const node of passed) {
-      const i = route.indexOf(node, this.furthest);
-      if (i > this.furthest) this.furthest = i;
+      const i = route.indexOf(node, this.furthest + 1);
+      if (i === this.furthest + 1 && route[i - 1] === from) this.furthest = i;
+      from = node;
     }
     if (this.trailing) this.trail.push(...passed);
     this.movePolice(dt, passed.length > 0);
@@ -296,6 +309,7 @@ export class Escape {
       for (const transmission of transmissions) events.push({ type: 'TRANSMISSION', transmission });
     }
     this.waitForFirstCall(events);
+    this.neverQuiet(dt, events);
 
     this.distance = this.measure();
     this.report(events);
@@ -319,6 +333,34 @@ export class Escape {
       events.push({ type: 'CAPTURED' });
     }
     return events;
+  }
+
+  /**
+   * The partner never leaves a stuck player in silence: the order to change
+   * transport is said again while it has not been done, and a player stopped
+   * at a junction, or lost off the way with nothing said for a while, hears
+   * the way on from where they are (again every so often while it lasts).
+   */
+  private neverQuiet(dt: number, events: ChaseEvent[]): void {
+    if (events.some((e) => e.type === 'TRANSMISSION')) this.heardAt = this.elapsed;
+    if (this.autoStage !== null || this.elapsed < this.radioFreeAt) return;
+    if (this.pending?.announced) {
+      if (this.elapsed - this.orderSaidAt < ESCAPE.orderAgainSeconds) return;
+      this.orderSaidAt = this.elapsed;
+      events.push({ type: 'ANNOUNCE', lines: [this.pending.mode === 'CAR' ? TRANSPORT_LINES.GET_IN : TRANSPORT_LINES.GET_OUT] });
+      return;
+    }
+    const here = this.player.location();
+    const stopped = this.player.snapshot().waiting === 'JUNCTION';
+    this.stoppedFor = stopped ? this.stoppedFor + dt : 0;
+    const due = stopped
+      ? this.stoppedFor >= ESCAPE.stoppedSeconds
+      : this.navigator.isOffGuide(here) && this.elapsed - this.heardAt >= ESCAPE.offGuideSeconds;
+    if (!due || this.elapsed - this.promptedAt < ESCAPE.orderAgainSeconds) return;
+    this.promptedAt = this.elapsed;
+    const transmissions = this.nav(events).prompt(here, this.remainingRoute());
+    for (const transmission of transmissions) events.push({ type: 'TRANSMISSION', transmission });
+    if (transmissions.length > 0) this.heardAt = this.elapsed;
   }
 
   /** Once the new stage's first direction has been given, the police wait only until it has been heard. */
@@ -472,6 +514,7 @@ export class Escape {
     const near = distance(this.player.snapshot(), this.graph.node(this.transferNode)) <= TRANSFER.getOutWithin;
     if (!near) return;
     this.pending = { mode: next.mode, announced: true };
+    this.orderSaidAt = this.elapsed;
     if (next.mode === 'CAR') {
       this.parkedCar = this.stageStart(this.stage + 1);
       events.push({ type: 'ANNOUNCE', lines: [TRANSPORT_LINES.GET_IN] });

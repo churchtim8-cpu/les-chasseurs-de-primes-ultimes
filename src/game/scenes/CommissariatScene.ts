@@ -32,7 +32,7 @@ export class CommissariatScene extends Phaser.Scene {
     const progress = loadProgress();
     backdrop(this, SCREEN_PICTURES.briefing, 0.5);
 
-    text(this, width / 2, 22, 'COMMISSARIAT DE BELLEVUE CITY', 34, { bold: true, color: toCss(PALETTE.cream) }).setOrigin(0.5, 0);
+    text(this, width / 2, 26, 'COMMISSARIAT DE BELLEVUE CITY', 28, { bold: true, color: toCss(PALETTE.cream) }).setOrigin(0.5, 0);
 
     // Rank and points, top left.
     paper(this, 40, 72, 560, 124);
@@ -66,6 +66,9 @@ export class CommissariatScene extends Phaser.Scene {
       menu.add(bx, 672, 300, 52, `${b.nickname.toUpperCase()}  ▶`, () => this.scene.start('Briefing', { boss: b.picture }), { size: 20 });
     });
     menu.add(1150, 672, 180, 52, 'MENU', () => this.scene.start('Title'), { key: 'ESC', size: 20 });
+    // Either side of the title: the garage and the wanted posters wall.
+    menu.add(110, 42, 170, 40, '🔧 GARAGE (G)', () => this.scene.start('Garage', { back: 'Commissariat' }), { key: 'G', size: 16 });
+    menu.add(1060, 42, 200, 40, '📜 POSTERS (W)', () => this.scene.start('Wanted', { back: 'Commissariat' }), { key: 'W', size: 16 });
   }
 
   /** A round badge: coloured and dated when earned, grey with how to earn it otherwise. */

@@ -20,11 +20,9 @@ import { FootSounds } from '../audio/FootSounds';
 import { menuMusic } from '../audio/Jingles';
 import { scannerAudio, type SpokenLine } from '../audio/ScannerAudio';
 import { CameraRig } from '../camera/cameraRig';
-import { loadProgress } from '../campaignStore';
 import { debugState } from '../debug/debugState';
 import { Hud } from '../hud/Hud';
 import { Controls, type ControlAction } from '../input/controls';
-import { livery } from '../../engine/campaign/campaign';
 import { animateRunner, createIntentBadge, createOfficer, createPoliceCar, createSuspectCar, createSuspectRunner } from '../render/actors';
 import { arrestKind, playArrest } from '../render/arrest';
 import { BURNOUT_SMOKE, DriftEffects } from '../render/drift';
@@ -38,6 +36,8 @@ import { scenarioOptionsFromAddress } from '../scenarioOptions';
 import { loadFacing, nextFacing } from './ChaseScene';
 import type { ResultsData } from './ResultsScene';
 import { PauseScene, type PauseSceneData } from './PauseScene';
+import { currentLook } from '../lookStore';
+import { liveryLook } from '../../engine/campaign/cosmetics';
 
 export interface EscapeSceneData {
   seed: string;
@@ -144,9 +144,10 @@ export class EscapeScene extends Phaser.Scene {
     this.cars = vehicles.map((v) => (v ? createSuspectCar(this, v) : null));
     this.runner = createSuspectRunner(this).setVisible(false);
     this.drift = new DriftEffects(this);
-    const colours = livery(loadProgress().livery);
-    this.policeCar = createPoliceCar(this, colours).setVisible(false);
-    this.officer = createOfficer(this, colours).setVisible(false);
+    const look = currentLook();
+    const colours = liveryLook(look.LIVERY);
+    this.policeCar = createPoliceCar(this, colours, look.VEHICLE).setVisible(false);
+    this.officer = createOfficer(this, colours, look.OUTFIT).setVisible(false);
     this.badge = createIntentBadge(this);
     this.roundabout = new RoundaboutGuide(this, this.graph, () =>
       this.hud.showToast('Rond-point : ◀ ▶ pour choisir la sortie', 2600),
@@ -163,7 +164,7 @@ export class EscapeScene extends Phaser.Scene {
     this.rig.setFacing(loadFacing());
     this.controls = new Controls(this);
     this.controls.onAction((action) => this.handleAction(action));
-    this.hud = new Hud(this, 'ÉVASION', 'POLICE');
+    this.hud = new Hud(this, 'ÉVASION', 'POLICE', look.HUD);
     this.hud.onRepeat(() => this.repeat());
     this.hud.onMusic(() => this.toggleMusic());
     this.hud.setMusic(!this.music.isMuted);
@@ -301,7 +302,9 @@ export class EscapeScene extends Phaser.Scene {
     const seconds = LANGUAGE_SETTINGS[difficulty].textSeconds + 2 * (clips.length - 1);
     this.hud.showScanner(clips.map((c) => c.text).join(' '), audioOnly ? 0 : seconds);
     this.orderToasts(lead);
-    this.speech = scannerAudio.play([...before, ...clips.map((c) => ({ audioId: c.audioId, radio: true }))]);
+    // A way back after a wrong turn replaces anything still queued on the radio (it is out of date now).
+    const spoken = [...before, ...clips.map((c) => ({ audioId: c.audioId, radio: true }))];
+    this.speech = transmission.kind === 'RECOVERY' && lead.length === 0 ? scannerAudio.interrupt(spoken) : scannerAudio.play(spoken);
     const detail = [...lead.map((l) => l.audioId), ...transmission.instructions.map((i) => `${i.template} ${i.audioId}`), ...tail.map((l) => l.audioId)].join(' + ');
     debugState.info.set('scanner', `${transmission.kind}: ${detail}`);
   }

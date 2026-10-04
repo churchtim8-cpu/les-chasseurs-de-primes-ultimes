@@ -1,12 +1,14 @@
 import Phaser from 'phaser';
 import { jingles, menuMusic } from '../audio/Jingles';
-import { isComplete, MISSION_COUNT, MISSIONS, newlyUnlocked, recordMission } from '../../engine/campaign/campaign';
+import { isComplete, MISSION_COUNT, MISSIONS, recordMission } from '../../engine/campaign/campaign';
+import { newlyEarned, SLOT_NAMES } from '../../engine/campaign/cosmetics';
 import { scoreMission, type MissionStats, type ScoreLine } from '../../engine/campaign/scoring';
 import type { EscapeReason } from '../../engine/chase/chase';
-import { BOSS, bossInfo, recordChase } from '../../engine/campaign/profile';
+import { BOSS, bossInfo, recordChase, starsFor } from '../../engine/campaign/profile';
 import type { ChaseType, Vehicle } from '../../engine/chase/settings';
 import type { TravelMode } from '../../engine/world/graph';
 import { loadProgress, saveProgress } from '../campaignStore';
+import { lookContext } from '../lookStore';
 import { loadProfile, saveProfile, today } from '../profileStore';
 import { debugState } from '../debug/debugState';
 import { PALETTE, toCss } from '../palette';
@@ -71,14 +73,14 @@ export class ResultsScene extends Phaser.Scene {
     debugState.info.set('medal', score.medal ?? '-');
 
     let best = false;
-    let unlocked: string[] = [];
     let caseDone = false;
+    // What the garage holds before this chase is recorded, to show what it newly earned.
+    const lookBefore = lookContext();
     if (mission !== null) {
       const before = loadProgress();
       const after = recordMission(before, mission, score);
       saveProgress(after);
       best = score.total > (before.missions[mission]?.bestScore ?? -1) && (before.missions[mission] ?? null) !== null;
-      unlocked = newlyUnlocked(before, after).map((l) => l.name);
       caseDone = isComplete(after);
     }
     // The player's record: points towards the next rank, badges, and the suspect's case file.
@@ -100,6 +102,7 @@ export class ResultsScene extends Phaser.Scene {
     });
     saveProfile(recorded.profile);
     if (boss && captured) best = score.total > previousBest;
+    const unlocked = newlyEarned(lookBefore, lookContext()).map((c) => `${SLOT_NAMES[c.slot]} : ${c.name}`);
 
     // Escape Mode shows the getaway for a win, the arrest for a loss.
     backdrop(this, captured !== escape ? SCREEN_PICTURES.captured : SCREEN_PICTURES.escaped);
@@ -111,6 +114,15 @@ export class ResultsScene extends Phaser.Scene {
       bold: true,
       color: toCss(PALETTE.seaDeep),
     });
+    // Stars for the chase (★ caught, ★★ no wrong turn, ★★★ no repeat): replaying for all three means more listening.
+    if (!escape) {
+      const stars = starsFor(stats);
+      for (let i = 0; i < 3; i++) {
+        const on = i < stars;
+        const star = this.add.star(x + 476 + i * 44, 64, 5, 9, 20, on ? 0xf2c230 : 0xcfc6ae).setStrokeStyle(2.5, on ? 0x9c7a12 : 0x9a917c);
+        if (on) this.tweens.add({ targets: star, scale: { from: 0, to: 1 }, delay: 300 + i * 260, duration: 300, ease: 'Back.easeOut' });
+      }
+    }
     const headline = escape ? (captured ? 'Vous avez semé la police !' : 'Vous êtes arrêté.') : captured ? 'Mission réussie !' : 'Le suspect s’est échappé.';
     text(this, left, captured ? 80 : 86, headline, captured && !escape ? 40 : 34, {
       bold: true,
@@ -156,9 +168,11 @@ export class ResultsScene extends Phaser.Scene {
       text(this, left, note, 'Nouveau record !', 22, { bold: true, color: toCss(PALETTE.terracotta) });
       note += 30;
     }
-    for (const name of unlocked) {
-      text(this, left, note, `Nouvelle couleur de voiture : ${name} !`, 21, { bold: true, color: toCss(0x2e8b57) });
-      note += 28;
+    if (unlocked.length > 0) {
+      // Room for a couple of lines above the rank bar; the rest wait in the garage.
+      const shown = unlocked.slice(0, 2).join('  ·  ') + (unlocked.length > 2 ? `  (+${unlocked.length - 2})` : '');
+      const line = text(this, left, note, `Garage 🔓 ${shown}`, 19, { bold: true, color: toCss(0x2e8b57), wordWrap: { width: 536 } });
+      note += line.height + 6;
     }
     if (recorded.newBadges.length > 0) {
       const one = recorded.newBadges.length === 1;

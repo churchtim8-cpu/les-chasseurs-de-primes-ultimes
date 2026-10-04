@@ -81,6 +81,9 @@ export class TitleScene extends Phaser.Scene {
       setNight(!nightOn());
       night.label.setText(nightLabel());
     }, { key: 'N', size: 19 });
+    // The garage (what the police drive and wear) and the wanted posters wall.
+    menu.add(GAME_WIDTH / 2 - 144, top + 162, 276, 44, '🔧 GARAGE (G)', () => this.scene.start('Garage', { back: 'Title' }), { key: 'G', size: 19 });
+    menu.add(GAME_WIDTH / 2 + 144, top + 162, 276, 44, '📜 POSTERS (W)', () => this.scene.start('Wanted', { back: 'Title' }), { key: 'W', size: 19 });
   }
 
   private replay(seed: ChaseSeed): void {

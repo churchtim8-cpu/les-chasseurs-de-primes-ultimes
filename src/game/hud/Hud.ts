@@ -7,8 +7,14 @@ import type { TravelMode } from '../../engine/world/graph';
 import { FONT_FAMILY, PALETTE, toCss } from '../palette';
 import { FULLSCREEN_BUTTON } from '../layout';
 
-/** The HUD's dark glass panels, edged in pale blue like a police tablet. */
-const GLASS = { fill: 0x0b1d26, alpha: 0.84, edge: PALETTE.lightBlue, edgeAlpha: 0.55, radius: 10 } as const;
+/** The HUD's glass panels, in the garage's screen theme (a police tablet by default). */
+export const HUD_THEMES: Record<string, { fill: number; edge: number; radar: number; radarBack: number; label: number }> = {
+  TABLETTE: { fill: 0x0b1d26, edge: PALETTE.lightBlue, radar: 0x6fcf7c, radarBack: 0x0d3324, label: PALETTE.lightBlue },
+  RETRO: { fill: 0x03140a, edge: 0x39ff6a, radar: 0x39ff6a, radarBack: 0x02200c, label: 0x7dff9a },
+  CARNAVAL: { fill: 0x2a0f3d, edge: 0xf2c230, radar: 0xff4fa3, radarBack: 0x3d0f45, label: 0xf2c230 },
+  OR: { fill: 0x1c1608, edge: 0xf0c53c, radar: 0xf0c53c, radarBack: 0x2a2008, label: 0xf0c53c },
+};
+const GLASS = { fill: 0x0b1d26, alpha: 0.84, edge: PALETTE.lightBlue as number, edgeAlpha: 0.55, radius: 10, radar: 0x6fcf7c, radarBack: 0x0d3324, label: PALETTE.lightBlue as number };
 const RED = 0xe0463a;
 const BLUE = 0x2f7de1;
 const GREEN = 0x6fcf7c;
@@ -79,7 +85,10 @@ export class Hud {
     missionLabel: string,
     /** What the signal measures: the suspect's signal, or "POLICE" in Escape Mode. */
     private readonly signalName = 'SIGNAL',
+    /** The garage's screen theme. */
+    theme = 'TABLETTE',
   ) {
+    Object.assign(GLASS, HUD_THEMES[theme] ?? HUD_THEMES.TABLETTE);
     const { width, height } = scene.scale;
     const label = (x: number, y: number, value: string, size: number, colour: number = PALETTE.cream) =>
       scene.add.text(x, y, value, { fontFamily: FONT_FAMILY, fontSize: `${size}px`, fontStyle: 'bold', color: toCss(colour) });
@@ -94,7 +103,7 @@ export class Hud {
     // The radar: a sweep turning round, the suspect's blip, the signal bars beside it.
     this.signalPanel = this.chromed(scene.add.graphics());
     this.radar = this.chromed(scene.add.graphics());
-    this.signalLabel = this.chromed(label(LEFT.x + 98, RADAR.y + 14, signalName, 15, PALETTE.lightBlue));
+    this.signalLabel = this.chromed(label(LEFT.x + 98, RADAR.y + 14, signalName, 15, GLASS.label));
     this.signalState = this.chromed(label(LEFT.x + 98, RADAR.y + 66, '', 13, PALETTE.cream));
     for (let i = 0; i < 5; i++) {
       this.signalBars.push(this.chromed(scene.add.rectangle(LEFT.x + 100 + i * 18, RADAR.y + 60, 12, 10 + i * 6, PALETTE.cream).setOrigin(0, 1)));
@@ -153,8 +162,8 @@ export class Hud {
     );
     // The police scanner: the French instruction as text, for as long as the level allows.
     this.scannerPanel = this.add(scene.add.graphics().setVisible(false));
-    this.scannerTag = this.add(label(0, 0, 'SCANNER', 13, GREEN).setVisible(false));
-    this.scannerLed = this.add(scene.add.circle(0, 0, 5, GREEN).setVisible(false));
+    this.scannerTag = this.add(label(0, 0, 'SCANNER', 13, GLASS.radar).setVisible(false));
+    this.scannerLed = this.add(scene.add.circle(0, 0, 5, GLASS.radar).setVisible(false));
     this.scanner = this.add(
       scene.add
         .text(width / 2, height - 30, '', {
@@ -243,16 +252,16 @@ export class Hud {
     const cy = RADAR.y + RADAR.h / 2;
     const r = RADAR.r;
     const g = this.radar.clear();
-    g.fillStyle(0x0d3324, 0.95).fillCircle(cx, cy, r);
-    g.lineStyle(1, GREEN, 0.35).strokeCircle(cx, cy, r * 0.66).strokeCircle(cx, cy, r * 0.33);
+    g.fillStyle(GLASS.radarBack, 0.95).fillCircle(cx, cy, r);
+    g.lineStyle(1, GLASS.radar, 0.35).strokeCircle(cx, cy, r * 0.66).strokeCircle(cx, cy, r * 0.33);
     g.lineBetween(cx - r, cy, cx + r, cy).lineBetween(cx, cy - r, cx, cy + r);
-    g.lineStyle(2, GREEN, 0.8).strokeCircle(cx, cy, r);
+    g.lineStyle(2, GLASS.radar, 0.8).strokeCircle(cx, cy, r);
     if (!status.signalLost) {
       // The sweep, with a fading trail behind it.
       const angle = (now / 1400) * Math.PI * 2;
       for (let k = 0; k < 6; k++) {
         const a = angle - k * 0.12;
-        g.lineStyle(2, GREEN, 0.75 - k * 0.12).lineBetween(cx, cy, cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+        g.lineStyle(2, GLASS.radar, 0.75 - k * 0.12).lineBetween(cx, cy, cx + Math.cos(a) * r, cy + Math.sin(a) * r);
       }
       // The blip: nearer the middle as the signal grows, glowing as the sweep passes.
       const blipAngle = -0.9;
@@ -261,7 +270,7 @@ export class Hud {
       const glow = Math.max(0.25, 1 - since / Math.PI);
       g.fillStyle(status.warning ? RED : 0xb8ffbf, glow).fillCircle(cx + Math.cos(blipAngle) * blipR, cy + Math.sin(blipAngle) * blipR, 4);
     } else {
-      g.fillStyle(GREEN, 0.25 + 0.2 * Math.random()).fillCircle(cx, cy, r - 2);
+      g.fillStyle(GLASS.radar, 0.25 + 0.2 * Math.random()).fillCircle(cx, cy, r - 2);
     }
 
     const lit = status.signalLost ? 0 : Math.ceil(status.signal * 5);
@@ -269,7 +278,7 @@ export class Hud {
     this.signalBars.forEach((bar, i) => bar.setFillStyle(i < lit ? colour : 0x55656b, 1).setVisible(this.shown && !status.signalLost));
     const blink = warn && Math.floor(now / 300) % 2 === 0;
     this.signalLabel.setText(status.signalLost ? 'SIGNAL PERDU' : this.signalName);
-    this.signalLabel.setColor(blink ? '#ffb4a2' : toCss(PALETTE.lightBlue));
+    this.signalLabel.setColor(blink ? '#ffb4a2' : toCss(GLASS.label));
     this.signalState.setText(status.signalLost ? '' : status.warning ? 'IL S’ÉLOIGNE !' : lit >= 4 ? 'TOUT PRÈS' : '');
     this.signalState.setColor(status.warning ? '#ffb4a2' : toCss(GREEN));
   }
@@ -323,8 +332,8 @@ export class Hud {
     this.scanner.setText(text);
     const b = this.scanner.getBounds();
     this.scannerPanel.clear();
-    glass(this.scannerPanel, b.x, b.y, b.width, b.height, GREEN);
-    this.scannerPanel.fillStyle(GREEN, 0.9).fillRect(b.x + 10, b.y, 70, 3);
+    glass(this.scannerPanel, b.x, b.y, b.width, b.height, GLASS.radar);
+    this.scannerPanel.fillStyle(GLASS.radar, 0.9).fillRect(b.x + 10, b.y, 70, 3);
     this.scannerTag.setPosition(b.x + 28, b.y - 20);
     this.scannerLed.setPosition(b.x + 16, b.y - 12);
     parts.forEach((p) => p.setVisible(true).setAlpha(1));
