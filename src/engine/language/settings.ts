@@ -59,3 +59,27 @@ export const LANGUAGE_SETTINGS: Record<Difficulty, LanguageSettings> = {
     textSeconds: 3,
   },
 };
+
+/**
+ * How long the scanner takes to say things, used to plan every direction so
+ * it is heard out before its junction (Mr Henry, 2026-10-03: never slow the
+ * chase down for a call). `secondsPerChar` and `baseSeconds` are an upper
+ * bound fitted to Alain's recordings (slowed 15 %): no clip is longer than
+ * this estimate. The radio framing matches the game's scanner: a beep and a
+ * burst of static before the voice, a short gap between clips, a click after.
+ */
+export const SPEECH = {
+  baseSeconds: 0.8,
+  secondsPerChar: 1 / 16.3,
+  radioLeadSeconds: 0.34,
+  clipGapSeconds: 0.18,
+  radioTailSeconds: 0.15,
+  /** Time to act on a step once it has been heard, before its junction. */
+  reactSeconds: 1,
+  /**
+   * Plans allow this much more (seconds): in play a call starts a frame or two
+   * after its junction, or the radio frees a moment late, so a plan with no
+   * room to spare would be just too late.
+   */
+  planSlackSeconds: 0.25,
+} as const;

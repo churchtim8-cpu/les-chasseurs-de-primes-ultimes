@@ -178,7 +178,7 @@ describe('interpreter (how a listener reads an instruction)', () => {
 });
 
 /** Plays one chase with the listening bot. */
-function listen(seed: string, reaction = 1.2, options: ScenarioOptions = {}) {
+function listen(seed: string, reaction = 0.8, options: ScenarioOptions = {}) {
   const chase = new Chase(graph, generateScenario(graph, seed, options));
   const bot = new ListenerBot(graph, reaction);
   for (let t = 0; t < 400 && chase.status.phase === 'PURSUIT'; t += 0.05) bot.step(chase, 0.05);
@@ -200,7 +200,7 @@ describe('scanner instructions in real chases', () => {
   it.each(DIFFICULTIES)('every turn on the route is announced before the junction (%s)', (difficulty) => {
     for (const seed of seeds(difficulty, 60, 'announce')) {
       // The route as planned (a last-second U-turn would change it).
-      const { chase, log } = listen(seed, 1.2, { chaseType: 'CAR_CAR', nearCapture: null });
+      const { chase, log } = listen(seed, 0.8, { chaseType: 'CAR_CAR', nearCapture: null });
       const route = chase.scenario.route;
       const announced = new Set(log.flatMap((t) => t.instructions.flatMap((i) => i.atNodes)));
       const reached = new Set<string>();
@@ -211,38 +211,37 @@ describe('scanner instructions in real chases', () => {
     }
   });
 
-  it.each(DIFFICULTIES)('directions leave time to hear them before the junction (%s)', (difficulty) => {
-    // Time from a call to the player reaching its junction, against how long its first step takes to say.
-    let calls = 0;
+  it.each(DIFFICULTIES)('every step is heard out before its junction, at full speed (%s)', (difficulty) => {
+    // Mr Henry (2026-10-03): the car must never pass the corner before the scanner has finished,
+    // and the chase must not slow down for it. Timed with the real recordings (see ListenerBot).
+    let steps = 0;
     let late = 0;
-    for (const chaseType of ['CAR_CAR', 'FOOT_FOOT'] as const) {
-      for (const seed of seeds(difficulty, 30, 'call-time')) {
+    for (const chaseType of ['CAR_CAR', 'FOOT_FOOT', 'CAR_FOOT', 'FOOT_CAR'] as const) {
+      for (const seed of seeds(difficulty, 15, 'call-time')) {
         const chase = new Chase(graph, generateScenario(graph, seed, { chaseType }));
-        const bot = new ListenerBot(graph, 1.2);
-        const waiting: { at: string; time: number; speech: number }[] = [];
-        let time = 0;
+        const bot = new ListenerBot(graph);
+        const pending: { node: string; heardBy: number }[] = [];
+        let seen = 0;
         let from = '';
-        for (; time < 400 && chase.status.phase === 'PURSUIT'; time += 0.05) {
-          for (const e of bot.step(chase, 0.05)) {
-            if (e.type !== 'TRANSMISSION' || e.transmission.kind !== 'DIRECTION' || !e.transmission.at) continue;
-            const firstStep = e.transmission.text.split(/(?<=\.)\s|,\s*puis\s/)[0] ?? '';
-            waiting.push({ at: e.transmission.at, time, speech: 0.6 + firstStep.length / 13 });
-          }
+        for (let t = 0; t < 400 && chase.status.phase === 'PURSUIT'; t += 0.05) {
+          bot.step(chase, 0.05);
+          pending.push(...bot.steps.slice(seen));
+          seen = bot.steps.length;
           const here = chase.player.location();
           const origin = graph.other(graph.edge(here.edgeId), here.towards);
           if (origin === from) continue;
           from = origin;
-          for (const w of waiting.filter((w) => w.at === origin)) {
-            calls++;
-            if (time - w.time < w.speech + 1) late++;
-            waiting.splice(waiting.indexOf(w), 1);
+          for (const step of pending.filter((p) => p.node === origin)) {
+            steps++;
+            if (bot.now < step.heardBy) late++;
+            pending.splice(pending.indexOf(step), 1);
           }
         }
       }
     }
-    expect(calls).toBeGreaterThan(50);
-    expect(late / calls).toBeLessThan(0.15);
-  });
+    expect(steps).toBeGreaterThan(100);
+    expect(late, `${late} of ${steps} steps heard too late`).toBeLessThanOrEqual(steps * 0.01);
+  }, 180_000);
 
   it('uses only the templates allowed at each difficulty', () => {
     for (const difficulty of DIFFICULTIES) {
@@ -260,7 +259,10 @@ describe('scanner instructions in real chases', () => {
   it.each(DIFFICULTIES)('the scanner speaks as soon as the chase starts (%s)', (difficulty) => {
     for (const seed of seeds(difficulty, 150, 'first-call')) {
       const chase = new Chase(graph, generateScenario(graph, seed));
-      const first = chase.update(0.05).find((e) => e.type === 'TRANSMISSION');
+      // The game plays the opening call in full before anything moves. Where no direction is
+      // clear yet from the start (the turn is past a nearer junction on that side), it names
+      // the suspect's vehicle and the direction comes at that junction.
+      const first = chase.openingCall().find((e) => e.type === 'TRANSMISSION' || e.type === 'ANNOUNCE');
       expect(first, seed).toBeDefined();
     }
   });

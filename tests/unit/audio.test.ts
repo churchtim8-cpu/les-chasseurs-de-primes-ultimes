@@ -17,7 +17,7 @@ let script: ScriptLine[] = [];
 
 beforeAll(() => {
   script = buildScript(graph);
-}, 60_000);
+}, 180_000);
 
 function seeds(difficulty: Difficulty, count: number, label: string): string[] {
   const rng = Rng.fromSeed(`${label}-${difficulty}`);
@@ -118,6 +118,7 @@ describe('repeat mechanic', () => {
   it('costs time on Hard and is counted for scoring', () => {
     const seed = seeds('HARD', 1, 'repeat')[0]!;
     const chase = new Chase(graph, generateScenario(graph, seed));
+    chase.openingCall();
     for (let i = 0; i < 20 && !chase.navigator.last; i++) chase.update(0.1);
     const before = chase.status.timeLeft;
     const result = chase.requestRepeat();

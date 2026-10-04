@@ -59,11 +59,6 @@ export class Mover {
   private planIndex = 0;
   /** Multiplies cruise and top speed (the suspect uses this to be slower or faster). */
   speedFactor = 1;
-  /**
-   * The chase's pace (1 = normal): it slows everyone a little while a late
-   * direction is still being heard (CALL_TIMING).
-   */
-  callAssist = 1;
 
   constructor(
     private readonly graph: TownGraph,
@@ -220,7 +215,7 @@ export class Mover {
       return passed;
     }
 
-    const top = (this.throttle === 'ACCELERATE' ? settings.max : settings.cruise) * this.speedFactor * this.callAssist;
+    const top = (this.throttle === 'ACCELERATE' ? settings.max : settings.cruise) * this.speedFactor;
     const targetSpeed = this.throttle === 'BRAKE' ? 0 : top;
     if (this.speed < targetSpeed) this.speed = Math.min(targetSpeed, this.speed + settings.acceleration * dt);
     else this.speed = Math.max(targetSpeed, this.speed - settings.braking * dt);

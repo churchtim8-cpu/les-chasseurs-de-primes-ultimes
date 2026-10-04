@@ -20,8 +20,23 @@ import type { Difficulty } from '../difficulty';
 import type { MoverStart } from '../movement/mover';
 import type { Rng } from '../rng/prng';
 import { canTravel, type TownGraph, type TravelMode } from '../world/graph';
+import { distance, lerp } from '../world/geometry';
 import { followProblem, pathLength } from '../chase/route';
-import { actionIndices, describable, finalInstruction, instructionFor, straightOn, type AudioCheck } from './generate';
+import {
+  actionIndices,
+  describable,
+  finalInstruction,
+  instructionOptions,
+  pickInstruction,
+  straightOn,
+  type AudioCheck,
+  type Guided,
+} from './generate';
+import { aheadFrom, callableFrom, fits, lateness, planCalls, type CallContext, type CallPlanner } from './callPlan';
+import { callSeconds } from './timing';
+import { SPEECH } from './settings';
+import { MOVEMENT } from '../movement/settings';
+import { exitsAt } from '../movement/turns';
 import { makeInstruction, type Instruction } from './instructions';
 
 /** RECOVERY answers a wrong turn; CORRECTION follows the suspect changing direction ("Faites demi-tour."). */
@@ -50,12 +65,31 @@ const U_TURN_PENALTY = 40;
  */
 const EARLY_ARRIVAL = 30;
 
+/** At most this many streets go by after a wrong turn before the way back is given, in time or not. */
+const MAX_DEFERRALS = 2;
+
+/** A way back should share at least this much of the suspect's route (metres). */
+const SHARED_ROUTE = 150;
+
+/** Reaching the suspect's route this far (metres) ahead of it is leading it: a last resort. */
+const LEADING = 120;
+
 export class Navigator {
   /** Nodes the player should follow; the player is on the edge guide[progress] → guide[progress + 1]. */
   guide: string[];
   progress = 0;
   private actions: number[];
   private covered = new Set<number>();
+  /**
+   * No call covers a step past this guide index (null: no limit). Before a
+   * change of direction, the directions stop where it will be said: calls past
+   * there would only be taken back, and would keep the radio busy.
+   */
+  holdAfter: number | null = null;
+  /** The next call is planned for a player held still until its first step is heard. */
+  private heldForCall = false;
+  /** Streets driven on since a wrong turn without a way back given yet (see recover). */
+  private deferrals = 0;
   private fillerFor: number | null = null;
   private finalDone = false;
   private started = false;
@@ -77,6 +111,20 @@ export class Navigator {
   leadDistance = Infinity;
   minLeadDistance = 0;
   private spoken = false;
+  /**
+   * Timing (see callPlan.ts): the player's speed (metres per second, set each
+   * frame by the chase) and how long until the radio is free. A direction is
+   * only given once the radio is free, so it is heard from where it was
+   * meant, and only one that is heard out before its junctions; among those,
+   * one that leaves the rest of the route callable in time.
+   */
+  speed: number;
+  radioFreeIn = 0;
+  /** The very first call is the opening call, heard before the chase starts (no hurry). */
+  firstCallBeforeStart = false;
+  /** A direction is waiting for the radio to be free. */
+  private deferred = false;
+  private calls: CallPlanner | null = null;
 
   constructor(
     private readonly graph: TownGraph,
@@ -91,6 +139,7 @@ export class Navigator {
   ) {
     this.guide = [...route];
     this.actions = actionIndices(graph, this.guide, mode);
+    this.speed = MOVEMENT[mode].cruise;
   }
 
   /**
@@ -104,6 +153,7 @@ export class Navigator {
     if (nodes[0] !== this.guide[this.guide.length - 1]) return null;
     this.guide.push(...nodes.slice(1));
     this.actions = actionIndices(this.graph, this.guide, this.mode);
+    this.calls = null;
     this.destination = destination;
     this.finalDone = false;
     this.fillerFor = null;
@@ -111,6 +161,32 @@ export class Navigator {
     const out: Transmission[] = [];
     if (this.onGuide(player)) this.schedule(player, out);
     return out;
+  }
+
+  /**
+   * The suspect will leave its route at `at`, a junction ahead that no call
+   * has mentioned yet, and go on by `nodes` (starting at `at`): the directions
+   * already given stand, the next ones follow the new way. Null if `at` is
+   * not such a junction.
+   */
+  reroute(player: MoverStart, at: string, nodes: readonly string[], destination: string | null): Transmission[] | null {
+    if (!this.canReroute(at) || nodes[0] !== at) return null;
+    const index = this.guide.lastIndexOf(at);
+    this.guide.splice(index + 1, this.guide.length, ...nodes.slice(1));
+    this.actions = actionIndices(this.graph, this.guide, this.mode);
+    this.calls = null;
+    this.destination = destination;
+    this.fillerFor = null;
+    const out: Transmission[] = [];
+    if (this.onGuide(player)) this.schedule(player, out);
+    return out;
+  }
+
+  /** Is `at` a junction ahead on the guide that no call has mentioned yet (see reroute)? */
+  canReroute(at: string): boolean {
+    const index = this.guide.lastIndexOf(at);
+    const lastCovered = Math.max(-1, ...this.covered);
+    return !this.finalDone && index > this.progress && index > lastCovered && index < this.guide.length - 1;
   }
 
   /** The most recent transmission (for the Repeat button). */
@@ -134,7 +210,7 @@ export class Navigator {
       // After a U-turn the player is back on the guide: give the next direction straight away.
       const turnedRound = this.awaiting !== null;
       this.awaiting = null;
-      if (this.progress !== before || turnedRound) this.schedule(player, out);
+      if (this.progress !== before || turnedRound || (this.deferred && this.radioFreeIn <= 0)) this.schedule(player, out);
       return out;
     }
     if (this.awaiting && this.awaiting.edgeId === player.edgeId && this.awaiting.towards === player.towards) return out;
@@ -152,14 +228,53 @@ export class Navigator {
     return this.onGuide(player);
   }
 
+  /** Where a player following the guide will be after `metres` more of it (where they are, when off it). */
+  pointAhead(player: MoverStart, metres: number): { x: number; y: number } {
+    const edge = this.graph.edge(player.edgeId);
+    const here = lerp(this.graph.node(edge.from), this.graph.node(edge.to), player.t);
+    const progress = this.progressAt(player);
+    if (progress === -1) return here;
+    let at = here;
+    let left = metres;
+    for (let k = progress + 1; k < this.guide.length; k++) {
+      const next = this.graph.node(this.guide[k] as string);
+      const d = distance(at, next);
+      if (d >= left) return lerp(at, next, left / Math.max(d, 1e-6));
+      left -= d;
+      at = next;
+    }
+    return at;
+  }
+
   /**
    * Would the scanner have something new to say here: the player is off the
    * guide, or the next junction has not been covered by a call yet?
    */
   hasNews(player: MoverStart): boolean {
-    if (!this.onGuide(player)) return true;
-    const next = this.actions.find((a) => a > this.progress);
+    const progress = this.progressAt(player);
+    if (progress === -1) return true;
+    const next = this.actions.find((a) => a > progress);
     return next === undefined ? !this.finalDone && this.destination !== null : !this.covered.has(next);
+  }
+
+  /**
+   * Seconds before the scanner next needs the radio (0 when it has news now):
+   * the next call comes on passing the last junction already called. Other
+   * lines fit in that gap without making a direction late.
+   */
+  quietFor(player: MoverStart): number {
+    const progress = this.progressAt(player);
+    if (progress === -1) return 0;
+    const next = this.actions.findIndex((a) => a > progress && !this.covered.has(a));
+    let callAt: number;
+    if (next === -1) {
+      if (this.finalDone || this.destination === null) return Infinity;
+      callAt = this.actions[this.actions.length - 1] ?? -1; // the final call follows the last turn
+    } else {
+      callAt = next === 0 ? -1 : (this.actions[next - 1] as number);
+    }
+    if (callAt <= progress) return 0;
+    return Math.max(0, this.distanceTo(player, callAt, progress) / this.speed - Math.max(0, this.radioFreeIn));
   }
 
   /** The signal is back: say what the player needs now (the next direction, or a way back). */
@@ -178,27 +293,38 @@ export class Navigator {
    * Road distance from the player to a junction ahead on the guide (by guide
    * index, or node ID), or Infinity when it is not ahead on the guide.
    */
-  distanceTo(player: MoverStart, target: number | string): number {
-    const index = typeof target === 'number' ? target : this.guide.indexOf(target, this.progress + 1);
-    if (index <= this.progress) return Infinity;
+  /** Road distance from the player to the end of the guide (Infinity when off it). */
+  toGuideEnd(player: MoverStart): number {
+    const progress = this.progressAt(player);
+    return progress === -1 ? Infinity : this.distanceTo(player, this.guide.length - 1, progress);
+  }
+
+  distanceTo(player: MoverStart, target: number | string, progress = this.progress): number {
+    const index = typeof target === 'number' ? target : this.guide.indexOf(target, progress + 1);
+    if (index <= progress) return Infinity;
     const edge = this.graph.edge(player.edgeId);
-    if (player.towards !== this.guide[this.progress + 1]) return Infinity;
+    if (player.towards !== this.guide[progress + 1]) return Infinity;
     const along = player.towards === edge.to ? player.t : 1 - player.t;
     const rest = (1 - along) * this.graph.edgeLength(edge);
-    return rest + pathLength(this.graph, this.guide.slice(this.progress + 1, index + 1));
+    return rest + pathLength(this.graph, this.guide.slice(progress + 1, index + 1));
   }
 
   /** Is the player where the guide expects (moving forward along it)? Advances `progress` if so. */
   private onGuide(player: MoverStart): boolean {
+    const k = this.progressAt(player);
+    if (k === -1) return false;
+    this.progress = k;
+    return true;
+  }
+
+  /** The guide edge the player is on, moving forward (-1 when off the guide). Changes nothing. */
+  private progressAt(player: MoverStart): number {
     const last = Math.min(this.progress + 4, this.guide.length - 2);
     for (let k = this.progress; k <= last; k++) {
       const edge = this.graph.edgeBetween(this.guide[k] as string, this.guide[k + 1] as string);
-      if (edge?.id === player.edgeId && player.towards === this.guide[k + 1]) {
-        this.progress = k;
-        return true;
-      }
+      if (edge?.id === player.edgeId && player.towards === this.guide[k + 1]) return k;
     }
-    return false;
+    return -1;
   }
 
   /** Just past the last node (usually driving up to the stopped suspect): not a mistake yet. */
@@ -210,12 +336,21 @@ export class Navigator {
     return along < OVERSHOOT;
   }
 
-  /** Say the next thing the player needs, if it has not been said yet. */
-  private schedule(player: MoverStart, out: Transmission[]): void {
+  /**
+   * Say the next thing the player needs, if it has not been said yet. With
+   * `wait`, a direction waits for the radio to be free (the update after it
+   * is free gives it); without, it is timed to start when the radio is free.
+   */
+  private schedule(player: MoverStart, out: Transmission[], wait = true): void {
     const pos = player;
+    this.deferred = false;
     const nextIndex = this.actions.findIndex((a) => a > this.progress);
     if (nextIndex === -1) {
       if (!this.finalDone && this.destination !== null) {
+        if (wait && this.radioFreeIn > 0) {
+          this.deferred = true;
+          return;
+        }
         this.finalDone = true;
         const final = finalInstruction(this.graph, pos, this.guide, this.destination, this.difficulty, this.rng, this.hasAudio);
         if (final) this.emit('FINAL', [final], out);
@@ -224,18 +359,24 @@ export class Navigator {
     }
     const a = this.actions[nextIndex] as number;
     if (this.covered.has(a)) return;
+    if (this.holdAfter !== null && a > this.holdAfter) return;
     if (this.spoken && this.tooEarly(pos, a)) return;
-    const guided = instructionFor(
+    if (wait && this.radioFreeIn > 0) {
+      this.deferred = true;
+      return;
+    }
+    const delay = wait ? 0 : Math.max(0, this.radioFreeIn);
+    const options = instructionOptions(
       this.graph,
       pos,
       this.guide,
       a,
       this.actions.slice(nextIndex + 1, nextIndex + 3),
       this.difficulty,
-      this.rng,
       this.hasAudio,
-      this.preferSteps,
     );
+    const allowed = this.holdAfter === null ? options : options.filter((o) => o.covers.every((c) => c <= this.holdAfter!));
+    const guided = pickInstruction(this.timely(allowed, pos, nextIndex, delay), this.difficulty, this.rng, this.preferSteps);
     if (guided) {
       for (const c of guided.covers) this.covered.add(c);
       this.emit('DIRECTION', [guided.instruction], out, this.guide[a]);
@@ -244,8 +385,55 @@ export class Navigator {
     if (this.fillerFor !== a) {
       this.fillerFor = a;
       const filler = straightOn(this.graph, pos, this.guide, this.difficulty, this.hasAudio);
-      if (filler) this.emit('FILLER', [filler], out);
+      // Only when it is over before the next node, where the real direction may be due.
+      const toNext = this.distanceTo(pos, this.progress + 1);
+      if (filler && toNext >= this.speed * (delay + callSeconds([filler.text]))) this.emit('FILLER', [filler], out);
     }
+  }
+
+  /**
+   * The options heard out in time, preferring those that leave the rest of the
+   * guide callable in time (see callPlan.ts). If none is in time (the player
+   * is already close, after a wrong turn), the one that is least late.
+   */
+  private timely(options: Guided[], pos: MoverStart, nextIndex: number, delay: number): Guided[] {
+    if (options.length === 0) return options;
+    // The opening call is heard before the chase starts: any call is in time.
+    const opening = !this.spoken && this.firstCallBeforeStart;
+    const ahead = aheadFrom(this.graph, this.guide, this.progress, pos);
+    const inTime = opening ? options : options.filter((o) => fits(o, ahead, this.speed, delay, this.heldForCall));
+    if (inTime.length > 0) {
+      this.calls ??= planCalls(this.graph, this.guide, this.callContext());
+      const k = this.calls.actions.indexOf(this.actions[nextIndex] as number);
+      const onward = k === -1 ? [] : inTime.filter((o) => this.calls!.solvable(k + o.covers.length));
+      return onward.length > 0 ? onward : inTime;
+    }
+    const late = options.map((o) => lateness(o, ahead, this.speed, delay));
+    const least = Math.min(...late);
+    return options.filter((_, i) => (late[i] as number) <= least + 0.05);
+  }
+
+  /** Could a new guide from here have every call heard in time, its first call after the radio is free? */
+  canCallInTime(guide: readonly string[], player: MoverStart, extraDelay = 0, held = false): boolean {
+    return callableFrom(this.graph, guide, player, Math.max(0, this.radioFreeIn) + extraDelay, this.callContext(), held);
+  }
+
+  /** Would a new way onto the suspect's route (see redirect) be called in time, after `extraDelay` more seconds of radio? */
+  canRedirectInTime(player: MoverStart, suspectRoute: readonly string[], extraDelay = 0): boolean {
+    const timing = { ctx: this.callContext(), delay: Math.max(0, this.radioFreeIn) + extraDelay };
+    const plan = this.planner(this.graph, player, suspectRoute, this.difficulty, timing);
+    return plan !== null && timely(this.graph, plan.guide, player, plan.uTurn, timing);
+  }
+
+  private callContext(): CallContext {
+    return {
+      mode: this.mode,
+      difficulty: this.difficulty,
+      hasAudio: this.hasAudio,
+      speed: this.speed,
+      leadDistance: this.leadDistance,
+      minLeadDistance: this.minLeadDistance,
+    };
   }
 
   /** The player has left the guide: say so, and plan a way back to the suspect. */
@@ -258,14 +446,26 @@ export class Navigator {
     );
     const wrongStreet = !onGuideEdge && fromIndex !== -1 && fromIndex < this.guide.length - 1;
 
-    const plan = this.replan(player, suspectRoute);
+    const { plan, timing } = this.replan(player, suspectRoute, wrongStreet);
     const lines: Instruction[] = [];
     if (wrongStreet) lines.push(makeInstruction([{ action: 'WRONG_STREET' }], this.difficulty));
+    // (Only where the player drives on: at a junction with no way straight on they stop, and can turn round there.)
+    const drivesOn = exitsAt(this.graph, edge, player.towards, player.mode).some((e) => e.kind === 'STRAIGHT');
+    if (plan?.uTurn && drivesOn && this.deferrals < MAX_DEFERRALS && !timely(this.graph, plan.guide, player, true, timing)) {
+      // Too close to the end of this street to turn round once told: say only that it
+      // is the wrong street, and give the way back from the next street, where there is room.
+      if (lines.length > 0) this.emit('RECOVERY', lines, out);
+      this.stuckOn = player.edgeId;
+      this.deferrals++;
+      return;
+    }
+    this.deferrals = 0;
     if (plan?.uTurn) lines.push(makeInstruction([{ action: 'U_TURN' }], this.difficulty));
     if (lines.length > 0) this.emit('RECOVERY', lines, out);
     this.stuckOn = plan ? null : player.edgeId;
     if (!plan) return;
-    this.useGuide(plan, player, out);
+    // The way back follows straight on in the same call.
+    this.useGuide(plan, player, out, false);
   }
 
   /**
@@ -281,36 +481,53 @@ export class Navigator {
     guide?: readonly string[],
     /** The guide starts by turning round on that edge ("Faites demi-tour."). */
     turnRound = false,
+    /** The player is held still until the first step of the correction is heard (after a dodge). */
+    held = false,
   ): Transmission[] {
     const out: Transmission[] = [];
     this.destination = destination;
-    const plan = guide ? { guide: [...guide], uTurn: turnRound } : this.replan(player, suspectRoute);
+    // (A correction is not "Ce n'est pas la bonne rue.": its first call follows what the radio is saying.)
+    const timing = { ctx: this.callContext(), delay: Math.max(0, this.radioFreeIn) };
+    const plan = guide
+      ? { guide: [...guide], uTurn: turnRound }
+      : this.planner(this.graph, player, suspectRoute, this.difficulty, timing);
     if (!plan) return out; // off the guide now: the usual recovery takes over
     if (plan.uTurn) this.emit('CORRECTION', [makeInstruction([{ action: 'U_TURN' }], this.difficulty)], out);
-    this.useGuide(plan, player, out);
+    // The player is held still for a correction: it is said straight away (after any call before it).
+    this.heldForCall = held;
+    this.useGuide(plan, player, out, false);
+    this.heldForCall = false;
     return out;
   }
 
-  private useGuide(plan: { guide: string[]; uTurn: boolean }, player: MoverStart, out: Transmission[]): void {
+  private useGuide(plan: { guide: string[]; uTurn: boolean }, player: MoverStart, out: Transmission[], wait = true): void {
     this.guide = plan.guide;
     this.progress = 0;
+    this.holdAfter = null; // a new guide: the old one's indices no longer apply
     this.actions = actionIndices(this.graph, this.guide, player.mode);
+    this.calls = null;
     this.covered.clear();
     this.fillerFor = null;
     this.finalDone = false;
     if (plan.uTurn) {
       this.awaiting = { edgeId: player.edgeId, towards: player.towards };
+      // The way back follows "Faites demi-tour." at once, so it is heard while turning round.
+      const edge = this.graph.edge(player.edgeId);
+      this.schedule({ ...player, towards: this.graph.other(edge, player.towards) }, out, false);
     } else {
       this.awaiting = null;
-      this.schedule(player, out);
+      this.schedule(player, out, wait);
     }
   }
 
   /** How a way back is planned after a wrong turn: onto a moving suspect's route (default), or to a fixed destination. */
   planner: GuidePlanner = planGuide;
 
-  private replan(player: MoverStart, suspectRoute: readonly string[]): { guide: string[]; uTurn: boolean } | null {
-    return this.planner(this.graph, player, suspectRoute, this.difficulty);
+  private replan(player: MoverStart, suspectRoute: readonly string[], wrongStreet: boolean) {
+    // The first direction of the way back comes after what the radio is saying and "Ce n'est pas la bonne rue. Faites demi-tour."
+    const delay = Math.max(0, this.radioFreeIn) + callSeconds([...(wrongStreet ? ["Ce n'est pas la bonne rue."] : []), U_TURN_TEXT]);
+    const timing: GuideTiming = { ctx: this.callContext(), delay, uTurnSaid: true };
+    return { plan: this.planner(this.graph, player, suspectRoute, this.difficulty, timing), timing };
   }
 
   /** Is it too early for the direction about action `a` (see leadDistance)? The next node will do. */
@@ -332,8 +549,18 @@ export class Navigator {
     };
     this.history.push(transmission);
     this.spoken = true;
+    this.radioFreeIn = Math.max(0, this.radioFreeIn) + callSeconds(instructions.flatMap((i) => i.clips.map((c) => c.text)));
     out.push(transmission);
   }
+}
+
+/** How the calls for a new guide will be timed: the guide is preferred when they can all be heard in time. */
+export interface GuideTiming {
+  ctx: CallContext;
+  /** Seconds before its first call can start. */
+  delay: number;
+  /** `delay` already allows for saying "Faites demi-tour.". */
+  uTurnSaid?: boolean;
 }
 
 export type GuidePlanner = (
@@ -341,7 +568,27 @@ export type GuidePlanner = (
   player: MoverStart,
   route: readonly string[],
   difficulty: Difficulty,
+  timing?: GuideTiming,
 ) => { guide: string[]; uTurn: boolean } | null;
+
+/** Turning round takes about this long before the first call of the way back can count. */
+const U_TURN_SECONDS = 1.5;
+
+const U_TURN_TEXT = 'Faites demi-tour.';
+
+/** Can the calls for this guide be heard in time (when timing is given)? */
+function timely(graph: TownGraph, guide: readonly string[], player: MoverStart, uTurn: boolean, timing?: GuideTiming): boolean {
+  if (!timing) return true;
+  const edge = graph.edge(player.edgeId);
+  if (uTurn) {
+    // "Faites demi-tour." must be heard (and acted on) before the player reaches the end of the street.
+    const left = (player.towards === edge.to ? 1 - player.t : player.t) * graph.edgeLength(edge);
+    const heard = timing.delay + (timing.uTurnSaid ? 0 : callSeconds([U_TURN_TEXT])) + SPEECH.reactSeconds;
+    if (left < timing.ctx.speed * heard) return false;
+  }
+  const from: MoverStart = uTurn ? { ...player, towards: graph.other(edge, player.towards) } : player;
+  return callableFrom(graph, guide, from, timing.delay + (uTurn ? U_TURN_SECONDS : 0), timing.ctx);
+}
 
 /**
  * A guide from the player's position onto the suspect's route: either going
@@ -355,6 +602,7 @@ export function planGuide(
   player: MoverStart,
   suspectRoute: readonly string[],
   difficulty: Difficulty,
+  timing?: GuideTiming,
 ): { guide: string[]; uTurn: boolean } | null {
   const mode = player.mode;
   const edge = graph.edge(player.edgeId);
@@ -370,24 +618,32 @@ export function planGuide(
     options.push({ first: [player.towards, origin], lead: fromOrigin + U_TURN_PENALTY, uTurn: true });
   }
 
-  let best: { guide: string[]; uTurn: boolean; cost: number } | null = null;
+  // Ways that can be called in time come first (late calls are a last resort).
+  let best: { guide: string[]; uTurn: boolean; cost: number; inTime: boolean; late: boolean; rank: number } | null = null;
   for (const option of options) {
     const start = option.first[1];
     for (let k = 0; k < suspectRoute.length; k++) {
       const join = suspectRoute[k] as string;
       const path = start === join ? { nodes: [start], length: 0 } : graph.shortestPath(start, join, mode, blocked);
       if (!path) continue;
+      // How far behind the suspect the player reaches the join (negative: ahead of it).
+      const behind = option.lead + path.length - pathLength(graph, suspectRoute.slice(0, k + 1));
+      // Joining near the end of the suspect's route is a last resort: where it goes on from there is not known yet.
+      // ...and so is getting there well ahead of the suspect (leading it), even with every call in time.
+      const late = timing !== undefined && (pathLength(graph, suspectRoute.slice(k)) < SHARED_ROUTE || behind < -LEADING);
+      const cost = behind >= -EARLY_ARRIVAL ? Math.max(behind, 0) : -behind - EARLY_ARRIVAL;
+      if (best && !best.late && best.inTime && (late || cost >= best.cost)) continue;
       const guide = [option.first[0], ...path.nodes, ...suspectRoute.slice(k + 1)];
       if (new Set(guide).size !== guide.length || followProblem(graph, guide, mode)) continue;
       if (!describable(graph, guide, mode, difficulty)) continue;
-      // How far behind the suspect the player reaches the join (negative: ahead of it).
-      const behind = option.lead + path.length - pathLength(graph, suspectRoute.slice(0, k + 1));
-      const cost = behind >= -EARLY_ARRIVAL ? Math.max(behind, 0) : -behind - EARLY_ARRIVAL;
-      if (!best || cost < best.cost) best = { guide, uTurn: option.uTurn, cost };
-      break;
+      const inTime = timely(graph, guide, player, option.uTurn, timing);
+      // Sharing the suspect's route first, then calls heard in time, then arriving closest behind it.
+      const rank = (late ? 2 : 0) + (inTime ? 0 : 1);
+      const better = !best || rank < best.rank || (rank === best.rank && cost < best.cost);
+      if (better) best = { guide, uTurn: option.uTurn, cost, inTime, late, rank };
     }
   }
-  return best;
+  return best ? { guide: best.guide, uTurn: best.uTurn } : null;
 }
 
 /**
@@ -400,6 +656,7 @@ export function planEscapeGuide(
   player: MoverStart,
   route: readonly string[],
   difficulty: Difficulty,
+  timing?: GuideTiming,
 ): { guide: string[]; uTurn: boolean } | null {
   const mode = player.mode;
   const edge = graph.edge(player.edgeId);
@@ -413,7 +670,7 @@ export function planEscapeGuide(
   if (canTravel(edge, mode, player.towards)) {
     options.push({ first: [player.towards, origin], lead: fromOrigin + U_TURN_PENALTY, uTurn: true });
   }
-  let best: { guide: string[]; uTurn: boolean; cost: number } | null = null;
+  let best: { guide: string[]; uTurn: boolean; cost: number; inTime: boolean } | null = null;
   for (const option of options) {
     const start = option.first[1];
     for (let k = 0; k < route.length; k++) {
@@ -424,8 +681,11 @@ export function planEscapeGuide(
       if (new Set(guide).size !== guide.length || followProblem(graph, guide, mode)) continue;
       if (!describable(graph, guide, mode, difficulty)) continue;
       const cost = option.lead + path.length + pathLength(graph, route.slice(k));
-      if (!best || cost < best.cost) best = { guide, uTurn: option.uTurn, cost };
+      if (best && best.inTime && cost >= best.cost) continue;
+      const inTime = timely(graph, guide, player, option.uTurn, timing);
+      const better = !best || (inTime && !best.inTime) || (inTime === best.inTime && cost < best.cost);
+      if (better) best = { guide, uTurn: option.uTurn, cost, inTime };
     }
   }
-  return best;
+  return best ? { guide: best.guide, uTurn: best.uTurn } : null;
 }

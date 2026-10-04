@@ -17,6 +17,6 @@ export default defineConfig({
     include: ['tests/unit/**/*.test.ts'],
     environment: 'node',
     // Many tests play whole simulated chases; CI runners share cores across test files.
-    testTimeout: 30_000,
+    testTimeout: 240_000, // chases are planned so every call is heard in time (2026-10-03): generating one takes longer; CI runners are about 3x slower
   },
 });

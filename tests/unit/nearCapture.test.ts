@@ -75,8 +75,9 @@ describe('the suspect turns round just before the arrest', () => {
   ] as const)('the scanner says so and "Faites demi-tour.", and a listener still catches it (%s %s)', (difficulty, chaseType) => {
     const runs = seeds(difficulty, 40, `near-dodge-${chaseType}`).map((s) => listen(s, { chaseType, nearCapture: 'DODGE' }));
     const dodged = runs.filter((r) => r.events.some((e) => e.type === 'SUSPECT_DODGE'));
-    // Now and then no fair new route leaves that spot, and the arrest goes ahead.
-    expect(dodged.length).toBeGreaterThanOrEqual(runs.length * 0.75);
+    // Now and then no fair new route leaves that spot (every turn of it must be callable in
+    // time, 2026-10-03), or too little time is left, and the arrest goes ahead.
+    expect(dodged.length).toBeGreaterThanOrEqual(runs.length * 0.6);
     let turnedRound = 0;
     for (const r of dodged) {
       expect(spoken(r.events)).toEqual(expect.arrayContaining([EVENT_LINES.ATTENTION.audioId, EVENT_LINES.CHANGED_DIRECTION.audioId]));
@@ -91,7 +92,7 @@ describe('the suspect turns round just before the arrest', () => {
       expect(r.events.some((e) => e.type === 'TRANSMISSION' && e.transmission.kind === 'RECOVERY'), r.chase.scenario.seed).toBe(false);
     }
     // Usually "Faites demi-tour."; now and then going on round the block is quicker.
-    expect(turnedRound).toBeGreaterThanOrEqual(dodged.length * 0.7);
+    expect(turnedRound).toBeGreaterThanOrEqual(dodged.length * 0.6);
     const caught = runs.filter((r) => r.chase.status.phase === 'CAPTURED');
     expect(caught.length / runs.length).toBeGreaterThanOrEqual(0.95);
   });

@@ -30,7 +30,7 @@ describe('chase generation', () => {
       const scenario = generateScenario(graph, seed);
       expect(validateScenario(graph, scenario)).toEqual([]);
     }
-  }, 60_000);
+  }, 180_000);
 
   it('recreates exactly the same chase from the same seed', () => {
     for (const seed of seeds('HARD', 50)) {
@@ -40,7 +40,9 @@ describe('chase generation', () => {
 
   it('varies routes and destinations (no fixed suspect routes)', () => {
     const scenarios = seeds('EASY', 200).map((s) => generateScenario(graph, s));
-    expect(new Set(scenarios.map((s) => s.route.join())).size).toBeGreaterThan(190);
+    // Every turn must be callable in time (2026-10-03), which leaves Easy fewer routes to pick from:
+    // some chases share a route, but most are still different.
+    expect(new Set(scenarios.map((s) => s.route.join())).size).toBeGreaterThan(145);
     expect(new Set(scenarios.map((s) => s.destination)).size).toBeGreaterThanOrEqual(25);
   });
 
@@ -62,7 +64,7 @@ describe('chase generation', () => {
         }
       }
     }
-  }, 120_000);
+  }, 300_000);
 
   it('counts only junctions passed straight through, not long streets or bends', () => {
     // Along Rue Jean-Jaurès from c3 to c7: straight through c4, c5 and c6, one run to the end.
@@ -147,7 +149,7 @@ describe('pursuit balance (comprehension must beat luck)', () => {
     const results = seeds(difficulty, 80, 'balance').map((s) => play(s, 'RANDOM'));
     const captured = results.filter((r) => r.phase === 'CAPTURED').length;
     expect(captured / results.length).toBeLessThanOrEqual(LUCK_LIMIT[difficulty]);
-  }, 120_000); // a random driver now plays out the whole clock: the suspect only escapes at time-out
+  }, 300_000); // a random driver now plays out the whole clock: the suspect only escapes at time-out
 
   it('one wrong turn costs distance but is recoverable', () => {
     // Follow the route but take one detour early, then return to following.

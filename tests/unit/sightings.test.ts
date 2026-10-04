@@ -97,7 +97,7 @@ describe('suspect sightings', () => {
     expect(runs.flatMap((r) => r.bot.unsure)).toEqual([]);
     const captured = runs.filter((r) => r.chase.status.phase === 'CAPTURED').length;
     expect(captured / runs.length).toBeGreaterThanOrEqual(0.95);
-  }, 60_000);
+  }, 180_000);
 
   it('says which vehicle to look for before the first sighting of a driving stage', () => {
     for (const seed of seeds('HARD', 30, 'told')) {
@@ -184,14 +184,14 @@ describe('lost signal', () => {
     }
     // It needs a call with several turns, which the map does not always allow (junctions far apart).
     expect(cut / list.length).toBeGreaterThan(0.35);
-  }, 60_000);
+  }, 180_000);
 
   it('a student who remembers the directions still catches the suspect', () => {
     const runs = seeds('EXPERT', 40, 'lost-catch').map((s) => listen(s, { lostSignal: true }));
     const captured = runs.filter((r) => r.chase.status.phase === 'CAPTURED').length;
     expect(captured / runs.length).toBeGreaterThanOrEqual(0.95);
     expect(runs.filter((r) => r.bot.log.some((t) => t.kind === 'RECOVERY')).map((r) => r.chase.scenario.seed)).toEqual([]);
-  }, 60_000);
+  }, 180_000);
 
   it('blocks repeats while the signal is lost', () => {
     for (const seed of seeds('EXPERT', 20, 'lost-repeat')) {

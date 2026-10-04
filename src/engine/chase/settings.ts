@@ -48,15 +48,28 @@ export const TRANSFER = {
    * moves off, however far away it is: the player sees the change happen.
    */
   revealSeconds: 2.5,
-  /** "Descendez de la voiture !" is said when the player is this close (metres) to where the suspect got out. */
+  /**
+   * "Descendez de la voiture !" is said so it is heard out, with time to
+   * react, this far (metres) before the car reaches where the suspect got out.
+   */
   getOutWithin: 70,
+  /**
+   * The police car starts pulling up this far (metres) before where the suspect left
+   * its car, and waits there until the player gets out: the order may take a
+   * moment to be said after the news of the suspect running.
+   */
+  pullUpWithin: 30,
   /**
    * When the suspect gets into a car, a colleague brings the police car to the
    * nearest road; the player can get in from this far away (metres).
    */
   pickupWithin: 160,
+  /** An officer who reaches the brought police car before being told to get in waits beside it, this close (metres). */
+  waitByCarWithin: 12,
+  /** Just out of (or into) the car, the player waits up to this long (seconds) for the first direction to be said, then until it has been heard. */
+  firstCallWaitSeconds: 3,
   /** Extra time on the clock for each change of transport (getting out, catching up on foot is slow). */
-  extraSeconds: 12,
+  extraSeconds: 20,
   /**
    * Suspect speed (fraction of the player's cruising speed) before its last
    * stage: it keeps pace with the police, so the chase reaches every change of
@@ -187,24 +200,29 @@ export const LOST_SIGNAL = {
  * When directions are spoken. On foot each call waits until the runner is
  * about `footLeadSeconds` from the junction it is about, so it comes close to
  * the turn instead of a whole street early (longer at the levels with longer
- * sentences). Calls still come only just after a node, never mid-street. The car is fast, so its calls come as soon as possible. If a
- * call still comes late (two junctions close together, or a long sentence),
- * the whole chase slows a little, police and suspect alike and the clock too,
- * so the player can hear it out and react before the junction without losing
- * ground. The same at every level: difficulty never comes from rushed timing.
+ * sentences). The car is fast, so its calls come just after the junction
+ * before. Either way the call chosen is one that is heard out, with time to
+ * react, before its junctions at full speed (language/callPlan.ts, SPEECH),
+ * and routes are only used if every turn can be called that way: the chase
+ * never slows down for the French (Mr Henry, 2026-10-03).
  */
 export const CALL_TIMING = {
   footLeadSeconds: { EASY: 6, INTERMEDIATE: 6.5, HARD: 8, EXPERT: 9.5 } as Record<Difficulty, number>,
   /** A foot call that would come later than this before its junction comes a node earlier instead. */
-  footMinLeadSeconds: 4,
-  /** Time to react after the call ends, before the junction. */
-  reactSeconds: 1,
-  /** The chase never runs slower than this share of its usual pace. */
-  minPace: 0.4,
-  /** Speech length estimate for a call (slow, clear French). */
-  speechBaseSeconds: 0.6,
-  speechCharsPerSecond: 13,
+  footMinLeadSeconds: 4.5,
 };
+
+/**
+ * Routes the scanner can always call in time at full speed (Mr Henry,
+ * 2026-10-03). A car covers a block in about two and a half seconds, and a
+ * direction takes three or four to say and act on, so after a turn the
+ * suspect's car keeps going at least this far before it turns again (two
+ * blocks); on foot there is time anyway. Every route is then checked call by
+ * call (`callable`).
+ */
+export const CALL_ROUTES = {
+  minTurnGap: { CAR: 380, FOOT: 0 } as Record<TravelMode, number>,
+} as const;
 
 export const TURN_OFF = {
   /** The suspect turns off at least this far (metres) beyond where it starts the stage. */
@@ -220,9 +238,13 @@ export const TURN_OFF = {
   /** After a change of transport the police are close behind, so the turn-off comes within this share of the stage... */
   laterStageShare: 0.35,
   /** ...or, either way, within this many metres of the earliest point. */
-  minWindow: 170,
+  minWindow: 500,
   /** Routes to try for a chase that should change direction before giving up on the change. */
-  routeTries: 3,
+  routeTries: 6,
+  /** The correction waits up to this many seconds for a way back whose directions can be heard in time... */
+  maxWaitSeconds: 25,
+  /** ...or until the player is this many seconds from the end of the directions they are following. */
+  guideEndSeconds: 4,
   /** Length of the route the scanner wrongly predicted, from the turn-off point (metres). */
   decoyLength: [250, 700] as [number, number],
   /**
@@ -230,8 +252,12 @@ export const TURN_OFF = {
    * from the next junction (or stopped), so there is time to take it in.
    */
   clearSeconds: 2,
-  /** The scanner sees the suspect turning off when it is this close to the junction (metres, by mode). */
-  seenWithin: { CAR: 60, FOOT: 20 } as Record<TravelMode, number>,
+  /**
+   * The scanner sees the suspect turning off when it is this much road from the
+   * junction (metres, by mode): early enough for the police, further behind, to
+   * hear the new direction before they reach it.
+   */
+  seenWithin: { CAR: 450, FOOT: 80 } as Record<TravelMode, number>,
 } as const;
 
 /**
@@ -273,7 +299,12 @@ export const CRASH = {
  */
 export const KEEP_GOING = {
   /** Plan the route onwards when the suspect is within this many metres of the end of its route, so the directions come in good time. */
-  aheadMetres: 160,
+  aheadMetres: { CAR: 900, FOOT: 220 } as Record<TravelMode, number>,
+  /** When no way on is found, try again after this many seconds, doubling after each miss up to maxRetrySeconds (planning is costly). */
+  retrySeconds: 0.5,
+  maxRetrySeconds: 2,
+  /** With no callable way on from the end of its route, the suspect may leave it at one of this many junctions before the end. */
+  branchBackNodes: 3,
   /** The new route keeps every one of its junctions at least this many sighting distances from the police, and ends further away than it starts by as much. */
   clearSightings: 4,
 } as const;
@@ -385,7 +416,12 @@ export const ESCAPE = {
    * route takes at cruising speed, by level: room to listen, hesitate and
    * repeat, not to wander the town (a perfect run takes about 1.1 to 1.5).
    */
-  timeFactor: { EASY: 2.6, INTERMEDIATE: 2.2, HARD: 1.9, EXPERT: 1.7 } as Record<Difficulty, number>,
+  timeFactor: { EASY: 2.6, INTERMEDIATE: 2.1, HARD: 1.9, EXPERT: 1.7 } as Record<Difficulty, number>,
   /** The player's getaway car waits this far (metres) along a car stage's route. */
   carAheadMetres: 14,
+  /**
+   * After a change of transport the police wait until the new stage's first
+   * direction has been heard, as a chase does; at most this long (seconds).
+   */
+  changeWaitSeconds: 15,
 } as const;

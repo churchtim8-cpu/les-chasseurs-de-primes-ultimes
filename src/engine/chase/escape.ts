@@ -36,18 +36,9 @@ import { canTravel, type TownGraph, type TravelMode } from '../world/graph';
 import { pointOf, type ChaseEvent, type ChaseStatus, type ModeChangeResult, type SpokenText } from './chase';
 import { roadDistance } from './distance';
 import { pathLength, placeOnRoute } from './route';
+import { callSeconds } from '../language/timing';
 import type { ChaseScenario, ChaseStage } from './scenario';
 import { CALL_TIMING, CHASE_SETTINGS, ESCAPE, TRANSFER, type ChaseSettings } from './settings';
-
-/** Roughly how long a line takes to say (slow, clear French). */
-function speechSeconds(text: string): number {
-  return text ? CALL_TIMING.speechBaseSeconds + text.length / CALL_TIMING.speechCharsPerSecond : 0;
-}
-
-/** The first step of a call: "…, puis …" and "D'abord … Ensuite …" calls go on while the player moves. */
-function firstStep(text: string): string {
-  return text.split(/(?<=\.)\s|,\s*puis\s/)[0] ?? text;
-}
 
 export class Escape {
   /** The player: the suspect on the run. */
@@ -80,6 +71,11 @@ export class Escape {
   private lost = false;
   /** "Juste derrière vous" is not said again until they have fallen back. */
   private closeSaid = false;
+  /** News of the police waiting for a quiet moment on the radio (see report). */
+  private closeNews = false;
+  /** After a change of transport the police wait until the new stage's first direction has been heard (see waitForFirstCall). */
+  private policeWait: { firstCall: boolean; until: number } | null = null;
+  private lostNews: SpokenText | null = null;
   /** The player must change to this mode; `announced` once the order has been given. */
   private pending: { mode: TravelMode; announced: boolean } | null = null;
   /** Set while the player is being taken to the start of this stage. */
@@ -100,8 +96,9 @@ export class Escape {
   private behind = Infinity;
   /** The furthest node of the stage route the player has reached (index). */
   private furthest = 0;
-  /** The latest direction: its junction and when it finishes being spoken (elapsed seconds). */
-  private call: { at: string; spokenBy: number } | null = null;
+  /** When the radio is next free (elapsed seconds); see Chase.radioFreeAt. */
+  private radioFreeAt = 0;
+  private radioCounted = 0;
   /**
    * Metres of head start the police still have to make up before they are on
    * the map: the streets behind the start are too short for all of it, so
@@ -211,10 +208,42 @@ export class Escape {
     if (this.started || this.phase !== 'PURSUIT') return events;
     this.started = true;
     events.push({ type: 'ANNOUNCE', lines: [ESCAPE_LINES.OPENING] });
+    this.navigator.firstCallBeforeStart = true;
+    this.navigator.radioFreeIn = 0;
     const transmissions = this.navigator.update(this.player.location(), this.remainingRoute());
     for (const transmission of transmissions) events.push({ type: 'TRANSMISSION', transmission });
-    this.noteCall(transmissions);
+    this.navigator.firstCallBeforeStart = false; // any later call is timed as usual
+    // Heard in full before anything moves.
+    this.radioFreeAt = 0;
     return events;
+  }
+
+  /** Count the lines in `events` not yet counted into `radioFreeAt`. */
+  private hearRadio(events: readonly ChaseEvent[]): void {
+    for (let i = this.radioCounted; i < events.length; i++) {
+      const e = events[i] as ChaseEvent;
+      let texts: string[] = [];
+      if (e.type === 'TRANSMISSION') texts = e.transmission.instructions.flatMap((ins) => ins.clips.map((c) => c.text));
+      else if (e.type === 'ANNOUNCE') texts = e.lines.map((l) => l.text);
+      if (texts.length > 0) this.radioFreeAt = Math.max(this.elapsed, this.radioFreeAt) + callSeconds(texts);
+    }
+    this.radioCounted = events.length;
+  }
+
+  /** The navigator, told how soon the radio is free and how fast the player is going. */
+  private nav(events: readonly ChaseEvent[]): Navigator {
+    this.hearRadio(events);
+    this.navigator.radioFreeIn = this.radioFreeAt - this.elapsed;
+    this.navigator.speed = Math.max(MOVEMENT[this.player.mode].cruise, this.player.snapshot().speed);
+    return this.navigator;
+  }
+
+  /** Is the player on their stage route, going the right way? */
+  private onRoute(): boolean {
+    const here = this.player.location();
+    const route = this.stages[this.stage]!.route;
+    const k = route.indexOf(here.towards);
+    return k > 0 && this.graph.edgeBetween(route[k - 1] as string, here.towards)?.id === here.edgeId;
   }
 
   /** The rest of the stage route from the furthest node reached (starting with the next node). */
@@ -230,17 +259,21 @@ export class Escape {
 
   /** Advance by `dt` seconds. The caller moves nothing itself. */
   update(dt: number): ChaseEvent[] {
+    this.radioCounted = 0;
+    const events = this.advance(dt);
+    this.hearRadio(events);
+    return events;
+  }
+
+  private advance(dt: number): ChaseEvent[] {
     const events: ChaseEvent[] = [];
     if (this.phase !== 'PURSUIT') return events;
     if (!this.started) {
       this.started = true;
       events.push({ type: 'ANNOUNCE', lines: [ESCAPE_LINES.OPENING] });
     }
-    const pace = this.callPace();
-    this.player.callAssist = pace;
-    this.police.callAssist = pace;
     this.elapsed += dt;
-    this.timeLeft = Math.max(0, this.timeLeft - dt * pace);
+    this.timeLeft = Math.max(0, this.timeLeft - dt);
     const wasOn = this.player.location().edgeId;
     const passed = this.player.update(dt);
     const route = this.stages[this.stage]!.route;
@@ -259,10 +292,10 @@ export class Escape {
       const foot = here.mode === 'FOOT';
       this.navigator.leadDistance = foot ? CALL_TIMING.footLeadSeconds[this.scenario.difficulty] * MOVEMENT.FOOT.cruise : Infinity;
       this.navigator.minLeadDistance = foot ? CALL_TIMING.footMinLeadSeconds * MOVEMENT.FOOT.cruise : 0;
-      const transmissions = this.navigator.update(here, this.remainingRoute());
+      const transmissions = this.nav(events).update(here, this.remainingRoute());
       for (const transmission of transmissions) events.push({ type: 'TRANSMISSION', transmission });
-      this.noteCall(transmissions);
     }
+    this.waitForFirstCall(events);
 
     this.distance = this.measure();
     this.report(events);
@@ -288,11 +321,22 @@ export class Escape {
     return events;
   }
 
+  /** Once the new stage's first direction has been given, the police wait only until it has been heard. */
+  private waitForFirstCall(events: readonly ChaseEvent[]): void {
+    if (!this.policeWait?.firstCall || this.autoStage !== null || !events.some((e) => e.type === 'TRANSMISSION')) return;
+    this.hearRadio(events);
+    this.policeWait = { firstCall: false, until: Math.min(this.policeWait.until, this.radioFreeAt) };
+  }
+
   /** The police follow the player by the shortest way, choosing again at every junction. */
   private movePolice(dt: number, playerTurned = false): void {
+    if (this.policeWait) {
+      if (this.elapsed < this.policeWait.until) return;
+      this.policeWait = null;
+    }
     if (this.policeBehind > 0) {
       // Still on their way from off the map: not moving yet, but closing.
-      this.policeBehind -= dt * MOVEMENT[this.police.mode].cruise * this.police.speedFactor * this.police.callAssist;
+      this.policeBehind -= dt * MOVEMENT[this.police.mode].cruise * this.police.speedFactor;
       if (this.policeBehind > 0) return;
       this.policeBehind = 0;
       this.pursue();
@@ -302,7 +346,6 @@ export class Escape {
       // Boxed in, or a plan it could not take: start again from here, turning round if there is no other way.
       this.police = new Mover(this.graph, this.police.location());
       this.police.speedFactor = ESCAPE.policeSpeed[this.scenario.difficulty];
-      this.police.callAssist = this.player.callAssist;
       if (!this.pursue()) {
         this.police.uTurn();
         this.pursue();
@@ -443,6 +486,13 @@ export class Escape {
    * next stage.
    */
   toggleMode(): { result: ModeChangeResult; events: ChaseEvent[] } {
+    this.radioCounted = 0;
+    const done = this.toggleModeNow();
+    this.hearRadio(done.events);
+    return done;
+  }
+
+  private toggleModeNow(): { result: ModeChangeResult; events: ChaseEvent[] } {
     const events: ChaseEvent[] = [];
     if (this.phase !== 'PURSUIT' || this.autoStage !== null) return { result: { ok: false, reason: 'NOT_HERE' }, events };
     if (!this.pending) return { result: { ok: false, reason: 'NOT_HERE' }, events };
@@ -461,7 +511,10 @@ export class Escape {
     }
     this.changePoint = { at: this.player.location(), mode: this.player.mode };
     this.startTrail();
+    // As in a chase, the whole chase waits for the radio here: the police gain nothing while it speaks.
+    this.policeWait = { firstCall: true, until: this.elapsed + ESCAPE.changeWaitSeconds };
     this.startStage(events);
+    this.waitForFirstCall(events);
     this.distance = this.measure();
     return { result: { ok: true }, events };
   }
@@ -488,9 +541,8 @@ export class Escape {
     this.player = new Mover(this.graph, placeOnRoute(this.graph, route, 1, mode).start);
     this.player.setSpeed(speed);
     this.navigator = this.navigatorFor(stage);
-    const transmissions = this.navigator.update(this.player.location(), this.remainingRoute());
+    const transmissions = this.nav(events).update(this.player.location(), this.remainingRoute());
     for (const transmission of transmissions) events.push({ type: 'TRANSMISSION', transmission });
-    this.noteCall(transmissions);
   }
 
   /** A plan from where the player is to `node`, turning round first if that is shorter. */
@@ -543,44 +595,33 @@ export class Escape {
       this.near = near;
       events.push({ type: 'WARNING', on: near });
     }
-    const lines: SpokenText[] = [];
     if (near && !this.closeSaid) {
       this.closeSaid = true;
-      lines.push(ESCAPE_LINES.POLICE_CLOSE);
-    } else if (!near && this.closeSaid && this.distance > ESCAPE.closeWithin[mode] * ESCAPE.closeClear) {
-      this.closeSaid = false;
+      this.closeNews = true;
+    } else if (!near) {
+      this.closeNews = false; // no longer true: not worth saying
+      if (this.closeSaid && this.distance > ESCAPE.closeWithin[mode] * ESCAPE.closeClear) this.closeSaid = false;
     }
     if (!this.lost && this.distance >= s.warningDistance) {
       this.lost = true;
-      lines.push(ESCAPE_LINES.POLICE_LOST);
+      this.lostNews = this.lostNews === ESCAPE_LINES.POLICE_FOUND ? null : ESCAPE_LINES.POLICE_LOST;
     } else if (this.lost && this.distance <= s.warningDistance * ESCAPE.foundShare) {
       this.lost = false;
-      lines.push(ESCAPE_LINES.POLICE_FOUND);
+      this.lostNews = this.lostNews === ESCAPE_LINES.POLICE_LOST ? null : ESCAPE_LINES.POLICE_FOUND;
     }
+    const lines: SpokenText[] = [];
+    if (this.closeNews) lines.push(ESCAPE_LINES.POLICE_CLOSE);
+    if (this.lostNews) lines.push(this.lostNews);
+    if (lines.length === 0) return;
+    // Said where it is over before the next direction is due, so that is not made late;
+    // a player who has gone wrong (the directions already putting them right) hears it at once.
+    // (On the way to a new stage's start the first direction is about to come: that waits too.)
+    const quiet = this.nav(events).quietFor(this.player.location()) >= callSeconds(lines.map((l) => l.text));
+    if (!quiet && (this.autoStage !== null || this.onRoute())) return;
+    this.closeNews = false;
+    this.lostNews = null;
     // Said after a direction given this frame, never over it.
-    if (lines.length > 0) events.push({ type: 'ANNOUNCE', lines, ...(events.some((e) => e.type === 'TRANSMISSION') ? { after: true } : {}) });
-  }
-
-  /** Remember the junction a new direction is about, and roughly when it will have been heard. */
-  private noteCall(transmissions: readonly Transmission[]): void {
-    for (const t of transmissions) {
-      if (t.kind !== 'DIRECTION' || !t.at) continue;
-      this.call = { at: t.at, spokenBy: this.elapsed + speechSeconds(firstStep(t.text)) };
-    }
-  }
-
-  /** Slow everyone just enough to hear the latest direction out before its junction (CALL_TIMING). */
-  private callPace(): number {
-    if (!this.call || this.phase !== 'PURSUIT') return 1;
-    const here = this.player.location();
-    const toJunction = this.navigator.distanceTo(here, this.call.at);
-    if (!Number.isFinite(toJunction)) {
-      this.call = null;
-      return 1;
-    }
-    const needed = Math.max(0, this.call.spokenBy - this.elapsed) + CALL_TIMING.reactSeconds;
-    const cruise = MOVEMENT[here.mode].cruise * this.player.speedFactor;
-    return Math.min(1, Math.max(CALL_TIMING.minPace, toJunction / needed / cruise));
+    events.push({ type: 'ANNOUNCE', lines, ...(events.some((e) => e.type === 'TRANSMISSION') ? { after: true } : {}) });
   }
 
   /** The player asks the partner to say the last call again. */
@@ -588,7 +629,11 @@ export class Escape {
     if (this.phase !== 'PURSUIT' || !this.navigator.last) return null;
     const status = this.status;
     const result = this.repeats.request(status.signal, status.warning);
-    if (result.allowed) this.timeLeft = Math.max(0, this.timeLeft - result.penaltySeconds);
+    if (result.allowed) {
+      this.timeLeft = Math.max(0, this.timeLeft - result.penaltySeconds);
+      const last = this.navigator.last;
+      if (last) this.radioFreeAt = Math.max(this.elapsed, this.radioFreeAt) + callSeconds(last.instructions.flatMap((i) => i.clips.map((c) => c.text)));
+    }
     return result;
   }
 

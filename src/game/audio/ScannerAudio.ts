@@ -19,6 +19,16 @@ const MIX = {
   radioLowCut: 300,
   radioHighCut: 3400,
   gapSeconds: 0.18,
+  /**
+   * Everything is turned down this much before the safety limiter, so the
+   * limiter (which squashes the whole mix, the French included) almost never
+   * has to act: when it did, calls and music audibly dipped and distorted.
+   */
+  master: 0.72,
+  /** A clip that has not downloaded by then is given up on (the call still shows as text). */
+  fetchSeconds: 5,
+  /** At most this many calls wait their turn; older waiting ones are dropped. */
+  maxWaiting: 2,
 } as const;
 
 /**
@@ -38,14 +48,24 @@ export class ScannerAudio {
   private sources: AudioScheduledSourceNode[] = [];
   private busy: Promise<void> = Promise.resolve();
   private generation = 0;
+  /** Calls up to this ticket were stopped (see stop). */
+  private cancelled = 0;
+  /** Calls queued that have not started yet. */
+  private waiting = 0;
+  /** Ends the wait for the call playing now (see stop). */
+  private wake: (() => void) | null = null;
   /** The radio filter can be switched off (?radio=0) to hear the clean recordings. */
   radioFilter = new URLSearchParams(window.location.search).get('radio') !== '0';
 
   constructor(private readonly baseUrl: string) {
-    // Browsers only start sound after a key press or tap.
+    // Browsers only start sound after a key press or tap. Every press also
+    // wakes the sound back up if the browser or computer paused it.
     const unlock = () => this.unlock();
-    window.addEventListener('keydown', unlock, { once: true });
-    window.addEventListener('pointerdown', unlock, { once: true });
+    window.addEventListener('keydown', unlock);
+    window.addEventListener('pointerdown', unlock);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') this.resume();
+    });
   }
 
   setManifest(manifest: AudioManifest | undefined): void {
@@ -67,10 +87,16 @@ export class ScannerAudio {
   unlock(): void {
     try {
       if (!this.ctx) this.ctx = this.createContext();
-      if (this.ctx?.state === 'suspended') void this.ctx.resume();
+      this.resume();
     } catch {
       this.ctx = null; // no Web Audio: the game still works with text
     }
+  }
+
+  /** Start the sound again if it was paused (another app took the speakers, a power saver, a hidden tab). */
+  private resume(): void {
+    const ctx = this.ctx;
+    if (ctx && ctx.state !== 'running' && ctx.state !== 'closed') ctx.resume().catch(() => undefined);
   }
 
   /** Start decoding clips in the background so the first call plays without delay. */
@@ -84,7 +110,14 @@ export class ScannerAudio {
    */
   play(lines: SpokenLine[]): Promise<void> {
     const ticket = ++this.generation;
-    this.busy = this.busy.then(() => (ticket === this.generation ? this.sequence(lines, ticket) : undefined));
+    this.waiting++;
+    // Calls play in order, one after another: the chase times each one to be heard in full.
+    // (Two calls sent at once used to drop the first: an announcement just before a direction.)
+    this.busy = this.busy.then(() => {
+      this.waiting--;
+      if (ticket <= this.cancelled || this.waiting >= MIX.maxWaiting) return undefined;
+      return this.sequence(lines, ticket);
+    });
     return this.busy;
   }
 
@@ -108,9 +141,18 @@ export class ScannerAudio {
     return this.ctx?.state === 'running';
   }
 
+  /** Urgent news: cut off whatever is being said and say this now. */
+  interrupt(lines: SpokenLine[]): Promise<void> {
+    this.stop();
+    return this.play(lines);
+  }
+
   /** Stop everything now (leaving the chase). */
   stop(): void {
-    this.generation++;
+    this.cancelled = ++this.generation;
+    this.duck(false);
+    this.wake?.();
+    this.wake = null;
     for (const source of this.sources) {
       try {
         source.stop();
@@ -132,25 +174,38 @@ export class ScannerAudio {
     } catch {
       ctx = new Ctx();
     }
-    // A last-moment safety limiter that only touches rare peaks.
+    // If the browser or computer pauses the sound, start it again as soon as it is allowed.
+    ctx.addEventListener('statechange', () => {
+      if (ctx.state !== 'running' && ctx.state !== 'closed') this.resume();
+    });
+    // A last-moment safety limiter for rare peaks, after plenty of headroom (MIX.master).
     const limiter = ctx.createDynamicsCompressor();
-    limiter.threshold.value = -2;
-    limiter.knee.value = 0;
-    limiter.ratio.value = 20;
-    limiter.attack.value = 0.002;
-    limiter.release.value = 0.1;
+    limiter.threshold.value = -1;
+    limiter.knee.value = 2;
+    limiter.ratio.value = 12;
+    limiter.attack.value = 0.003;
+    limiter.release.value = 0.25;
     limiter.connect(ctx.destination);
-    // Music and effects share a compressor; the French bypasses it, so loud
-    // drums, sirens or crashes can no longer squash the voice mid-sentence.
+    const master = ctx.createGain();
+    master.gain.value = MIX.master;
+    master.connect(limiter);
+    // Music and effects share a gentle compressor; the French bypasses it, so loud
+    // drums, sirens or crashes never squash the voice. (The browser's default
+    // settings squeezed hard and boosted quiet parts, so the music pumped.)
     const sounds = ctx.createDynamicsCompressor();
-    sounds.connect(limiter);
+    sounds.threshold.value = -14;
+    sounds.knee.value = 10;
+    sounds.ratio.value = 3;
+    sounds.attack.value = 0.01;
+    sounds.release.value = 0.3;
+    sounds.connect(master);
     const bus = (level: number, into: AudioNode) => {
       const gain = ctx.createGain();
       gain.gain.value = level;
       gain.connect(into);
       return gain;
     };
-    const scanner = bus(MIX.scanner, limiter);
+    const scanner = bus(MIX.scanner, master);
     const effects = bus(MIX.effects, sounds);
     const music = bus(1, sounds);
     // The scanner's own beep, static and click: part of the call, so never ducked.
@@ -170,7 +225,7 @@ export class ScannerAudio {
     const ctx = this.ctx;
     if (!ctx || !this.buses || ctx.state !== 'running') return;
     const buffers = await Promise.all(lines.map((line) => this.buffer(line.audioId)));
-    if (ticket !== this.generation) return;
+    if (ticket <= this.cancelled) return;
 
     this.duck(true);
     let t = ctx.currentTime + 0.02;
@@ -187,8 +242,12 @@ export class ScannerAudio {
       }
     }
     if (radioAt !== -1) t = this.click(t);
-    await new Promise((resolve) => setTimeout(resolve, Math.max(0, (t - ctx.currentTime) * 1000)));
-    if (ticket === this.generation) this.duck(false);
+    await new Promise<void>((resolve) => {
+      this.wake = resolve; // stop() ends the wait at once
+      setTimeout(resolve, Math.max(0, (t - ctx.currentTime) * 1000));
+    });
+    // The music comes back up only when no other call follows straight on (no pumping between calls).
+    if (ticket > this.cancelled && this.waiting === 0) this.duck(false);
   }
 
   private duck(on: boolean): void {
@@ -257,17 +316,28 @@ export class ScannerAudio {
     if (!pending) {
       pending = this.decode(`${this.baseUrl}audio/${clip.file}`);
       this.buffers.set(audioId, pending);
+      // A clip that failed (a slow or dropped connection) is tried again next time.
+      void pending.then((buffer) => {
+        if (!buffer) this.buffers.delete(audioId);
+      });
     }
     return pending;
   }
 
   private async decode(url: string): Promise<AudioBuffer | null> {
+    // A stalled download must not hold up every call after it.
+    const abort = new AbortController();
+    const timer = window.setTimeout(() => abort.abort(), MIX.fetchSeconds * 1000);
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, { signal: abort.signal });
       if (!response.ok) return null;
-      return await this.ctx!.decodeAudioData(await response.arrayBuffer());
+      const data = await response.arrayBuffer();
+      window.clearTimeout(timer);
+      return await this.ctx!.decodeAudioData(data);
     } catch {
-      return null; // a missing or broken clip falls back to text
+      return null; // a missing, slow or broken clip falls back to text
+    } finally {
+      window.clearTimeout(timer);
     }
   }
 }

@@ -14,7 +14,12 @@
  */
 
 import type { Difficulty } from '../difficulty';
-import { actionIndices, describable } from '../language/generate';
+import { actionIndices, describable, type AudioCheck } from '../language/generate';
+import { callable, callContext, planCalls, type CallContext } from '../language/callPlan';
+import { callSeconds } from '../language/timing';
+import { SPEECH } from '../language/settings';
+import { EVENT_LINES } from '../audio/script';
+import { MOVEMENT } from '../movement/settings';
 import type { MoverStart } from '../movement/mover';
 import { Rng } from '../rng/prng';
 import { parseSeed } from '../rng/seedCode';
@@ -34,6 +39,8 @@ import {
   CHASE_TYPE_MODES,
   CHASE_TYPE_WEIGHTS,
   CHASE_TYPES,
+  CALL_ROUTES,
+  CALL_TIMING,
   CRASH,
   NEAR_CAPTURE,
   TURN_OFF,
@@ -207,6 +214,54 @@ export function generateScenario(graph: TownGraph, seedCode: string, options: Sc
   return scenario;
 }
 
+/**
+ * How the scanner times its calls for a stage: at cruising speed, on foot a
+ * few seconds before each turn (CALL_TIMING). The first stage's opening call
+ * is heard before the chase starts.
+ */
+export function stageCallContext(mode: TravelMode, difficulty: Difficulty, hasAudio: AudioCheck = () => true, firstCallBeforeStart = false): CallContext {
+  const lead =
+    mode === 'FOOT'
+      ? {
+          leadDistance: CALL_TIMING.footLeadSeconds[difficulty] * MOVEMENT.FOOT.cruise,
+          minLeadDistance: CALL_TIMING.footMinLeadSeconds * MOVEMENT.FOOT.cruise,
+        }
+      : undefined;
+  return callContext(mode, difficulty, hasAudio, lead, firstCallBeforeStart);
+}
+
+/**
+ * Where the change of direction is said: just after a turn the real route
+ * and the predicted one share before they part (as a route index), so the
+ * turns said up to there stay right. Null when "Attention ! Le suspect a
+ * changé de direction." cannot be heard before the parting, and the real
+ * turns after it in time, from any such turn.
+ */
+export function correctionPoint(
+  graph: TownGraph,
+  route: readonly string[],
+  at: number,
+  mode: TravelMode,
+  difficulty: Difficulty,
+  hasAudio?: AudioCheck,
+): number | null {
+  const ctx = stageCallContext(mode, difficulty, hasAudio);
+  const plan = planCalls(graph, route, ctx);
+  const k = plan.actions.findIndex((a) => a >= at);
+  const next = k === -1 ? plan.actions.length : k;
+  // Said just after a turn the two routes share: the latest one that leaves time for the warning
+  // before the junction where the predicted route turned away, and for the real turns after it.
+  for (let m = next - 1; m >= 0; m--) {
+    const from = plan.actions[m] as number;
+    if (pathLength(graph, route.slice(from, at + 1)) < ctx.speed * (CHANGE_SECONDS + SPEECH.reactSeconds)) continue;
+    return plan.solvableAfter(m + 1, CHANGE_SECONDS) ? from : null;
+  }
+  return null;
+}
+
+/** "Attention ! Le suspect a changé de direction.", said before the corrected directions. */
+const CHANGE_SECONDS = callSeconds([EVENT_LINES.ATTENTION.text, EVENT_LINES.CHANGED_DIRECTION.text]);
+
 /** One route per stage, each starting where the last one ended; null if a stage cannot be built. */
 function planStages(
   graph: TownGraph,
@@ -235,7 +290,9 @@ function planStages(
           accept: (nodes) =>
             nodes.slice(1).every((n) => !used.has(n)) &&
             (i === modes.length - 1 || actionIndices(graph, nodes, mode).length > 0) &&
-            describable(graph, nodes, mode, difficulty),
+            describable(graph, nodes, mode, difficulty) &&
+            callable(graph, nodes, stageCallContext(mode, difficulty, undefined, i === 0)),
+          minTurnGap: CALL_ROUTES.minTurnGap[mode],
           ...(at ? { from: at } : {}),
           ...(arrivedBy ? { avoidEdge: arrivedBy } : {}),
           ...(i < modes.length - 1 ? { transferTo: modes[i + 1] as TravelMode } : {}),
@@ -274,13 +331,17 @@ function planTurnOff(
     earliest + TURN_OFF.minWindow,
   );
   const candidates: number[] = [];
+  const later: number[] = [];
   let s = 0;
   for (let i = 1; i < route.length - 1; i++) {
     s += pathLength(graph, [route[i - 1] as string, route[i] as string]);
-    if (s >= earliest && s <= latest && length - s >= length * TURN_OFF.minRemainingShare) candidates.push(i);
+    if (s < earliest || length - s < length * TURN_OFF.minRemainingShare) continue;
+    // Later junctions too, as a second choice: a change there may still come before the arrest.
+    (s <= latest ? candidates : later).push(i);
   }
   const used = new Set(stages.flatMap((st) => st.route));
-  for (const at of rng.shuffle(candidates)) {
+  for (const at of [...rng.shuffle(candidates), ...rng.shuffle(later)]) {
+    if (correctionPoint(graph, route, at, mode, difficulty) === null) continue; // the correction could not be heard in time
     const node = route[at] as string;
     const arrivedBy = graph.edgeBetween(route[at - 1] as string, node)?.id;
     try {
@@ -292,7 +353,8 @@ function planTurnOff(
           mode,
           from: node,
           ...(arrivedBy ? { avoidEdge: arrivedBy } : {}),
-          accept: (nodes) => decoyOk(graph, route, at, nodes, mode, difficulty, used),
+          accept: (nodes) => decoyOk(graph, route, at, nodes, mode, difficulty, used, stage === 0),
+          minTurnGap: CALL_ROUTES.minTurnGap[mode],
         },
         40,
       );
@@ -323,6 +385,8 @@ function decoyOk(
   mode: TravelMode,
   difficulty: Difficulty,
   used: ReadonlySet<string>,
+  /** The chase starts on this route: its first call is heard before the start. */
+  opening: boolean,
 ): boolean {
   if (decoy[0] !== route[at] || decoy[1] === route[at + 1]) return false;
   if (decoy.slice(1).some((n) => used.has(n))) return false;
@@ -330,7 +394,8 @@ function decoyOk(
   return (
     followProblem(graph, guide, mode) === null &&
     turnsOftenEnough(graph, guide, mode) &&
-    describable(graph, guide, mode, difficulty)
+    describable(graph, guide, mode, difficulty) &&
+    callable(graph, guide, stageCallContext(mode, difficulty, undefined, opening))
   );
 }
 
@@ -354,6 +419,9 @@ export function validateScenario(graph: TownGraph, s: ChaseScenario): string[] {
     if (stage.route.slice(1).some((n) => earlier.has(n))) problems.push(`${label} doubles back over an earlier stage`);
     if (!describable(graph, stage.route, stage.mode, s.difficulty)) {
       problems.push(`${label} needs a roundabout exit this level cannot name`);
+    }
+    if (!callable(graph, stage.route, stageCallContext(stage.mode, s.difficulty, undefined, i === 0))) {
+      problems.push(`${label} has turns too close together to call in time`);
     }
     const length = pathLength(graph, stage.route);
     total += length;
@@ -395,8 +463,10 @@ export function validateScenario(graph: TownGraph, s: ChaseScenario): string[] {
     const used = new Set(s.stages.flatMap((e) => e.route));
     if (stage !== s.stages.length - 1 || !st) problems.push('The change of direction is not in the last stage');
     else if (at < 1 || at > st.route.length - 2) problems.push('The change of direction is not inside the route');
-    else if (!decoyOk(graph, st.route, at, decoy, st.mode, s.difficulty, used)) {
+    else if (!decoyOk(graph, st.route, at, decoy, st.mode, s.difficulty, used, stage === 0)) {
       problems.push('The predicted route is not a fair, different way on');
+    } else if (correctionPoint(graph, st.route, at, st.mode, s.difficulty) === null) {
+      problems.push('The change of direction cannot be corrected in time');
     }
   }
   problems.push(...sightingProblems(graph, s.stages, s.vehicles, s.sightings));
