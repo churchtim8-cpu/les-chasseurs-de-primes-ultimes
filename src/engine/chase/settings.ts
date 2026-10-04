@@ -424,4 +424,14 @@ export const ESCAPE = {
    * direction has been heard, as a chase does; at most this long (seconds).
    */
   changeWaitSeconds: 15,
+  /**
+   * The partner never goes quiet on a player who is stuck (Mr Henry,
+   * 2026-10-04): "Descendez/Montez…" is said again after this many seconds
+   * while the player has not changed transport; a player stopped at a
+   * junction for `stoppedSeconds`, or off the way with no direction for
+   * `offGuideSeconds`, hears the way on from there (free, not a repeat).
+   */
+  orderAgainSeconds: 9,
+  stoppedSeconds: 3.5,
+  offGuideSeconds: 7,
 } as const;

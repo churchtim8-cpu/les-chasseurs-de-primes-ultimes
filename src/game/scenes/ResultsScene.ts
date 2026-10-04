@@ -1,12 +1,14 @@
 import Phaser from 'phaser';
 import { jingles, menuMusic } from '../audio/Jingles';
-import { isComplete, MISSION_COUNT, MISSIONS, newlyUnlocked, recordMission } from '../../engine/campaign/campaign';
+import { isComplete, MISSION_COUNT, MISSIONS, recordMission } from '../../engine/campaign/campaign';
+import { newlyEarned, SLOT_NAMES } from '../../engine/campaign/cosmetics';
 import { scoreMission, type MissionStats, type ScoreLine } from '../../engine/campaign/scoring';
 import type { EscapeReason } from '../../engine/chase/chase';
-import { BOSS, bossInfo, recordChase } from '../../engine/campaign/profile';
+import { BOSS, bossInfo, recordChase, starsFor } from '../../engine/campaign/profile';
 import type { ChaseType, Vehicle } from '../../engine/chase/settings';
 import type { TravelMode } from '../../engine/world/graph';
 import { loadProgress, saveProgress } from '../campaignStore';
+import { lookContext } from '../lookStore';
 import { loadProfile, saveProfile, today } from '../profileStore';
 import { debugState } from '../debug/debugState';
 import { PALETTE, toCss } from '../palette';
@@ -32,12 +34,12 @@ export interface ResultsData {
 }
 
 const LINE_LABELS: Record<ScoreLine['key'], (count: number) => string> = {
-  CAPTURE: () => 'Suspect arrêté',
-  TIME: (n) => `Temps restant : ${n} s`,
-  SIGHTINGS: (n) => `Observations justes : ${n}`,
-  TRANSPORT: (n) => `Changements de transport : ${n}`,
-  WRONG_TURNS: (n) => `Mauvaises directions : ${n}`,
-  REPEATS: (n) => `Répétitions : ${n}`,
+  CAPTURE: () => 'Suspect arrested',
+  TIME: (n) => `Time left: ${n} s`,
+  SIGHTINGS: (n) => `Right sightings: ${n}`,
+  TRANSPORT: (n) => `Transport changes: ${n}`,
+  WRONG_TURNS: (n) => `Wrong turns: ${n}`,
+  REPEATS: (n) => `Repeats: ${n}`,
 };
 
 /**
@@ -71,14 +73,14 @@ export class ResultsScene extends Phaser.Scene {
     debugState.info.set('medal', score.medal ?? '-');
 
     let best = false;
-    let unlocked: string[] = [];
     let caseDone = false;
+    // What the garage holds before this chase is recorded, to show what it newly earned.
+    const lookBefore = lookContext();
     if (mission !== null) {
       const before = loadProgress();
       const after = recordMission(before, mission, score);
       saveProgress(after);
       best = score.total > (before.missions[mission]?.bestScore ?? -1) && (before.missions[mission] ?? null) !== null;
-      unlocked = newlyUnlocked(before, after).map((l) => l.name);
       caseDone = isComplete(after);
     }
     // The player's record: points towards the next rank, badges, and the suspect's case file.
@@ -100,6 +102,7 @@ export class ResultsScene extends Phaser.Scene {
     });
     saveProfile(recorded.profile);
     if (boss && captured) best = score.total > previousBest;
+    const unlocked = newlyEarned(lookBefore, lookContext()).map((c) => `${SLOT_NAMES[c.slot]}: ${c.name}`);
 
     // Escape Mode shows the getaway for a win, the arrest for a loss.
     backdrop(this, captured !== escape ? SCREEN_PICTURES.captured : SCREEN_PICTURES.escaped);
@@ -107,11 +110,20 @@ export class ResultsScene extends Phaser.Scene {
     const x = 628;
     paper(this, x, 30, 600, 600, 0.95);
     const left = x + 32;
-    text(this, left, 50, escape ? 'ÉVASION' : boss ? `MISSION SPÉCIALE : ${boss.nickname.toUpperCase()}` : mission === null ? 'ENTRAÎNEMENT' : `MISSION ${mission + 1} / ${MISSION_COUNT}`, 22, {
+    text(this, left, 50, escape ? 'ESCAPE' : boss ? `SPECIAL MISSION: ${boss.nickname.toUpperCase()}` : mission === null ? 'PRACTICE' : `MISSION ${mission + 1} / ${MISSION_COUNT}`, 22, {
       bold: true,
       color: toCss(PALETTE.seaDeep),
     });
-    const headline = escape ? (captured ? 'Vous avez semé la police !' : 'Vous êtes arrêté.') : captured ? 'Mission réussie !' : 'Le suspect s’est échappé.';
+    // Stars for the chase (★ caught, ★★ no wrong turn, ★★★ no repeat): replaying for all three means more listening.
+    if (!escape) {
+      const stars = starsFor(stats);
+      for (let i = 0; i < 3; i++) {
+        const on = i < stars;
+        const star = this.add.star(x + 476 + i * 44, 64, 5, 9, 20, on ? 0xf2c230 : 0xcfc6ae).setStrokeStyle(2.5, on ? 0x9c7a12 : 0x9a917c);
+        if (on) this.tweens.add({ targets: star, scale: { from: 0, to: 1 }, delay: 300 + i * 260, duration: 300, ease: 'Back.easeOut' });
+      }
+    }
+    const headline = escape ? (captured ? 'You lost the police!' : 'You are under arrest.') : captured ? 'Mission complete!' : 'The suspect got away.';
     text(this, left, captured ? 80 : 86, headline, captured && !escape ? 40 : 34, {
       bold: true,
       color: toCss(captured ? 0x2e8b57 : PALETTE.terracotta),
@@ -119,18 +131,18 @@ export class ResultsScene extends Phaser.Scene {
     const nickname = boss ? ` « ${boss.nickname} »` : mission !== null ? ` « ${MISSIONS[mission]!.nickname} »` : '';
     const detail = escape
       ? captured
-        ? 'Vous avez atteint la planque.'
+        ? 'You reached the hideout.'
         : this.result.escapeReason === 'TIME'
-          ? 'Le temps est écoulé : les barrages étaient en place.'
-          : 'La police vous a rattrapé.'
+          ? 'Time is up: the roadblocks were in place.'
+          : 'The police caught you.'
       : captured
-        ? `Vous avez capturé le suspect${nickname} !`
-        : 'Le temps est écoulé.';
+        ? `You caught the suspect${nickname}!`
+        : 'Time is up.';
     text(this, left, 134, detail, 22, { wordWrap: { width: 540 } });
 
     let y = 182;
     for (const line of score.lines) {
-      text(this, left, y, escape && line.key === 'CAPTURE' ? 'Planque atteinte' : LINE_LABELS[line.key](line.count), 21);
+      text(this, left, y, escape && line.key === 'CAPTURE' ? 'Hideout reached' : LINE_LABELS[line.key](line.count), 21);
       text(this, x + 568, y, `${line.points > 0 ? '+' : ''}${line.points}`, 21, {
         bold: true,
         color: toCss(line.points < 0 ? PALETTE.terracotta : PALETTE.ink),
@@ -138,64 +150,66 @@ export class ResultsScene extends Phaser.Scene {
       y += 31;
     }
     if (score.lines.length === 0) {
-      text(this, left, y, 'Pas de points cette fois.', 21);
+      text(this, left, y, 'No points this time.', 21);
       y += 31;
     }
     this.add.rectangle(left, y + 6, 536, 2, PALETTE.ink).setOrigin(0);
     text(this, left, y + 16, 'TOTAL', 26, { bold: true });
     text(this, x + 568, y + 16, `${score.total}`, 26, { bold: true }).setOrigin(1, 0);
-    text(this, left, y + 56, `Précision d’écoute : ${Math.round(score.accuracy * 100)} %`, 21, { color: toCss(PALETTE.seaDeep) });
+    text(this, left, y + 56, `Listening accuracy: ${Math.round(score.accuracy * 100)}%`, 21, { color: toCss(PALETTE.seaDeep) });
 
     let note = y + 92;
     if (score.medal) {
       medalBadge(this, left + 26, note + 34, score.medal, 24);
-      text(this, left + 64, note + 20, `Médaille : ${MEDAL_NAMES[score.medal]}`, 24, { bold: true });
+      text(this, left + 64, note + 20, `Medal: ${MEDAL_NAMES[score.medal]}`, 24, { bold: true });
       note += 74;
     }
     if (best) {
-      text(this, left, note, 'Nouveau record !', 22, { bold: true, color: toCss(PALETTE.terracotta) });
+      text(this, left, note, 'New record!', 22, { bold: true, color: toCss(PALETTE.terracotta) });
       note += 30;
     }
-    for (const name of unlocked) {
-      text(this, left, note, `Nouvelle couleur de voiture : ${name} !`, 21, { bold: true, color: toCss(0x2e8b57) });
-      note += 28;
+    if (unlocked.length > 0) {
+      // Room for a couple of lines above the rank bar; the rest wait in the garage.
+      const shown = unlocked.slice(0, 2).join('  ·  ') + (unlocked.length > 2 ? `  (+${unlocked.length - 2})` : '');
+      const line = text(this, left, note, `Garage 🔓 ${shown}`, 19, { bold: true, color: toCss(0x2e8b57), wordWrap: { width: 536 } });
+      note += line.height + 6;
     }
     if (recorded.newBadges.length > 0) {
       const one = recorded.newBadges.length === 1;
       const list = recorded.newBadges.map((b) => `${b.icon} ${b.name}`).join('   ');
-      const badges = text(this, left, note, `${one ? 'Nouveau badge' : 'Nouveaux badges'} : ${list} !`, 20, { bold: true, color: toCss(PALETTE.seaDeep), wordWrap: { width: 536 } });
+      const badges = text(this, left, note, `${one ? 'New badge' : 'New badges'}: ${list}!`, 20, { bold: true, color: toCss(PALETTE.seaDeep), wordWrap: { width: 536 } });
       note += badges.height + 6;
     }
     if (recorded.rankAfter.id !== recorded.rankBefore.id) {
-      text(this, left, note, `Nouveau grade : ${recorded.rankAfter.name} !`, 22, { bold: true, color: toCss(PALETTE.terracotta) });
+      text(this, left, note, `New rank: ${recorded.rankAfter.name}!`, 22, { bold: true, color: toCss(PALETTE.terracotta) });
     }
     // Rank and points, along the bottom of the sheet.
     rankLine(this, left, 562, recorded.profile.points, 536);
 
     const menu = new Menu(this);
     if (escape) {
-      menu.add(x + 300, 680, 340, 60, 'NOUVELLE ÉVASION', () => this.scene.start('Practice', { autostart: true, escape: true }), { size: 22 });
-      menu.add(x - 60, 680, 240, 60, 'REJOUER (R)', () => this.scene.start('Escape', { seed: this.result.seed }), { key: 'R', size: 22 });
+      menu.add(x + 300, 680, 340, 60, 'NEW ESCAPE', () => this.scene.start('Practice', { autostart: true, escape: true }), { size: 22 });
+      menu.add(x - 60, 680, 240, 60, 'REPLAY (R)', () => this.scene.start('Escape', { seed: this.result.seed }), { key: 'R', size: 22 });
       menu.add(x - 330, 680, 220, 60, 'MENU', () => this.scene.start('Title'), { key: 'ESC', size: 22 });
     } else if (boss) {
-      menu.add(x + 300, 680, 340, 60, 'COMMISSARIAT  ▶', () => this.scene.start('Commissariat'), { size: 22 });
-      menu.add(x - 60, 680, 240, 60, 'RÉESSAYER (R)', () => this.scene.start('Briefing', { boss: boss.picture }), { key: 'R', size: 22 });
+      menu.add(x + 300, 680, 340, 60, 'POLICE STATION  ▶', () => this.scene.start('Commissariat'), { size: 22 });
+      menu.add(x - 60, 680, 240, 60, 'TRY AGAIN (R)', () => this.scene.start('Briefing', { boss: boss.picture }), { key: 'R', size: 22 });
       menu.add(x - 330, 680, 220, 60, 'MENU', () => this.scene.start('Title'), { key: 'ESC', size: 22 });
     } else if (mission !== null) {
       const last = mission + 1 >= MISSION_COUNT;
-      const nextLabel = caseDone && last ? 'AFFAIRE CLASSÉE  ▶' : last ? 'DOSSIER  ▶' : 'MISSION SUIVANTE  ▶';
+      const nextLabel = caseDone && last ? 'CASE CLOSED  ▶' : last ? 'CASE FILE  ▶' : 'NEXT MISSION  ▶';
       menu.add(x + 300, 680, 340, 60, nextLabel, () => {
         if (caseDone && last) this.scene.start('CaseClosed');
         else if (last) this.scene.start('Campaign');
         else this.scene.start('Briefing', { mission: mission + 1 });
       });
-      menu.add(x - 60, 680, 240, 60, 'RÉESSAYER (R)', () => this.scene.start('Briefing', { mission }), { key: 'R', size: 22 });
-      menu.add(x - 330, 680, 220, 60, 'DOSSIER', () => this.scene.start('Campaign'), { key: 'ESC', size: 22 });
+      menu.add(x - 60, 680, 240, 60, 'TRY AGAIN (R)', () => this.scene.start('Briefing', { mission }), { key: 'R', size: 22 });
+      menu.add(x - 330, 680, 220, 60, 'CASE FILE', () => this.scene.start('Campaign'), { key: 'ESC', size: 22 });
     } else {
-      menu.add(x + 300, 680, 340, 60, 'NOUVELLE POURSUITE', () => this.scene.start('Practice', { autostart: true }), { size: 22 });
-      menu.add(x - 60, 680, 240, 60, 'REJOUER (R)', () => this.scene.start('Chase', { seed: this.result.seed }), { key: 'R', size: 22 });
+      menu.add(x + 300, 680, 340, 60, 'NEW CHASE', () => this.scene.start('Practice', { autostart: true }), { size: 22 });
+      menu.add(x - 60, 680, 240, 60, 'REPLAY (R)', () => this.scene.start('Chase', { seed: this.result.seed }), { key: 'R', size: 22 });
       menu.add(x - 330, 680, 220, 60, 'MENU', () => this.scene.start('Title'), { key: 'ESC', size: 22 });
     }
-    text(this, 24, 24, `${escape ? 'Évasion' : 'Poursuite'} ${this.result.seed}`, 16, { color: toCss(PALETTE.cream), backgroundColor: 'rgba(22, 50, 61, 0.7)', padding: { x: 8, y: 4 } });
+    text(this, 24, 24, `${escape ? 'Escape' : 'Chase'} ${this.result.seed}`, 16, { color: toCss(PALETTE.cream), backgroundColor: 'rgba(22, 50, 61, 0.7)', padding: { x: 8, y: 4 } });
   }
 }

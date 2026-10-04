@@ -30,7 +30,19 @@ interface Mark {
   age: number;
   /** How dark the mark is (a burnout leaves black rubber; a drift a lighter scuff). */
   alpha: number;
+  colour: number;
 }
+
+/**
+ * The garage's tyre smoke (Mr Henry, 2026-10-04): the colours of the player's
+ * own smoke puffs and skid marks. A rainbow takes its colours in turn.
+ */
+export const SMOKE_STYLES: Record<string, { tones: number[]; marks: number[] }> = {
+  CLASSIQUE: { tones: [], marks: [0x161616] },
+  BLEUE: { tones: [0xbfdcff, 0x9cc8ff, 0x6aa8ff, 0x4f8fe8], marks: [0x1f3f8a] },
+  ARC_EN_CIEL: { tones: [0xff5a5a, 0xffa53a, 0xffe14d, 0x5ad66a, 0x4fa8ff, 0xb070ff], marks: [0xe0463a, 0xf29b2e, 0xe8c547, 0x3fae55, 0x2f7de1, 0x8a4fd6] },
+  FLAMMES: { tones: [0xffe08a, 0xffd23f, 0xff9f1c, 0xff6b1a], marks: [0xb8860b] },
+};
 
 /** How a car's tyres smoke and mark the road: a drift (default) or a burnout (big white clouds, black rubber). */
 export interface TyreSmoke {
@@ -60,7 +72,15 @@ export class DriftEffects {
   private drift: { dir: number; t: number } | null = null;
   private lastHeading: number | null = null;
 
-  constructor(private readonly scene: Phaser.Scene) {
+  private readonly style: { tones: number[]; marks: number[] };
+  private colourTurn = 0;
+
+  /** `own` gives the player's tyres (by id) the garage's smoke style. */
+  constructor(
+    private readonly scene: Phaser.Scene,
+    private readonly own: { ids: string[]; style: string } = { ids: [], style: 'CLASSIQUE' },
+  ) {
+    this.style = SMOKE_STYLES[own.style] ?? SMOKE_STYLES.CLASSIQUE!;
     this.marks = scene.add.graphics().setDepth(27);
     for (let i = 0; i < 90; i++) this.puffs.push(scene.add.circle(0, 0, 5, 0xd2d2d2).setAlpha(0).setDepth(29));
   }
@@ -132,10 +152,14 @@ export class DriftEffects {
       x: x - Math.cos(body) * DRIFT.rear - Math.sin(body) * (side * DRIFT.track),
       y: y - Math.sin(body) * DRIFT.rear + Math.cos(body) * (side * DRIFT.track),
     }));
+    const mine = this.own.ids.includes(id) && this.style.tones.length > 0;
+    const turn = () => this.colourTurn++;
     const last = this.lastWheels.get(id);
     if (last) {
+      const marks = mine ? this.style.marks : SMOKE_STYLES.CLASSIQUE!.marks;
+      const colour = marks[Math.floor(this.colourTurn / 6) % marks.length]!;
       wheels.forEach((w, i) =>
-        this.segments.push({ ax: last[i]!.x, ay: last[i]!.y, bx: w.x, by: w.y, age: 0, alpha: smoke.markAlpha }),
+        this.segments.push({ ax: last[i]!.x, ay: last[i]!.y, bx: w.x, by: w.y, age: 0, alpha: smoke.markAlpha, colour }),
       );
       if (this.segments.length > 600) this.segments.splice(0, this.segments.length - 600);
     }
@@ -145,15 +169,16 @@ export class DriftEffects {
     while (left >= DRIFT.puffEvery / smoke.rate) {
       left -= DRIFT.puffEvery / smoke.rate;
       const w = wheels[this.nextPuff++ % 2]!;
+      const ownTone = mine ? this.style.tones[turn() % this.style.tones.length]! : null;
       if (smoke.hangs) {
         // Billows out behind the car and to the sides, in mixed tones.
-        const tone = SMOKE_TONES[this.nextPuff % SMOKE_TONES.length]!;
+        const tone = ownTone ?? SMOKE_TONES[this.nextPuff % SMOKE_TONES.length]!;
         const back = 6 + Phaser.Math.FloatBetween(0, 14);
         const side = Phaser.Math.FloatBetween(-6, 6);
         const push = { x: -Math.cos(body) * back - Math.sin(body) * side, y: -Math.sin(body) * back + Math.cos(body) * side };
         this.puff(w.x, w.y, strength, tone, smoke.size * Phaser.Math.FloatBetween(0.7, 1.3), smoke.life, true, push);
       } else {
-        this.puff(w.x, w.y, strength, smoke.colour, smoke.size, smoke.life, false);
+        this.puff(w.x, w.y, strength, ownTone ?? smoke.colour, smoke.size, smoke.life, false);
       }
     }
     this.puffClocks.set(id, left);
@@ -220,7 +245,7 @@ export class DriftEffects {
     for (const m of this.segments) m.age += dt;
     this.segments = this.segments.filter((m) => m.age < DRIFT.markSeconds);
     for (const m of this.segments) {
-      this.marks.lineStyle(2.2, 0x161616, m.alpha * (1 - m.age / DRIFT.markSeconds)).lineBetween(m.ax, m.ay, m.bx, m.by);
+      this.marks.lineStyle(2.2, m.colour, m.alpha * (1 - m.age / DRIFT.markSeconds)).lineBetween(m.ax, m.ay, m.bx, m.by);
     }
   }
 }

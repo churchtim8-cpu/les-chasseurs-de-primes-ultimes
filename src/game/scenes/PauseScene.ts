@@ -1,12 +1,13 @@
 import Phaser from 'phaser';
-import { isLiveryUnlocked, LIVERIES, livery } from '../../engine/campaign/campaign';
+import { liveryLook } from '../../engine/campaign/cosmetics';
 import { scannerAudio } from '../audio/ScannerAudio';
-import { loadProgress, saveProgress } from '../campaignStore';
 import { GAME_HEIGHT, GAME_WIDTH } from '../layout';
 import { FONT_FAMILY, PALETTE, toCss } from '../palette';
 import { createPoliceCar } from '../render/actors';
 import { Menu } from '../ui/ui';
+import { currentLook } from '../lookStore';
 import { openCommands } from './CommandsScene';
+import { openGarage } from './GarageScene';
 
 export interface PauseSceneData {
   /** The chase or escape underneath, frozen while the menu is open. */
@@ -23,7 +24,7 @@ export interface PauseSceneData {
  * The pause menu (ÉCHAP during a chase or an escape, Mr Henry 2026-10-03):
  * the chase and every sound freeze where they are. REPRENDRE (or ÉCHAP)
  * carries on, RECOMMENCER starts the same chase again, COMMANDES shows the
- * controls, VOITURE changes the police colours among those unlocked, and
+ * controls, GARAGE opens the garage (car, colours, uniform, effects), and
  * QUITTER leaves.
  */
 export class PauseScene extends Phaser.Scene {
@@ -64,39 +65,25 @@ export class PauseScene extends Phaser.Scene {
     const bh = 54;
     let y = top + 132;
     const step = 68;
-    menu.add(cx, y, bw, bh, 'REPRENDRE (ÉCHAP)', () => this.carryOn(), { size: 22 });
-    menu.add(cx, (y += step), bw, bh, 'RECOMMENCER', () => this.leave(this.opts.retry), { size: 22 });
-    menu.add(cx, (y += step), bw, bh, 'COMMANDES', () => openCommands(this), { size: 22 });
-    const car = menu.add(cx, (y += step), bw, bh, this.carLabel(), () => {
-      this.nextLivery();
-      car.label.setText(this.carLabel());
-    }, { size: 22 });
-    menu.add(cx, (y += step), bw, bh, 'QUITTER LA POURSUITE', () => this.leave(this.opts.quit), { size: 22 });
+    menu.add(cx, y, bw, bh, 'RESUME (ESC)', () => this.carryOn(), { size: 22 });
+    menu.add(cx, (y += step), bw, bh, 'RESTART', () => this.leave(this.opts.retry), { size: 22 });
+    menu.add(cx, (y += step), bw, bh, 'CONTROLS', () => openCommands(this), { size: 22 });
+    menu.add(cx, (y += step), bw, bh, 'GARAGE  ▶', () =>
+      openGarage(this, () => {
+        this.showPreview(this.preview?.x ?? 0, this.preview?.y ?? 0);
+        this.opts.liveryChanged?.();
+      }), { size: 22 });
+    menu.add(cx, (y += step), bw, bh, 'QUIT THE CHASE', () => this.leave(this.opts.quit), { size: 22 });
     this.showPreview(cx + bw / 2 + 38, top + 132 + 3 * step);
     this.input.keyboard?.on('keydown-ESC', () => this.carryOn());
-  }
-
-  private carLabel(): string {
-    return `VOITURE : ${livery(loadProgress().livery).name}  ▶`;
-  }
-
-  /** The next unlocked colours, saved for every chase from now on. */
-  private nextLivery(): void {
-    const progress = loadProgress();
-    const unlocked = LIVERIES.filter((l) => isLiveryUnlocked(progress, l.id));
-    const at = unlocked.findIndex((l) => l.id === progress.livery);
-    const next = unlocked[(at + 1) % unlocked.length];
-    if (!next || next.id === progress.livery) return;
-    saveProgress({ ...progress, livery: next.id });
-    this.showPreview(this.preview?.x ?? 0, this.preview?.y ?? 0);
-    this.opts.liveryChanged?.();
   }
 
   /** The police car in the chosen colours, turning slowly beside its button. */
   private showPreview(x: number, y: number): void {
     const rotation = this.preview?.rotation ?? -Math.PI / 2;
     this.preview?.destroy();
-    this.preview = createPoliceCar(this, livery(loadProgress().livery)).setPosition(x, y).setScale(2.8).setRotation(rotation);
+    const look = currentLook();
+    this.preview = createPoliceCar(this, liveryLook(look.LIVERY), look.VEHICLE).setPosition(x, y).setScale(2.8).setRotation(rotation);
     this.tweens.add({ targets: this.preview, rotation: rotation + Math.PI * 2, duration: 9000, repeat: -1 });
   }
 

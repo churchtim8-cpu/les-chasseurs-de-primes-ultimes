@@ -24,16 +24,16 @@ export interface BriefingData {
 }
 
 const REPEAT_RULES: Record<RepeatRule['kind'], (rule: RepeatRule) => string> = {
-  UNLIMITED: () => 'autant que vous voulez',
-  LIMITED: (rule) => `${rule.kind === 'LIMITED' ? rule.maxPerChase : 0} par poursuite`,
-  COSTS_TIME: (rule) => `chaque répétition coûte ${rule.kind === 'COSTS_TIME' ? rule.secondsPerRepeat : 0} secondes`,
-  ONCE: () => 'une seule',
+  UNLIMITED: () => 'as many as you like',
+  LIMITED: (rule) => `${rule.kind === 'LIMITED' ? rule.maxPerChase : 0} per chase`,
+  COSTS_TIME: (rule) => `each repeat costs ${rule.kind === 'COSTS_TIME' ? rule.secondsPerRepeat : 0} seconds`,
+  ONCE: () => 'just one',
 };
 
 const TEXT_RULES: Record<TextDisplay, string> = {
-  BRIEF: 'oui',
-  BRIEF_THEN_REMOVED: 'quelques secondes seulement',
-  AUDIO_ONLY: 'non : écoutez seulement',
+  BRIEF: 'yes',
+  BRIEF_THEN_REMOVED: 'for a few seconds only',
+  AUDIO_ONLY: 'no: listen only',
 };
 
 /**
@@ -83,33 +83,33 @@ export class BriefingScene extends Phaser.Scene {
     // The file itself.
     paper(this, 460, 60, 760, 540);
     const x = 496;
-    text(this, x, 84, boss ? 'MISSION SPÉCIALE' : `MISSION ${this.mission + 1} / ${MISSION_COUNT}`, 40, { bold: true, color: toCss(PALETTE.terracotta) });
-    text(this, x, 142, boss ? `${boss.picture === 'patronne' ? 'La cheffe' : 'Le chef'} de la bande : « ${mission.nickname} »` : `Suspect n° ${this.mission + 1} : « ${mission.nickname} »`, 26, { bold: true });
-    text(this, x, 180, 'Statut : en fuite', 22);
-    text(this, x, 212, `Niveau : ${settings.label.fr}`, 22);
+    text(this, x, 84, boss ? 'SPECIAL MISSION' : `MISSION ${this.mission + 1} / ${MISSION_COUNT}`, 40, { bold: true, color: toCss(PALETTE.terracotta) });
+    text(this, x, 142, boss ? `Gang leader: « ${mission.nickname} »` : `Suspect no. ${this.mission + 1}: « ${mission.nickname} »`, 26, { bold: true });
+    text(this, x, 180, 'Status: on the run', 22);
+    text(this, x, 212, `Level: ${settings.label.en}`, 22);
 
-    text(this, x, 262, 'Première information du scanner :', 20, { color: toCss(PALETTE.seaDeep), bold: true });
+    text(this, x, 262, 'First news from the scanner:', 20, { color: toCss(PALETTE.seaDeep), bold: true });
     text(this, x, 292, `« ${firstLine.text} »`, 28, { bold: true, wordWrap: { width: 690 } });
 
     const limit = settings.timeLimitSeconds + (boss?.extraSeconds ?? 0);
     const minutes = Math.floor(limit / 60);
     const seconds = String(limit % 60).padStart(2, '0');
     const rules = [
-      `Temps : ${minutes}:${seconds}`,
-      `Répétitions : ${REPEAT_RULES[settings.repeat.kind](settings.repeat)}`,
-      `Texte à l’écran : ${TEXT_RULES[settings.textDisplay]}`,
+      `Time: ${minutes}:${seconds}`,
+      `Repeats: ${REPEAT_RULES[settings.repeat.kind](settings.repeat)}`,
+      `Text on screen: ${TEXT_RULES[settings.textDisplay]}`,
     ];
-    text(this, x, 360, 'Règles', 20, { color: toCss(PALETTE.seaDeep), bold: true });
+    text(this, x, 360, 'Rules', 20, { color: toCss(PALETTE.seaDeep), bold: true });
     rules.forEach((rule, i) => text(this, x + 12, 392 + i * 32, `•  ${rule}`, 21));
-    text(this, x, 500, boss ? `Trois étapes : ${stagesLine(boss)}. ${mission.nickname} ne se laisse pas prendre facilement !` : 'Écoutez bien le scanner et suivez les directions !', 21, { fontStyle: 'italic', wordWrap: { width: 690 } });
+    text(this, x, 500, boss ? `Three stages: ${stagesLine(boss)}. ${mission.nickname} will not be caught easily!` : 'Listen carefully to the scanner and follow the directions!', 21, { fontStyle: 'italic', wordWrap: { width: 690 } });
 
     const menu = new Menu(this);
-    menu.add(840, 650, 300, 60, 'COMMENCER  ▶', () => this.start(seed.code), { size: 26 });
-    menu.add(530, 650, 280, 60, '🔊  ÉCOUTER (R)', () => void scannerAudio.play([{ audioId: firstLine.audioId, radio: true }]), {
+    menu.add(840, 650, 300, 60, 'START  ▶', () => this.start(seed.code), { size: 26 });
+    menu.add(530, 650, 280, 60, '🔊  LISTEN (R)', () => void scannerAudio.play([{ audioId: firstLine.audioId, radio: true }]), {
       key: 'R',
       size: 22,
     });
-    menu.add(1120, 650, 200, 60, boss ? 'RETOUR' : 'DOSSIER', () => this.scene.start(boss ? 'Commissariat' : 'Campaign'), { key: 'ESC', size: 22 });
+    menu.add(1120, 650, 200, 60, boss ? 'BACK' : 'CASE FILE', () => this.scene.start(boss ? 'Commissariat' : 'Campaign'), { key: 'ESC', size: 22 });
     menu.add(240, 650, 260, 60, 'MENU', () => this.scene.start('Title'), { size: 22 });
   }
 
@@ -119,8 +119,8 @@ export class BriefingScene extends Phaser.Scene {
   }
 }
 
-/** "en voiture, à pied, puis en voiture" for a boss's three-stage chase. */
+/** "by car, on foot, then by car" for a boss's three-stage chase. */
 function stagesLine(boss: BossInfo): string {
-  const words = CHASE_TYPE_MODES[boss.chaseType].map((m) => (m === 'CAR' ? 'en voiture' : 'à pied'));
-  return `${words.slice(0, -1).join(', ')}, puis ${words[words.length - 1]}`;
+  const words = CHASE_TYPE_MODES[boss.chaseType].map((m) => (m === 'CAR' ? 'by car' : 'on foot'));
+  return `${words.slice(0, -1).join(', ')}, then ${words[words.length - 1]}`;
 }

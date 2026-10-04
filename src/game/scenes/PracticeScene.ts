@@ -75,7 +75,7 @@ export class PracticeScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.add
-      .text(GAME_WIDTH / 2, 262, this.escape ? 'ÉVASION' : 'ENTRAÎNEMENT', {
+      .text(GAME_WIDTH / 2, 262, this.escape ? 'ESCAPE' : 'PRACTICE', {
         fontFamily: FONT_FAMILY,
         fontSize: '28px',
         color: toCss(PALETTE.terracotta),
@@ -84,7 +84,7 @@ export class PracticeScene extends Phaser.Scene {
       .setOrigin(0.5);
     if (this.escape) {
       this.add
-        .text(GAME_WIDTH / 2, 306, 'Vous êtes le fugitif : suivez les directions de votre partenaire jusqu’à la planque. La police est derrière vous !', {
+        .text(GAME_WIDTH / 2, 306, 'You are the fugitive: follow your partner’s directions to the hideout (la planque). The police are behind you!', {
           fontFamily: FONT_FAMILY,
           fontSize: '20px',
           color: toCss(PALETTE.ink),
@@ -95,7 +95,7 @@ export class PracticeScene extends Phaser.Scene {
     }
 
     this.add
-      .text(GAME_WIDTH / 2, 352, 'Choisissez un niveau', {
+      .text(GAME_WIDTH / 2, 352, 'Choose a level', {
         fontFamily: FONT_FAMILY,
         fontSize: '26px',
         color: toCss(PALETTE.ink),
@@ -112,7 +112,7 @@ export class PracticeScene extends Phaser.Scene {
         .setStrokeStyle(3, PALETTE.ink)
         .setInteractive({ useHandCursor: true });
       const label = this.add
-        .text(x, 420, `${i + 1}  ${DIFFICULTY_SETTINGS[level].label.fr}`, {
+        .text(x, 420, `${i + 1}  ${DIFFICULTY_SETTINGS[level].label.en}`, {
           fontFamily: FONT_FAMILY,
           fontSize: '26px',
           fontStyle: 'bold',
@@ -126,7 +126,7 @@ export class PracticeScene extends Phaser.Scene {
     this.select(PracticeScene.currentLevel);
 
     const prompt = this.add
-      .text(GAME_WIDTH / 2, 482, 'Touchez un niveau, ou appuyez sur 1 à 4 puis ENTRÉE', {
+      .text(GAME_WIDTH / 2, 482, 'Tap a level, or press 1 to 4 then ENTER', {
         fontFamily: FONT_FAMILY,
         fontSize: '20px',
         color: toCss(PALETTE.ink),
@@ -151,7 +151,7 @@ export class PracticeScene extends Phaser.Scene {
     keyboard?.on('keydown-ESC', () => this.scene.start('Title'));
     keyboard?.on('keydown-H', () => openCommands(this));
     const commands = this.add
-      .text(GAME_WIDTH / 2, 548, '🎮  VOIR LES COMMANDES (H)', {
+      .text(GAME_WIDTH / 2, 548, '🎮  SEE THE CONTROLS (H)', {
         fontFamily: FONT_FAMILY,
         fontSize: '20px',
         fontStyle: 'bold',
@@ -163,7 +163,7 @@ export class PracticeScene extends Phaser.Scene {
       .setInteractive({ useHandCursor: true });
     commands.on('pointerdown', () => openCommands(this));
     this.add
-      .text(GAME_WIDTH / 2, 600, 'ÉCHAP : retour au menu', { fontFamily: FONT_FAMILY, fontSize: '18px', color: toCss(PALETTE.ink) })
+      .text(GAME_WIDTH / 2, 600, 'ESC: back to the menu', { fontFamily: FONT_FAMILY, fontSize: '18px', color: toCss(PALETTE.ink) })
       .setOrigin(0.5);
   }
 

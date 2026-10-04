@@ -97,6 +97,8 @@ export class Navigator {
   private awaiting: { edgeId: string; towards: string } | null = null;
   /** An edge where no way back could be planned: wait until the player leaves it before trying again. */
   private stuckOn: string | null = null;
+  /** The roundabout where a way back has already been given: going round it again gets no new one until the player leaves it. */
+  private ringRecovered: string | null = null;
   private nextId = 1;
   readonly history: Transmission[] = [];
   /** Prefer calls with at least this many turns, when the map allows (the chase is about to lose the signal). */
@@ -216,8 +218,21 @@ export class Navigator {
     if (this.awaiting && this.awaiting.edgeId === player.edgeId && this.awaiting.towards === player.towards) return out;
     if (this.justPastEnd(player)) return out;
     if (this.stuckOn === player.edgeId) return out;
+    // Round a roundabout, each stretch of the ring is a new street: one way back
+    // per visit, not "Ce n'est pas la bonne rue" at every exit passed.
+    const ring = this.ringOf(player);
+    if (ring === null) this.ringRecovered = null;
+    else if (ring === this.ringRecovered) return out;
     this.recover(player, suspectRoute, out);
+    if (ring !== null) this.ringRecovered = ring;
     return out;
+  }
+
+  /** The roundabout whose ring the player is driving round, or null. */
+  private ringOf(player: MoverStart): string | null {
+    const edge = this.graph.edge(player.edgeId);
+    const a = this.graph.node(edge.from).roundaboutId;
+    return a && a === this.graph.node(edge.to).roundaboutId ? a : null;
   }
 
   /**
@@ -275,6 +290,34 @@ export class Navigator {
     }
     if (callAt <= progress) return 0;
     return Math.max(0, this.distanceTo(player, callAt, progress) / this.speed - Math.max(0, this.radioFreeIn));
+  }
+
+  /** Is the player off the guide (lost, or not yet turned round)? */
+  isOffGuide(player: MoverStart): boolean {
+    return !this.onGuide(player);
+  }
+
+  /**
+   * The player has stopped at a junction and is waiting, or is lost with nothing said for a while: say what to do from
+   * here, the last direction again while they are on the guide, or (off it)
+   * a fresh way back, even if none could be found on this street before.
+   */
+  prompt(player: MoverStart, suspectRoute: readonly string[]): Transmission[] {
+    const out: Transmission[] = [];
+    if (this.onGuide(player)) {
+      const last = this.last;
+      if (last) {
+        this.radioFreeIn = Math.max(0, this.radioFreeIn) + callSeconds(last.instructions.flatMap((i) => i.clips.map((c) => c.text)));
+        out.push(last);
+      }
+      return out;
+    }
+    this.stuckOn = null;
+    this.awaiting = null;
+    this.ringRecovered = null;
+    this.deferrals = MAX_DEFERRALS; // stopped: there is room to turn round now
+    this.recover(player, suspectRoute, out);
+    return out;
   }
 
   /** The signal is back: say what the player needs now (the next direction, or a way back). */

@@ -28,7 +28,7 @@ export class BootScene extends Phaser.Scene {
     backdrop(this, TITLE_PICTURE);
     this.add.rectangle(width / 2, height - 92, 760, 104, PALETTE.cream, 0.9).setStrokeStyle(3, PALETTE.ink, 0.6);
     const title = this.add
-      .text(width / 2, height - 122, 'Chargement…', {
+      .text(width / 2, height - 122, 'Loading…', {
         fontFamily: FONT_FAMILY,
         fontSize: '26px',
         fontStyle: 'bold',
@@ -62,7 +62,7 @@ export class BootScene extends Phaser.Scene {
       return;
     }
     bar.setFillStyle(0x2e8b57);
-    title.setText('Prêt ! Appuyez sur une touche ou touchez l’écran');
+    title.setText('Ready! Press any key or tap the screen');
     this.tweens.add({ targets: title, alpha: 0.4, duration: 700, yoyo: true, repeat: -1 });
     const go = () => {
       scannerAudio.unlock();

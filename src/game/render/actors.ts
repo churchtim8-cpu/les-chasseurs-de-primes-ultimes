@@ -88,41 +88,133 @@ function foot(scene: Phaser.Scene, name: string, y: number, colour: number): Pha
   return scene.add.ellipse(0, y, 2.7, 1.6, colour).setStrokeStyle(0.3, OUTLINE, 0.9).setName(name);
 }
 
-/** Police car and uniform colours (the campaign's unlockable liveries). */
+/** Police car and uniform colours (the garage's liveries); `pattern` is drawn over the body. */
 export interface PoliceColours {
   body: number;
   stripe: number;
   uniform: number;
+  pattern?: 'CARNIVAL' | 'FLAG' | 'NEON' | 'CAMO';
 }
 
 export const CLASSIC_COLOURS: PoliceColours = { body: 0xf7f7f2, stripe: 0x1f4e9c, uniform: 0x1f4e9c };
 
-/** Placeholder police car, drawn facing east (heading 0). Sizes in metres. */
-export function createPoliceCar(scene: Phaser.Scene, colours: PoliceColours = CLASSIC_COLOURS): Phaser.GameObjects.Container {
-  const picture = carPicture(scene, 'CAR', colours.body, 18);
+/**
+ * The player's police vehicle, facing east (heading 0), sizes in metres. Every
+ * car is drawn the same size as the others in town (the motorbike smaller),
+ * so the garage never breaks the town's proportions.
+ */
+export function createPoliceCar(scene: Phaser.Scene, colours: PoliceColours = CLASSIC_COLOURS, vehicle = 'BERLINE'): Phaser.GameObjects.Container {
+  if (vehicle === 'MOTO') return createPoliceBike(scene, colours);
+  const undercover = vehicle === 'BANALISEE';
+  const vintage = vehicle === 'VINTAGE';
+  const suv = vehicle === 'GENDARMERIE';
+  const body = undercover ? 0x2a2d33 : colours.body;
+  const picture = carPicture(scene, 'CAR', body, 18);
+  // The 4x4 is a little wider; the same length as a car.
+  if (suv) for (const image of picture) image.setDisplaySize(18.4, image.displayHeight * 1.14);
   const g = scene.add.graphics();
+  const extras: Phaser.GameObjects.GameObject[] = [];
   if (picture.length > 0) {
-    // The livery stripe along the roof and the bonnet, and the light bar across the roof.
-    g.fillStyle(colours.stripe, 0.95).fillRect(-5.2, -1.2, 6.6, 2.4).fillRect(4.6, -1, 3.4, 2);
-    g.fillStyle(0x1b2230).fillRoundedRect(-2.3, -3.2, 1.6, 6.4, 0.5);
+    if (!undercover) drawPattern(g, colours);
+    if (vehicle === 'PRESTIGE') {
+      // Twin gold stripes, gold trim and a glint on the roof.
+      g.fillStyle(0xf0c53c).fillRect(-5.2, -1.9, 6.6, 1).fillRect(-5.2, 0.9, 6.6, 1).fillRect(4.6, -1.6, 3.4, 0.8).fillRect(4.6, 0.8, 3.4, 0.8);
+      g.lineStyle(0.5, 0xf0c53c, 0.9).strokeRoundedRect(-8.6, -3.9, 17.2, 7.8, 2.4);
+      const sparkle = scene.add.star(2.5, -2.4, 4, 0.3, 1.2, 0xffffff).setAlpha(0);
+      scene.tweens.add({ targets: sparkle, alpha: 1, scale: 1.4, duration: 500, yoyo: true, repeat: -1, repeatDelay: 1100 });
+      extras.push(sparkle);
+    } else if (!undercover && !vintage) {
+      // The livery stripe along the roof and the bonnet.
+      g.fillStyle(colours.stripe, 0.95).fillRect(-5.2, -1.2, 6.6, 2.4).fillRect(4.6, -1, 3.4, 2);
+    }
+    if (vintage) {
+      // Chrome bumpers and a stripe down each side.
+      g.fillStyle(0xd9dde2).fillRoundedRect(8.2, -3.4, 1.2, 6.8, 0.5).fillRoundedRect(-9.4, -3.4, 1.2, 6.8, 0.5);
+      g.fillStyle(colours.stripe, 0.95).fillRect(-7.5, -3.9, 15, 0.9).fillRect(-7.5, 3, 15, 0.9);
+    }
+    if (suv) g.lineStyle(0.6, 0x1b2230, 0.8).lineBetween(-5.5, -2.6, 1.5, -2.6).lineBetween(-5.5, 2.6, 1.5, 2.6); // roof rails
+    if (!undercover && !vintage) g.fillStyle(0x1b2230).fillRoundedRect(-2.3, suv ? -3.8 : -3.2, 1.6, suv ? 7.6 : 6.4, 0.5); // light bar
   } else {
     g.fillStyle(0x000000, 0.25).fillRoundedRect(-9 + 1.5, -4.8 + 2, 18, 9.6, 2.5);
-    g.fillStyle(colours.body).fillRoundedRect(-9, -4.8, 18, 9.6, 2.5);
-    g.fillStyle(colours.stripe).fillRect(-9, -1.4, 18, 2.8); // stripe
+    g.fillStyle(body).fillRoundedRect(-9, -4.8, 18, 9.6, 2.5);
+    if (!undercover) g.fillStyle(colours.stripe).fillRect(-9, -1.4, 18, 2.8); // stripe
     g.fillStyle(0x27323a).fillRoundedRect(1.5, -3.8, 3.5, 7.6, 1); // windscreen
     g.fillStyle(0x27323a).fillRoundedRect(-6.5, -3.6, 2.5, 7.2, 1); // rear window
   }
-  // Siren: the light bar flashes red and blue, and throws a coloured glow on the road.
-  const glowRed = scene.add.circle(-1, -6, 11, 0xe0463a, 0.22);
-  const glowBlue = scene.add.circle(-1, 6, 11, 0x2f7de1, 0.22).setAlpha(0);
-  const bar = picture.length > 0 ? { x: -1.5, w: 1.2, h: 2.8, y: 1.5 } : { x: -1, w: 2, h: 2, y: 2 };
-  const lightRed = scene.add.rectangle(bar.x, -bar.y, bar.w, bar.h, 0xe0463a);
-  const lightBlue = scene.add.rectangle(bar.x, bar.y, bar.w, bar.h, 0x2f7de1).setAlpha(0.2);
+  // Siren: the lights flash red and blue, and throw a coloured glow on the road.
+  // The undercover car hides small ones in its grille; the classic has one blue dome on the roof.
+  const glowSize = undercover ? 7 : 11;
+  const glowAt = undercover ? 8.5 : -1;
+  const glowRed = scene.add.circle(glowAt, -6, glowSize, vintage ? 0x2f7de1 : 0xe0463a, 0.22);
+  const glowBlue = scene.add.circle(glowAt, 6, glowSize, 0x2f7de1, 0.22).setAlpha(0);
+  let bar = picture.length > 0 ? { x: -1.5, w: 1.2, h: 2.8, y: 1.5 } : { x: -1, w: 2, h: 2, y: 2 };
+  if (undercover) bar = { x: 8.4, w: 0.7, h: 0.9, y: 2.2 };
+  if (suv) bar = { x: -1.5, w: 1.2, h: 3.4, y: 1.9 };
+  const lightRed = vintage ? scene.add.circle(-1.5, 0, 1.3, 0x2f7de1) : scene.add.rectangle(bar.x, -bar.y, bar.w, bar.h, 0xe0463a);
+  const lightBlue = vintage ? scene.add.circle(-1.5, 0, 0.6, 0xbfe0ff).setAlpha(0.2) : scene.add.rectangle(bar.x, bar.y, bar.w, bar.h, 0x2f7de1).setAlpha(0.2);
   scene.tweens.add({ targets: [lightRed, glowRed], alpha: 0.15, duration: 230, yoyo: true, repeat: -1 });
   scene.tweens.add({ targets: [lightBlue, glowBlue], alpha: 1, duration: 230, yoyo: true, repeat: -1 });
-  // The same size as every other car; the flashing lights make it easy to find on screen.
-  const parts = [glowRed, glowBlue, ...picture, g, lightRed, lightBlue, ...carLights(scene, 18)];
+  const parts = [glowRed, glowBlue, ...picture, g, ...extras, lightRed, lightBlue, ...carLights(scene, 18)];
   return scene.add.container(0, 0, parts).setDepth(30).setScale(CAR_SCALE);
+}
+
+/** The livery's pattern over a car body (roof and bonnet), sizes in metres. */
+function drawPattern(g: Phaser.GameObjects.Graphics, colours: PoliceColours): void {
+  switch (colours.pattern) {
+    case 'FLAG':
+      // A white-edged black band across, corner to corner.
+      g.fillStyle(0xffffff).fillPoints([v(-6.5, 3.4), v(-3.6, 3.4), v(5.6, -3.4), v(2.7, -3.4)], true);
+      g.fillStyle(0x111111).fillPoints([v(-5.9, 3.4), v(-4.2, 3.4), v(5, -3.4), v(3.3, -3.4)], true);
+      break;
+    case 'CARNIVAL': {
+      // Sequins in mas colours and a golden swoosh.
+      const sequins = [0xf2c230, 0x2ed3a0, 0xff4fa3, 0x29b6ff];
+      for (let i = 0; i < 18; i++) {
+        const x = -6.5 + ((i * 37) % 130) / 10;
+        const y = -2.8 + ((i * 53) % 56) / 10;
+        g.fillStyle(sequins[i % 4]!).fillCircle(x, y, 0.45);
+      }
+      g.lineStyle(0.9, 0xf2c230, 0.95).beginPath().arc(-1, 6, 7.5, -2.3, -0.8).strokePath();
+      break;
+    }
+    case 'NEON':
+      g.lineStyle(0.6, 0x29f0ff, 1).lineBetween(-7.5, -3.3, 7.5, -3.3).lineBetween(-7.5, 3.3, 7.5, 3.3);
+      g.lineStyle(0.4, 0xff3fd0, 1).lineBetween(-7.5, -2.6, 7.5, -2.6).lineBetween(-7.5, 2.6, 7.5, 2.6);
+      break;
+    case 'CAMO':
+      g.fillStyle(0x3d4626, 0.9).fillEllipse(-4.5, -1.5, 3.6, 2.2).fillEllipse(3.5, 1.8, 3, 2).fillEllipse(6, -2, 2, 1.4);
+      g.fillStyle(0x8a8656, 0.9).fillEllipse(-1, 1.9, 3, 1.8).fillEllipse(-6.5, 2, 1.8, 1.2).fillEllipse(1.5, -2.2, 2.4, 1.4);
+      break;
+    default:
+      break;
+  }
+}
+
+function v(x: number, y: number): Phaser.Math.Vector2 {
+  return new Phaser.Math.Vector2(x, y);
+}
+
+/** The police motorbike: about half a car long, the rider in a white helmet. */
+function createPoliceBike(scene: Phaser.Scene, colours: PoliceColours): Phaser.GameObjects.Container {
+  const g = scene.add.graphics();
+  g.fillStyle(0x000000, 0.25).fillEllipse(0.8, 1.2, 10, 3.6);
+  g.fillStyle(0x1b1b1b).fillRoundedRect(3, -0.6, 2.6, 1.2, 0.5).fillRoundedRect(-5.2, -0.65, 2.6, 1.3, 0.5); // tyres
+  g.fillStyle(colours.body).fillEllipse(0, 0, 8.4, 2.8); // tank and seat
+  g.lineStyle(0.35, OUTLINE, 0.9).strokeEllipse(0, 0, 8.4, 2.8);
+  g.fillStyle(colours.stripe).fillRect(-2.6, -0.45, 5.2, 0.9);
+  g.fillStyle(colours.body).fillRoundedRect(-4.8, -1.9, 2.6, 3.8, 0.8); // panniers
+  g.lineStyle(0.6, 0x2b2b2b).lineBetween(2.6, -2.2, 2.6, 2.2); // handlebars
+  // The rider: shoulders in uniform, a white helmet with a dark visor.
+  g.fillStyle(colours.uniform).fillEllipse(-0.6, 0, 3.4, 4.6);
+  g.fillStyle(0xf4f4f0).fillCircle(-0.3, 0, 1.6);
+  g.fillStyle(0x1b2230).fillEllipse(0.9, 0, 0.8, 2);
+  const glowRed = scene.add.circle(-4, -4, 7, 0xe0463a, 0.22);
+  const glowBlue = scene.add.circle(-4, 4, 7, 0x2f7de1, 0.22).setAlpha(0);
+  const lightRed = scene.add.rectangle(-4.6, -1.5, 0.8, 0.8, 0xe0463a);
+  const lightBlue = scene.add.rectangle(-4.6, 1.5, 0.8, 0.8, 0x2f7de1).setAlpha(0.2);
+  scene.tweens.add({ targets: [lightRed, glowRed], alpha: 0.15, duration: 230, yoyo: true, repeat: -1 });
+  scene.tweens.add({ targets: [lightBlue, glowBlue], alpha: 1, duration: 230, yoyo: true, repeat: -1 });
+  return scene.add.container(0, 0, [glowRed, glowBlue, g, lightRed, lightBlue, ...carLights(scene, 10)]).setDepth(30).setScale(CAR_SCALE);
 }
 
 /** The suspect's vehicle (the one the scanner names), drawn facing east. */
@@ -135,11 +227,8 @@ export function createSuspectCar(scene: Phaser.Scene, vehicle: Vehicle): Phaser.
   return scene.add.container(0, 0, [...picture, g, ...carLights(scene, vehicle === 'VAN' ? 22 : 18)]).setDepth(29).setScale(CAR_SCALE);
 }
 
-/**
- * Placeholder police officer on foot, seen from above. Its feet and arms are
- * separate children (named) so the scene can swing them while running.
- */
-export function createOfficer(scene: Phaser.Scene, colours: PoliceColours = CLASSIC_COLOURS): Phaser.GameObjects.Container {
+/** The officer on foot, seen from above, wearing the garage's headgear (`outfit`). */
+export function createOfficer(scene: Phaser.Scene, colours: PoliceColours = CLASSIC_COLOURS, outfit = 'CASQUETTE'): Phaser.GameObjects.Container {
   const uniform = colours.uniform;
   const parts = [
     foot(scene, 'footL', -1.6, 0x111111),
@@ -153,15 +242,60 @@ export function createOfficer(scene: Phaser.Scene, colours: PoliceColours = CLAS
   g.lineStyle(0.5, OUTLINE, 0.9).strokeEllipse(0, 0, 5.6, 7.4);
   g.fillStyle(0xe8c547).fillRoundedRect(-1.2, -3.5, 2.2, 0.9, 0.3).fillRoundedRect(-1.2, 2.6, 2.2, 0.9, 0.3); // epaulettes
   g.fillStyle(0x1a1a1a).fillRoundedRect(0.4, -3.0, 1.1, 1.3, 0.3); // radio on the shoulder
-  g.fillStyle(0x0f1a30).fillEllipse(1.9, 0, 1.7, 3.4); // cap peak
-  g.fillStyle(0x16233d).fillCircle(0.2, 0, 2.3); // cap
-  g.lineStyle(0.45, OUTLINE, 0.9).strokeCircle(0.2, 0, 2.3);
-  g.fillStyle(0x24365a).fillCircle(-0.1, -0.3, 1.3); // light on the crown
-  g.fillStyle(0xe8c547).fillCircle(1.7, 0, 0.6); // badge on the cap peak
+  drawHeadgear(g, outfit, uniform);
   // About the size of the people walking in town (a car is three times as long); a soft
   // ring underneath keeps the player easy to find.
   const ring = scene.add.circle(0, 0, 6.5, 0xffffff, 0.22).setStrokeStyle(0.8, uniform, 0.8).setName('ring');
   return scene.add.container(0, 0, [ring, ...parts, g]).setDepth(31).setScale(OFFICER_SCALE);
+}
+
+/** The officer's head from above: the police cap, or the garage's choice. */
+function drawHeadgear(g: Phaser.GameObjects.Graphics, outfit: string, uniform: number): void {
+  const cap = () => {
+    g.fillStyle(0x0f1a30).fillEllipse(1.9, 0, 1.7, 3.4); // cap peak
+    g.fillStyle(0x16233d).fillCircle(0.2, 0, 2.3); // cap
+    g.lineStyle(0.45, OUTLINE, 0.9).strokeCircle(0.2, 0, 2.3);
+    g.fillStyle(0x24365a).fillCircle(-0.1, -0.3, 1.3); // light on the crown
+    g.fillStyle(0xe8c547).fillCircle(1.7, 0, 0.6); // badge on the cap peak
+  };
+  switch (outfit) {
+    case 'LUNETTES':
+      cap();
+      g.fillStyle(0x111111).fillRoundedRect(2.3, -1.6, 0.7, 1.4, 0.3).fillRoundedRect(2.3, 0.2, 0.7, 1.4, 0.3);
+      g.lineStyle(0.3, 0xdddddd, 0.9).lineBetween(2.65, -0.2, 2.65, 0.2);
+      break;
+    case 'CASQUE':
+      g.fillStyle(0xf4f4f0).fillCircle(0.2, 0, 2.6);
+      g.lineStyle(0.45, OUTLINE, 0.9).strokeCircle(0.2, 0, 2.6);
+      g.fillStyle(uniform).fillRect(-2.2, -0.4, 4.6, 0.8);
+      g.fillStyle(0x1b2230).fillEllipse(2.3, 0, 1, 3);
+      break;
+    case 'BERET':
+      g.fillStyle(0x8a1c2b).fillEllipse(-0.1, -0.5, 5, 4.4);
+      g.lineStyle(0.45, OUTLINE, 0.9).strokeEllipse(-0.1, -0.5, 5, 4.4);
+      g.fillStyle(0xe8c547).fillCircle(1.3, 0.6, 0.6);
+      break;
+    case 'CARNAVAL': {
+      // A fan of feathers behind the head, in mas colours, on a gold band.
+      const feathers = [0xff4fa3, 0xf2c230, 0x2ed3a0, 0x29b6ff, 0xff7a29];
+      feathers.forEach((colour, i) => {
+        const a = Math.PI + (i - 2) * 0.38;
+        g.fillStyle(colour).fillEllipse(0.2 + Math.cos(a) * 3, Math.sin(a) * 3, 3.6, 1.3);
+      });
+      g.fillStyle(0xf2c230).fillCircle(0.2, 0, 2.2);
+      g.lineStyle(0.45, OUTLINE, 0.9).strokeCircle(0.2, 0, 2.2);
+      g.fillStyle(0xff4fa3).fillCircle(1.4, 0, 0.6);
+      break;
+    }
+    case 'NOEL':
+      g.fillStyle(0xd23b30).fillCircle(0.2, 0, 2.3);
+      g.fillStyle(0xd23b30).fillTriangle(-0.6, -1.2, -0.6, 1.2, -3.6, 1.6);
+      g.fillStyle(0xffffff).fillCircle(-3.8, 1.7, 0.8);
+      g.lineStyle(0.9, 0xffffff).strokeCircle(0.2, 0, 2.1);
+      break;
+    default:
+      cap();
+  }
 }
 
 /** On-foot figures are drawn at this scale (shapes are in metres). */

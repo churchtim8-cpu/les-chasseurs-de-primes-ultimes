@@ -62,24 +62,24 @@ export type BadgeId = (typeof BADGE_IDS)[number];
 export interface Badge {
   id: BadgeId;
   name: string;
-  /** How it is earned, in French (shown while locked). */
+  /** How it is earned (shown while locked). The badge names stay French, like the ranks. */
   how: string;
   /** Emoji drawn on the badge. */
   icon: string;
 }
 
 export const BADGES: readonly Badge[] = [
-  { id: 'PREMIERE', name: 'Première arrestation', how: 'Arrêtez votre premier suspect.', icon: '⭐' },
-  { id: 'SANS_FAUTE', name: 'Sans faute', how: 'Une poursuite sans aucune mauvaise direction.', icon: '🎯' },
-  { id: 'ECLAIR', name: 'Éclair', how: 'Arrêtez un suspect avec plus de la moitié du temps restant.', icon: '⚡' },
-  { id: 'OREILLE_D_OR', name: 'Oreille d’or', how: 'Une arrestation au niveau Expert sans répétition.', icon: '👂' },
-  { id: 'PIED_LEGER', name: 'Pied léger', how: 'Arrêtez un suspect à pied.', icon: '👟' },
-  { id: 'NOCTAMBULE', name: 'Noctambule', how: `${10} arrestations en mode nuit.`, icon: '🌙' },
-  { id: 'MARATHONIEN', name: 'Marathonien', how: `${25} arrestations en tout.`, icon: '🏃' },
-  { id: 'CHASSEUR_ULTIME', name: 'Chasseur ultime', how: 'Une médaille d’or pour les 8 suspects de la campagne.', icon: '🏆' },
-  { id: 'BOSS', name: 'Le Boss sous les verrous', how: 'Arrêtez le Boss.', icon: '🐻' },
-  { id: 'PATRONNE', name: 'La Patronne sous les verrous', how: 'Arrêtez la Patronne.', icon: '🐆' },
-  { id: 'INSAISISSABLE', name: 'Insaisissable', how: 'Semez la police en mode Évasion.', icon: '🏃' },
+  { id: 'PREMIERE', name: 'Première arrestation', how: 'Arrest your first suspect.', icon: '⭐' },
+  { id: 'SANS_FAUTE', name: 'Sans faute', how: 'A chase without a single wrong turn.', icon: '🎯' },
+  { id: 'ECLAIR', name: 'Éclair', how: 'Arrest a suspect with more than half the time left.', icon: '⚡' },
+  { id: 'OREILLE_D_OR', name: 'Oreille d’or', how: 'An Expert arrest without a repeat.', icon: '👂' },
+  { id: 'PIED_LEGER', name: 'Pied léger', how: 'Arrest a suspect on foot.', icon: '👟' },
+  { id: 'NOCTAMBULE', name: 'Noctambule', how: `${10} arrests in night mode.`, icon: '🌙' },
+  { id: 'MARATHONIEN', name: 'Marathonien', how: `${25} arrests in all.`, icon: '🏃' },
+  { id: 'CHASSEUR_ULTIME', name: 'Chasseur ultime', how: 'A gold medal for all 8 campaign suspects.', icon: '🏆' },
+  { id: 'BOSS', name: 'Le Boss sous les verrous', how: 'Arrest Le Boss.', icon: '🐻' },
+  { id: 'PATRONNE', name: 'La Patronne sous les verrous', how: 'Arrest La Patronne.', icon: '🐆' },
+  { id: 'INSAISISSABLE', name: 'Insaisissable', how: 'Lose the police in Escape mode.', icon: '🏃' },
 ];
 
 /** Captures needed for the counting badges. */
@@ -100,13 +100,13 @@ export interface BossInfo {
   chaseType: ChaseType;
   /** Extra seconds on the clock for the longer chase. */
   extraSeconds: number;
-  /** How it is found, in French (shown while locked). */
+  /** How it is found (shown while locked). */
   unlock: string;
 }
 
 export const BOSSES: readonly BossInfo[] = [
-  { nickname: 'Le Boss', picture: 'boss', difficulty: 'EXPERT', chaseType: 'CAR_FOOT_CAR', extraSeconds: 30, unlock: 'Une médaille d’or pour les 8 suspects' },
-  { nickname: 'La Patronne', picture: 'patronne', difficulty: 'EXPERT', chaseType: 'FOOT_CAR_FOOT', extraSeconds: 30, unlock: 'Le Boss arrêté' },
+  { nickname: 'Le Boss', picture: 'boss', difficulty: 'EXPERT', chaseType: 'CAR_FOOT_CAR', extraSeconds: 30, unlock: 'A gold medal for all 8 suspects' },
+  { nickname: 'La Patronne', picture: 'patronne', difficulty: 'EXPERT', chaseType: 'FOOT_CAR_FOOT', extraSeconds: 30, unlock: 'Arrest Le Boss' },
 ];
 
 export const BOSS = BOSSES[0] as BossInfo;
@@ -153,6 +153,8 @@ export interface CaseFile {
   chaseType: ChaseType | null;
   /** The date (YYYY-MM-DD) of the first arrest. */
   firstArrest: string | null;
+  /** Best stars won against this suspect (0-3, see starsFor). */
+  stars: number;
 }
 
 export const EMPTY_FILE: CaseFile = {
@@ -165,7 +167,23 @@ export const EMPTY_FILE: CaseFile = {
   vehicle: null,
   chaseType: null,
   firstArrest: null,
+  stars: 0,
 };
+
+/**
+ * Stars for one chase (Mr Henry, 2026-10-04): ★ the suspect is caught,
+ * ★★ with no wrong turn, ★★★ with no repeat asked for. Students replay a
+ * mission for all three, which means more listening.
+ */
+export function starsFor(stats: Pick<MissionStats, 'captured' | 'wrongTurns' | 'repeatsUsed'>): number {
+  if (!stats.captured) return 0;
+  return 1 + (stats.wrongTurns === 0 ? 1 : 0) + (stats.repeatsUsed === 0 ? 1 : 0);
+}
+
+/** Stars won over every suspect (best per suspect): the campaign's eight and the bosses. */
+export function totalStars(profile: Profile): number {
+  return Object.values(profile.files).reduce((sum, f) => sum + f.stars, 0);
+}
 
 export interface Profile {
   version: 1;
@@ -178,10 +196,12 @@ export interface Profile {
   badges: Partial<Record<BadgeId, string>>;
   /** Case files by suspect picture id ("renard" … "requin", "boss", "patronne"). */
   files: Record<string, CaseFile>;
+  /** The garage choices by slot (see cosmetics.ts, which checks they are earned). */
+  look: Partial<Record<string, string>>;
 }
 
 export function newProfile(): Profile {
-  return { version: 1, points: 0, arrests: 0, nightArrests: 0, badges: {}, files: {} };
+  return { version: 1, points: 0, arrests: 0, nightArrests: 0, badges: {}, files: {}, look: {} };
 }
 
 /** Everything about one finished chase that the record keeps. */
@@ -241,6 +261,7 @@ export function recordChase(before: Profile, outcome: ChaseOutcome): Recorded {
       vehicle: outcome.vehicle,
       chaseType: outcome.chaseType,
       firstArrest: file.firstArrest ?? (captured ? outcome.date : null),
+      stars: Math.max(file.stars, starsFor({ ...stats, captured })),
     };
   }
   const newBadges = BADGES.filter((b) => !before.badges[b.id] && earned(b.id, profile, outcome));
@@ -312,10 +333,15 @@ export function parseProfile(json: string | null): Profile {
           vehicle: typeof f.vehicle === 'string' ? (f.vehicle as Vehicle) : null,
           chaseType: typeof f.chaseType === 'string' ? (f.chaseType as ChaseType) : null,
           firstArrest: typeof f.firstArrest === 'string' ? f.firstArrest : null,
+          stars: Math.min(3, count(f.stars)),
         };
       }
     }
-    return { version: 1, points: count(data.points), arrests: count(data.arrests), nightArrests: count(data.nightArrests), badges, files };
+    const look: Partial<Record<string, string>> = {};
+    if (data.look && typeof data.look === 'object') {
+      for (const [slot, id] of Object.entries(data.look as Record<string, unknown>)) if (typeof id === 'string') look[slot] = id;
+    }
+    return { version: 1, points: count(data.points), arrests: count(data.arrests), nightArrests: count(data.nightArrests), badges, files, look };
   } catch {
     return newProfile();
   }

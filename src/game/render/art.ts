@@ -122,22 +122,95 @@ export function cross(g: G, x: number, y: number, size: number, colour: number):
   g.fillStyle(colour).fillRect(x - t / 2, y - size / 2, t, size).fillRect(x - size / 2, y - t / 2, size, t);
 }
 
-export function tree(g: G, x: number, y: number, radius: number, leaf: number = LEAF): void {
-  g.fillStyle(SHADOW, 0.17).fillEllipse(x + radius * 0.9, y + radius * 0.55, radius * 2.6, radius * 1.6);
-  g.fillStyle(shade(leaf, -18)).fillCircle(x, y, radius);
-  g.fillStyle(leaf).fillCircle(x - radius * 0.2, y - radius * 0.25, radius * 0.75);
-  g.fillStyle(shade(leaf, 18)).fillCircle(x - radius * 0.35, y - radius * 0.4, radius * 0.35);
+/** A steady pseudo-random number in [0, 1) from a position, so each tree keeps its look (no Math.random). */
+function hash(x: number, y: number, salt = 0): number {
+  const n = Math.sin(x * 12.9898 + y * 78.233 + salt * 37.719) * 43758.5453;
+  return n - Math.floor(n);
 }
 
-export function palm(g: G, x: number, y: number, radius: number): void {
-  g.fillStyle(SHADOW, 0.15).fillEllipse(x + radius * 0.9, y + radius * 0.6, radius * 2.1, radius * 1.1);
-  const leaf = 0x4f9a52;
-  g.lineStyle(radius * 0.32, leaf);
-  for (let i = 0; i < 7; i++) {
-    const a = (i / 7) * Math.PI * 2 + 0.3;
-    g.lineBetween(x, y, x + Math.cos(a) * radius, y + Math.sin(a) * radius);
+/**
+ * Flowering trees of Trinidad and Tobago seen from above (Mr Henry,
+ * 2026-10-04: the trees were plain green circles): the flamboyant's red, the
+ * pink and the yellow poui. Most trees stay green; these are the splashes.
+ */
+const BLOSSOMS = [0xe0462f, 0xf07ab4, 0xf5c518] as const;
+
+/**
+ * A leafy tree from above, cartoon style: a lumpy crown of overlapping
+ * clumps (not one disc), shaded darker underneath and lit from the top left,
+ * with a soft shadow on the ground. About one tree in six is in flower.
+ */
+export function tree(g: G, x: number, y: number, radius: number, leaf: number = LEAF): void {
+  const r = radius;
+  g.fillStyle(SHADOW, 0.18).fillEllipse(x + r * 0.75, y + r * 0.6, r * 2.5, r * 1.7);
+  // The crown: clumps round the middle, then the same clumps a little smaller and lighter, nudged towards the light.
+  const clumps = 6 + Math.floor(hash(x, y) * 3);
+  const turn = hash(x, y, 1) * Math.PI * 2;
+  const spots: { cx: number; cy: number; cr: number }[] = [];
+  for (let i = 0; i < clumps; i++) {
+    const a = turn + (i / clumps) * Math.PI * 2;
+    const d = r * (0.48 + hash(x, y, i + 2) * 0.12);
+    spots.push({ cx: x + Math.cos(a) * d, cy: y + Math.sin(a) * d, cr: r * (0.5 + hash(x, y, i + 9) * 0.12) });
   }
-  g.fillStyle(0x8a6a44).fillCircle(x, y, radius * 0.18);
+  const dark = shade(leaf, -30);
+  g.fillStyle(shade(leaf, -45), 0.9).fillCircle(x + r * 0.08, y + r * 0.1, r * 1.02);
+  g.fillStyle(dark);
+  for (const s of spots) g.fillCircle(s.cx, s.cy, s.cr);
+  g.fillCircle(x, y, r * 0.62);
+  g.fillStyle(leaf);
+  for (const s of spots) g.fillCircle(s.cx - r * 0.1, s.cy - r * 0.12, s.cr * 0.8);
+  g.fillCircle(x - r * 0.08, y - r * 0.1, r * 0.55);
+  // Sunlit leaves on the top-left clumps.
+  g.fillStyle(shade(leaf, 26));
+  for (const s of spots) {
+    if (s.cx - x + (s.cy - y) < 0) g.fillCircle(s.cx - r * 0.2, s.cy - r * 0.22, s.cr * 0.38);
+  }
+  g.fillStyle(shade(leaf, 40), 0.85).fillCircle(x - r * 0.32, y - r * 0.36, r * 0.18);
+  // In flower: blossom dots scattered over the crown.
+  if (hash(x, y, 30) < 0.17) {
+    const bloom = BLOSSOMS[Math.floor(hash(x, y, 31) * BLOSSOMS.length)]!;
+    for (let i = 0; i < 14; i++) {
+      const a = hash(x, y, 40 + i) * Math.PI * 2;
+      const d = Math.sqrt(hash(x, y, 60 + i)) * r * 0.85;
+      g.fillStyle(i % 4 === 0 ? shade(bloom, 30) : bloom).fillCircle(x + Math.cos(a) * d - r * 0.05, y + Math.sin(a) * d - r * 0.05, r * 0.13);
+    }
+  }
+}
+
+/** A coconut palm from above: feathered fronds with a midrib, drooping out from a crown of coconuts. */
+export function palm(g: G, x: number, y: number, radius: number): void {
+  const r = radius;
+  g.fillStyle(SHADOW, 0.15).fillEllipse(x + r * 0.8, y + r * 0.55, r * 2.1, r * 1.2);
+  const fronds = 8;
+  const turn = hash(x, y) * Math.PI;
+  for (let pass = 0; pass < 2; pass++) {
+    for (let i = pass; i < fronds; i += 2) {
+      const a = turn + (i / fronds) * Math.PI * 2;
+      const tipX = x + Math.cos(a) * r;
+      const tipY = y + Math.sin(a) * r;
+      // Leaflets either side of the midrib, longest in the middle of the frond.
+      const nx = -Math.sin(a);
+      const ny = Math.cos(a);
+      const colour = pass === 0 ? 0x3f8a45 : 0x56a94f;
+      g.fillStyle(colour);
+      g.fillTriangle(x + nx * r * 0.12, y + ny * r * 0.12, x - nx * r * 0.12, y - ny * r * 0.12, tipX, tipY);
+      for (let k = 1; k <= 4; k++) {
+        const t = k / 5;
+        const px = x + (tipX - x) * t;
+        const py = y + (tipY - y) * t;
+        const w = r * 0.32 * Math.sin(Math.PI * t);
+        g.fillTriangle(px, py, px + nx * w + Math.cos(a) * r * 0.14, py + ny * w + Math.sin(a) * r * 0.14, px + Math.cos(a) * r * 0.16, py + Math.sin(a) * r * 0.16);
+        g.fillTriangle(px, py, px - nx * w + Math.cos(a) * r * 0.14, py - ny * w + Math.sin(a) * r * 0.14, px + Math.cos(a) * r * 0.16, py + Math.sin(a) * r * 0.16);
+      }
+      g.lineStyle(r * 0.05, shade(colour, -30), 0.9).lineBetween(x, y, tipX, tipY);
+    }
+  }
+  // Coconuts and the top of the trunk in the middle.
+  for (let i = 0; i < 3; i++) {
+    const a = turn + (i / 3) * Math.PI * 2 + 0.5;
+    g.fillStyle(0x6b4a26).fillCircle(x + Math.cos(a) * r * 0.13, y + Math.sin(a) * r * 0.13, r * 0.11);
+  }
+  g.fillStyle(0x8a6a44).fillCircle(x, y, r * 0.09);
 }
 
 /** Parked car seen from above, the same size as the cars driving through town. */

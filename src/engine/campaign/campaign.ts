@@ -109,23 +109,23 @@ export type LiveryId = (typeof LIVERY_IDS)[number];
 
 export interface Livery {
   id: LiveryId;
-  /** Name shown in the game, in French. */
+  /** Name shown in the game (the menus are in English). */
   name: string;
   /** Car body, car stripe and uniform colours. */
   body: number;
   stripe: number;
   uniform: number;
-  /** How it is earned, in French (shown while locked). */
+  /** How it is earned (shown while locked). */
   unlock: string;
 }
 
 export const LIVERIES: readonly Livery[] = [
-  { id: 'CLASSIQUE', name: 'Classique', body: 0xf7f7f2, stripe: 0x1f4e9c, uniform: 0x1f4e9c, unlock: '' },
-  { id: 'NUIT', name: 'Nuit', body: 0x2b2f3a, stripe: 0xf2f2f2, uniform: 0x2b2f3a, unlock: '2 suspects arrêtés' },
-  { id: 'COTIERE', name: 'Côtière', body: 0x2bb3b1, stripe: 0xf7f7f2, uniform: 0x1d8a88, unlock: '4 suspects arrêtés' },
-  { id: 'BRONZE', name: 'Bronze', body: 0xc98a4b, stripe: 0x6b3f1d, uniform: 0x8a5a2e, unlock: '8 suspects arrêtés' },
-  { id: 'ARGENT', name: 'Argent', body: 0xc9d1d9, stripe: 0x4a5866, uniform: 0x5d6b78, unlock: '8 médailles d’argent ou mieux' },
-  { id: 'OR', name: 'Or', body: 0xf0c53c, stripe: 0x8a6a10, uniform: 0xb8901e, unlock: '8 médailles d’or' },
+  { id: 'CLASSIQUE', name: 'Classic', body: 0xf7f7f2, stripe: 0x1f4e9c, uniform: 0x1f4e9c, unlock: '' },
+  { id: 'NUIT', name: 'Night', body: 0x2b2f3a, stripe: 0xf2f2f2, uniform: 0x2b2f3a, unlock: '2 suspects arrested' },
+  { id: 'COTIERE', name: 'Coastal', body: 0x2bb3b1, stripe: 0xf7f7f2, uniform: 0x1d8a88, unlock: '4 suspects arrested' },
+  { id: 'BRONZE', name: 'Bronze', body: 0xc98a4b, stripe: 0x6b3f1d, uniform: 0x8a5a2e, unlock: '8 bronze medals or better' },
+  { id: 'ARGENT', name: 'Silver', body: 0xc9d1d9, stripe: 0x4a5866, uniform: 0x5d6b78, unlock: '8 silver medals or better' },
+  { id: 'OR', name: 'Gold', body: 0xf0c53c, stripe: 0x8a6a10, uniform: 0xb8901e, unlock: '8 gold medals' },
 ];
 
 export function livery(id: LiveryId): Livery {
