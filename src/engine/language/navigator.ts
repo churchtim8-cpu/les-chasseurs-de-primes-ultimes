@@ -86,6 +86,8 @@ export class Navigator {
    * there would only be taken back, and would keep the radio busy.
    */
   holdAfter: number | null = null;
+  /** The next call is planned for a player held still until its first step is heard. */
+  private heldForCall = false;
   /** Streets driven on since a wrong turn without a way back given yet (see recover). */
   private deferrals = 0;
   private fillerFor: number | null = null;
@@ -399,7 +401,7 @@ export class Navigator {
     // The opening call is heard before the chase starts: any call is in time.
     const opening = !this.spoken && this.firstCallBeforeStart;
     const ahead = aheadFrom(this.graph, this.guide, this.progress, pos);
-    const inTime = opening ? options : options.filter((o) => fits(o, ahead, this.speed, delay));
+    const inTime = opening ? options : options.filter((o) => fits(o, ahead, this.speed, delay, this.heldForCall));
     if (inTime.length > 0) {
       this.calls ??= planCalls(this.graph, this.guide, this.callContext());
       const k = this.calls.actions.indexOf(this.actions[nextIndex] as number);
@@ -412,8 +414,8 @@ export class Navigator {
   }
 
   /** Could a new guide from here have every call heard in time, its first call after the radio is free? */
-  canCallInTime(guide: readonly string[], player: MoverStart, extraDelay = 0): boolean {
-    return callableFrom(this.graph, guide, player, Math.max(0, this.radioFreeIn) + extraDelay, this.callContext());
+  canCallInTime(guide: readonly string[], player: MoverStart, extraDelay = 0, held = false): boolean {
+    return callableFrom(this.graph, guide, player, Math.max(0, this.radioFreeIn) + extraDelay, this.callContext(), held);
   }
 
   /** Would a new way onto the suspect's route (see redirect) be called in time, after `extraDelay` more seconds of radio? */
@@ -479,6 +481,8 @@ export class Navigator {
     guide?: readonly string[],
     /** The guide starts by turning round on that edge ("Faites demi-tour."). */
     turnRound = false,
+    /** The player is held still until the first step of the correction is heard (after a dodge). */
+    held = false,
   ): Transmission[] {
     const out: Transmission[] = [];
     this.destination = destination;
@@ -490,7 +494,9 @@ export class Navigator {
     if (!plan) return out; // off the guide now: the usual recovery takes over
     if (plan.uTurn) this.emit('CORRECTION', [makeInstruction([{ action: 'U_TURN' }], this.difficulty)], out);
     // The player is held still for a correction: it is said straight away (after any call before it).
+    this.heldForCall = held;
     this.useGuide(plan, player, out, false);
+    this.heldForCall = false;
     return out;
   }
 

@@ -964,17 +964,30 @@ export class Chase {
     const around = new Set(exits.map((e) => e.step.to));
     const skidOn = exits.reduce<Exit | null>((best, e) => (!best || Math.abs(e.relativeAngle) < Math.abs(best.relativeAngle) ? e : best), null);
     const beyond = new Set(skidOn ? [skidOn.step.to] : []);
-    const followable = (avoid: ReadonlySet<string>) => (nodes: readonly string[]) =>
-      nodes.every((n, i) => i === 0 || (!near.has(n) && (i === 1 || !avoid.has(n)))) &&
-      (planGuide(this.graph, here, nodes, this.scenario.difficulty)?.guide.slice(1).includes(nodes[1] as string) ?? false);
+    // The correction comes after "Attention ! Le suspect a changé de direction." (and "Faites demi-tour.").
+    const announce = callSeconds([EVENT_LINES.ATTENTION.text, EVENT_LINES.CHANGED_DIRECTION.text]);
+    const followable = (avoid: ReadonlySet<string>, timed: boolean) => (nodes: readonly string[]) => {
+      if (!nodes.every((n, i) => i === 0 || (!near.has(n) && (i === 1 || !avoid.has(n))))) return false;
+      // The guide the correction will give (see correctAfterDodge): onto the street the suspect is on, then its route.
+      const onto = planGuide(this.graph, here, [at.towards, back], this.scenario.difficulty);
+      const guide = onto ? [...onto.guide, ...nodes.slice(1)] : null;
+      if (!onto || !guide || !guide.slice(1).includes(nodes[1] as string)) return false;
+      if (!timed) return true;
+      // The player is held still until the first step of the correction has been heard.
+      const start = onto.uTurn ? { ...here, towards: this.graph.other(playerEdge, here.towards) } : here;
+      return this.navigator.canCallInTime(guide, start, announce, true);
+    };
     const length = DODGE.routeLength[at.mode];
     // Ideally every turn of it can be called in time (the player is held while the correction is said).
     // (A shorter route carries on like any other, at its end.)
-    const route =
-      this.escapeRoute(back, edge.id, at.mode, length, followable(around)) ??
-      this.escapeRoute(back, edge.id, at.mode, length, followable(beyond)) ??
-      this.escapeRoute(back, edge.id, at.mode, [length[0] / 2, length[1]], followable(around)) ??
-      this.escapeRoute(back, edge.id, at.mode, [length[0] / 2, length[1]], followable(beyond));
+    const tries = [length, [length[0] / 2, length[1]] as [number, number]];
+    let route = null;
+    for (const timed of [true]) {
+      for (const span of tries) {
+        route ??= this.escapeRoute(back, edge.id, at.mode, span, followable(around, timed));
+        route ??= this.escapeRoute(back, edge.id, at.mode, span, followable(beyond, timed));
+      }
+    }
     if (!route || !this.suspect.uTurn()) return false;
     this.suspect.followPlan(route.nodes);
     this.destination = route.destination;
@@ -1017,7 +1030,7 @@ export class Chase {
       followProblem(this.graph, guide, here.mode) === null &&
       describable(this.graph, guide, here.mode, this.scenario.difficulty);
     const corrections = fair
-      ? this.nav(events).redirect(here, plan, this.destination, guide, onto!.uTurn)
+      ? this.nav(events).redirect(here, plan, this.destination, guide, onto!.uTurn, true)
       : this.nav(events).redirect(here, plan, this.destination);
     for (const transmission of corrections) events.push({ type: 'TRANSMISSION', transmission });
     const turnRound = corrections.some((t) => t.instructions.some((i) => i.clauses.some((c) => c.action === 'U_TURN')));

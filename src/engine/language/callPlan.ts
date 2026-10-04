@@ -71,9 +71,11 @@ function cumulative(graph: TownGraph, guide: readonly string[]): number[] {
 }
 
 /** Does this call fit when given with `ahead(i)` metres to go to guide node i, after `delay` seconds of waiting? */
-export function fits(option: Guided, ahead: (index: number) => number, speed: number, delay = 0): boolean {
+export function fits(option: Guided, ahead: (index: number) => number, speed: number, delay = 0, held = false): boolean {
   const needed = neededSeconds([option.instruction], delay);
-  return option.covers.every((index, j) => ahead(index) >= speed * (needed[j] ?? Infinity));
+  // Held still until the first step is heard: the clock starts then.
+  const start = held ? (needed[0] ?? 0) : 0;
+  return option.covers.every((index, j) => ahead(index) >= speed * ((needed[j] ?? Infinity) - start));
 }
 
 /** How many seconds too late the latest step of this call would be heard (≤ 0: in time). */
@@ -147,7 +149,15 @@ export function callable(graph: TownGraph, nodes: readonly string[], ctx: CallCo
  * player turns round first): can that call be heard in time, and every call
  * after it?
  */
-export function callableFrom(graph: TownGraph, guide: readonly string[], player: MoverStart, delay: number, ctx: CallContext): boolean {
+export function callableFrom(
+  graph: TownGraph,
+  guide: readonly string[],
+  player: MoverStart,
+  delay: number,
+  ctx: CallContext,
+  /** The player is held still until the first step of the first call is heard. */
+  held = false,
+): boolean {
   const plan = planCalls(graph, guide, ctx);
   const first = plan.actions[0];
   if (first === undefined) return true;
@@ -155,7 +165,7 @@ export function callableFrom(graph: TownGraph, guide: readonly string[], player:
   const options = instructionOptions(graph, player, guide, first, plan.actions.slice(1, 3), ctx.difficulty, ctx.hasAudio);
   // No clear sentence from here yet: it will come at a node further on, as planned.
   if (options.length === 0) return plan.solvable(0);
-  return options.some((o) => fits(o, ahead, ctx.speed, delay) && plan.solvable(o.covers.length));
+  return options.some((o) => fits(o, ahead, ctx.speed, delay, held) && plan.solvable(o.covers.length));
 }
 
 /** Distance (metres) from a position on the guide's edge `progress` → `progress + 1` to each later guide node. */
