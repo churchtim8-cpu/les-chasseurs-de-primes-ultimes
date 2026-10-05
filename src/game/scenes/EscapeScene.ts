@@ -612,6 +612,12 @@ export class EscapeScene extends Phaser.Scene {
     const keyboard = this.input.keyboard;
     if (!keyboard) return;
     keyboard.on('keydown-ESC', () => this.pause());
+    // P pauses too: Firefox and Safari keep ÉCHAP for leaving full screen (see FullscreenScene).
+    keyboard.on('keydown-P', () => this.pause());
+    // Leaving full screen mid-chase (ÉCHAP in Firefox or Safari) pauses rather than carrying on unseen.
+    const leftFullscreen = () => this.pause();
+    this.scale.on(Phaser.Scale.Events.LEAVE_FULLSCREEN, leftFullscreen);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.scale.off(Phaser.Scale.Events.LEAVE_FULLSCREEN, leftFullscreen));
     keyboard.addCapture('TAB');
     keyboard.on('keydown-TAB', () => this.hud.toggle());
     keyboard.on('keydown-R', () => this.repeat());

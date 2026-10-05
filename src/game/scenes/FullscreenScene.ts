@@ -2,6 +2,29 @@ import Phaser from 'phaser';
 import { FULLSCREEN_BUTTON } from '../layout';
 import { PALETTE } from '../palette';
 
+interface KeyboardLock {
+  lock?: (keys: string[]) => Promise<void>;
+  unlock?: () => void;
+}
+
+/**
+ * ÉCHAP pauses the game rather than leaving full screen (Mr Henry,
+ * 2026-10-04). Chrome and Edge let a full-screen page keep the key: a quick
+ * press reaches the game, and holding ÉCHAP down still leaves full screen
+ * (the browser says so when full screen starts). Firefox and Safari always
+ * leave full screen on ÉCHAP; there, P pauses too, and leaving full screen
+ * in the middle of a chase pauses it (see ChaseScene / EscapeScene).
+ */
+function lockEscape(on: boolean): void {
+  const keyboard = (navigator as Navigator & { keyboard?: KeyboardLock }).keyboard;
+  try {
+    if (on) void keyboard?.lock?.(['Escape'])?.catch(() => undefined);
+    else keyboard?.unlock?.();
+  } catch {
+    // no keyboard lock in this browser
+  }
+}
+
 /**
  * Always-running scene with the full-screen button in the top right corner,
  * on every screen. A click or tap (or F) switches full screen on and off;
@@ -42,8 +65,14 @@ export class FullscreenScene extends Phaser.Scene {
     // Browsers only allow full screen from a click or key press, which pointerup is.
     bg.on('pointerup', toggle);
     this.input.keyboard?.on('keydown-F', toggle);
-    this.scale.on(Phaser.Scale.Events.ENTER_FULLSCREEN, draw);
-    this.scale.on(Phaser.Scale.Events.LEAVE_FULLSCREEN, draw);
+    this.scale.on(Phaser.Scale.Events.ENTER_FULLSCREEN, () => {
+      draw();
+      lockEscape(true);
+    });
+    this.scale.on(Phaser.Scale.Events.LEAVE_FULLSCREEN, () => {
+      draw();
+      lockEscape(false);
+    });
     // Hidden where the browser has no full screen (some phones).
     if (!this.sys.game.device.fullscreen.available) {
       bg.setVisible(false);

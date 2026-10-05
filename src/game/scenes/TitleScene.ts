@@ -75,7 +75,7 @@ export class TitleScene extends Phaser.Scene {
         : `${capturedCount(progress)} / ${MISSION_COUNT} suspects arrested   ·   Rank: ${rank.name} (${profile.points.toLocaleString('en-GB')} pts)`;
     text(this, GAME_WIDTH / 2, top + 62, detail, 19).setOrigin(0.5);
     // The police station (rank, badges, case files), Escape Mode (the player is the fugitive), and day or night in the town.
-    menu.add(GAME_WIDTH / 2 - 432, top + 108, 276, 44, '🏅 POLICE STATION (O)', () => this.scene.start('Commissariat'), { key: 'O', size: 19 });
+    menu.add(GAME_WIDTH / 2 - 432, top + 108, 276, 44, '🏅 POLICE STATION (O)', () => this.scene.start('Commissariat', { back: 'Title' }), { key: 'O', size: 19 });
     menu.add(GAME_WIDTH / 2 - 144, top + 108, 276, 44, '🏃 ESCAPE (E)', () => this.scene.start('Officers'), { key: 'E', size: 19 });
     const nightLabel = () => `🌙 NIGHT: ${nightOn() ? 'ON' : 'OFF'}`;
     menu.add(GAME_WIDTH / 2 + 144, top + 108, 276, 44, '🎮 CONTROLS (H)', () => openCommands(this), { key: 'H', size: 19 });

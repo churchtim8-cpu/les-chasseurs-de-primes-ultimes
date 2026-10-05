@@ -222,8 +222,8 @@ export class ResultsScene extends Phaser.Scene {
     const menu = new Menu(this);
     if (daily) {
       this.dailyCard(daily);
-      menu.add(x + 300, 680, 340, 60, 'CLASS BOARD  ▶', () => this.scene.start('Daily'), { size: 22 });
-      menu.add(x - 330, 680, 220, 60, 'MENU', () => this.scene.start('Title'), { key: 'ESC', size: 22 });
+      menu.add(x + 300, 680, 340, 60, 'CLASS BOARD  ▶', () => this.scene.start('Daily'), { key: 'ESC', size: 22 });
+      menu.add(x - 330, 680, 220, 60, 'MENU', () => this.scene.start('Title'), { size: 22 });
     } else if (officer) {
       const next = nextOfficer(loadEscapeProgress(), officer.id);
       menu.add(x + 300, 680, 340, 60, next ? 'NEXT OFFICER  ▶' : 'OFFICERS  ▶', () => this.scene.start('Officers', next ? { show: next.id } : {}), { size: 22 });
@@ -232,11 +232,11 @@ export class ResultsScene extends Phaser.Scene {
     } else if (escape) {
       menu.add(x + 300, 680, 340, 60, 'NEW ESCAPE', () => this.scene.start('Practice', { autostart: true, escape: true }), { size: 22 });
       menu.add(x - 60, 680, 240, 60, 'REPLAY (R)', () => this.scene.start('Escape', { seed: this.result.seed }), { key: 'R', size: 22 });
-      menu.add(x - 330, 680, 220, 60, 'MENU', () => this.scene.start('Title'), { key: 'ESC', size: 22 });
+      menu.add(x - 330, 680, 220, 60, 'BACK', () => this.scene.start('Practice', { escape: true }), { key: 'ESC', size: 22 });
     } else if (boss) {
-      menu.add(x + 300, 680, 340, 60, 'POLICE STATION  ▶', () => this.scene.start('Commissariat'), { size: 22 });
+      menu.add(x + 300, 680, 340, 60, 'POLICE STATION  ▶', () => this.scene.start('Commissariat'), { key: 'ESC', size: 22 });
       menu.add(x - 60, 680, 240, 60, 'TRY AGAIN (R)', () => this.scene.start('Briefing', { boss: boss.picture }), { key: 'R', size: 22 });
-      menu.add(x - 330, 680, 220, 60, 'MENU', () => this.scene.start('Title'), { key: 'ESC', size: 22 });
+      menu.add(x - 330, 680, 220, 60, 'MENU', () => this.scene.start('Title'), { size: 22 });
     } else if (mission !== null) {
       const last = mission + 1 >= MISSION_COUNT;
       const nextLabel = caseDone && last ? 'CASE CLOSED  ▶' : last ? 'CASE FILE  ▶' : 'NEXT MISSION  ▶';
@@ -250,7 +250,7 @@ export class ResultsScene extends Phaser.Scene {
     } else {
       menu.add(x + 300, 680, 340, 60, 'NEW CHASE', () => this.scene.start('Practice', { autostart: true }), { size: 22 });
       menu.add(x - 60, 680, 240, 60, 'REPLAY (R)', () => this.scene.start('Chase', { seed: this.result.seed }), { key: 'R', size: 22 });
-      menu.add(x - 330, 680, 220, 60, 'MENU', () => this.scene.start('Title'), { key: 'ESC', size: 22 });
+      menu.add(x - 330, 680, 220, 60, 'BACK', () => this.scene.start('Practice'), { key: 'ESC', size: 22 });
     }
     text(this, 24, 24, `${escape ? 'Escape' : 'Chase'} ${this.result.seed}`, 16, { color: toCss(PALETTE.cream), backgroundColor: 'rgba(22, 50, 61, 0.7)', padding: { x: 8, y: 4 } });
   }

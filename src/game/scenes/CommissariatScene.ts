@@ -21,8 +21,18 @@ import { backdrop, medalBadge, Menu, paper, rankLine, SCREEN_PICTURES, suspectPi
 export class CommissariatScene extends Phaser.Scene {
   static readonly KEY = 'Commissariat';
 
+  /**
+   * Where BACK (ÉCHAP) goes: the screen the station was opened from, kept
+   * while the garage or the posters open over it and come back.
+   */
+  private static backTo = 'Title';
+
   constructor() {
     super(CommissariatScene.KEY);
+  }
+
+  init(data?: { back?: string }): void {
+    if (data?.back) CommissariatScene.backTo = data.back;
   }
 
   create(): void {
@@ -65,7 +75,7 @@ export class CommissariatScene extends Phaser.Scene {
       const bx = bosses.length === 1 ? 650 : 490 + i * 320;
       menu.add(bx, 672, 300, 52, `${b.nickname.toUpperCase()}  ▶`, () => this.scene.start('Briefing', { boss: b.picture }), { size: 20 });
     });
-    menu.add(1150, 672, 180, 52, 'MENU', () => this.scene.start('Title'), { key: 'ESC', size: 20 });
+    menu.add(1150, 672, 180, 52, 'BACK', () => this.scene.start(CommissariatScene.backTo), { key: 'ESC', size: 20 });
     // Either side of the title: the garage and the wanted posters wall.
     menu.add(110, 42, 170, 40, '🔧 GARAGE (G)', () => this.scene.start('Garage', { back: 'Commissariat' }), { key: 'G', size: 16 });
     menu.add(1060, 42, 200, 40, '📜 POSTERS (W)', () => this.scene.start('Wanted', { back: 'Commissariat' }), { key: 'W', size: 16 });

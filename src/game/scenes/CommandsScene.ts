@@ -25,7 +25,7 @@ const DRIVING: Row[] = [
 const RADIO: Row[] = [
   { keys: ['R'], what: 'Repeat the last call' },
   { keys: ['1', '2', '3', '4'], what: '"Where is the suspect?": pick the card' },
-  { keys: ['ESC'], what: 'Pause: resume, restart, garage, quit' },
+  { keys: ['ESC'], what: 'Pause (or P): resume, restart, garage, quit' },
   { keys: ['TAB'], what: 'Hide / show the dashboard' },
   { keys: ['B'], what: 'Music   ·   V: map direction   ·   F: full screen' },
 ];
