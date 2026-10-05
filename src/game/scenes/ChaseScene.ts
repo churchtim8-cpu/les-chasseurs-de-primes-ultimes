@@ -47,6 +47,7 @@ import { arrestEffect, victoryPose } from '../render/celebrate';
 import { currentLook } from '../lookStore';
 import { liveryLook, type CosmeticSlot } from '../../engine/campaign/cosmetics';
 import { drawNight, nightOn } from '../render/night';
+import { Searchlight } from '../render/searchlight';
 import { currentFestival, drawFestival } from '../render/festival';
 import { drawWeather, onScreen, weatherFor } from '../render/weather';
 import { LanePosition } from '../render/lanes';
@@ -106,6 +107,8 @@ export class ChaseScene extends Phaser.Scene {
   private graph!: TownGraph;
   private layers?: TownLayers;
   private life?: TownLife;
+  /** The police helicopter's searchlight sweeping round the player at night (drawing only). */
+  private searchlight?: Searchlight;
   private chase!: Chase;
   private controls!: Controls;
   private rig!: CameraRig;
@@ -228,7 +231,10 @@ export class ChaseScene extends Phaser.Scene {
     this.layers = drawTown(this, this.graph);
     // Bellevue en fête: Carnival or Christmas decorations, by the calendar or the title-screen choice.
     drawFestival(this, this.graph, currentFestival(), nightOn());
-    if (nightOn()) drawNight(this, this.graph);
+    if (nightOn()) {
+      drawNight(this, this.graph);
+      this.searchlight = new Searchlight(this);
+    }
     if (new URLSearchParams(window.location.search).get('life') !== '0') {
       this.life = new TownLife(this, this.graph, {
         player: () => (this.chase.player.mode === 'CAR' ? this.car : this.officer),
@@ -536,6 +542,7 @@ export class ChaseScene extends Phaser.Scene {
 
   private drawActors(delta: number): void {
     const me = this.chase.player.snapshot();
+    this.searchlight?.update(me, delta);
     if (me.mode !== this.cameraMode) {
       this.cameraMode = me.mode;
       this.rig.setMode(me.mode);

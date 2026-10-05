@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { jingles, menuMusic } from '../audio/Jingles';
 import { isComplete, MISSION_COUNT, MISSIONS, recordMission } from '../../engine/campaign/campaign';
-import { newlyEarned, SLOT_NAMES } from '../../engine/campaign/cosmetics';
+import { newlyEarned, nextReward, SLOT_NAMES } from '../../engine/campaign/cosmetics';
 import { scoreMission, type MissionStats, type ScoreLine } from '../../engine/campaign/scoring';
 import type { EscapeReason } from '../../engine/chase/chase';
 import { BOSS, bossInfo, recordChase, starsFor } from '../../engine/campaign/profile';
@@ -215,6 +215,13 @@ export class ResultsScene extends Phaser.Scene {
     }
     if (recorded.rankAfter.id !== recorded.rankBefore.id) {
       text(this, left, note, `New rank: ${recorded.rankAfter.name}!`, 22, { bold: true, color: toCss(PALETTE.terracotta) });
+      note += 30;
+    }
+    // Something to aim for next time: the locked garage item they are closest to.
+    const next = nextReward(lookContext());
+    if (next && note <= 522) {
+      const { item, progress } = next;
+      text(this, left, note, `Next reward: ${SLOT_NAMES[item.slot]} · ${item.name}  (${item.unlock}: ${progress.have}/${progress.need})`, 18, { color: toCss(PALETTE.seaDeep), wordWrap: { width: 536 } });
     }
     // Rank and points, along the bottom of the sheet.
     rankLine(this, left, 562, recorded.profile.points, 536);

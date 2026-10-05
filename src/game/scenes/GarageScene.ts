@@ -1,13 +1,13 @@
 import Phaser from 'phaser';
 import { jingles, menuMusic } from '../audio/Jingles';
-import { COSMETIC_SLOTS, cosmeticsIn, liveryLook, SLOT_NAMES, type CosmeticSlot } from '../../engine/campaign/cosmetics';
+import { COSMETIC_SLOTS, cosmeticsIn, ESCAPE_SLOTS, liveryLook, SLOT_NAMES, unlockedCount, type Cosmetic, type CosmeticSlot } from '../../engine/campaign/cosmetics';
 import { rankFor, totalStars } from '../../engine/campaign/profile';
 import { HUD_THEMES } from '../hud/Hud';
 import { GAME_HEIGHT, GAME_WIDTH } from '../layout';
-import { chooseLook, currentLook, isEarned } from '../lookStore';
+import { chooseLook, currentLook, isEarned, lookContext } from '../lookStore';
 import { FONT_FAMILY, PALETTE, toCss } from '../palette';
 import { loadProfile } from '../profileStore';
-import { createOfficer, createPoliceCar } from '../render/actors';
+import { animateRunner, createGetawayCar, createOfficer, createPoliceCar, createSuspectRunner } from '../render/actors';
 import { arrestEffect, victoryPose } from '../render/celebrate';
 import { DriftEffects } from '../render/drift';
 import { backdrop, SCREEN_PICTURES } from '../ui/ui';
@@ -26,16 +26,24 @@ const STAGE = { x: 6000, y: 6000 } as const;
 const VIEW = { x: 330, y: 96, w: 450, h: 500 } as const;
 /** Far from the town and the menu: what is drawn over the preview (the stamp, the HUD sample) lives here, filmed by a clear camera on top. */
 const OVER = { x: -6000, y: -6000 } as const;
+/** The slot tabs down the left: nine of them, so they are a little tighter than the old seven. */
+const TABS = { x: 170, top: 122, step: 54, w: 260, h: 46 } as const;
+/** The getaway car shown in the garage has this colour from the story (any colour: it is the player's own look over it). */
+const SAMPLE_GETAWAY = 'BLUE' as const;
 
 /**
- * The garage (Mr Henry, 2026-10-04): the player picks their police vehicle,
- * colours, officer's look, victory pose, tyre smoke, arrest effect and chase
- * screen. Locked items say how to earn them. The preview is the real thing at
- * town scale, filmed by a zoomed camera: the car turns on a turntable (and
- * drifts in circles to show off its smoke), the officer poses, the arrest
- * effect plays.
+ * The garage (Mr Henry, 2026-10-04, enlarged 2026-10-05): the player picks
+ * their police vehicle, colours, officer's look, victory pose, tyre smoke,
+ * arrest effect and chase screen, and for Escape Mode their getaway car and
+ * fugitive's outfit. Locked items say how to earn them, with a counter, and
+ * can be looked at all the same: the preview always shows the item under the
+ * cursor, worn over the rest of the current look, under a "locked" ribbon
+ * when it is not earned yet. The preview is the real thing at town scale,
+ * filmed by a zoomed camera: the car turns on a turntable under a showroom
+ * light with a glint sweeping over it (and drifts in circles to show off its
+ * smoke), the officer poses, the arrest effect plays, the fugitive runs.
  *
- * Keys: ◀ ▶ change the slot, ▲ ▼ choose, ENTRÉE or ESPACE wears it, ÉCHAP leaves.
+ * Keys: ◀ ▶ change the slot, ▲ ▼ choose, ENTER or SPACE wears it, ESC leaves.
  */
 export class GarageScene extends Phaser.Scene {
   static readonly KEY = 'Garage';
@@ -47,11 +55,15 @@ export class GarageScene extends Phaser.Scene {
   private preview: Phaser.GameObjects.GameObject[] = [];
   private car: Phaser.GameObjects.Container | null = null;
   private officer: Phaser.GameObjects.Container | null = null;
+  private runner: Phaser.GameObjects.Container | null = null;
   private drift: DriftEffects | null = null;
   private camera!: Phaser.Cameras.Scene2D.Camera;
   private angle = 0;
+  private stride = 0;
   private hudSample: Phaser.GameObjects.Graphics | null = null;
   private demoTimer: Phaser.Time.TimerEvent | null = null;
+  private ribbon: Phaser.GameObjects.GameObject[] = [];
+  private glint: Phaser.GameObjects.Rectangle | null = null;
 
   constructor() {
     super(GarageScene.KEY);
@@ -66,9 +78,12 @@ export class GarageScene extends Phaser.Scene {
     this.preview = [];
     this.car = null;
     this.officer = null;
+    this.runner = null;
     this.drift = null;
     this.hudSample = null;
     this.demoTimer = null;
+    this.ribbon = [];
+    this.glint = null;
   }
 
   create(): void {
@@ -77,26 +92,34 @@ export class GarageScene extends Phaser.Scene {
     if (this.opts.overlayOf) this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x05121a, 0.5);
     this.label(GAME_WIDTH / 2, 20, 'GARAGE', 40, PALETTE.cream).setOrigin(0.5, 0);
     const profile = loadProfile();
-    const summary = `★ ${totalStars(profile)} stars   ·   ${profile.arrests} arrests   ·   Rank: ${rankFor(profile.points).name}`;
-    this.label(GAME_WIDTH / 2, 68, summary, 18, PALETTE.paleYellow).setOrigin(0.5, 0);
+    const owned = unlockedCount(lookContext());
+    const summary = `★ ${totalStars(profile)} stars   ·   ${profile.arrests} arrests   ·   ${profile.escapes} escapes   ·   Rank: ${rankFor(profile.points).name}   ·   🔓 ${owned.have} / ${owned.total}`;
+    this.label(GAME_WIDTH / 2, 68, summary, 17, PALETTE.paleYellow).setOrigin(0.5, 0);
 
-    // The turntable under the preview, and the camera that films it.
+    // The showroom under the preview, and the camera that films it.
     this.panel(VIEW.x, VIEW.y, VIEW.w, VIEW.h);
     this.camera = this.cameras.add(VIEW.x + 4, VIEW.y + 4, VIEW.w - 8, VIEW.h - 8).setZoom(7).centerOn(STAGE.x, STAGE.y);
     this.cameras.add(VIEW.x, VIEW.y, VIEW.w, VIEW.h).setScroll(OVER.x, OVER.y);
-    this.camera.setBackgroundColor(0x8c8580);
+    this.camera.setBackgroundColor(0x6f6964);
     const floor = this.add.graphics();
-    floor.fillStyle(0x7d7671).fillRect(STAGE.x - 60, STAGE.y - 60, 120, 120);
+    // Chequered showroom tiles, a pool of light from the lamp above, and the turntable.
+    for (let i = -8; i < 8; i++) for (let j = -8; j < 8; j++) floor.fillStyle((i + j) % 2 === 0 ? 0x7d7671 : 0x746d68).fillRect(STAGE.x + i * 10, STAGE.y + j * 10, 10, 10);
+    for (let r = 44; r > 10; r -= 4) floor.fillStyle(0xfff3d2, 0.045).fillCircle(STAGE.x, STAGE.y, r);
     floor.lineStyle(0.6, 0xf6ecd2, 0.5).strokeCircle(STAGE.x, STAGE.y, 15);
-    floor.fillStyle(0x6f6964).fillCircle(STAGE.x, STAGE.y, 14.5);
+    floor.fillStyle(0x5e5955).fillCircle(STAGE.x, STAGE.y, 14.5);
+    floor.lineStyle(0.3, 0xf6ecd2, 0.25).strokeCircle(STAGE.x, STAGE.y, 12).strokeCircle(STAGE.x, STAGE.y, 8);
+    // The glint: a soft white bar that sweeps across whatever is on the turntable every few seconds.
+    this.glint = this.add.rectangle(STAGE.x - 16, STAGE.y, 2, 30, 0xffffff, 0.16).setRotation(0.5).setDepth(60);
+    this.tweens.add({ targets: this.glint, x: STAGE.x + 16, duration: 1100, repeat: -1, repeatDelay: 2600, ease: 'Sine.easeInOut' });
     // Everything on the main camera stays off the preview camera (it is far away anyway).
-    this.camera.ignore(this.children.list.filter((o) => o !== floor));
+    this.camera.ignore(this.children.list.filter((o) => o !== floor && o !== this.glint));
 
     // Slots down the left.
     COSMETIC_SLOTS.forEach((slot, i) => {
-      const y = 126 + i * 62;
-      const box = this.add.rectangle(170, y, 260, 50, PALETTE.cream).setStrokeStyle(3, PALETTE.ink).setInteractive({ useHandCursor: true });
-      const label = this.label(170, y, SLOT_NAMES[slot].toUpperCase(), 20, PALETTE.ink).setOrigin(0.5);
+      const y = TABS.top + i * TABS.step;
+      const box = this.add.rectangle(TABS.x, y, TABS.w, TABS.h, PALETTE.cream).setStrokeStyle(3, PALETTE.ink).setInteractive({ useHandCursor: true });
+      const escapeOnly = ESCAPE_SLOTS.includes(slot);
+      const label = this.label(TABS.x, y, `${escapeOnly ? '🏃 ' : ''}${SLOT_NAMES[slot].toUpperCase()}`, 17, PALETTE.ink).setOrigin(0.5);
       box.on('pointerdown', () => this.showSlot(slot));
       this.tabs.push({ box, label });
       this.camera.ignore([box, label]);
@@ -106,7 +129,7 @@ export class GarageScene extends Phaser.Scene {
     const backLabel = this.label(GAME_WIDTH / 2, 660, 'BACK (ESC)', 20, PALETTE.cream).setOrigin(0.5);
     back.on('pointerdown', () => this.close());
     this.camera.ignore([back, backLabel]);
-    const hint = this.label(GAME_WIDTH / 2, 616, '◀ ▶: category   ·   ▲ ▼: choose   ·   ENTER: equip', 16, PALETTE.cream).setOrigin(0.5);
+    const hint = this.label(GAME_WIDTH / 2, 616, '◀ ▶: category   ·   ▲ ▼: look at any item   ·   ENTER: equip', 16, PALETTE.cream).setOrigin(0.5);
     this.camera.ignore(hint);
 
     const keyboard = this.input.keyboard;
@@ -122,8 +145,16 @@ export class GarageScene extends Phaser.Scene {
   }
 
   override update(_time: number, delta: number): void {
-    if (!this.car) return;
     const dt = delta / 1000;
+    if (this.runner && this.slot === 'FUGITIVE') {
+      // The fugitive runs on the spot, turning slowly so every side is seen.
+      this.angle += dt * 0.6;
+      this.stride += dt * 9;
+      this.runner.setRotation(this.angle);
+      animateRunner(this.runner, this.stride, true);
+      return;
+    }
+    if (!this.car) return;
     if (this.slot === 'SMOKE') {
       // Drifting round the turntable, sideways, laying its smoke and marks.
       this.angle += dt * 1.6;
@@ -162,9 +193,16 @@ export class GarageScene extends Phaser.Scene {
 
   private moveCursor(by: number): void {
     const n = cosmeticsIn(this.slot).length;
-    this.cursor = (this.cursor + by + n) % n;
+    this.pointAt((this.cursor + by + n) % n);
+  }
+
+  /** Move the cursor to an item: the list and the preview follow it, earned or not. */
+  private pointAt(index: number): void {
+    if (index === this.cursor) return;
+    this.cursor = index;
     jingles.move();
     this.drawList();
+    this.buildPreview();
   }
 
   /** Wear the item under the cursor, if it has been earned. */
@@ -175,6 +213,7 @@ export class GarageScene extends Phaser.Scene {
     if (!isEarned(this.slot, item.id)) {
       jingles.move();
       this.drawList();
+      this.buildPreview();
       return;
     }
     jingles.select();
@@ -183,7 +222,18 @@ export class GarageScene extends Phaser.Scene {
     this.buildPreview();
   }
 
-  /** The items in this slot, down the right: worn ✓, earned, or 🔒 with how to earn it. */
+  /** The item under the cursor. */
+  private pointed(): Cosmetic | undefined {
+    return cosmeticsIn(this.slot)[this.cursor];
+  }
+
+  /** "3 / 5 arrests" for a counted unlock, else how it is earned. */
+  private earnLine(item: Cosmetic): string {
+    const progress = item.progress?.(lookContext());
+    return progress ? `To earn: ${item.unlock}  (${progress.have} / ${progress.need})` : `To earn: ${item.unlock}`;
+  }
+
+  /** The items in this slot, down the right: worn ✓, earned, or 🔒 with how to earn it and how far along the player is. */
   private drawList(): void {
     this.rows.forEach((o) => o.destroy());
     this.rows = [];
@@ -193,7 +243,9 @@ export class GarageScene extends Phaser.Scene {
     const w = 440;
     const rowH = Math.min(62, Math.floor(500 / items.length));
     const top = VIEW.y;
+    // Two lines per row when there is room (a tighter pair for ten rows), else one line with the unlock on the right.
     const big = rowH >= 48;
+    const roomy = rowH >= 58;
     items.forEach((item, i) => {
       const y = top + i * rowH;
       const earned = isEarned(this.slot, item.id);
@@ -203,36 +255,43 @@ export class GarageScene extends Phaser.Scene {
         .setOrigin(0)
         .setStrokeStyle(here ? 3 : 2, here ? PALETTE.terracotta : PALETTE.ink)
         .setInteractive({ useHandCursor: true });
-      box.on('pointerover', () => {
-        if (this.cursor !== i) {
-          this.cursor = i;
-          this.drawList();
-        }
-      });
+      box.on('pointerover', () => this.pointAt(i));
       box.on('pointerdown', () => this.wear(i));
       const mark = item.id === worn ? '✓' : earned ? '' : '🔒';
-      const name = this.label(x + 14, y + (big ? 8 : (rowH - 6) / 2), `${mark ? `${mark}  ` : ''}${item.name}`, big ? 19 : 16, PALETTE.ink);
+      const name = this.label(x + 14, y + (roomy ? 8 : big ? 4 : (rowH - 6) / 2), `${mark ? `${mark}  ` : ''}${item.name}`, roomy ? 19 : big ? 17 : 16, PALETTE.ink);
       if (!big) name.setOrigin(0, 0.5);
       const parts: Phaser.GameObjects.GameObject[] = [box, name];
       if (big) {
-        const how = item.id === worn ? 'Equipped' : earned ? 'Unlocked: ENTER to equip' : `To earn: ${item.unlock}`;
-        parts.push(this.label(x + 14, y + 32, how, 14, earned ? PALETTE.seaDeep : PALETTE.terracotta));
+        const how = item.id === worn ? 'Equipped' : earned ? 'Unlocked: ENTER to equip' : this.earnLine(item);
+        parts.push(this.label(x + 14, y + (roomy ? 32 : 25), how, roomy ? 14 : 12, earned ? PALETTE.seaDeep : PALETTE.terracotta));
       } else if (!earned) {
-        parts.push(this.label(x + w - 12, y + (rowH - 6) / 2, item.unlock, 13, PALETTE.terracotta).setOrigin(1, 0.5));
+        const progress = item.progress?.(lookContext());
+        const short = progress ? `${item.unlock} (${progress.have}/${progress.need})` : item.unlock;
+        parts.push(this.label(x + w - 12, y + (rowH - 6) / 2, short, 12, PALETTE.terracotta).setOrigin(1, 0.5));
       }
       this.camera.ignore(parts);
       this.rows.push(...parts);
     });
   }
 
-  /** The preview: the car on its turntable, the officer beside it, and the slot's demo. */
+  /**
+   * The preview: the current look with the item under the cursor worn in its
+   * slot (locked or not), on the turntable, with the slot's demo and, for a
+   * locked item, the ribbon saying so.
+   */
   private buildPreview(): void {
     this.demoTimer?.remove();
     this.preview.forEach((o) => o.destroy());
     this.preview = [];
+    this.ribbon.forEach((o) => o.destroy());
+    this.ribbon = [];
     this.hudSample?.destroy();
     this.hudSample = null;
-    const look = currentLook();
+    this.car = null;
+    this.officer = null;
+    this.runner = null;
+    const pointed = this.pointed();
+    const look = { ...currentLook(), ...(pointed ? { [this.slot]: pointed.id } : {}) } as Record<CosmeticSlot, string>;
     const colours = liveryLook(look.LIVERY);
     const keep = (o: Phaser.GameObjects.GameObject) => {
       this.cameras.main.ignore(o);
@@ -240,16 +299,27 @@ export class GarageScene extends Phaser.Scene {
     };
     this.drift = new DriftEffects(this, { ids: ['demo'], style: look.SMOKE });
     this.drift.objects.forEach(keep);
-    this.car = createPoliceCar(this, colours, look.VEHICLE).setPosition(STAGE.x, STAGE.y);
-    keep(this.car);
+    const escape = this.slot === 'GETAWAY' || this.slot === 'FUGITIVE';
+    if (this.slot === 'FUGITIVE') {
+      this.runner = createSuspectRunner(this, look.FUGITIVE).setPosition(STAGE.x, STAGE.y).setRotation(this.angle);
+      keep(this.runner);
+    } else {
+      this.car = (escape ? createGetawayCar(this, SAMPLE_GETAWAY, look.GETAWAY) : createPoliceCar(this, colours, look.VEHICLE)).setPosition(STAGE.x, STAGE.y);
+      keep(this.car);
+    }
     const officerAt = { x: STAGE.x, y: STAGE.y + 19 };
-    this.officer = createOfficer(this, colours, look.OUTFIT).setPosition(officerAt.x, officerAt.y).setRotation(-Math.PI / 2);
-    keep(this.officer);
+    if (!escape) {
+      this.officer = createOfficer(this, colours, look.OUTFIT).setPosition(officerAt.x, officerAt.y).setRotation(-Math.PI / 2);
+      keep(this.officer);
+    }
 
     const person = this.slot === 'OUTFIT' || this.slot === 'POSE';
+    const close = person || this.slot === 'FUGITIVE';
+    this.glint?.setVisible(!close && this.slot !== 'SMOKE');
     // The HUD sample sits along the bottom of the preview, so the car moves up out of its way.
-    this.camera.pan(person ? officerAt.x : STAGE.x, person ? officerAt.y : STAGE.y + (this.slot === 'HUD' ? 22 : 6), 300, 'Sine.easeInOut');
-    this.camera.zoomTo(person ? 22 : this.slot === 'SMOKE' ? 7 : 9, 300);
+    const focus = person ? officerAt : { x: STAGE.x, y: STAGE.y + (this.slot === 'HUD' ? 22 : this.slot === 'FUGITIVE' ? 0 : 6) };
+    this.camera.pan(focus.x, focus.y, 300, 'Sine.easeInOut');
+    this.camera.zoomTo(close ? 22 : this.slot === 'SMOKE' ? 7 : 9, 300);
 
     if (this.slot === 'POSE') {
       const pose = () => this.officer && victoryPose(this, this.officer, look.POSE);
@@ -263,6 +333,21 @@ export class GarageScene extends Phaser.Scene {
       this.demoTimer = this.time.addEvent({ delay: 2800, loop: true, callback: play });
     }
     if (this.slot === 'HUD') this.drawHudSample(look.HUD);
+    if (pointed && !isEarned(this.slot, pointed.id)) this.drawRibbon(pointed);
+  }
+
+  /** A diagonal "LOCKED" ribbon across the top corner of the preview, and how to earn the item along the bottom. */
+  private drawRibbon(item: Cosmetic): void {
+    const keep = (o: Phaser.GameObjects.GameObject) => {
+      this.cameras.main.ignore(o);
+      this.camera.ignore(o);
+      this.ribbon.push(o);
+    };
+    const band = this.add.rectangle(OVER.x + VIEW.w - 70, OVER.y + 52, 260, 30, 0xd4202c, 0.92).setRotation(Math.PI / 4);
+    const text = this.label(OVER.x + VIEW.w - 70, OVER.y + 52, '🔒 LOCKED', 16, PALETTE.cream).setOrigin(0.5).setRotation(Math.PI / 4);
+    const foot = this.add.rectangle(OVER.x + VIEW.w / 2, OVER.y + VIEW.h - 24, VIEW.w - 8, 36, 0x10232d, 0.88).setStrokeStyle(2, 0xd4202c, 0.8);
+    const how = this.label(OVER.x + VIEW.w / 2, OVER.y + VIEW.h - 24, `Preview · ${this.earnLine(item)}`, 15, PALETTE.paleYellow).setOrigin(0.5);
+    [band, text, foot, how].forEach(keep);
   }
 
   /** A stamp made by the arrest effect belongs on the screen over the preview, not in the town. */

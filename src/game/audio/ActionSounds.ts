@@ -30,6 +30,20 @@ export class ActionSounds {
     s.noiseHit(t, level * 1.4, seconds, 'bandpass', 2300, gain);
   }
 
+  /** A heartbeat ("lub-dub"): two deep soft thumps, for the police right behind in Escape Mode. */
+  heartbeat(level = 0.3): void {
+    const s = this.synth();
+    if (!s) return;
+    const t = s.ctx.currentTime + 0.01;
+    for (const [at, f, lv] of [
+      [0, 64, level],
+      [0.15, 54, level * 0.65],
+    ] as const) {
+      const thump = s.osc('sine', f, t + at, 0.24, s.lowpass(160, s.env(t + at, lv, 0.008, 0.2)));
+      thump.frequency.exponentialRampToValueAtTime(f * 0.6, t + at + 0.2);
+    }
+  }
+
   /** A body hitting the ground: a deep thump with a soft scuff. */
   thud(level = 0.5): void {
     const s = this.synth();

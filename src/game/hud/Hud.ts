@@ -13,6 +13,9 @@ export const HUD_THEMES: Record<string, { fill: number; edge: number; radar: num
   RETRO: { fill: 0x03140a, edge: 0x39ff6a, radar: 0x39ff6a, radarBack: 0x02200c, label: 0x7dff9a },
   CARNAVAL: { fill: 0x2a0f3d, edge: 0xf2c230, radar: 0xff4fa3, radarBack: 0x3d0f45, label: 0xf2c230 },
   OR: { fill: 0x1c1608, edge: 0xf0c53c, radar: 0xf0c53c, radarBack: 0x2a2008, label: 0xf0c53c },
+  OCEAN: { fill: 0x062a33, edge: 0x3ad1c8, radar: 0x7ff0e6, radarBack: 0x083d3a, label: 0x9fe8e0 },
+  NUIT: { fill: 0x0c0a2a, edge: 0x8a7cff, radar: 0xb8aaff, radarBack: 0x1a1550, label: 0xc9c0ff },
+  ROSE: { fill: 0x3a0f2a, edge: 0xff7ab8, radar: 0xffb3d9, radarBack: 0x4d1438, label: 0xffc2e2 },
 };
 const GLASS = { fill: 0x0b1d26, alpha: 0.84, edge: PALETTE.lightBlue as number, edgeAlpha: 0.55, radius: 10, radar: 0x6fcf7c, radarBack: 0x0d3324, label: PALETTE.lightBlue as number };
 const RED = 0xe0463a;

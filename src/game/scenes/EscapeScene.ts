@@ -23,11 +23,14 @@ import { CameraRig } from '../camera/cameraRig';
 import { debugState } from '../debug/debugState';
 import { Hud } from '../hud/Hud';
 import { Controls, type ControlAction } from '../input/controls';
-import { animateRunner, createIntentBadge, createOfficer, createPoliceCar, createSuspectCar, createSuspectRunner } from '../render/actors';
+import { animateRunner, createGetawayCar, createIntentBadge, createOfficer, createPoliceCar, createSuspectRunner } from '../render/actors';
 import { arrestKind, playArrest } from '../render/arrest';
 import { BURNOUT_SMOKE, DriftEffects } from '../render/drift';
 import { LanePosition } from '../render/lanes';
 import { drawNight, nightOn } from '../render/night';
+import { DangerPulse, ESCAPE_FX, HideoutMarker } from '../render/escapeFx';
+import { Searchlight } from '../render/searchlight';
+import { distance } from '../../engine/world/geometry';
 import { currentFestival, drawFestival } from '../render/festival';
 import { drawWeather, onScreen, weatherFor } from '../render/weather';
 import { RoundaboutGuide } from '../render/roundaboutGuide';
@@ -104,6 +107,10 @@ export class EscapeScene extends Phaser.Scene {
   private officerId: string | undefined;
   /** Where the police are when they are off the screen but still in view: a flashing marker at its edge. */
   private policeMarker!: Phaser.GameObjects.Container;
+  /** The red throb when the police are right behind, the hideout's sign and ring, and the night helicopter. */
+  private danger!: DangerPulse;
+  private hideoutMark!: HideoutMarker;
+  private searchlight?: Searchlight;
 
   constructor() {
     super(EscapeScene.KEY);
@@ -156,11 +163,14 @@ export class EscapeScene extends Phaser.Scene {
       });
     }
     this.routeOverlay = this.drawRoute();
+    this.hideoutMark = new HideoutMarker(this, this.hideoutDoor());
+    if (nightOn()) this.searchlight = new Searchlight(this);
     const vehicles = this.escape.scenario.vehicles;
-    this.cars = vehicles.map((v) => (v ? createSuspectCar(this, v) : null));
-    this.runner = createSuspectRunner(this).setVisible(false);
-    this.drift = new DriftEffects(this);
     const look = currentLook();
+    // The fugitive's own getaway car and outfit (the garage's Escape Mode choices).
+    this.cars = vehicles.map((v) => (v ? createGetawayCar(this, v, look.GETAWAY) : null));
+    this.runner = createSuspectRunner(this, look.FUGITIVE).setVisible(false);
+    this.drift = new DriftEffects(this, { ids: ['getaway'], style: look.SMOKE });
     // A campaign officer drives their own vehicle and colours; a practice escape has the garage's choice.
     const colours = liveryLook(officer?.livery ?? look.LIVERY);
     this.policeCar = createPoliceCar(this, colours, officer?.vehicle ?? look.VEHICLE).setVisible(false);
@@ -196,6 +206,8 @@ export class EscapeScene extends Phaser.Scene {
     this.cameras.main.ignore(drawWeather(this, weatherFor(this.seed), () => this.playerOnScreen()));
     this.policeMarker = createPoliceMarker(this);
     this.cameras.main.ignore(this.policeMarker);
+    this.danger = new DangerPulse(this);
+    this.cameras.main.ignore(this.danger.objects);
 
     this.bindKeys();
     this.syncDebug();
@@ -344,9 +356,26 @@ export class EscapeScene extends Phaser.Scene {
       returnTo: this.scene.key,
       retry: () => this.scene.start(EscapeScene.KEY, { seed: this.seed, ...(this.officerId ? { officer: this.officerId } : {}) }),
       quit: () => this.scene.start(this.officerId ? 'Officers' : 'Title'),
+      liveryChanged: () => this.redrawFugitive(),
     };
     this.scene.launch(PauseScene.KEY, data);
     this.scene.pause();
+  }
+
+  /** A new getaway car or outfit from the pause menu's garage: drawn again where they are. */
+  private redrawFugitive(): void {
+    const look = currentLook();
+    const swap = (old: Phaser.GameObjects.Container, made: Phaser.GameObjects.Container) => {
+      made.setPosition(old.x, old.y).setRotation(old.rotation).setVisible(old.visible).setAlpha(old.alpha);
+      this.cameras.cameras.filter((c) => c !== this.cameras.main).forEach((c) => c.ignore(made));
+      old.destroy();
+      return made;
+    };
+    this.cars = this.cars.map((car, i) => {
+      const vehicle = this.escape.scenario.vehicles[i];
+      return car && vehicle ? swap(car, createGetawayCar(this, vehicle, look.GETAWAY)) : car;
+    });
+    this.runner = swap(this.runner, createSuspectRunner(this, look.FUGITIVE));
   }
 
   private handleAction(action: ControlAction): void {
@@ -453,6 +482,12 @@ export class EscapeScene extends Phaser.Scene {
 
     const framed = this.staged ? shown : null;
     this.rig.update(framed ? { x: (avatar.x + framed.x) / 2, y: (avatar.y + framed.y) / 2, heading: this.policeHeading } : me, delta);
+    // The drama: red edges and a heartbeat with the police right behind; the hideout showing itself on the last stretch.
+    const chasing = this.stage === 'PURSUIT';
+    this.danger.update(chasing && this.escape.policeOnMap && status.proximity === 'CLOSE', status.captureProgress, delta);
+    const lastStretch = this.escape.stage === this.escape.scenario.stages.length - 1;
+    this.hideoutMark.update(chasing && lastStretch && distance(me, this.hideoutDoor()) <= ESCAPE_FX.hideout.revealWithin, this.cameras.main.zoom, delta);
+    this.searchlight?.update(me, delta);
     this.scaleLabels();
     this.keepUpright();
   }
@@ -523,8 +558,17 @@ export class EscapeScene extends Phaser.Scene {
     sprite.setPosition(p.x, p.y).setRotation(Math.atan2(to.y - from.y, to.x - from.x));
   }
 
-  /** Safe: "Bravo ! Vous avez semé la police !" */
+  /** Where the hideout's door is: the end of the last stretch of the route. */
+  private hideoutDoor(): { x: number; y: number } {
+    const stages = this.escape.scenario.stages;
+    const last = stages[stages.length - 1]!;
+    return this.graph.node(last.route[last.route.length - 1]!);
+  }
+
+  /** Safe: "Bravo ! Vous avez semé la police !" The fugitive slips in at the door as it lights up. */
   private hideout(): void {
+    this.hideoutMark.celebrate();
+    this.tweens.add({ targets: this.mySprite(), alpha: 0, delay: 250, duration: 650 });
     this.showResults(scannerAudio.play([{ audioId: ESCAPE_LINES.WON.audioId, radio: true }]), 'You lost the police!');
   }
 
@@ -669,6 +713,7 @@ export class EscapeScene extends Phaser.Scene {
     const upright = -this.rig.rotation;
     for (const { text } of this.layers?.labels ?? []) text.setRotation(upright);
     this.roundabout.setUpright(upright);
+    this.hideoutMark.setUpright(upright);
   }
 
   private scaleLabels(): void {
