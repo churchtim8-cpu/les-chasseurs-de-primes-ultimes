@@ -192,6 +192,8 @@ export interface Profile {
   /** Suspects arrested, in every mode. */
   arrests: number;
   nightArrests: number;
+  /** Escape Mode: times the player got away to the hideout. */
+  escapes: number;
   /** Badge → the date it was earned (YYYY-MM-DD). */
   badges: Partial<Record<BadgeId, string>>;
   /** Case files by suspect picture id ("renard" … "requin", "boss", "patronne"). */
@@ -201,7 +203,7 @@ export interface Profile {
 }
 
 export function newProfile(): Profile {
-  return { version: 1, points: 0, arrests: 0, nightArrests: 0, badges: {}, files: {}, look: {} };
+  return { version: 1, points: 0, arrests: 0, nightArrests: 0, escapes: 0, badges: {}, files: {}, look: {} };
 }
 
 /** Everything about one finished chase that the record keeps. */
@@ -245,6 +247,7 @@ export function recordChase(before: Profile, outcome: ChaseOutcome): Recorded {
     points: before.points + score.total,
     arrests: before.arrests + (captured ? 1 : 0),
     nightArrests: before.nightArrests + (captured && outcome.night ? 1 : 0),
+    escapes: before.escapes + (stats.captured && outcome.escape ? 1 : 0),
     badges: { ...before.badges },
     files: { ...before.files },
   };
@@ -341,7 +344,7 @@ export function parseProfile(json: string | null): Profile {
     if (data.look && typeof data.look === 'object') {
       for (const [slot, id] of Object.entries(data.look as Record<string, unknown>)) if (typeof id === 'string') look[slot] = id;
     }
-    return { version: 1, points: count(data.points), arrests: count(data.arrests), nightArrests: count(data.nightArrests), badges, files, look };
+    return { version: 1, points: count(data.points), arrests: count(data.arrests), nightArrests: count(data.nightArrests), escapes: count(data.escapes), badges, files, look };
   } catch {
     return newProfile();
   }

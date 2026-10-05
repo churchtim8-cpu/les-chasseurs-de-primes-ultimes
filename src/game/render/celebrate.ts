@@ -32,6 +32,66 @@ export function arrestEffect(
   if (kind === 'TAMPON' || all) stamp(scene, toScreen, stampSize);
   if (kind === 'CONFETTIS' || all) confetti(scene, at, toWorld);
   if (kind === 'ETINCELLES' || all) sparkle(scene, at, toWorld);
+  if (kind === 'FEUX' || all) fireworks(scene, at, toWorld);
+  if (kind === 'ETOILES' || all) shootingStars(scene, at, toWorld);
+}
+
+/** Rockets go up from the suspect and burst into coloured sparks, one after another. */
+function fireworks(scene: Phaser.Scene, at: { x: number; y: number }, toWorld: (o: Phaser.GameObjects.GameObject) => void): void {
+  const colours = [0xff4fa3, 0xf2c230, 0x2ed3a0, 0x4fa8ff, 0xffffff];
+  for (let n = 0; n < 4; n++) {
+    const burstAt = { x: at.x + (n - 1.5) * 12, y: at.y - 14 - (n % 2) * 8 };
+    const rocket = scene.add.circle(at.x, at.y, 0.7, 0xfff1a8).setDepth(41);
+    toWorld(rocket);
+    scene.tweens.add({
+      targets: rocket,
+      x: burstAt.x,
+      y: burstAt.y,
+      delay: n * 350,
+      duration: 420,
+      ease: 'Quad.easeOut',
+      onComplete: () => {
+        rocket.destroy();
+        const colour = colours[n % colours.length]!;
+        for (let i = 0; i < 14; i++) {
+          const a = (i / 14) * Math.PI * 2;
+          const spark = scene.add.circle(burstAt.x, burstAt.y, 0.8, i % 3 === 0 ? 0xffffff : colour).setDepth(41);
+          toWorld(spark);
+          const d = 7 + (i % 2) * 4;
+          scene.tweens.add({ targets: spark, x: burstAt.x + Math.cos(a) * d, y: burstAt.y + Math.sin(a) * d + 3, scale: 0.2, alpha: 0, duration: 700, ease: 'Quad.easeOut', onComplete: () => spark.destroy() });
+        }
+        const flash = scene.add.circle(burstAt.x, burstAt.y, 4, colour, 0.6).setDepth(40);
+        toWorld(flash);
+        scene.tweens.add({ targets: flash, scale: 2.5, alpha: 0, duration: 350, onComplete: () => flash.destroy() });
+      },
+    });
+  }
+}
+
+/** Gold stars streak down across the suspect, trailing light, and wink out. */
+function shootingStars(scene: Phaser.Scene, at: { x: number; y: number }, toWorld: (o: Phaser.GameObjects.GameObject) => void): void {
+  for (let i = 0; i < 8; i++) {
+    const from = { x: at.x - 30 + i * 6, y: at.y - 28 - (i % 3) * 5 };
+    const to = { x: from.x + 24, y: from.y + 26 };
+    const trail = scene.add.line(0, 0, 0, 0, -6, -6.5, 0xfff1a8, 0.9).setLineWidth(0.7).setDepth(40).setPosition(from.x, from.y).setAlpha(0);
+    const star = scene.add.star(from.x, from.y, 5, 0.6, 1.4, 0xf2c230).setDepth(41).setAlpha(0);
+    toWorld(trail);
+    toWorld(star);
+    const delay = i * 140;
+    scene.tweens.add({ targets: [star, trail], alpha: 1, delay, duration: 120 });
+    scene.tweens.add({ targets: [star, trail], x: to.x, y: to.y, delay, duration: 520, ease: 'Quad.easeIn' });
+    scene.tweens.add({ targets: star, angle: 180, delay, duration: 520 });
+    scene.tweens.add({
+      targets: [star, trail],
+      alpha: 0,
+      delay: delay + 420,
+      duration: 200,
+      onComplete: () => {
+        star.destroy();
+        trail.destroy();
+      },
+    });
+  }
 }
 
 /** "ARRÊTÉ !" slammed on like a rubber stamp, red and slightly crooked. */
@@ -117,6 +177,22 @@ export function victoryPose(scene: Phaser.Scene, officer: Phaser.GameObjects.Con
     // The fist punches up past the head, three times.
     scene.tweens.add({ targets: armR, x: 3.4, y: 1.6, duration: 160, yoyo: true, repeat: 3, ease: 'Back.easeOut' });
     scene.tweens.add({ targets: officer, scale: officer.scale * 1.08, duration: 160, yoyo: true, repeat: 3 });
+  } else if (pose === 'PIROUETTE') {
+    // A full spin on the spot, arms out wide, then back to face the way they were.
+    scene.tweens.add({ targets: armR, y: base.ry + 1.4, duration: 200, yoyo: true, hold: 700 });
+    scene.tweens.add({ targets: armL, y: base.ly - 1.4, duration: 200, yoyo: true, hold: 700 });
+    scene.tweens.add({ targets: officer, rotation: base.rotation + Math.PI * 2, duration: 1000, ease: 'Cubic.easeInOut', onComplete: () => officer.setRotation(base.rotation) });
+  } else if (pose === 'SAUT') {
+    // A star jump: up with arms and legs spread, twice, with a bounce of the shadow ring.
+    const footL = part('footL');
+    const footR = part('footR');
+    scene.tweens.add({ targets: officer, scale: officer.scale * 1.3, duration: 260, yoyo: true, repeat: 1, ease: 'Quad.easeOut' });
+    scene.tweens.add({ targets: armR, y: base.ry + 1.6, x: 2, duration: 260, yoyo: true, repeat: 1 });
+    scene.tweens.add({ targets: armL, y: base.ly - 1.6, x: 2, duration: 260, yoyo: true, repeat: 1 });
+    if (footL && footR) {
+      scene.tweens.add({ targets: footL, y: -3, duration: 260, yoyo: true, repeat: 1 });
+      scene.tweens.add({ targets: footR, y: 3, duration: 260, yoyo: true, repeat: 1 });
+    }
   } else if (pose === 'DANSE') {
     // Swaying side to side, arms swinging opposite ways.
     scene.tweens.add({ targets: officer, rotation: base.rotation + 0.5, duration: 190, yoyo: true, repeat: 3, ease: 'Sine.easeInOut' });
@@ -129,5 +205,7 @@ export function victoryPose(scene: Phaser.Scene, officer: Phaser.GameObjects.Con
   scene.time.delayedCall(CELEBRATE.poseMs, () => {
     armR.setY(base.ry);
     armL.setY(base.ly);
+    (part('footL') as unknown as Phaser.GameObjects.Components.Transform | null)?.setY(-1.6);
+    (part('footR') as unknown as Phaser.GameObjects.Components.Transform | null)?.setY(1.6);
   });
 }

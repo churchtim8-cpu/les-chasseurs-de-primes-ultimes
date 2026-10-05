@@ -8,6 +8,8 @@ import {
   isCosmeticUnlocked,
   liveryLook,
   newlyEarned,
+  nextReward,
+  unlockedCount,
   type CosmeticContext,
 } from '../../src/engine/campaign/cosmetics';
 import { EMPTY_FILE, newProfile, parseProfile, starsFor, totalStars, type Profile } from '../../src/engine/campaign/profile';
@@ -74,6 +76,25 @@ describe('garage', () => {
     expect(ids).toContain('OUTFIT:LUNETTES');
     expect(ids).toContain('ARREST:CONFETTIS');
     expect(newlyEarned(after, after)).toEqual([]);
+  });
+
+  it('counts what is open and points at the closest locked reward', () => {
+    const fresh = unlockedCount(ctx());
+    expect(fresh.have).toBeGreaterThan(0);
+    expect(fresh.have).toBeLessThan(fresh.total);
+    const next = nextReward(ctx({ arrests: 1 }));
+    expect(next).not.toBeNull();
+    expect(next!.progress.have).toBeLessThan(next!.progress.need);
+    expect(next!.item.unlocked(ctx({ arrests: 1 }))).toBe(false);
+    // One arrest away from the two-arrest rewards: those come first.
+    expect(next!.progress.need - next!.progress.have).toBe(1);
+  });
+
+  it('opens the getaway cars and fugitive looks with escapes', () => {
+    expect(isCosmeticUnlocked(ctx(), 'GETAWAY', 'SPORTIVE')).toBe(false);
+    expect(isCosmeticUnlocked(ctx({ escapes: 1 }), 'GETAWAY', 'SPORTIVE')).toBe(true);
+    expect(isCosmeticUnlocked(ctx({ escapes: 1 }), 'FUGITIVE', 'NOIR')).toBe(true);
+    expect(isCosmeticUnlocked(ctx({ escapes: 1 }), 'FUGITIVE', 'VERT')).toBe(false);
   });
 
   it('knows the colours of every livery, falling back to the classic one', () => {

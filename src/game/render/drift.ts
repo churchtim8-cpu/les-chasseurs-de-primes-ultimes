@@ -42,6 +42,10 @@ export const SMOKE_STYLES: Record<string, { tones: number[]; marks: number[] }> 
   BLEUE: { tones: [0xbfdcff, 0x9cc8ff, 0x6aa8ff, 0x4f8fe8], marks: [0x1f3f8a] },
   ARC_EN_CIEL: { tones: [0xff5a5a, 0xffa53a, 0xffe14d, 0x5ad66a, 0x4fa8ff, 0xb070ff], marks: [0xe0463a, 0xf29b2e, 0xe8c547, 0x3fae55, 0x2f7de1, 0x8a4fd6] },
   FLAMMES: { tones: [0xffe08a, 0xffd23f, 0xff9f1c, 0xff6b1a], marks: [0xb8860b] },
+  BONBON: { tones: [0xffd6e8, 0xffb3d1, 0xff8fc0, 0xff6fae], marks: [0xd1407f] },
+  EMERAUDE: { tones: [0xc8f5dc, 0x8fe8b8, 0x4fd68f, 0x2bb673], marks: [0x1f7a4d] },
+  GALAXIE: { tones: [0xe0c8ff, 0xb48cff, 0x8a5cf0, 0x5d3bb8, 0xffffff], marks: [0x4b2a8a, 0x8a4fd6] },
+  NEIGE: { tones: [0xffffff, 0xf4fbff, 0xe6f4ff, 0xd4ecff], marks: [0xbfe0ff] },
 };
 
 /** How a car's tyres smoke and mark the road: a drift (default) or a burnout (big white clouds, black rubber). */
