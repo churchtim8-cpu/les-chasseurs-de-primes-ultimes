@@ -92,8 +92,9 @@ export class Synth {
 
   /** Soft string pad: slow attack, detuned saws through a gentle filter. */
   strings(t: number, f: number, length: number, level = 0.05): void {
-    const tone = this.lowpass(1300, this.hold(t, level, 0.35, length, 0.5));
-    for (const detune of [-12, -4, 5, 11]) this.osc('sawtooth', f, t, length + 0.6, tone).detune.value = detune;
+    // Three saws, not four: a quarter less work for a slow computer's sound, much the same sound.
+    const tone = this.lowpass(1300, this.hold(t, level * 1.15, 0.35, length, 0.5));
+    for (const detune of [-11, 0, 10]) this.osc('sawtooth', f, t, length + 0.6, tone).detune.value = detune;
   }
 }
 

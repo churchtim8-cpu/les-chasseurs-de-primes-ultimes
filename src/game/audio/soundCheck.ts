@@ -58,6 +58,7 @@ export function startSoundCheck(audio: ScannerAudio, game: Phaser.Game): void {
       `stalls: ${r.stalls} (${Math.round(r.stalledSeconds)} s)  restarts ${r.restarts}  rebuilds ${r.rebuilds}`,
       `page froze: ${r.freezes}x  longest ${r.longestFreeze} s  fps ${fps} (low ${Number.isFinite(fpsLow) ? fpsLow : '-'})`,
       `too loud: squeezed ${Math.round(r.squashedSeconds)} s  clipped ${Math.round(r.clippedSeconds)} s  peak ${r.peak}`,
+      `glitches: ${r.glitches === null ? 'not shown by this browser' : `${r.glitches} (${r.glitchMs} ms of sound missed)`}`,
       `calls: played ${r.callsPlayed}  skipped ${r.callsSkipped}  clips failed ${r.clipsFailed}`,
       `memory: ${heap ? `${Math.round(heap / 1e6)} MB` : '-'}  cores ${navigator.hardwareConcurrency ?? '-'}`,
       ...r.log,
