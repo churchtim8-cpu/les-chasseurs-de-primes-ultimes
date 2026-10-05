@@ -54,6 +54,13 @@ const CAR_WIDTH = 9.6 * CAR_SCALE;
  */
 const PULL_OVER = { range: 80, onKerb: 0.5, crawl: 0.3, ease: 4 };
 const WALKER_SPEED: [number, number] = [4, 7];
+/**
+ * People step aside for someone running at them (Mr Henry, 2026-10-05: the
+ * suspect and the officers run round people, not through them): within
+ * `range` metres they move `shift` metres out of the way, slowing to `slow`
+ * of their pace, easing across at `ease` per second.
+ */
+const STEP_ASIDE = { range: 12, shift: 5, slow: 0.25, ease: 7 };
 
 interface Traveller {
   sprite: Phaser.GameObjects.Image;
@@ -74,6 +81,9 @@ interface Traveller {
   /** A car pulled over to the kerb to let the chase by. */
   pulledOver: boolean;
   car: boolean;
+  /** A person stepping aside for a runner: metres moved out of the way, and whether they are waiting for them to pass. */
+  aside?: number;
+  yielding?: boolean;
 }
 
 export interface TownLifeOptions {
@@ -81,6 +91,10 @@ export interface TownLifeOptions {
   player: () => { x: number; y: number };
   /** The police car and the suspect's car (drawn), when driving: traffic pulls over to let them by. */
   chasers?: () => { x: number; y: number }[];
+  /** Anyone running (the suspect or an officer on foot): people step out of their way. */
+  runners?: () => { x: number; y: number }[];
+  /** Something across the whole road (a police roadblock): traffic stops short of it. */
+  obstacles?: () => { x: number; y: number }[];
 }
 
 export class TownLife {
@@ -124,8 +138,10 @@ export class TownLife {
     this.clock += dt;
     const player = this.options.player();
     const chasers = this.options.chasers?.() ?? [];
+    const runners = this.options.runners?.() ?? [];
     for (const t of this.travellers) {
       if (t.car) this.giveWay(t, chasers, dt);
+      else this.stepAside(t, runners, dt);
       this.move(t, dt, player);
     }
     this.waves.forEach((w, i) => {
@@ -316,8 +332,26 @@ export class TownLife {
     t.offset += (target - t.offset) * Math.min(1, dt * PULL_OVER.ease);
   }
 
+  /** Someone running this way: move out of their path, to the side away from them, and let them by. */
+  private stepAside(t: Traveller, runners: readonly { x: number; y: number }[], dt: number): void {
+    let target = 0;
+    t.yielding = false;
+    const heading = t.sprite.rotation;
+    for (const r of runners) {
+      const dx = r.x - t.sprite.x;
+      const dy = r.y - t.sprite.y;
+      if (dx * dx + dy * dy > STEP_ASIDE.range * STEP_ASIDE.range) continue;
+      // Which side of the person the runner is on (to their right is positive).
+      const across = -dx * Math.sin(heading) + dy * Math.cos(heading);
+      target = across >= 0 ? -STEP_ASIDE.shift : STEP_ASIDE.shift;
+      t.yielding = true;
+      break;
+    }
+    t.aside = (t.aside ?? 0) + (target - (t.aside ?? 0)) * Math.min(1, dt * STEP_ASIDE.ease);
+  }
+
   private move(t: Traveller, dt: number, player: { x: number; y: number }): void {
-    let step = t.speed * dt * (t.pulledOver ? PULL_OVER.crawl : 1);
+    let step = t.speed * dt * (t.pulledOver ? PULL_OVER.crawl : 1) * (t.yielding ? STEP_ASIDE.slow : 1);
     if (t.car && this.blocked(t, player)) step = 0;
     t.along += step;
     // A person's legs and arms swing with the distance walked.
@@ -334,14 +368,15 @@ export class TownLife {
   /** Cars wait behind the player, and behind each other, rather than driving through. */
   private blocked(t: Traveller, player: { x: number; y: number }): boolean {
     const heading = t.sprite.rotation;
-    const ahead = (x: number, y: number, range: number) => {
+    const ahead = (x: number, y: number, range: number, width = CAR_WIDTH) => {
       const dx = x - t.sprite.x;
       const dy = y - t.sprite.y;
       const forward = dx * Math.cos(heading) + dy * Math.sin(heading);
       const side = -dx * Math.sin(heading) + dy * Math.cos(heading);
-      return forward > 0 && forward < range && Math.abs(side) < CAR_WIDTH;
+      return forward > 0 && forward < range && Math.abs(side) < width;
     };
     if (ahead(player.x, player.y, CAR_LENGTH * 1.5)) return true;
+    if ((this.options.obstacles?.() ?? []).some((o) => ahead(o.x, o.y, CAR_LENGTH * 1.5, HALF_WIDTH[t.edge.kind] * 1.5))) return true;
     return this.travellers.some((o) => o !== t && o.car && ahead(o.sprite.x, o.sprite.y, CAR_LENGTH * 1.2));
   }
 
@@ -368,7 +403,8 @@ export class TownLife {
     // Drive on the right: the offset goes to the right of the direction of travel.
     const nx = -Math.sin(angle);
     const ny = Math.cos(angle);
-    t.sprite.setPosition(a.x + (b.x - a.x) * k + nx * t.offset, a.y + (b.y - a.y) * k + ny * t.offset);
+    const offset = t.offset + (t.aside ?? 0);
+    t.sprite.setPosition(a.x + (b.x - a.x) * k + nx * offset, a.y + (b.y - a.y) * k + ny * offset);
     t.sprite.setRotation(angle);
     t.shadow?.setPosition(t.sprite.x + 1.5, t.sprite.y + 2).setRotation(angle);
     t.lights?.setPosition(t.sprite.x, t.sprite.y).setRotation(angle);

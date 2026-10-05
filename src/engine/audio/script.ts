@@ -92,6 +92,10 @@ export const ESCAPE_LINES = {
   POLICE_FOUND: { audioId: 'escape.police_found', text: 'La police vous a retrouvé !' },
   ARRESTED: { audioId: 'escape.arrested', text: 'Vous êtes arrêté !' },
   WON: { audioId: 'escape.won', text: 'Bravo ! Vous avez semé la police !' },
+  /** Smarter police (approved by the owner on 2026-10-05). */
+  ROADBLOCK: { audioId: 'escape.roadblock', text: 'Attention ! Un barrage de police devant vous ! Faites demi-tour.' },
+  POLICE_AHEAD: { audioId: 'escape.police_ahead', text: 'Attention ! La police arrive en face !' },
+  POLICE_BOOST: { audioId: 'escape.police_boost', text: 'La police accélère ! Vite !' },
 } as const;
 
 /**

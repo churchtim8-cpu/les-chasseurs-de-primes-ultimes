@@ -28,7 +28,7 @@ import { arrestKind, playArrest } from '../render/arrest';
 import { BURNOUT_SMOKE, DriftEffects } from '../render/drift';
 import { LanePosition } from '../render/lanes';
 import { drawNight, nightOn } from '../render/night';
-import { DangerPulse, ESCAPE_FX, HideoutMarker } from '../render/escapeFx';
+import { createRoadblock, DangerPulse, ESCAPE_FX, HideoutMarker } from '../render/escapeFx';
 import { Searchlight } from '../render/searchlight';
 import { distance } from '../../engine/world/geometry';
 import { currentFestival, drawFestival } from '../render/festival';
@@ -111,6 +111,14 @@ export class EscapeScene extends Phaser.Scene {
   private danger!: DangerPulse;
   private hideoutMark!: HideoutMarker;
   private searchlight?: Searchlight;
+  /** Smarter police: the roadblock across the street of a wrong turn, and the second unit coming from the front (Expert). */
+  private roadblock!: Phaser.GameObjects.Container;
+  private ambushCar!: Phaser.GameObjects.Container;
+  private ambushOfficer!: Phaser.GameObjects.Container;
+  private wasBoosting = false;
+  private ambushStride = 0;
+  private hadRoadblock = false;
+  private hadAmbush = false;
 
   constructor() {
     super(EscapeScene.KEY);
@@ -159,7 +167,12 @@ export class EscapeScene extends Phaser.Scene {
     if (new URLSearchParams(window.location.search).get('life') !== '0') {
       this.life = new TownLife(this, this.graph, {
         player: () => this.mySprite(),
-        chasers: () => [this.mySprite(), ...(this.policeCar.visible ? [this.policeCar] : [])],
+        chasers: () => [this.mySprite(), ...(this.policeCar.visible ? [this.policeCar] : []), ...(this.ambushCar.visible ? [this.ambushCar] : [])],
+        runners: () => [
+          ...(this.escape.player.mode === 'FOOT' ? [this.runner] : []),
+          ...[this.officer, this.ambushOfficer].filter((o) => o.visible && o.alpha > 0.3),
+        ],
+        obstacles: () => (this.roadblock?.visible ? [this.roadblock] : []),
       });
     }
     this.routeOverlay = this.drawRoute();
@@ -175,6 +188,9 @@ export class EscapeScene extends Phaser.Scene {
     const colours = liveryLook(officer?.livery ?? look.LIVERY);
     this.policeCar = createPoliceCar(this, colours, officer?.vehicle ?? look.VEHICLE).setVisible(false);
     this.officer = createOfficer(this, colours, officer?.outfit ?? look.OUTFIT).setVisible(false);
+    this.roadblock = createRoadblock(this);
+    this.ambushCar = createPoliceCar(this, colours, officer?.vehicle ?? look.VEHICLE).setVisible(false);
+    this.ambushOfficer = createOfficer(this, colours, officer?.outfit ?? look.OUTFIT).setVisible(false);
     this.badge = createIntentBadge(this);
     this.roundabout = new RoundaboutGuide(this, this.graph, () =>
       this.hud.showToast('Roundabout: ◀ ▶ to choose the exit', 2600),
@@ -304,7 +320,7 @@ export class EscapeScene extends Phaser.Scene {
         }
         case 'ANNOUNCE': {
           const joined = event.after ? events[i - 1]?.type === 'TRANSMISSION' : events[i + 1]?.type === 'TRANSMISSION';
-          if (!joined) this.announce(event.lines);
+          if (!joined) this.announce(event.lines, event.interrupt === true);
           break;
         }
         default:
@@ -314,11 +330,13 @@ export class EscapeScene extends Phaser.Scene {
   }
 
   /** The partner's warnings and orders, as text when the level shows it (always when a line has no recording). */
-  private announce(lines: SpokenText[]): void {
+  private announce(lines: SpokenText[], interrupt = false): void {
     const difficulty = this.escape.scenario.difficulty;
     const text = lines.map((l) => l.text).join(' ');
     this.hud.showScanner(text, this.showsText(lines) ? Math.max(LANGUAGE_SETTINGS[difficulty].textSeconds, 4) : 0);
-    void scannerAudio.play(lines.map((l) => ({ audioId: l.audioId, radio: true })));
+    const spoken = lines.map((l) => ({ audioId: l.audioId, radio: true }));
+    // A roadblock ahead cuts off whatever was being said: the way it gave no longer applies.
+    void (interrupt ? scannerAudio.interrupt(spoken) : scannerAudio.play(spoken));
     this.orderToasts(lines);
     debugState.info.set('scanner', `EVENT: ${lines.map((l) => l.audioId).join(' + ')}`);
   }
@@ -482,6 +500,7 @@ export class EscapeScene extends Phaser.Scene {
 
     const framed = this.staged ? shown : null;
     this.rig.update(framed ? { x: (avatar.x + framed.x) / 2, y: (avatar.y + framed.y) / 2, heading: this.policeHeading } : me, delta);
+    this.drawSmarterPolice(delta);
     // The drama: red edges and a heartbeat with the police right behind; the hideout showing itself on the last stretch.
     const chasing = this.stage === 'PURSUIT';
     this.danger.update(chasing && this.escape.policeOnMap && status.proximity === 'CLOSE', status.captureProgress, delta);
@@ -558,6 +577,44 @@ export class EscapeScene extends Phaser.Scene {
     sprite.setPosition(p.x, p.y).setRotation(Math.atan2(to.y - from.y, to.x - from.x));
   }
 
+  /**
+   * The smarter police (Mr Henry, 2026-10-05): the roadblock across the street
+   * of a wrong turn, the second unit coming from the front, and a word on the
+   * screen when they speed up after a mistake.
+   */
+  private drawSmarterPolice(delta: number): void {
+    const block = this.escape.roadblockAt;
+    this.roadblock.setVisible(block !== null);
+    if (block) this.roadblock.setPosition(block.x, block.y).setRotation(block.heading);
+    if (block && !this.hadRoadblock) this.hud.showToast('Roadblock ahead! Turn round (U or ▼▼)', 3500);
+    this.hadRoadblock = block !== null;
+
+    const unit = this.escape.ambush;
+    const car = unit?.mode === 'CAR';
+    const shown = car ? this.ambushCar : this.ambushOfficer;
+    const other = car ? this.ambushOfficer : this.ambushCar;
+    other.setVisible(false);
+    if (unit && !this.staged) {
+      const at = unit.snapshot();
+      if (!shown.visible) shown.setAlpha(0).setRotation(at.heading);
+      shown.setVisible(true).setAlpha(Math.min(1, shown.alpha + delta / 400)).setPosition(at.x, at.y);
+      shown.setRotation(shown.rotation + Phaser.Math.Angle.Wrap(at.heading - shown.rotation) * Math.min(1, delta / 90));
+      if (!car) {
+        this.ambushStride += (delta / 1000) * at.speed * 0.75;
+        animateRunner(this.ambushOfficer, this.ambushStride, at.speed > 1);
+      }
+      if (!this.hadAmbush) this.hud.showToast('Police coming the other way!', 3000);
+    } else if (shown.visible && !this.staged) {
+      shown.setAlpha(shown.alpha - delta / 400);
+      if (shown.alpha <= 0.02) shown.setVisible(false);
+    }
+    if (!this.staged) this.hadAmbush = unit !== null;
+
+    const boosting = this.escape.boosting && this.stage === 'PURSUIT';
+    if (boosting && !this.wasBoosting) this.hud.showToast('Wrong turn: the police are speeding up!', 2800);
+    this.wasBoosting = boosting;
+  }
+
   /** Where the hideout's door is: the end of the last stretch of the route. */
   private hideoutDoor(): { x: number; y: number } {
     const stages = this.escape.scenario.stages;
@@ -587,16 +644,18 @@ export class EscapeScene extends Phaser.Scene {
     this.stage = 'ARREST';
     this.staged = true;
     const me = this.escape.player.snapshot();
-    const police = this.policeSprite();
+    // The second unit made it (Expert), or the police on the player's tail.
+    const unit = this.escape.caughtByAmbush ? this.escape.ambush : null;
+    const police = unit ? (unit.mode === 'CAR' ? this.ambushCar : this.ambushOfficer) : this.policeSprite();
     police.setAlpha(1).setVisible(true);
     this.rig.closeUp();
     void playArrest(this, this.drift, {
       police,
       suspect: this.mySprite(),
-      policeHeading: this.policeHeading,
+      policeHeading: unit ? police.rotation : this.policeHeading,
       suspectHeading: this.displayHeading,
       suspectSpeed: me.speed,
-      kind: arrestKind(this.escape.police.mode, me.mode === 'CAR'),
+      kind: arrestKind(unit ? unit.mode : this.escape.police.mode, me.mode === 'CAR'),
     }).then(() => {
       if (this.scene.isActive()) this.showResults(said(), 'You are under arrest!');
     });

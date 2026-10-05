@@ -440,4 +440,37 @@ export const ESCAPE = {
   orderAgainSeconds: 9,
   stoppedSeconds: 3.5,
   offGuideSeconds: 7,
+  /**
+   * Smarter police (Mr Henry, 2026-10-05: "the police chases are too easy").
+   * They start this share of the chase's head start behind the player, much
+   * closer than before, and closer at each level.
+   */
+  headStartShare: {
+    CAR: { EASY: 0.6, INTERMEDIATE: 0.5, HARD: 0.45, EXPERT: 0.4 },
+    // On foot the head start was short already (115-160 m): a little less off it.
+    FOOT: { EASY: 0.8, INTERMEDIATE: 0.75, HARD: 0.7, EXPERT: 0.65 },
+  } as Record<TravelMode, Record<Difficulty, number>>,
+  /** A wrong turn puts the police's foot down: this much faster (a share of their speed) for this many seconds. */
+  boost: { seconds: 8, extra: { EASY: 0.15, INTERMEDIATE: 0.2, HARD: 0.25, EXPERT: 0.3 } as Record<Difficulty, number> },
+  /**
+   * Police with the player in sight drive to the player's next junction to cut
+   * them off when they would get there first (by this margin of the player's
+   * time), at these levels; there, and whenever they meet the player head on,
+   * they stop across the street to block it, and an arrest counts from the front.
+   */
+  cutOff: { EASY: false, INTERMEDIATE: false, HARD: true, EXPERT: true } as Record<Difficulty, boolean>,
+  cutOffMargin: 0.85,
+  /**
+   * Roadblocks: at these levels a wrong turn puts a roadblock across the street
+   * the player turned into ("Un barrage de police devant vous ! Faites
+   * demi-tour."), between `ahead` metres in front of them and the far end;
+   * they are held `stopGap` metres short of it until they turn round.
+   */
+  roadblock: { levels: { EASY: false, INTERMEDIATE: false, HARD: true, EXPERT: true } as Record<Difficulty, boolean>, ahead: [30, 70] as const, stopGap: 20 },
+  /**
+   * Expert: a second police unit comes at the player from the front after a
+   * wrong turn ("La police arrive en face !"), from the first junction of the
+   * way ahead at least `from` metres away, for `seconds`.
+   */
+  ambush: { levels: { EASY: false, INTERMEDIATE: false, HARD: false, EXPERT: true } as Record<Difficulty, boolean>, from: 180, seconds: 30 },
 } as const;
