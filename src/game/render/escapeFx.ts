@@ -160,3 +160,33 @@ function makeVignette(scene: Phaser.Scene): void {
   ctx.fillRect(0, 0, w, h);
   tex.refresh();
 }
+
+/**
+ * A police roadblock across a street (Hard and Expert, after a wrong turn):
+ * two red-and-white barriers on legs, cones and flashing blue and red lights,
+ * drawn for a street running east (the container is turned to the street).
+ */
+export function createRoadblock(scene: Phaser.Scene): Phaser.GameObjects.Container {
+  const g = scene.add.graphics();
+  const barrier = (y: number) => {
+    g.fillStyle(0x000000, 0.25).fillRect(-0.4, y - 4.5 + 0.6, 1.8, 9);
+    g.fillStyle(0xffffff).fillRect(-0.8, y - 4.5, 1.6, 9);
+    g.fillStyle(0xd62828);
+    for (let k = 0; k < 9; k += 2) g.fillRect(-0.8, y - 4.5 + k, 1.6, 1);
+    g.lineStyle(0.25, 0x10202a, 0.9).strokeRect(-0.8, y - 4.5, 1.6, 9);
+    g.fillStyle(0x3a3d45).fillRect(-1.6, y - 4.2, 0.6, 0.6).fillRect(-1.6, y + 3.6, 0.6, 0.6);
+  };
+  barrier(-5);
+  barrier(5);
+  for (const y of [-11, 11]) {
+    g.fillStyle(0xf28c28).fillCircle(-3, y, 1.1);
+    g.fillStyle(0xffffff).fillCircle(-3, y, 0.45);
+  }
+  const blue = scene.add.circle(0.2, -9.6, 0.9, 0x2f7de1);
+  const red = scene.add.circle(0.2, 9.6, 0.9, 0xd62828);
+  const glowBlue = scene.add.circle(0.2, -9.6, 3, 0x4fa8ff, 0.35);
+  const glowRed = scene.add.circle(0.2, 9.6, 3, 0xff4d4d, 0.35);
+  scene.tweens.add({ targets: [blue, glowBlue], alpha: 0.15, duration: 260, yoyo: true, repeat: -1 });
+  scene.tweens.add({ targets: [red, glowRed], alpha: 0.15, duration: 260, yoyo: true, repeat: -1, delay: 260 });
+  return scene.add.container(0, 0, [g, glowBlue, glowRed, blue, red]).setDepth(28).setVisible(false);
+}

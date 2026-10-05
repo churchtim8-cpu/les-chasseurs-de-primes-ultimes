@@ -3402,11 +3402,23 @@
       "voice": "DISPATCHER",
       "durationMs": 1071
     },
+    "escape.police_ahead": {
+      "file": "dispatcher/escape.police_ahead.mp3",
+      "text": "Attention ! La police arrive en face !",
+      "voice": "DISPATCHER",
+      "durationMs": 2638
+    },
     "escape.police_close": {
       "file": "dispatcher/escape.police_close.mp3",
       "text": "Attention ! La police est juste derrière vous.",
       "voice": "DISPATCHER",
       "durationMs": 3161
+    },
+    "escape.roadblock": {
+      "file": "dispatcher/escape.roadblock.mp3",
+      "text": "Attention ! Un barrage de police devant vous ! Faites demi-tour.",
+      "voice": "DISPATCHER",
+      "durationMs": 4258
     },
     "escape.won": {
       "file": "dispatcher/escape.won.mp3",
@@ -3431,6 +3443,12 @@
       "text": "Il monte dans une voiture !",
       "voice": "DISPATCHER",
       "durationMs": 1933
+    },
+    "escape.police_boost": {
+      "file": "dispatcher/escape.police_boost.mp3",
+      "text": "La police accélère ! Vite !",
+      "voice": "DISPATCHER",
+      "durationMs": 2168
     },
     "escape.police_lost": {
       "file": "dispatcher/escape.police_lost.mp3",

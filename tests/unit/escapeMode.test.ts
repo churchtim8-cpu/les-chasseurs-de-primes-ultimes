@@ -3,7 +3,7 @@ import { BELLEVUE } from '../../src/content/map/bellevue';
 import { ESCAPE_LINES } from '../../src/engine/audio/script';
 import { Escape } from '../../src/engine/chase/escape';
 import { generateScenario, type ScenarioOptions } from '../../src/engine/chase/scenario';
-import { CHASE_TYPES, type ChaseType } from '../../src/engine/chase/settings';
+import { CHASE_SETTINGS, CHASE_TYPES, ESCAPE, type ChaseType } from '../../src/engine/chase/settings';
 import { DIFFICULTIES, type Difficulty } from '../../src/engine/difficulty';
 import { exitsAt, type TurnIntent } from '../../src/engine/movement/turns';
 import { Rng } from '../../src/engine/rng/prng';
@@ -140,4 +140,78 @@ describe('Escape Mode', () => {
     const random = seeds(officer.difficulty, 30, `officer-luck-${officer.id}`).map((s) => play(s, 'RANDOM', { ...options, chaseType: officer.chaseType ?? 'CAR_CAR' }, officer.speed));
     expect(random.filter((r) => r.status.phase === 'ESCAPED').length / random.length).toBeLessThanOrEqual(0.25);
   }, 180_000);
+
+  // Smarter police (Mr Henry, 2026-10-05): closer, quicker after a mistake, roadblocks and a second unit higher up.
+  /** A player who listens but turns at random at `rate` of the junctions. */
+  function sloppy(seed: string, rate: number) {
+    const escape = new Escape(graph, generateScenario(graph, seed, PLAIN));
+    const listener = new ListenerBot(graph);
+    const rng = Rng.fromSeed(`sloppy-${seed}`);
+    let lastEdge = '';
+    let started = false;
+    let boosted = false;
+    let held = false;
+    let turnedAtBlock = false;
+    const said = new Set<string>();
+    for (let t = 0; t < escape.timeLimit + 5 && escape.status.phase === 'PURSUIT'; t += 0.05) {
+      const me = escape.player.snapshot();
+      let events;
+      if (started && me.edgeId !== lastEdge && rng.next() < rate && escape.status.switchTo === null && !escape.status.followingTracks) {
+        const exits = exitsAt(graph, graph.edge(me.edgeId), me.towards, me.mode);
+        if (exits.length > 0) escape.player.queue(rng.pick(exits).kind as TurnIntent);
+        events = escape.update(0.05);
+      } else {
+        events = listener.step(escape, 0.05);
+        started = true;
+      }
+      lastEdge = me.edgeId;
+      boosted ||= escape.boosting;
+      const block = escape.roadblock;
+      if (block && escape.player.speedFactor === 0) held = true;
+      if (held && block && escape.player.location().towards !== block.towards) turnedAtBlock = true;
+      for (const e of events) if (e.type === 'ANNOUNCE') for (const l of e.lines) said.add(l.audioId);
+    }
+    return { escape, boosted, held, turnedAtBlock, said };
+  }
+
+  it.each(DIFFICULTIES)('the police start much closer than a chase\'s head start (%s)', (difficulty) => {
+    for (const seed of seeds(difficulty, 8, 'start')) {
+      const escape = new Escape(graph, generateScenario(graph, seed, PLAIN));
+      const mode = escape.player.mode;
+      const share = ESCAPE.headStartShare[mode][difficulty];
+      expect(escape.status.distance, seed).toBeLessThanOrEqual(CHASE_SETTINGS[difficulty].headStart[mode] * share * 1.6 + 30);
+    }
+  });
+
+  it('a wrong turn speeds the police up, and the partner says so', () => {
+    const runs = seeds('EASY', 16, 'boost').map((s) => sloppy(s, 0.2));
+    expect(runs.filter((r) => r.boosted).length).toBeGreaterThan(runs.length / 2);
+    expect(runs.filter((r) => r.said.has(ESCAPE_LINES.POLICE_BOOST.audioId)).length).toBeGreaterThan(runs.length / 3);
+    // No roadblocks or second unit at Easy.
+    expect(runs.some((r) => r.said.has(ESCAPE_LINES.ROADBLOCK.audioId) || r.said.has(ESCAPE_LINES.POLICE_AHEAD.audioId))).toBe(false);
+  }, 180_000);
+
+  it('on Hard a wrong turn meets a roadblock: the player is stopped short of it and turns round', () => {
+    const runs = seeds('HARD', 20, 'roadblock').map((s) => sloppy(s, 0.2));
+    const blocked = runs.filter((r) => r.said.has(ESCAPE_LINES.ROADBLOCK.audioId));
+    expect(blocked.length).toBeGreaterThan(runs.length / 3);
+    expect(runs.filter((r) => r.held && r.turnedAtBlock).length).toBeGreaterThan(0);
+    expect(runs.some((r) => r.said.has(ESCAPE_LINES.POLICE_AHEAD.audioId))).toBe(false);
+  }, 180_000);
+
+  it('on Expert a second unit comes from the front after a wrong turn', () => {
+    const runs = seeds('EXPERT', 16, 'ambush').map((s) => sloppy(s, 0.2));
+    expect(runs.filter((r) => r.said.has(ESCAPE_LINES.POLICE_AHEAD.audioId)).length).toBeGreaterThan(runs.length / 3);
+  }, 180_000);
+
+  // Mistakes cost more the higher the level: Easy stays forgiving, Expert punishes.
+  it('mistakes are forgiven at Easy and punished at Expert', () => {
+    const away = (difficulty: Difficulty) =>
+      seeds(difficulty, 30, 'mistakes').map((s) => sloppy(s, 0.2)).filter((r) => r.escape.status.phase === 'ESCAPED').length / 30;
+    const easy = away('EASY');
+    const expert = away('EXPERT');
+    expect(easy).toBeGreaterThanOrEqual(0.5);
+    expect(expert).toBeLessThanOrEqual(0.45);
+    expect(expert).toBeLessThan(easy);
+  }, 300_000);
 });

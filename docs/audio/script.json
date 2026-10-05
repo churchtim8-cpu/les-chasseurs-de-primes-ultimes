@@ -17603,8 +17603,34 @@
     ]
   },
   {
+    "audioId": "escape.police_ahead",
+    "text": "Attention ! La police arrive en face !",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
     "audioId": "escape.police_close",
     "text": "Attention ! La police est juste derrière vous.",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "escape.roadblock",
+    "text": "Attention ! Un barrage de police devant vous ! Faites demi-tour.",
     "voice": "DISPATCHER",
     "category": "EVENT",
     "template": null,
@@ -17659,6 +17685,19 @@
     "category": "EVENT",
     "template": null,
     "levels": [
+      "HARD",
+      "EXPERT"
+    ]
+  },
+  {
+    "audioId": "escape.police_boost",
+    "text": "La police accélère ! Vite !",
+    "voice": "DISPATCHER",
+    "category": "EVENT",
+    "template": null,
+    "levels": [
+      "EASY",
+      "INTERMEDIATE",
       "HARD",
       "EXPERT"
     ]

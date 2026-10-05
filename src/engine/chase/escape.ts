@@ -114,6 +114,30 @@ export class Escape {
   private escapeReason?: ChaseStatus['escapeReason'];
   /** The police's speed as a share of the player's: the level's, or the officer's in the escape campaign. */
   private readonly policeSpeed: number;
+  /** After a wrong turn the police put their foot down until then (elapsed seconds), and say so when there is a moment. */
+  private boostUntil = -Infinity;
+  private boostNews = false;
+  /** The player is off their way after a wrong turn (set at the way back, cleared once back on it). */
+  private wentWrong = false;
+  /** The police stopped across the player's street, facing them: blocking it (a cut-off, or meeting head on). */
+  private blocking = false;
+  /** The police are driving round to cut the player off at their next junction. */
+  private cutting = false;
+  /**
+   * A roadblock across the street of a wrong turn (Hard and Expert): the edge,
+   * the junction it faces and how far along the street from the player's side
+   * (metres from the end the player came in by).
+   */
+  roadblock: { edgeId: string; towards: string; along: number } | null = null;
+  /** The player is held at the roadblock until they turn round. */
+  private heldAtBlock = false;
+  /** Expert: a second unit coming at the player from the front after a wrong turn, until `until` (elapsed seconds). */
+  ambush: Mover | null = null;
+  private ambushUntil = 0;
+  private ambushFor = 0;
+  private aheadNews = false;
+  /** The arrest was made by the second unit (for the scene to play it with that car). */
+  caughtByAmbush = false;
 
   constructor(
     private readonly graph: TownGraph,
@@ -153,7 +177,7 @@ export class Escape {
    */
   private policeAtStart(): Mover {
     const { route, mode } = this.stages[0]!;
-    const headStart = this.settings.headStart[mode];
+    const headStart = this.settings.headStart[mode] * ESCAPE.headStartShare[mode][this.scenario.difficulty];
     const tail: string[] = [route[0] as string];
     let node = route[0] as string;
     let ahead = route[1] as string;
@@ -178,7 +202,7 @@ export class Escape {
     }
     this.policeBehind = Math.max(0, headStart - length);
     const police = new Mover(this.graph, tail.length > 1 ? placeOnRoute(this.graph, tail, length - headStart + this.policeBehind, mode).start : this.player.location());
-    police.speedFactor = this.policeSpeed;
+    police.speedFactor = this.copSpeed();
     if (tail.length > 2) {
       try {
         police.followPlan(tail.slice(tail.indexOf(police.snapshot().towards)));
@@ -298,7 +322,7 @@ export class Escape {
       if (i === this.furthest + 1 && route[i - 1] === from) this.furthest = i;
       from = node;
     }
-    if (this.trailing) this.trail.push(...passed);
+    if (this.trailing) for (const node of passed) this.extendTrail(node);
     this.movePolice(dt, passed.length > 0);
     this.switchPolice();
 
@@ -309,9 +333,17 @@ export class Escape {
       const foot = here.mode === 'FOOT';
       this.navigator.leadDistance = foot ? CALL_TIMING.footLeadSeconds[this.scenario.difficulty] * MOVEMENT.FOOT.cruise : Infinity;
       this.navigator.minLeadDistance = foot ? CALL_TIMING.footMinLeadSeconds * MOVEMENT.FOOT.cruise : 0;
-      const transmissions = this.nav(events).update(here, this.remainingRoute());
-      for (const transmission of transmissions) events.push({ type: 'TRANSMISSION', transmission });
+      if (!this.heldAtBlock) {
+        const transmissions = this.nav(events).update(here, this.remainingRoute());
+        for (const transmission of transmissions) {
+          if (transmission.kind === 'RECOVERY' && !this.wentWrong && this.wrongTurn(events)) continue;
+          events.push({ type: 'TRANSMISSION', transmission });
+        }
+      }
     }
+    if (this.wentWrong && this.onRoute()) this.wentWrong = false;
+    this.holdAtRoadblock(events);
+    this.moveAmbush(dt);
     this.waitForFirstCall(events);
     this.neverQuiet(dt, events);
 
@@ -327,7 +359,10 @@ export class Escape {
     const s = this.settings;
     const canCapture = this.player.mode === this.police.mode && this.policeBehind <= 0;
     this.closeFor = this.behind <= s.captureDistance && canCapture ? this.closeFor + dt : 0;
+    this.ambushFor = this.ambush && this.ambushGap() <= s.captureDistance ? this.ambushFor + dt : 0;
+    if (this.ambushFor >= s.captureHold) this.closeFor = Math.max(this.closeFor, this.ambushFor);
     if (this.closeFor > 0 && this.closeFor >= s.captureHold) {
+      this.caughtByAmbush = this.ambushFor >= s.captureHold;
       this.phase = 'CAPTURED';
       events.push({ type: 'CAPTURED' });
     } else if (this.timeLeft <= 0) {
@@ -347,7 +382,7 @@ export class Escape {
    */
   private neverQuiet(dt: number, events: ChaseEvent[]): void {
     if (events.some((e) => e.type === 'TRANSMISSION')) this.heardAt = this.elapsed;
-    if (this.autoStage !== null || this.elapsed < this.radioFreeAt) return;
+    if (this.autoStage !== null || this.elapsed < this.radioFreeAt || this.heldAtBlock) return;
     if (this.pending?.announced) {
       if (this.elapsed - this.orderSaidAt < ESCAPE.orderAgainSeconds) return;
       this.orderSaidAt = this.elapsed;
@@ -391,12 +426,14 @@ export class Escape {
     if (cop.waiting) {
       // Boxed in, or a plan it could not take: start again from here, turning round if there is no other way.
       this.police = new Mover(this.graph, this.police.location());
-      this.police.speedFactor = this.policeSpeed;
+      this.police.speedFactor = this.copSpeed();
       if (!this.pursue()) {
         this.police.uTurn();
         this.pursue();
       }
     }
+    if (this.faceOff()) playerTurned = true;
+    this.police.speedFactor = this.copSpeed();
     const passed = this.police.update(dt);
     // The trail is used up in order: a junction of it passed on the way to join it is not a short cut.
     for (const node of passed) if (node === this.trail[0]) this.trail.shift();
@@ -442,6 +479,11 @@ export class Escape {
           nodes = rest ? [...along, ...rest.slice(1), ...(rest.includes(here.towards) ? [] : [here.towards])] : along;
         }
       }
+    }
+    this.cutting = false;
+    if (!nodes && !toChange && !this.trailing && ESCAPE.cutOff[this.scenario.difficulty]) {
+      nodes = this.cutOff(this.police.location(), me, mode, blocked);
+      this.cutting = nodes !== null;
     }
     if (!nodes) {
       const way = this.path(cop.towards, behind, mode, blocked);
@@ -506,7 +548,7 @@ export class Escape {
     // The officer leaves the car to follow on foot; a colleague brings it up again when the player drives off.
     this.policeParked = change.mode === 'FOOT' ? left : null;
     this.policeStage = this.stage;
-    this.police.speedFactor = this.policeSpeed;
+    this.police.speedFactor = this.copSpeed();
     this.pursue();
   }
 
@@ -656,9 +698,13 @@ export class Escape {
       this.lost = false;
       this.lostNews = this.lostNews === ESCAPE_LINES.POLICE_LOST ? null : ESCAPE_LINES.POLICE_FOUND;
     }
+    if (this.boostNews && !this.boosting) this.boostNews = false; // over before there was a moment: not worth saying
+    if (this.aheadNews && !this.ambush) this.aheadNews = false;
     const lines: SpokenText[] = [];
     if (this.closeNews) lines.push(ESCAPE_LINES.POLICE_CLOSE);
     if (this.lostNews) lines.push(this.lostNews);
+    if (this.aheadNews) lines.push(ESCAPE_LINES.POLICE_AHEAD);
+    if (this.boostNews) lines.push(ESCAPE_LINES.POLICE_BOOST);
     if (lines.length === 0) return;
     // Said where it is over before the next direction is due, so that is not made late;
     // a player who has gone wrong (the directions already putting them right) hears it at once.
@@ -667,6 +713,8 @@ export class Escape {
     if (!quiet && (this.autoStage !== null || this.onRoute())) return;
     this.closeNews = false;
     this.lostNews = null;
+    this.aheadNews = false;
+    this.boostNews = false;
     // Said after a direction given this frame, never over it.
     events.push({ type: 'ANNOUNCE', lines, ...(events.some((e) => e.type === 'TRANSMISSION') ? { after: true } : {}) });
   }
@@ -705,22 +753,244 @@ export class Escape {
     const mode = this.player.mode === this.police.mode ? this.police.mode : 'FOOT';
     const police = this.police.location();
     const player = this.player.location();
-    this.behind = this.policeBehind > 0 ? Infinity : this.gapBehind(police, player);
+    this.behind = this.policeBehind > 0 ? Infinity : this.reachGap(this.relation(police, player));
     return this.policeBehind + roadDistance(this.graph, police, player, mode);
   }
 
   /**
-   * Metres from the police to the player along the player's street, with the
-   * police behind them and going the same way; Infinity otherwise. Meeting
-   * head on, or at a junction from another street, is not an arrest: the
-   * police have to catch the player up.
+   * Where the police (or the second unit) are on the player's street: behind
+   * them going the same way (a chase), in front coming at them head on (they
+   * stop across the street to block it), in front going the same way
+   * (overshot), or past them going the other way. `gap` in metres.
    */
-  private gapBehind(police: MoverStart, player: MoverStart): number {
-    if (police.edgeId !== player.edgeId || police.towards !== player.towards) return Infinity;
-    const edge = this.graph.edge(police.edgeId);
-    const along = (t: number) => (player.towards === edge.to ? t : 1 - t) * this.graph.edgeLength(edge);
-    const gap = along(player.t) - along(police.t);
-    return gap >= 0 ? gap : Infinity;
+  private relation(cop: MoverStart, me: MoverStart): { kind: 'NONE' | 'BEHIND' | 'AHEAD' | 'OVERSHOT' | 'PASSED'; gap: number } {
+    if (cop.edgeId !== me.edgeId || cop.mode !== me.mode) return { kind: 'NONE', gap: Infinity };
+    const edge = this.graph.edge(cop.edgeId);
+    const length = this.graph.edgeLength(edge);
+    const dir = (l: MoverStart) => (l.towards === edge.to ? 1 : -1);
+    // Positive: the player is ahead of the police, the way the police are facing.
+    const gap = (me.t - cop.t) * length * dir(cop);
+    if (dir(cop) === dir(me)) return gap >= 0 ? { kind: 'BEHIND', gap } : { kind: 'OVERSHOT', gap: -gap };
+    return gap >= 0 ? { kind: 'AHEAD', gap } : { kind: 'PASSED', gap: -gap };
+  }
+
+  /**
+   * How close the police are for an arrest: catching the player up from
+   * behind, or blocking the street in front of them. Meeting at a junction
+   * from another street, or having driven past, is not an arrest.
+   */
+  private reachGap(rel: { kind: string; gap: number }, front = this.frontArrest): number {
+    return rel.kind === 'BEHIND' || (rel.kind === 'AHEAD' && front) ? rel.gap : Infinity;
+  }
+
+  /**
+   * Meeting the police head on is an arrest (they block the street) only when
+   * they came to cut the player off, or the player went the wrong way: a route
+   * that happens to lead back past them is not the player's fault.
+   */
+  private get frontArrest(): boolean {
+    return this.cutting || this.wentWrong;
+  }
+
+  /** Metres from a mover to the junction it is heading for. */
+  private left(at: MoverStart): number {
+    const edge = this.graph.edge(at.edgeId);
+    return (at.towards === edge.to ? 1 - at.t : at.t) * this.graph.edgeLength(edge);
+  }
+
+  /** The police's speed now: faster for a while after a wrong turn, stopped while blocking the street. */
+  private copSpeed(): number {
+    if (this.blocking) return 0;
+    const boost = this.elapsed < this.boostUntil ? 1 + ESCAPE.boost.extra[this.scenario.difficulty] : 1;
+    return this.policeSpeed * boost;
+  }
+
+  get boosting(): boolean {
+    return this.elapsed < this.boostUntil;
+  }
+
+  /**
+   * The police on the player's street never just drive past (Mr Henry,
+   * 2026-10-05): coming at the player head on, they stop across it; having
+   * gone past, or with the player behind them after a U-turn, they turn round.
+   * Returns true when the police must plan again.
+   */
+  private lastRelation = 'NONE';
+  private faceOff(): boolean {
+    const rel = this.relation(this.police.location(), this.player.location());
+    this.blocking = rel.kind === 'AHEAD' && this.frontArrest;
+    let replan = rel.kind !== this.lastRelation;
+    this.lastRelation = rel.kind;
+    if ((rel.kind === 'PASSED' || rel.kind === 'OVERSHOT') && this.frontArrest && this.police.uTurn()) {
+      this.police = new Mover(this.graph, this.police.location());
+      this.police.speedFactor = this.copSpeed();
+      this.trailing = false;
+      replan = true;
+    }
+    return replan;
+  }
+
+  /**
+   * Hard and Expert: with the player in sight, drive to the junction the player
+   * is heading for when the police would get there first, and turn into their
+   * street to meet them (then stop across it). Null when they cannot beat them to it.
+   */
+  private cutOff(cop: MoverStart, me: MoverStart, mode: TravelMode, blocked: ReadonlySet<string>): string[] | null {
+    const myEdge = this.graph.edge(me.edgeId);
+    const behind = this.graph.other(myEdge, me.towards);
+    if (!canTravel(myEdge, mode, me.towards)) return null;
+    const way = this.path(cop.towards, me.towards, mode, blocked);
+    if (!way || way.includes(behind)) return null;
+    const cruise = MOVEMENT[mode].cruise;
+    const policeTime = (this.left(cop) + pathLength(this.graph, way)) / (cruise * this.policeSpeed);
+    const playerTime = this.left(me) / Math.max(cruise, this.player.snapshot().speed);
+    if (policeTime > playerTime * ESCAPE.cutOffMargin) return null;
+    return [...way, behind];
+  }
+
+  /** The player passed `node`: add it to the trail, cutting out any loop back to a junction already on it (a wrong turn and back). */
+  private extendTrail(node: string): void {
+    const seen = this.trail.indexOf(node);
+    if (seen >= 0) this.trail.length = seen + 1;
+    else this.trail.push(node);
+  }
+
+  /**
+   * A wrong turn (the partner's first way back): the police speed up for a
+   * while; on Hard and Expert a roadblock goes up across the street ahead
+   * (its line replaces the way back: "Faites demi-tour"); on Expert a second
+   * unit comes at the player from the front. True when the way back is replaced.
+   */
+  private wrongTurn(events: ChaseEvent[]): boolean {
+    this.wentWrong = true;
+    const level = this.scenario.difficulty;
+    this.boostUntil = this.elapsed + ESCAPE.boost.seconds;
+    this.boostNews = true;
+    if (ESCAPE.ambush.levels[level] && !this.ambush) this.sendAmbush();
+    if (!ESCAPE.roadblock.levels[level] || this.roadblock || this.pending || this.autoStage !== null) return false;
+    const here = this.player.location();
+    const edge = this.graph.edge(here.edgeId);
+    const length = this.graph.edgeLength(edge);
+    const room = this.left(here);
+    const speed = this.player.snapshot().speed;
+    const braking = (speed * speed) / (2 * MOVEMENT[here.mode].braking);
+    const [shortest, far] = ESCAPE.roadblock.ahead;
+    // Far enough ahead to brake and stop short of it (the car's nose never reaches the barriers).
+    const near = Math.max(shortest, braking + ESCAPE.roadblock.stopGap + 4);
+    // Room to see it and stop, and a way back the other way.
+    if (room < near + 4 || !canTravel(edge, here.mode, here.towards)) return false;
+    const done = length - room;
+    this.roadblock = { edgeId: edge.id, towards: here.towards, along: done + Math.min(Math.max(far, near), room - 4, Math.max(near, room * 0.6)) };
+    events.push({ type: 'ANNOUNCE', lines: [ESCAPE_LINES.ROADBLOCK], interrupt: true });
+    return true;
+  }
+
+  /** Where the roadblock stands on its street (for drawing): a point and the way it faces. */
+  get roadblockAt(): { x: number; y: number; heading: number } | null {
+    const block = this.roadblock;
+    if (!block) return null;
+    const edge = this.graph.edge(block.edgeId);
+    const to = this.graph.node(block.towards);
+    const from = this.graph.node(this.graph.other(edge, block.towards));
+    const k = block.along / this.graph.edgeLength(edge);
+    return { x: from.x + (to.x - from.x) * k, y: from.y + (to.y - from.y) * k, heading: Math.atan2(to.y - from.y, to.x - from.x) };
+  }
+
+  /** The player is stopped short of the roadblock until they turn round; then the way on from there. */
+  private holdAtRoadblock(events: ChaseEvent[]): void {
+    const block = this.roadblock;
+    if (!block) return;
+    const here = this.player.location();
+    if (here.edgeId !== block.edgeId || here.towards !== block.towards) {
+      if (here.edgeId !== block.edgeId) this.roadblock = null;
+      if (this.heldAtBlock) {
+        this.heldAtBlock = false;
+        this.player.speedFactor = 1;
+        const transmissions = this.nav(events).prompt(here, this.remainingRoute());
+        for (const transmission of transmissions) events.push({ type: 'TRANSMISSION', transmission });
+        if (transmissions.length > 0) this.heardAt = this.elapsed;
+      }
+      return;
+    }
+    const length = this.graph.edgeLength(this.graph.edge(block.edgeId));
+    const done = length - this.left(here);
+    const speed = this.player.snapshot().speed;
+    const braking = (speed * speed) / (2 * MOVEMENT[here.mode].braking);
+    if (done + braking + ESCAPE.roadblock.stopGap >= block.along) {
+      this.player.speedFactor = 0;
+      this.heldAtBlock = true;
+    }
+  }
+
+  /** Expert: a second unit from the first junction of the way ahead far enough off, in by a side street. */
+  private sendAmbush(): void {
+    const me = this.player.snapshot();
+    const route = this.stages[this.stage]!.route;
+    const mode = this.player.mode;
+    for (let i = this.furthest; i < route.length; i++) {
+      const node = route[i] as string;
+      if (distance(this.graph.node(node), me) < ESCAPE.ambush.from) continue;
+      for (const edge of this.graph.edgesAt(node)) {
+        const from = this.graph.other(edge, node);
+        if (route.includes(from) || !canTravel(edge, mode, from)) continue;
+        try {
+          const unit = new Mover(this.graph, { edgeId: edge.id, t: 0.5, towards: node, mode });
+          unit.speedFactor = this.policeSpeed;
+          this.ambush = unit;
+          this.ambushUntil = this.elapsed + ESCAPE.ambush.seconds;
+          this.aheadNews = true;
+          this.hunt(unit);
+          return;
+        } catch {
+          /* not a way in: try another */
+        }
+      }
+    }
+  }
+
+  /** The second unit's way to the player's next junction (then into their street). */
+  private hunt(unit: Mover): void {
+    const me = this.player.location();
+    const at = unit.location();
+    const way = this.path(at.towards, me.towards, unit.mode, new Set([at.edgeId]));
+    if (!way) return;
+    const behind = this.graph.other(this.graph.edge(me.edgeId), me.towards);
+    try {
+      unit.followPlan(way.includes(behind) ? way : [...way, behind]);
+    } catch {
+      try {
+        unit.followPlan(way);
+      } catch {
+        /* plans again at the next junction */
+      }
+    }
+  }
+
+  private moveAmbush(dt: number): void {
+    const unit = this.ambush;
+    if (!unit) return;
+    if (this.elapsed >= this.ambushUntil || unit.mode !== this.player.mode || this.phase !== 'PURSUIT') {
+      this.ambush = null;
+      this.ambushFor = 0;
+      return;
+    }
+    const rel = this.relation(unit.location(), this.player.location());
+    if ((rel.kind === 'PASSED' || rel.kind === 'OVERSHOT') && unit.uTurn()) {
+      this.ambush = new Mover(this.graph, unit.location());
+      this.hunt(this.ambush);
+    }
+    const now = this.ambush!;
+    now.speedFactor = rel.kind === 'AHEAD' ? 0 : this.policeSpeed;
+    if (now.snapshot().waiting) {
+      this.ambush = new Mover(this.graph, now.location());
+      this.hunt(this.ambush);
+    }
+    const passed = this.ambush!.update(dt);
+    if (passed.length > 0) this.hunt(this.ambush!);
+  }
+
+  private ambushGap(): number {
+    return this.ambush ? this.reachGap(this.relation(this.ambush.location(), this.player.location()), true) : Infinity;
   }
 
   /** The police are on the map (not still on their way to the start). */

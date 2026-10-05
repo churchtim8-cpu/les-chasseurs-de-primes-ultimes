@@ -14,7 +14,7 @@
  * directions it already has.
  */
 
-import { EVENT_LINES, TRANSPORT_LINES } from '../../src/engine/audio/script';
+import { ESCAPE_LINES, EVENT_LINES, TRANSPORT_LINES } from '../../src/engine/audio/script';
 import type { ChaseEvent, ModeChangeResult } from '../../src/engine/chase/chase';
 import type { Mover } from '../../src/engine/movement/mover';
 import { VEHICLES, type Vehicle } from '../../src/engine/chase/settings';
@@ -149,6 +149,11 @@ export class ListenerBot {
             this.orders.push({ at, audioId: line.audioId });
           }
           if (line.audioId === EVENT_LINES.CHANGED_DIRECTION.audioId) this.changes.push({ at, before: this.seq });
+          // Escape Mode: "Un barrage de police devant vous ! Faites demi-tour." Drop the old directions and turn round.
+          if (line.audioId === ESCAPE_LINES.ROADBLOCK.audioId) {
+            this.heard.push({ at, seq: this.seq - 1, clause: { action: 'WRONG_STREET' } as Clause });
+            this.heard.push({ at, seq: this.seq - 1, clause: { action: 'U_TURN' } as Clause });
+          }
           const told = VEHICLES.find((v) => vehicleLine(v).audioId === line.audioId);
           if (told) this.vehicle = told;
           t += SPEECH.clipGapSeconds;

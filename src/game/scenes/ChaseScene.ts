@@ -245,6 +245,7 @@ export class ChaseScene extends Phaser.Scene {
             ...(theirs !== this.suspectRunner && theirs.alpha > 0.5 ? [theirs] : []),
           ];
         },
+        runners: () => [...(this.chase.player.mode === 'FOOT' ? [this.officer] : []), ...(this.suspectRunner.alpha > 0.05 ? [this.suspectRunner] : [])],
       });
     }
     this.routeOverlay = this.drawRoute();
