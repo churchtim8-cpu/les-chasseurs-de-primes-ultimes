@@ -74,6 +74,9 @@ const EARLY_ARRIVAL = 30;
 /** At most this many streets go by after a wrong turn before the way back is given, in time or not. */
 const MAX_DEFERRALS = 1;
 
+/** "Ce n'est pas la bonne rue." is not said again within this many seconds: the player has had no time to follow the way back. */
+const REPEAT_WRONG_STREET_SECONDS = 8;
+
 /** A way back should share at least this much of the suspect's route (metres). */
 const SHARED_ROUTE = 150;
 
@@ -94,6 +97,10 @@ export class Navigator {
   holdAfter: number | null = null;
   /** The next call is planned for a player held still until its first step is heard. */
   private heldForCall = false;
+  /** The chase clock (seconds), set by the chase each frame like radioFreeIn. */
+  now = 0;
+  /** When "Ce n'est pas la bonne rue." was last said. */
+  private wrongStreetAt = -Infinity;
   /** Streets driven on since a wrong turn without a way back given yet (see recover). */
   private deferrals = 0;
   private fillerFor: number | null = null;
@@ -105,6 +112,8 @@ export class Navigator {
   private stuckOn: string | null = null;
   /** The roundabout where a way back has already been given: going round it again gets no new one until the player leaves it. */
   private ringRecovered: string | null = null;
+  /** The roundabout where "Ce n'est pas la bonne rue." has been said: not again while going round it. */
+  private ringWarned: string | null = null;
   private nextId = 1;
   readonly history: Transmission[] = [];
   /** Prefer calls with at least this many turns, when the map allows (the chase is about to lose the signal). */
@@ -132,6 +141,12 @@ export class Navigator {
   firstCallBeforeStart = false;
   /** A direction is waiting for the radio to be free. */
   private deferred = false;
+  /**
+   * A way back was planned but its first direction is not due yet (Mr Henry,
+   * 2026-10-04: "takes very long to say what to do next, leaving the player
+   * to drive aimlessly"): "Continuez tout droit." as soon as it is true.
+   */
+  private reassure = false;
   private calls: CallPlanner | null = null;
 
   constructor(
@@ -219,18 +234,28 @@ export class Navigator {
       const turnedRound = this.awaiting !== null;
       this.awaiting = null;
       if (this.progress !== before || turnedRound || (this.deferred && this.radioFreeIn <= 0)) this.schedule(player, out);
+      if (out.length > 0) this.reassure = false;
+      else if (this.reassure && this.progress !== before) this.reassureIfQuiet(player, out);
       return out;
     }
     if (this.awaiting && this.awaiting.edgeId === player.edgeId && this.awaiting.towards === player.towards) return out;
+    // Told to turn round, the player carried on past the end of that street instead.
+    const missedUTurn = this.awaiting !== null && this.graph.other(this.graph.edge(player.edgeId), player.towards) === this.awaiting.towards;
+    this.awaiting = null;
     if (this.justPastEnd(player)) return out;
     if (this.stuckOn === player.edgeId) return out;
     // Round a roundabout, each stretch of the ring is a new street: one way back
     // per visit, not "Ce n'est pas la bonne rue" at every exit passed.
     const ring = this.ringOf(player);
-    if (ring === null) this.ringRecovered = null;
+    if (ring === null) this.ringRecovered = this.ringWarned = null;
     else if (ring === this.ringRecovered) return out;
-    this.recover(player, suspectRoute, out);
-    if (ring !== null) this.ringRecovered = ring;
+    this.recover(player, suspectRoute, out, missedUTurn);
+    // No way back from this stretch of the ring yet: try again on the next, rather than
+    // leave the player going round in silence.
+    if (ring !== null) {
+      this.ringWarned = ring;
+      if (this.stuckOn !== player.edgeId) this.ringRecovered = ring;
+    }
     return out;
   }
 
@@ -320,7 +345,7 @@ export class Navigator {
     }
     this.stuckOn = null;
     this.awaiting = null;
-    this.ringRecovered = null;
+    this.ringRecovered = this.ringWarned = null;
     this.deferrals = MAX_DEFERRALS; // stopped: there is room to turn round now
     this.recover(player, suspectRoute, out);
     return out;
@@ -486,29 +511,48 @@ export class Navigator {
   }
 
   /** The player has left the guide: say so, and plan a way back to the suspect. */
-  private recover(player: MoverStart, suspectRoute: readonly string[], out: Transmission[]): void {
+  private recover(player: MoverStart, suspectRoute: readonly string[], out: Transmission[], missedUTurn = false): void {
     const first = out.length;
     // The way back cuts in on the radio at once (see Transmission.urgent): plan it as heard from now.
     this.radioFreeIn = 0;
-    this.recoverFrom(player, suspectRoute, out);
+    this.recoverFrom(player, suspectRoute, out, missedUTurn);
     const lead = out[first];
     if (lead) lead.urgent = true;
   }
 
-  private recoverFrom(player: MoverStart, suspectRoute: readonly string[], out: Transmission[]): void {
+  private recoverFrom(player: MoverStart, suspectRoute: readonly string[], out: Transmission[], missedUTurn = false): void {
     const edge = this.graph.edge(player.edgeId);
     const origin = this.graph.other(edge, player.towards);
     const fromIndex = this.guide.indexOf(origin);
     const onGuideEdge = this.guide.some(
       (n, i) => i < this.guide.length - 1 && this.graph.edgeBetween(n, this.guide[i + 1] as string)?.id === edge.id,
     );
-    const wrongStreet = !onGuideEdge && fromIndex !== -1 && fromIndex < this.guide.length - 1;
+    // Told to turn round but carried on past the junction (Mr Henry, 2026-10-04: "Faites demi-tour"
+    // again and again): they are not lost, just late. No "Ce n'est pas la bonne rue." again, and a
+    // way on from here is preferred to turning round once more.
+    const missedTurn = missedUTurn;
+    // Nor is it said twice within a few seconds: the player has had no time to follow the first.
+    const saidJustNow = this.now - this.wrongStreetAt < REPEAT_WRONG_STREET_SECONDS;
+    const ring = this.ringOf(player);
+    const warned = ring !== null && ring === this.ringWarned;
+    const wrongStreet = !onGuideEdge && fromIndex !== -1 && fromIndex < this.guide.length - 1 && !missedTurn && !saidJustNow && !warned;
 
-    const { plan, timing } = this.replan(player, suspectRoute, wrongStreet);
+    let { plan, timing } = this.replan(player, suspectRoute, wrongStreet);
+    // (Only where the player drives on, straight on or round a bend: at a junction with no way
+    // straight on they stop, and can turn round there.)
+    const ahead = exitsAt(this.graph, edge, player.towards, player.mode);
+    const drivesOn = ahead.length === 1 || ahead.some((e) => e.kind === 'STRAIGHT');
+    // Turning round again, or too late to be told it on this street: give a way on from here at once
+    // if there is one, rather than leaving the player driving on with nothing to follow.
+    if (plan?.uTurn && drivesOn && (missedTurn || !timely(this.graph, plan.guide, player, true, timing))) {
+      const forward = this.replan(player, suspectRoute, wrongStreet, true);
+      if (forward.plan) ({ plan, timing } = forward);
+    }
     const lines: Instruction[] = [];
-    if (wrongStreet) lines.push(makeInstruction([{ action: 'WRONG_STREET' }], this.difficulty));
-    // (Only where the player drives on: at a junction with no way straight on they stop, and can turn round there.)
-    const drivesOn = exitsAt(this.graph, edge, player.towards, player.mode).some((e) => e.kind === 'STRAIGHT');
+    if (wrongStreet) {
+      lines.push(makeInstruction([{ action: 'WRONG_STREET' }], this.difficulty));
+      this.wrongStreetAt = this.now;
+    }
     if (plan?.uTurn && drivesOn && this.deferrals < MAX_DEFERRALS && !timely(this.graph, plan.guide, player, true, timing)) {
       // Too close to the end of this street to turn round once told: say only that it
       // is the wrong street, and give the way back from the next street, where there is room.
@@ -523,7 +567,31 @@ export class Navigator {
     this.stuckOn = plan ? null : player.edgeId;
     if (!plan) return;
     // The way back follows straight on in the same call.
+    const said = out.length;
     this.useGuide(plan, player, out, false);
+    // Its first turn is still a long way off: say to carry straight on meanwhile.
+    this.reassure = !plan.uTurn && out.length === said;
+    if (this.reassure) this.reassureIfQuiet(player, out);
+  }
+
+  /** "Continuez tout droit." when it is true here and heard out in time (see reassure). */
+  private reassureIfQuiet(player: MoverStart, out: Transmission[]): void {
+    const filler = straightOn(this.graph, player, this.guide, this.difficulty, this.hasAudio);
+    if (!filler) return;
+    const heard = this.speed * (Math.max(0, this.radioFreeIn) + callSeconds([filler.text]));
+    // Over before the next junction; or before the one after, when straight on is right
+    // there too (a player who hears the end of it just past the first applies it to the second).
+    let room = this.distanceTo(player, this.progress + 1);
+    const a = this.guide[this.progress + 1];
+    const b = this.guide[this.progress + 2];
+    const next = a !== undefined && b !== undefined ? this.graph.edgeBetween(a, b) : undefined;
+    if (room < heard && next) {
+      const past: MoverStart = { edgeId: next.id, t: next.from === a ? 0 : 1, towards: b as string, mode: player.mode };
+      if (straightOn(this.graph, past, this.guide, this.difficulty, this.hasAudio)) room = this.distanceTo(player, this.progress + 2);
+    }
+    if (room < heard) return;
+    this.reassure = false;
+    this.emit('FILLER', [filler], out);
   }
 
   /**
@@ -560,6 +628,7 @@ export class Navigator {
 
   private useGuide(plan: { guide: string[]; uTurn: boolean }, player: MoverStart, out: Transmission[], wait = true): void {
     this.guide = plan.guide;
+    this.reassure = false;
     this.progress = 0;
     this.holdAfter = null; // a new guide: the old one's indices no longer apply
     this.actions = actionIndices(this.graph, this.guide, player.mode);
@@ -581,10 +650,11 @@ export class Navigator {
   /** How a way back is planned after a wrong turn: onto a moving suspect's route (default), or to a fixed destination. */
   planner: GuidePlanner = planGuide;
 
-  private replan(player: MoverStart, suspectRoute: readonly string[], wrongStreet: boolean) {
+  private replan(player: MoverStart, suspectRoute: readonly string[], wrongStreet: boolean, forwardOnly = false) {
     // The first direction of the way back comes after what the radio is saying and "Ce n'est pas la bonne rue. Faites demi-tour."
-    const delay = Math.max(0, this.radioFreeIn) + callSeconds([...(wrongStreet ? ["Ce n'est pas la bonne rue."] : []), U_TURN_TEXT]);
-    const timing: GuideTiming = { ctx: this.callContext(), delay, uTurnSaid: true };
+    const said = [...(wrongStreet ? ["Ce n'est pas la bonne rue."] : []), ...(forwardOnly ? [] : [U_TURN_TEXT])];
+    const delay = Math.max(0, this.radioFreeIn) + (said.length > 0 ? callSeconds(said) : 0);
+    const timing: GuideTiming = { ctx: this.callContext(), delay, uTurnSaid: true, ...(forwardOnly ? { forwardOnly } : {}) };
     return { plan: this.planner(this.graph, player, suspectRoute, this.difficulty, timing), timing };
   }
 
@@ -619,6 +689,8 @@ export interface GuideTiming {
   delay: number;
   /** `delay` already allows for saying "Faites demi-tour.". */
   uTurnSaid?: boolean;
+  /** Only ways that carry on from here, without turning round. */
+  forwardOnly?: boolean;
 }
 
 export type GuidePlanner = (
@@ -672,7 +744,7 @@ export function planGuide(
   const options: { first: [string, string]; lead: number; uTurn: boolean }[] = [
     { first: [origin, player.towards], lead: length - fromOrigin, uTurn: false },
   ];
-  if (canTravel(edge, mode, player.towards)) {
+  if (canTravel(edge, mode, player.towards) && !timing?.forwardOnly) {
     options.push({ first: [player.towards, origin], lead: fromOrigin + U_TURN_PENALTY, uTurn: true });
   }
 
@@ -725,7 +797,7 @@ export function planEscapeGuide(
   const options: { first: [string, string]; lead: number; uTurn: boolean }[] = [
     { first: [origin, player.towards], lead: length - fromOrigin, uTurn: false },
   ];
-  if (canTravel(edge, mode, player.towards)) {
+  if (canTravel(edge, mode, player.towards) && !timing?.forwardOnly) {
     options.push({ first: [player.towards, origin], lead: fromOrigin + U_TURN_PENALTY, uTurn: true });
   }
   let best: { guide: string[]; uTurn: boolean; cost: number; inTime: boolean } | null = null;

@@ -1,5 +1,6 @@
 import { D2, D3, D4, note, Synth } from './synth';
 import type { ScannerAudio } from './ScannerAudio';
+import { Lookahead } from './lookahead';
 
 /**
  * Dramatic title theme for the menus (title, case folder, briefing,
@@ -40,6 +41,7 @@ export class MenuMusic {
   private step = 0;
   private bar = 0;
   private nextTime = 0;
+  private readonly ahead = new Lookahead(LOOKAHEAD);
 
   constructor(private readonly audio: ScannerAudio) {}
 
@@ -108,7 +110,8 @@ export class MenuMusic {
     const synth = this.synth;
     // After a long stall (a hidden tab), skip the missed beats rather than play them all at once.
     if (this.nextTime < synth.ctx.currentTime) this.nextTime = synth.ctx.currentTime + 0.05;
-    while (this.nextTime < synth.ctx.currentTime + LOOKAHEAD) {
+    const ahead = this.ahead.next();
+    while (this.nextTime < synth.ctx.currentTime + ahead) {
       this.playStep(this.nextTime);
       this.nextTime += 60 / BPM / 4;
       this.step = (this.step + 1) % 16;
