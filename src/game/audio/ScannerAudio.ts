@@ -44,6 +44,14 @@ const MIX = {
   waitSpareSeconds: 1.5,
   /** A call that is cut off fades out over this long, without a click. */
   cutSeconds: 0.06,
+  /**
+   * Music and effects lose everything below this (Hz) (Mr Henry, 2026-10-05:
+   * the sound still distorted, in menus and chases). Laptop, Chromebook and
+   * phone speakers cannot play deep bass: the engine's low hum, drums and bass
+   * notes made them rattle and their own protection pump. Cut twice for a
+   * steep slope; the French is left as it is.
+   */
+  speakerCut: 110,
 } as const;
 
 /**
@@ -95,6 +103,12 @@ export interface SoundReport {
   playing: number;
   /** Loud moments: the output's peak level over the last second (1 = full scale). */
   peak: number;
+  /**
+   * Glitches: times the computer did not get the next bit of sound ready in
+   * time, so the speakers got a gap (crackle). Only some browsers say (null otherwise).
+   */
+  glitches: number | null;
+  glitchMs: number | null;
   log: string[];
 }
 
@@ -259,7 +273,25 @@ export class ScannerAudio {
       sampleRate: ctx?.sampleRate ?? 0,
       latencyMs: ctx ? Math.round(((ctx.baseLatency ?? 0) + (ctx.outputLatency ?? 0)) * 1000) : 0,
       playing: this.sources.length,
+      ...this.glitchStats(ctx),
     };
+  }
+
+  /** Chrome's own count of sound the computer was too busy to make in time (two names over the years). */
+  private glitchStats(ctx: AudioContext | null): { glitches: number | null; glitchMs: number | null } {
+    const c = ctx as unknown as {
+      playbackStats?: { underrunEvents?: number; underrunDuration?: number };
+      playoutStats?: { fallbackFramesEvents?: number; fallbackDuration?: number };
+    } | null;
+    const playback = c?.playbackStats;
+    if (playback && typeof playback.underrunEvents === 'number') {
+      return { glitches: playback.underrunEvents, glitchMs: Math.round((playback.underrunDuration ?? 0) * 1000) };
+    }
+    const playout = c?.playoutStats;
+    if (playout && typeof playout.fallbackFramesEvents === 'number') {
+      return { glitches: playout.fallbackFramesEvents, glitchMs: Math.round(playout.fallbackDuration ?? 0) };
+    }
+    return { glitches: null, glitchMs: null };
   }
 
   /** True once the browser lets the game make sound. */
@@ -353,7 +385,16 @@ export class ScannerAudio {
     sounds.ratio.value = 3;
     sounds.attack.value = 0.01;
     sounds.release.value = 0.3;
-    sounds.connect(master);
+    let into: AudioNode = master;
+    for (let i = 0; i < 2; i++) {
+      const cut = ctx.createBiquadFilter();
+      cut.type = 'highpass';
+      cut.frequency.value = MIX.speakerCut;
+      cut.Q.value = 0.707;
+      cut.connect(into);
+      into = cut;
+    }
+    sounds.connect(into);
     const bus = (level: number, into: AudioNode) => {
       const gain = ctx.createGain();
       gain.gain.value = level;
