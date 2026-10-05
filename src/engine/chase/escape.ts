@@ -245,6 +245,7 @@ export class Escape {
   private nav(events: readonly ChaseEvent[]): Navigator {
     this.hearRadio(events);
     this.navigator.radioFreeIn = this.radioFreeAt - this.elapsed;
+    this.navigator.now = this.elapsed;
     this.navigator.speed = Math.max(MOVEMENT[this.player.mode].cruise, this.player.snapshot().speed);
     return this.navigator;
   }

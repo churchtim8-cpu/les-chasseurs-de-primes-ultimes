@@ -121,6 +121,12 @@ export class ScannerAudio {
   private waiting = 0;
   /** The game is paused: sound stays frozen until it carries on (see pause). */
   private paused = false;
+  /**
+   * The game is out of sight (another tab, a minimised window). The browser
+   * then runs the music's timers only about once a second, so it would play
+   * in broken, crackly bursts; the sound is frozen instead until it is back.
+   */
+  private hidden = typeof document !== 'undefined' && document.visibilityState === 'hidden';
   /** Ends the wait for the call playing now (see stop). */
   private wake: (() => void) | null = null;
   /** The current call's volume controls, faded out if it is cut off (see stop). */
@@ -156,7 +162,12 @@ export class ScannerAudio {
     window.addEventListener('keydown', unlock);
     window.addEventListener('pointerdown', unlock);
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') this.resume();
+      this.hidden = document.visibilityState === 'hidden';
+      const ctx = this.ctx;
+      if (!ctx || ctx.state === 'closed') return;
+      this.note(this.hidden ? 'game hidden: sound frozen' : 'game back in view');
+      if (this.hidden) ctx.suspend().catch(() => undefined);
+      else this.resume();
     });
   }
 
@@ -188,7 +199,7 @@ export class ScannerAudio {
   /** Start the sound again if it was paused (another app took the speakers, a power saver, a hidden tab). */
   private resume(): void {
     const ctx = this.ctx;
-    if (this.paused) return;
+    if (this.paused || this.hidden) return;
     if (ctx && ctx.state !== 'running' && ctx.state !== 'closed') ctx.resume().catch(() => undefined);
   }
 
@@ -313,7 +324,7 @@ export class ScannerAudio {
     // If the browser or computer pauses the sound, start it again as soon as it is allowed.
     ctx.addEventListener('statechange', () => {
       if (ctx !== this.ctx) return;
-      this.note(`sound ${ctx.state}${this.paused ? ' (pause menu)' : ''}`);
+      this.note(`sound ${ctx.state}${this.paused ? ' (pause menu)' : this.hidden ? ' (hidden)' : ''}`);
       if (ctx.state !== 'running' && ctx.state !== 'closed') this.resume();
     });
     // A last-moment safety limiter for rare peaks, after plenty of headroom (MIX.master).
@@ -400,7 +411,7 @@ export class ScannerAudio {
       let last = performance.now();
       const check = () => {
         const now = performance.now();
-        if (!this.paused) spare -= (now - last) / 1000;
+        if (!this.paused && !this.hidden) spare -= (now - last) / 1000;
         last = now;
         const left = t - ctx.currentTime;
         if (left <= 0.005 || spare <= 0 || ctx !== this.ctx) resolve();
@@ -478,7 +489,7 @@ export class ScannerAudio {
       this.note('sound stalled: restarted');
       ctx
         .suspend()
-        .then(() => (this.paused || ctx !== this.ctx ? undefined : ctx.resume()))
+        .then(() => (this.paused || this.hidden || ctx !== this.ctx ? undefined : ctx.resume()))
         .catch(() => undefined);
       return;
     }

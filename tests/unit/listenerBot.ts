@@ -114,6 +114,10 @@ export class ListenerBot {
         const start = Math.max(this.time, this.radioFree);
         const times = heardTimes(e.transmission.instructions, lead, clipSeconds);
         const seq = this.seq++;
+        // A way back replaces the directions heard before it, even when it does not open with
+        // "Ce n'est pas la bonne rue." (not said twice in a row, nor after a missed U-turn).
+        const wrong = e.transmission.instructions.some((ins) => ins.clauses.some((c) => c.action === 'WRONG_STREET'));
+        if (e.transmission.urgent && !wrong) this.heard.push({ at: start + this.reaction, seq: seq - 1, clause: { action: 'WRONG_STREET' } as Clause });
         let k = 0;
         for (const instruction of e.transmission.instructions) {
           const steps = instruction.clauses.filter((c) => !NOT_A_STEP.has(c.action));

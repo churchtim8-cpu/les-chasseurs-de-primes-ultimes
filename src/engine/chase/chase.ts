@@ -484,6 +484,7 @@ export class Chase {
   private nav(events: readonly ChaseEvent[]): Navigator {
     this.hearRadio(events);
     this.navigator.radioFreeIn = this.radioFreeAt - this.elapsed;
+    this.navigator.now = this.elapsed;
     const mode = this.player.mode;
     this.navigator.speed = Math.max(MOVEMENT[mode].cruise, this.player.snapshot().speed);
     return this.navigator;
