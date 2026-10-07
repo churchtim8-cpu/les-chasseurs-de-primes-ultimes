@@ -35,6 +35,8 @@ import { currentFestival, drawFestival } from '../render/festival';
 import { drawWeather, onScreen, weatherFor } from '../render/weather';
 import { RoundaboutGuide } from '../render/roundaboutGuide';
 import { preloadCanvaArt } from '../render/canvaArt';
+import { OffscreenCull } from '../render/offscreenCull';
+import { FrameWatch } from '../render/graphicsMode';
 import { drawTown, type TownLayers } from '../render/townRenderer';
 import { TownLife } from '../render/townLife';
 import { scenarioOptionsFromAddress } from '../scenarioOptions';
@@ -120,6 +122,10 @@ export class EscapeScene extends Phaser.Scene {
   private hadRoadblock = false;
   private hadAmbush = false;
 
+  /** Hides the town's off-screen pictures from the main camera. */
+  private cull?: OffscreenCull;
+  /** AUTO graphics: notices when this device runs the chase slowly. */
+  private readonly frameWatch = new FrameWatch();
   constructor() {
     super(EscapeScene.KEY);
   }
@@ -160,7 +166,9 @@ export class EscapeScene extends Phaser.Scene {
       this.driving.stop();
       this.footsteps.stop();
     });
+    const before = this.children.list.length;
     this.layers = drawTown(this, this.graph);
+    this.cull = new OffscreenCull(this.cameras.main, this.children.list.slice(before));
     // Bellevue en fête: Carnival or Christmas decorations, by the calendar or the title-screen choice.
     drawFestival(this, this.graph, currentFestival(), nightOn());
     if (nightOn()) drawNight(this, this.graph);
@@ -251,6 +259,8 @@ export class EscapeScene extends Phaser.Scene {
 
   override update(_time: number, delta: number): void {
     const dt = Math.min(delta, 50) / 1000;
+    this.frameWatch.update();
+    this.cull?.update();
     if (this.stage === 'PURSUIT' && this.time.now >= this.launchAt) {
       const { accelerate, brake } = this.controls.state;
       this.escape.player.setThrottle(brake ? 'BRAKE' : accelerate ? 'ACCELERATE' : 'CRUISE');

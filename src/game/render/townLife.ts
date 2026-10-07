@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { decorations } from './graphicsMode';
 import { HALF_WIDTH, laneOffset, PAVEMENT } from '../../engine/world/geometry';
 import type { TownGraph } from '../../engine/world/graph';
 import type { MapEdge } from '../../engine/world/types';
@@ -289,7 +290,7 @@ export class TownLife {
         car: true,
       });
     }
-    for (let i = 0; i < WALKER_COUNT; i++) {
+    for (let i = 0; i < decorations(WALKER_COUNT); i++) {
       const edge = walkways[Math.floor(Math.random() * walkways.length)] as MapEdge;
       const side = Math.random() < 0.5 ? -1 : 1;
       const kind = i % PERSON_KINDS;
@@ -455,8 +456,9 @@ export class TownLife {
     const beach = this.graph.map.locations.find((l) => l.id === 'BEACH');
     if (!sea || !beach) return;
     const top = Math.min(...sea.points.map((p) => p[1]));
-    for (let i = 0; i < SEA_SWIMMERS; i++) {
-      const x = beach.footprint.x + 40 + ((i + 0.5) / SEA_SWIMMERS) * (beach.footprint.w - 80) + Phaser.Math.FloatBetween(-30, 30);
+    const swimmers = decorations(SEA_SWIMMERS);
+    for (let i = 0; i < swimmers; i++) {
+      const x = beach.footprint.x + 40 + ((i + 0.5) / swimmers) * (beach.footprint.w - 80) + Phaser.Math.FloatBetween(-30, 30);
       const y = top + 8 + (i % 3) * 9 + Phaser.Math.FloatBetween(0, 4);
       const kind = (i * 5) % PERSON_KINDS;
       const ring = i % 3 === 0;
@@ -478,7 +480,7 @@ export class TownLife {
     const beach = this.graph.map.locations.find((l) => l.id === 'BEACH');
     if (!beach) return;
     const r = beach.footprint;
-    for (let i = 0; i < BEACH_STROLLERS; i++) {
+    for (let i = 0; i < decorations(BEACH_STROLLERS); i++) {
       const at = within(r, 10);
       const kind = (i * 7 + 3) % PERSON_KINDS;
       const sprite = this.image(at.x, at.y, `life-person-${kind}-0`, 25);
@@ -543,7 +545,7 @@ export class TownLife {
     const xs = park.points.map((p) => p[0]);
     const ys = park.points.map((p) => p[1]);
     const box = { x: Math.min(...xs), y: Math.min(...ys), w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys) };
-    for (let i = 0; i < BUTTERFLIES; i++) {
+    for (let i = 0; i < decorations(BUTTERFLIES); i++) {
       const at = within(box, 8);
       const sprite = this.image(at.x, at.y, `life-butterfly-${i % 4}`, 36);
       this.butterflies.push({ sprite, x: at.x, y: at.y, heading: Math.random() * Math.PI * 2, phase: i * 0.9 });

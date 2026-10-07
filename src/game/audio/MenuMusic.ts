@@ -108,6 +108,11 @@ export class MenuMusic {
       this.synth.noiseHit(this.nextTime, 0.16, 1.8, 'highpass', 4000);
     }
     const synth = this.synth;
+    // Switched off: make no notes at all (silent notes still cost a slow computer work).
+    if (MenuMusic.muted) {
+      this.nextTime = synth.ctx.currentTime + 0.05;
+      return;
+    }
     // After a long stall (a hidden tab), skip the missed beats rather than play them all at once.
     if (this.nextTime < synth.ctx.currentTime) this.nextTime = synth.ctx.currentTime + 0.05;
     const ahead = this.ahead.next();

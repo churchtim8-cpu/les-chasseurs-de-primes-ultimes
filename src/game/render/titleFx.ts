@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { lightGraphics } from './graphicsMode';
 import { GAME_HEIGHT, GAME_WIDTH } from '../layout';
 
 /**
@@ -25,6 +26,8 @@ export const TITLE_FX = {
 } as const;
 
 const reducedMotion = (): boolean => {
+  // Light graphics keep the title screen still too.
+  if (lightGraphics()) return true;
   try {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   } catch {

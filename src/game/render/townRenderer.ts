@@ -161,15 +161,33 @@ export const SURROUND = 1200;
  */
 function drawSurroundings(scene: Phaser.Scene, width: number, height: number, sea: Region | undefined) {
   const seaTop = sea ? Math.min(...sea.points.map(([, y]) => y)) : height;
+  // Only the bands outside the town are filled (the baked town tiles cover the rest), with the
+  // sunlight already mixed into the colours: one layer of pixels instead of three full screens.
+  const ground = sunlit(GROUND);
+  const water = sunlit(PALETTE.sea);
+  const S = SURROUND;
+  const o = 1; // tucked just under the tiles' edge so no seam shows
   scene.add
     .graphics()
     .setDepth(-1)
-    .fillStyle(GROUND)
-    .fillRect(-SURROUND, -SURROUND, width + 2 * SURROUND, seaTop + SURROUND)
-    .fillStyle(PALETTE.sea)
-    .fillRect(-SURROUND, seaTop, width + 2 * SURROUND, height - seaTop + SURROUND)
-    .fillStyle(SUNLIGHT.colour, SUNLIGHT.alpha)
-    .fillRect(-SURROUND, -SURROUND, width + 2 * SURROUND, height + 2 * SURROUND);
+    .fillStyle(ground)
+    .fillRect(-S, -S, width + 2 * S, S + o)
+    .fillRect(-S, -o, S + o, seaTop + o)
+    .fillRect(width - o, -o, S + o, seaTop + o)
+    .fillStyle(water)
+    .fillRect(-S, seaTop, S + o, height - seaTop)
+    .fillRect(width - o, seaTop, S + o, height - seaTop)
+    .fillRect(-S, height - o, width + 2 * S, S + o);
+}
+
+/** A colour as it looks under the town's golden sunlight wash. */
+function sunlit(colour: number): number {
+  const mix = (shift: number) => {
+    const c = (colour >> shift) & 0xff;
+    const s = (SUNLIGHT.colour >> shift) & 0xff;
+    return Math.round(c + (s - c) * SUNLIGHT.alpha);
+  };
+  return (mix(16) << 16) | (mix(8) << 8) | mix(0);
 }
 
 /** Pixels per metre in the baked town tiles: sharp in car view, close to it on foot. */
