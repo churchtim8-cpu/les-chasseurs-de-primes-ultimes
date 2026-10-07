@@ -207,8 +207,7 @@ export class Hud {
     const now = this.scene.time.now;
     const seconds = Math.ceil(status.timeLeft);
     const hurry = seconds <= HURRY_SECONDS;
-    this.timer.setText(`${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`);
-    this.timer.setColor(hurry ? '#ffb4a2' : toCss(PALETTE.cream));
+    put(this.timer, `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`, hurry ? '#ffb4a2' : toCss(PALETTE.cream));
     // The lights take turns, faster and brighter in the last seconds.
     const beat = Math.floor(now / (hurry ? 180 : 520)) % 2;
     this.timerLights.forEach((light, i) => light.setAlpha(i === beat ? (hurry ? 1 : 0.85) : 0.18));
@@ -243,7 +242,7 @@ export class Hud {
     if (status.sighting) this.sighting.tick(status.sighting.secondsLeft);
 
     const left = status.repeatsLeft;
-    this.repeat.label.setText(left === null ? '⟳  REPEAT' : `⟳  REPEAT  ·  ${left}`);
+    put(this.repeat.label, left === null ? '⟳  REPEAT' : `⟳  REPEAT  ·  ${left}`);
     const off = left === 0 || status.signalLost;
     [this.repeat.label, this.repeat.key].forEach((o) => o.setAlpha(off ? 0.45 : 1));
   }
@@ -285,10 +284,8 @@ export class Hud {
     const colour = status.signal > 0.6 ? GREEN : status.signal > 0.3 ? AMBER : RED;
     this.signalBars.forEach((bar, i) => bar.setFillStyle(i < lit ? colour : 0x55656b, 1).setVisible(this.shown && !status.signalLost));
     const blink = warn && Math.floor(now / 300) % 2 === 0;
-    this.signalLabel.setText(status.signalLost ? 'SIGNAL LOST' : this.signalName);
-    this.signalLabel.setColor(blink ? '#ffb4a2' : toCss(GLASS.label));
-    this.signalState.setText(status.signalLost ? '' : status.warning ? 'GETTING AWAY!' : lit >= 4 ? 'VERY CLOSE' : '');
-    this.signalState.setColor(status.warning ? '#ffb4a2' : toCss(GREEN));
+    put(this.signalLabel, status.signalLost ? 'SIGNAL LOST' : this.signalName, blink ? '#ffb4a2' : toCss(GLASS.label));
+    put(this.signalState, status.signalLost ? '' : status.warning ? 'GETTING AWAY!' : lit >= 4 ? 'VERY CLOSE' : '', status.warning ? '#ffb4a2' : toCss(GREEN));
   }
 
   /** Called when the Repeat button is clicked or tapped. */
@@ -550,4 +547,14 @@ class SightingPanel {
     for (const o of [this.backdrop, this.title, this.call, this.bar]) o.setVisible(on);
     if (!on) for (const card of this.cards) for (const o of [card.box, card.icon, card.place, card.key]) o.setVisible(false);
   }
+}
+
+/**
+ * Changes a text only when its words or colour really change: every change
+ * redraws the text and sends it to the graphics card again, which several
+ * HUD texts were doing every frame (slow on modest devices).
+ */
+function put(text: Phaser.GameObjects.Text, words: string, colour?: string): void {
+  if (text.text !== words) text.setText(words);
+  if (colour !== undefined && text.style.color !== colour) text.setColor(colour);
 }

@@ -4,6 +4,7 @@ import { nightOn, setNight } from '../render/night';
 import { cycleFestival, festivalLabel } from '../render/festival';
 import { cycleWeather, weatherChoice, WEATHER_ICONS, WEATHER_NAMES } from '../render/weather';
 import { titleBackdropFx, titleFrontFx } from '../render/titleFx';
+import { cycleGraphics, graphicsLabel, lightGraphics } from '../render/graphicsMode';
 import { parseSeed, type ChaseSeed } from '../../engine';
 import type { AudioManifest } from '../../engine/audio/manifest';
 import { capturedCount, isComplete, MISSION_COUNT } from '../../engine/campaign/campaign';
@@ -94,10 +95,18 @@ export class TitleScene extends Phaser.Scene {
       weather.label.setText(weatherLabel());
     }, { key: 'T', size: 18 });
     // Bellevue en fête: Carnival and Christmas decorations (by the calendar unless chosen).
-    const fete = menu.add(GAME_WIDTH / 2, top + 216, 400, 40, festivalLabel(), () => {
+    const fete = menu.add(GAME_WIDTH / 2 - 210, top + 216, 400, 40, festivalLabel(), () => {
       cycleFestival();
       fete.label.setText(festivalLabel());
     }, { size: 17 });
+    // Light graphics for slow computers and phones (AUTO switches by itself when a chase runs slowly).
+    const gfx = menu.add(GAME_WIDTH / 2 + 210, top + 216, 400, 40, `${graphicsLabel()} (L)`, () => {
+      const before = lightGraphics();
+      cycleGraphics();
+      gfx.label.setText(`${graphicsLabel()} (L)`);
+      // Edge smoothing and the title effects are set when the game loads.
+      if (lightGraphics() !== before) window.location.reload();
+    }, { key: 'L', size: 17 });
   }
 
   private replay(seed: ChaseSeed): void {

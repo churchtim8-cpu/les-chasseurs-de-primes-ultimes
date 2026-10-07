@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { decorations } from './graphicsMode';
 
 /**
  * Drifting round corners (drawing only: the chase's movement is unchanged).
@@ -86,7 +87,7 @@ export class DriftEffects {
   ) {
     this.style = SMOKE_STYLES[own.style] ?? SMOKE_STYLES.CLASSIQUE!;
     this.marks = scene.add.graphics().setDepth(27);
-    for (let i = 0; i < 90; i++) this.puffs.push(scene.add.circle(0, 0, 5, 0xd2d2d2).setAlpha(0).setDepth(29));
+    for (let i = 0; i < decorations(90); i++) this.puffs.push(scene.add.circle(0, 0, 5, 0xd2d2d2).setAlpha(0).setDepth(29));
   }
 
   /** The objects to keep off the interface camera. */
@@ -170,8 +171,9 @@ export class DriftEffects {
     this.lastWheels.set(id, wheels);
     const clock = (this.puffClocks.get(id) ?? 0) + dt;
     let left = clock;
-    while (left >= DRIFT.puffEvery / smoke.rate) {
-      left -= DRIFT.puffEvery / smoke.rate;
+    const every = DRIFT.puffEvery / smoke.rate / (decorations(100) / 100);
+    while (left >= every) {
+      left -= every;
       const w = wheels[this.nextPuff++ % 2]!;
       const ownTone = mine ? this.style.tones[turn() % this.style.tones.length]! : null;
       if (smoke.hangs) {

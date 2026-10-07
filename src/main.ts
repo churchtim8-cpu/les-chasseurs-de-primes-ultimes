@@ -21,6 +21,10 @@ import { ResultsScene } from './game/scenes/ResultsScene';
 import { DailyScene } from './game/scenes/DailyScene';
 import { OfficersScene } from './game/scenes/OfficersScene';
 import { TitleScene } from './game/scenes/TitleScene';
+import { installLeanShapes } from './game/render/leanShapes';
+import { lightGraphics } from './game/render/graphicsMode';
+
+installLeanShapes();
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
@@ -35,6 +39,8 @@ const game = new Phaser.Game({
   // Every sound is made by our own Web Audio mixer (ScannerAudio); Phaser's
   // sound system would only run a second, silent audio engine alongside it.
   audio: { noAudio: true },
+  // Edge smoothing costs a weak graphics chip the most; light graphics turn it off.
+  render: { antialiasGL: !lightGraphics() },
   // Boot (the loading screen) runs first, then the title screen.
   scene: [BootScene, TitleScene, CampaignScene, BriefingScene, PracticeScene, ChaseScene, EscapeScene, ResultsScene, DailyScene, OfficersScene, CaseClosedScene, CommissariatScene, WantedScene, GarageScene, PauseScene, CommandsScene, FullscreenScene, DebugOverlayScene],
 });

@@ -182,6 +182,11 @@ export class ChaseMusic {
       this.connect(output.ctx, output.bus);
     }
     const { ctx, filter } = this.out!;
+    // Switched off: make no notes at all (silent notes still cost a slow computer work).
+    if (this.muted) {
+      this.nextTime = ctx.currentTime + 0.05;
+      return;
+    }
     glide(filter.frequency, 1600 + this.intensity * 5000, ctx.currentTime, 0.5);
     // After a long stall (a hidden tab), skip the missed beats rather than play them all at once.
     if (this.nextTime < ctx.currentTime) this.nextTime = ctx.currentTime + 0.05;
