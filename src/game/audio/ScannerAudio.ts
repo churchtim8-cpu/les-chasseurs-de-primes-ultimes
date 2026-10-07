@@ -42,6 +42,8 @@ const MIX = {
    * calls are not held up behind it.
    */
   waitSpareSeconds: 1.5,
+  /** A call made while the sound is still waking up (just after the pause menu) waits this long for it. */
+  wakeSeconds: 2,
   /** A call that is cut off fades out over this long, without a click. */
   cutSeconds: 0.06,
   /**
@@ -420,6 +422,9 @@ export class ScannerAudio {
 
   private async sequence(lines: SpokenLine[], ticket: number): Promise<void> {
     const ctx = this.ctx;
+    // Just back from the pause menu (RESTART, for example), the sound is still waking up:
+    // wait a moment for it, or the restarted chase's opening call was skipped.
+    if (ctx && ctx.state === 'suspended' && !this.paused && !this.hidden) await this.wakeUp(ctx);
     if (!ctx || !this.buses || ctx.state !== 'running') {
       this.report.callsSkipped++;
       return;
@@ -464,6 +469,23 @@ export class ScannerAudio {
     if (ticket > this.cancelled) this.fades = [];
     // The music comes back up only when no other call follows straight on (no pumping between calls).
     if (ticket > this.cancelled && this.waiting === 0) this.duck(false);
+  }
+
+  /** Ask a suspended sound system to run again and wait (up to `MIX.wakeSeconds`) until it does. */
+  private wakeUp(ctx: AudioContext): Promise<void> {
+    return new Promise<void>((resolve) => {
+      const done = () => {
+        window.clearTimeout(timer);
+        ctx.removeEventListener('statechange', changed);
+        resolve();
+      };
+      const changed = () => {
+        if (ctx.state !== 'suspended') done();
+      };
+      const timer = window.setTimeout(done, MIX.wakeSeconds * 1000);
+      ctx.addEventListener('statechange', changed);
+      ctx.resume().catch(() => undefined);
+    });
   }
 
   /**

@@ -1,6 +1,6 @@
 import { D2, D3, D4, note, Synth } from './synth';
 import type { ScannerAudio } from './ScannerAudio';
-import { Lookahead } from './lookahead';
+import { endLoop, playLoop, renderLoop } from './loopRender';
 
 /**
  * Dramatic title theme for the menus (title, case folder, briefing,
@@ -13,8 +13,6 @@ import { Lookahead } from './lookahead';
 
 const BPM = 96;
 const LEVEL = 0.3;
-/** Notes are booked this far ahead on the audio clock (s), so a busy computer does not make them late. */
-const LOOKAHEAD = 0.6;
 const MUTE_KEY = 'bellevue.music';
 
 const n = null;
@@ -34,16 +32,38 @@ const MELODY: (number | null)[][] = [
 ];
 const STABS = [0, 3, 6];
 
+/** Bars in the loop and notes still ringing past its end (s), folded back onto its start. */
+const LOOP_BARS = 8;
+const TAIL = 2.5;
+
+let recording: Promise<AudioBuffer> | null = null;
+let recorded: AudioBuffer | null = null;
+
 export class MenuMusic {
   private timer: number | null = null;
   private synth: Synth | null = null;
-  private gain: GainNode | null = null;
   private step = 0;
   private bar = 0;
-  private nextTime = 0;
-  private readonly ahead = new Lookahead(LOOKAHEAD);
+  /** The recorded loop playing on the live sound system. */
+  private live: { ctx: BaseAudioContext; gain: GainNode; loop: { source: AudioBufferSourceNode; gain: GainNode } | null } | null = null;
 
   constructor(private readonly audio: ScannerAudio) {}
+
+  /** Record the loop once per visit (see loopRender): ready a moment after the game opens. */
+  static prepare(): Promise<AudioBuffer> {
+    recording ??= renderLoop((LOOP_BARS * 4 * 60) / BPM, TAIL, (ctx, out) => {
+      const music = new MenuMusic(null as unknown as ScannerAudio);
+      music.synth = new Synth(ctx, out);
+      let t = 0;
+      for (let k = 0; k < LOOP_BARS * 16; k++) {
+        music.playStep(t);
+        t += 60 / BPM / 4;
+        music.step = (music.step + 1) % 16;
+        if (music.step === 0) music.bar = (music.bar + 1) % 8;
+      }
+    }).then((loop) => (recorded = loop));
+    return recording;
+  }
 
   static get muted(): boolean {
     try {
@@ -61,19 +81,20 @@ export class MenuMusic {
   /** Start (or keep playing); it begins as soon as the browser allows sound. */
   start(): void {
     if (this.timer !== null) return;
-    this.timer = window.setInterval(() => this.tick(), 30);
+    this.timer = window.setInterval(() => this.tick(), 100);
+    this.tick();
   }
 
   stop(fade = 0.4): void {
     if (this.timer !== null) window.clearInterval(this.timer);
     this.timer = null;
-    if (this.gain && this.synth) {
-      const old = this.gain;
-      old.gain.setTargetAtTime(0, this.synth.ctx.currentTime, fade / 3);
-      window.setTimeout(() => old.disconnect(), fade * 1000 + 600);
+    if (this.live) {
+      const { ctx, gain, loop } = this.live;
+      gain.gain.setTargetAtTime(0, ctx.currentTime, fade / 3);
+      if (loop) endLoop(ctx, loop, fade + 0.5);
+      window.setTimeout(() => gain.disconnect(), fade * 1000 + 600);
     }
-    this.gain = null;
-    this.synth = null;
+    this.live = null;
   }
 
   /** B on a menu screen: turn music off or on (remembered with the chase music's choice). */
@@ -84,44 +105,32 @@ export class MenuMusic {
     } catch {
       // storage blocked
     }
-    if (this.gain && this.synth) this.gain.gain.setTargetAtTime(muted ? 0 : LEVEL, this.synth.ctx.currentTime, 0.1);
+    if (this.live) this.live.gain.gain.setTargetAtTime(muted ? 0 : LEVEL, this.live.ctx.currentTime, 0.1);
   }
 
   private tick(): void {
     // The sound system was rebuilt (see ScannerAudio's watchdog): start again on the new one.
-    if (this.synth && !this.audio.owns(this.synth.ctx)) {
-      this.synth = null;
-      this.gain = null;
-    }
-    if (!this.synth) {
+    if (this.live && !this.audio.owns(this.live.ctx)) this.live = null;
+    if (!this.live) {
       const output = this.audio.musicOutput();
       if (!output) return;
-      this.gain = output.ctx.createGain();
-      this.gain.gain.value = MenuMusic.muted ? 0 : LEVEL;
-      this.gain.connect(output.bus);
-      this.synth = new Synth(output.ctx, this.gain);
-      this.step = 0;
-      this.bar = 0;
-      this.nextTime = output.ctx.currentTime + 0.1;
-      // A big opening hit.
-      this.synth.timpani(this.nextTime, D2, 0.7);
-      this.synth.noiseHit(this.nextTime, 0.16, 1.8, 'highpass', 4000);
+      const gain = output.ctx.createGain();
+      gain.gain.value = MenuMusic.muted ? 0 : LEVEL;
+      gain.connect(output.bus);
+      this.live = { ctx: output.ctx, gain, loop: null };
     }
-    const synth = this.synth;
-    // Switched off: make no notes at all (silent notes still cost a slow computer work).
+    const live = this.live;
+    // Switched off: nothing plays at all.
     if (MenuMusic.muted) {
-      this.nextTime = synth.ctx.currentTime + 0.05;
+      if (live.loop) endLoop(live.ctx, live.loop);
+      live.loop = null;
       return;
     }
-    // After a long stall (a hidden tab), skip the missed beats rather than play them all at once.
-    if (this.nextTime < synth.ctx.currentTime) this.nextTime = synth.ctx.currentTime + 0.05;
-    const ahead = this.ahead.next();
-    while (this.nextTime < synth.ctx.currentTime + ahead) {
-      this.playStep(this.nextTime);
-      this.nextTime += 60 / BPM / 4;
-      this.step = (this.step + 1) % 16;
-      if (this.step === 0) this.bar = (this.bar + 1) % 8;
+    if (!recorded) {
+      void MenuMusic.prepare();
+      return;
     }
+    live.loop ??= playLoop(live.ctx, recorded, live.gain, live.ctx.currentTime + 0.05);
   }
 
   private playStep(t: number): void {
