@@ -115,7 +115,7 @@ export function drawTown(scene: Phaser.Scene, graph: TownGraph): TownLayers {
     else LANDMARKS[loc.id]?.(g, loc.footprint, sign);
   }
   g.fillStyle(SUNLIGHT.colour, SUNLIGHT.alpha).fillRect(0, 0, map.width, map.height);
-  bake(scene, g, map.width, map.height);
+  bake(scene, g, map.width, map.height, `${map.id}:${canva ? 'canva' : 'drawn'}`);
   if (canva) {
     placeCanvaArt(scene, graph);
     // The real paths across the park and the square stay visible on top of their pictures.
@@ -199,9 +199,12 @@ const BAKE_TILE = 512;
  * Draws the finished town into a few image tiles once, so the thousands of
  * shapes are not redrawn every frame (which slowed the game on modest devices).
  */
-function bake(scene: Phaser.Scene, g: Phaser.GameObjects.Graphics, width: number, height: number) {
-  bakeLayer(scene, g, width, height, 'town', {});
+function bake(scene: Phaser.Scene, g: Phaser.GameObjects.Graphics, width: number, height: number, signature: string) {
+  bakeLayer(scene, g, width, height, 'town', { reuse: signature });
 }
+
+/** What each baked layer's tiles show now, for layers that can be kept from one chase to the next. */
+const bakedAs = new Map<string, string>();
 
 /**
  * Bakes any drawn layer into image tiles the same way (the night's lamps and
@@ -213,26 +216,34 @@ export function bakeLayer(
   width: number,
   height: number,
   name: string,
-  options: { depth?: number; blendMode?: Phaser.BlendModes },
+  options: { depth?: number; blendMode?: Phaser.BlendModes; reuse?: string },
 ): void {
+  // The town is the same every chase: baking it took several seconds on a slow computer, with
+  // the game frozen, so its tiles are kept and reused while they still show the same thing.
+  const keep = options.reuse !== undefined && bakedAs.get(name) === options.reuse;
+  bakedAs.delete(name);
   g.setScale(BAKE_SCALE);
   for (let y0 = 0; y0 < height; y0 += BAKE_TILE) {
     for (let x0 = 0; x0 < width; x0 += BAKE_TILE) {
       const key = `${name}-${x0}-${y0}`;
-      if (scene.textures.exists(key)) scene.textures.remove(key);
+      const reuse = keep && scene.textures.exists(key);
+      if (!reuse && scene.textures.exists(key)) scene.textures.remove(key);
       // Tiles overlap by a metre so no hairline seam shows between them.
       const left = Math.max(0, x0 - 1);
       const top = Math.max(0, y0 - 1);
       const w = Math.min(x0 + BAKE_TILE + 1, width) - left;
       const h = Math.min(y0 + BAKE_TILE + 1, height) - top;
-      const tile = scene.textures.addDynamicTexture(key, w * BAKE_SCALE, h * BAKE_SCALE);
-      if (!tile) continue;
-      tile.draw(g, -left * BAKE_SCALE, -top * BAKE_SCALE).render();
+      if (!reuse) {
+        const tile = scene.textures.addDynamicTexture(key, w * BAKE_SCALE, h * BAKE_SCALE);
+        if (!tile) continue;
+        tile.draw(g, -left * BAKE_SCALE, -top * BAKE_SCALE).render();
+      }
       const image = scene.add.image(left, top, key).setOrigin(0).setScale(1 / BAKE_SCALE);
       if (options.depth !== undefined) image.setDepth(options.depth);
       if (options.blendMode !== undefined) image.setBlendMode(options.blendMode);
     }
   }
+  if (options.reuse !== undefined) bakedAs.set(name, options.reuse);
   g.destroy();
 }
 

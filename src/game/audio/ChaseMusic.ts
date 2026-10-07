@@ -1,7 +1,7 @@
 import type { TravelMode } from '../../engine/world/graph';
 import type { ScannerAudio } from './ScannerAudio';
 import { glide } from './synth';
-import { Lookahead } from './lookahead';
+import { LOOP_RATE, endLoop, playLoop, renderLoop } from './loopRender';
 
 /**
  * Dramatic chase music, synthesised live with Web Audio (no files, no
@@ -71,13 +71,25 @@ const GROOVES: Record<TravelMode, Groove[]> = {
 
 /** Overall music level (the French always comes first). */
 const LEVEL = 0.32;
-/**
- * Notes are booked this far ahead on the audio clock (s). A slow school
- * computer can leave the timer waiting several tenths of a second between
- * ticks, so a short look-ahead made notes land late and the music stutter.
- */
-const LOOKAHEAD = 0.6;
 const MUTE_KEY = 'bellevue.music';
+
+type LoopName = 'CAR' | 'CAR_HOT' | 'FOOT';
+/** Notes still ringing past a loop's end (s), folded back onto its start. */
+const TAIL = 1.6;
+/** Bars in each recorded loop: both grooves of the mode, two bars each, a crash at the start. */
+const LOOP_BARS = 4;
+/** The extra off-beat hats join in when the suspect is this close (intensity). */
+const HOT = 0.6;
+
+let recording: Promise<Record<LoopName, AudioBuffer>> | null = null;
+let recorded: Record<LoopName, AudioBuffer> | null = null;
+
+interface LiveLoop {
+  mode: TravelMode;
+  main: { source: AudioBufferSourceNode; gain: GainNode };
+  /** CAR only: the extra off-beat hats, in step with the main loop, faded in when the suspect is close. */
+  hot: { source: AudioBufferSourceNode; gain: GainNode } | null;
+}
 
 export class ChaseMusic {
   private mode: TravelMode = 'CAR';
@@ -86,8 +98,12 @@ export class ChaseMusic {
   private step = 0;
   private bar = 0;
   private nextTime = 0;
-  private readonly ahead = new Lookahead(LOOKAHEAD);
-  private out: { ctx: BaseAudioContext; gain: GainNode; filter: BiquadFilterNode; noise: AudioBuffer } | null = null;
+  /** Recording only the extra hats a close suspect adds (see `HOT`). */
+  private extrasOnly = false;
+  /** Where notes go while a loop is being recorded. */
+  private out: { ctx: BaseAudioContext; filter: AudioNode; noise: AudioBuffer } | null = null;
+  /** The recorded loops playing on the live sound system. */
+  private live: { ctx: BaseAudioContext; gain: GainNode; filter: BiquadFilterNode; loop: LiveLoop | null } | null = null;
   private muted: boolean;
 
   constructor(private readonly audio: ScannerAudio | null) {
@@ -100,34 +116,60 @@ export class ChaseMusic {
     this.muted = stored === 'off' || new URLSearchParams(window.location.search).get('music') === '0';
   }
 
+  /** Record the chase loops (once per visit), ready before the first chase. */
+  static prepare(): Promise<Record<LoopName, AudioBuffer>> {
+    recording ??= (async () => {
+      const loops = {
+        CAR: await ChaseMusic.record('CAR', false),
+        CAR_HOT: await ChaseMusic.record('CAR', true),
+        FOOT: await ChaseMusic.record('FOOT', false),
+      };
+      recorded = loops;
+      return loops;
+    })();
+    return recording;
+  }
+
+  private static record(mode: TravelMode, hot: boolean): Promise<AudioBuffer> {
+    const seconds = (LOOP_BARS * 4 * 60) / GROOVES[mode][0]!.bpm;
+    return renderLoop(seconds, TAIL, (ctx, out) => {
+      const music = new ChaseMusic(null);
+      music.mode = mode;
+      music.intensity = hot ? 1 : 0;
+      music.extrasOnly = hot;
+      const noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+      const data = noise.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+      music.out = { ctx, filter: out, noise };
+      music.nextTime = 0;
+      music.schedule(seconds - 1e-6);
+    });
+  }
+
   get isMuted(): boolean {
     return this.muted;
   }
 
   start(): void {
     if (this.timer !== null) return;
-    this.timer = window.setInterval(() => this.tick(), 25);
+    this.timer = window.setInterval(() => this.tick(), 50);
   }
 
   stop(): void {
     if (this.timer !== null) window.clearInterval(this.timer);
     this.timer = null;
-    if (this.out) {
-      const { ctx, gain } = this.out;
+    if (this.live) {
+      const { ctx, gain, loop } = this.live;
       gain.gain.setTargetAtTime(0, ctx.currentTime, 0.15);
-      const old = gain;
-      window.setTimeout(() => old.disconnect(), 800);
+      if (loop) this.endLoop(loop, 0.8);
+      window.setTimeout(() => gain.disconnect(), 1200);
     }
-    this.out = null;
+    this.live = null;
   }
 
   setMode(mode: TravelMode): void {
-    if (mode === this.mode) return;
+    // The new mode's loop starts from its first bar, with its crash, on the next tick.
     this.mode = mode;
-    // Start the new groove on the next bar, with a crash to mark the change.
-    this.step = 0;
-    this.bar = 0;
-    if (this.out) this.crash(this.nextTime);
   }
 
   setIntensity(value: number): void {
@@ -141,59 +183,76 @@ export class ChaseMusic {
     } catch {
       // storage blocked: the choice lasts this visit only
     }
-    if (this.out) this.out.gain.gain.setTargetAtTime(this.muted ? 0 : LEVEL, this.out.ctx.currentTime, 0.1);
+    if (this.live) this.live.gain.gain.setTargetAtTime(this.muted ? 0 : LEVEL, this.live.ctx.currentTime, 0.1);
     return this.muted;
   }
 
   /** Render `seconds` of one groove without playing it (to listen to or check the music offline). */
   static async render(mode: TravelMode, seconds: number, intensity = 0.5): Promise<AudioBuffer> {
-    const ctx = new OfflineAudioContext(2, Math.ceil(44100 * seconds), 44100);
+    const ctx = new OfflineAudioContext(2, Math.ceil(LOOP_RATE * seconds), LOOP_RATE);
     const music = new ChaseMusic(null);
-    music.muted = false;
     music.mode = mode;
     music.intensity = intensity;
-    music.connect(ctx, ctx.destination);
+    const noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+    const data = noise.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    music.out = { ctx, filter: ctx.destination, noise };
+    music.nextTime = 0;
     music.schedule(seconds);
     return ctx.startRendering();
   }
 
-  private connect(ctx: BaseAudioContext, bus: AudioNode): void {
-    const gain = ctx.createGain();
-    gain.gain.value = 0;
-    gain.gain.setTargetAtTime(this.muted ? 0 : LEVEL, ctx.currentTime, 0.4);
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.value = 1600 + this.intensity * 5000;
-    filter.connect(gain).connect(bus);
-    const frames = ctx.sampleRate;
-    const noise = ctx.createBuffer(1, frames, ctx.sampleRate);
-    const data = noise.getChannelData(0);
-    for (let i = 0; i < frames; i++) data[i] = Math.random() * 2 - 1;
-    this.out = { ctx, gain, filter, noise };
-    this.nextTime = ctx.currentTime + 0.1;
-  }
-
   private tick(): void {
     // The sound system was rebuilt (see ScannerAudio's watchdog): start again on the new one.
-    if (this.out && this.audio && !this.audio.owns(this.out.ctx)) this.out = null;
-    if (!this.out) {
+    if (this.live && this.audio && !this.audio.owns(this.live.ctx)) this.live = null;
+    if (!this.live) {
       const output = this.audio?.musicOutput();
       if (!output) return;
-      this.connect(output.ctx, output.bus);
+      const { ctx, bus } = output;
+      const gain = ctx.createGain();
+      gain.gain.value = 0;
+      gain.gain.setTargetAtTime(this.muted ? 0 : LEVEL, ctx.currentTime, 0.4);
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 1600 + this.intensity * 5000;
+      filter.connect(gain).connect(bus);
+      this.live = { ctx, gain, filter, loop: null };
     }
-    const { ctx, filter } = this.out!;
-    // Switched off: make no notes at all (silent notes still cost a slow computer work).
+    const live = this.live;
+    const now = live.ctx.currentTime;
+    glide(live.filter.frequency, 1600 + this.intensity * 5000, now, 0.5);
+    // Switched off: nothing plays at all.
     if (this.muted) {
-      this.nextTime = ctx.currentTime + 0.05;
+      if (live.loop) this.endLoop(live.loop);
+      live.loop = null;
       return;
     }
-    glide(filter.frequency, 1600 + this.intensity * 5000, ctx.currentTime, 0.5);
-    // After a long stall (a hidden tab), skip the missed beats rather than play them all at once.
-    if (this.nextTime < ctx.currentTime) this.nextTime = ctx.currentTime + 0.05;
-    this.schedule(ctx.currentTime + this.ahead.next());
+    if (!recorded) {
+      void ChaseMusic.prepare();
+      return;
+    }
+    if (live.loop?.mode !== this.mode) {
+      if (live.loop) this.endLoop(live.loop);
+      const when = now + 0.05;
+      const main = playLoop(live.ctx, this.mode === 'CAR' ? recorded.CAR : recorded.FOOT, live.filter, when);
+      const hot = this.mode === 'CAR' ? playLoop(live.ctx, recorded.CAR_HOT, live.filter, when) : null;
+      if (hot) hot.gain.gain.value = this.intensity > HOT ? 1 : 0;
+      live.loop = { mode: this.mode, main, hot };
+    }
+    const loop = live.loop!;
+    if (loop.hot) {
+      // Closing in brings in the extra hats.
+      glide(loop.hot.gain.gain, this.intensity > HOT ? 1 : 0, now, 0.15);
+    }
   }
 
-  /** Schedule every step that starts before `until` (seconds on the audio clock). */
+  private endLoop(loop: LiveLoop, fade = 0.08): void {
+    if (!this.live) return;
+    endLoop(this.live.ctx, loop.main, fade);
+    if (loop.hot) endLoop(this.live.ctx, loop.hot, fade);
+  }
+
+  /** Schedule every step that starts before `until` (seconds on the recording's clock). */
   private schedule(until: number): void {
     while (this.nextTime < until) {
       this.playStep(this.nextTime);
@@ -213,9 +272,13 @@ export class ChaseMusic {
     const g = this.groove();
     const s = this.step;
     const foot = this.mode === 'FOOT';
+    const extraHats = this.intensity > HOT && !foot;
+    if (this.extrasOnly) {
+      if (extraHats && s % 2 === 1 && !g.hat[s]) this.hat(t, 0.05);
+      return;
+    }
     if (g.kick[s]) this.kick(t, foot ? 0.9 : 1);
     if (g.snare[s]) this.snare(t);
-    const extraHats = this.intensity > 0.6 && !foot;
     if (g.hat[s] || (extraHats && s % 2 === 1)) this.hat(t, foot ? 0.05 : s % 4 === 0 ? 0.09 : 0.05);
     const bass = g.bass[s];
     if (bass !== null && bass !== undefined) this.bass(t, 73.42 * 2 ** (bass / 12), foot ? 0.5 : 0.11);
