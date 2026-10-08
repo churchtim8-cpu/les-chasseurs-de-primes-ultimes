@@ -3,6 +3,7 @@ import { jingles, menuMusic } from '../audio/Jingles';
 import { OFFICERS } from '../../engine/campaign/officers';
 import { nextRank, rankFor } from '../../engine/campaign/profile';
 import { FONT_FAMILY, PALETTE, toCss } from '../palette';
+import { picture } from '../pictures';
 
 /** Screen pictures made in Canva for M8 (public/images/m8). */
 export const SCREEN_PICTURES = {
@@ -31,15 +32,15 @@ export const officerPictureKey = (id: string) => `m8-officer-${id}`;
 export function preloadScreenPictures(scene: Phaser.Scene, suspects: readonly string[]): void {
   const base = `${import.meta.env.BASE_URL}images/m8/`;
   for (const [key, file] of Object.entries(SCREEN_FILES)) {
-    if (!scene.textures.exists(key)) scene.load.image(key, base + file);
+    if (!scene.textures.exists(key)) scene.load.image(key, picture(base + file));
   }
-  for (const picture of suspects) {
-    const key = suspectPictureKey(picture);
-    if (!scene.textures.exists(key)) scene.load.image(key, `${base}suspect-${picture}.jpg`);
+  for (const name of suspects) {
+    const key = suspectPictureKey(name);
+    if (!scene.textures.exists(key)) scene.load.image(key, picture(`${base}suspect-${name}.jpg`));
   }
   for (const officer of OFFICERS) {
     const key = officerPictureKey(officer.id);
-    if (!scene.textures.exists(key)) scene.load.image(key, `${base}officer-${officer.id}.jpg`);
+    if (!scene.textures.exists(key)) scene.load.image(key, picture(`${base}officer-${officer.id}.jpg`));
   }
 }
 

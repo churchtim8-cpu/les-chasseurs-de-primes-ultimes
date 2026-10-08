@@ -5,6 +5,7 @@ import { preloadCanvaArt } from '../render/canvaArt';
 import { FONT_FAMILY, PALETTE, toCss } from '../palette';
 import { TITLE_PICTURE } from '../layout';
 import { backdrop, preloadScreenPictures } from '../ui/ui';
+import { picture } from '../pictures';
 
 /**
  * Loading screen: shows the title picture with a progress bar while
@@ -20,7 +21,7 @@ export class BootScene extends Phaser.Scene {
   }
 
   preload(): void {
-    this.load.image(TITLE_PICTURE, `${import.meta.env.BASE_URL}images/title.jpg`);
+    this.load.image(TITLE_PICTURE, picture(`${import.meta.env.BASE_URL}images/title.jpg`));
   }
 
   create(): void {
