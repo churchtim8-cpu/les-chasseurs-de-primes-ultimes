@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import type { TownGraph } from '../../engine/world/graph';
 import type { MapLocation, Rect } from '../../engine/world/types';
 import { SHADOW, type G } from './art';
+import { picture } from '../pictures';
 
 /**
  * The town's buildings as straight-down pictures made in Canva. Each picture
@@ -75,7 +76,7 @@ export const CAR_PICTURES = { CAR: 'canva-car', VAN: 'canva-van' } as const;
 export function preloadCanvaArt(scene: Phaser.Scene): void {
   if (!canvaLookOn()) return;
   for (const file of [...Object.values(LANDMARK_PICTURES), ...HOUSE_PICTURES]) {
-    if (!scene.textures.exists(key(file))) scene.load.image(key(file), `${import.meta.env.BASE_URL}images/canva/${file}`);
+    if (!scene.textures.exists(key(file))) scene.load.image(key(file), picture(`${import.meta.env.BASE_URL}images/canva/${file}`));
   }
   for (const [file, texture] of [['car.png', CAR_PICTURES.CAR], ['van.png', CAR_PICTURES.VAN]] as const) {
     if (!scene.textures.exists(texture)) scene.load.image(texture, `${import.meta.env.BASE_URL}images/cars/${file}`);
