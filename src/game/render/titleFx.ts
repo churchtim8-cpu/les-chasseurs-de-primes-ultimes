@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { lightGraphics } from './graphicsMode';
 import { GAME_HEIGHT, GAME_WIDTH } from '../layout';
 
 /**
@@ -25,9 +24,9 @@ export const TITLE_FX = {
   pulse: { scale: 1.03, period: 1100 },
 } as const;
 
+// Light graphics keep all of this: it is a handful of shapes on a screen
+// with nothing else moving, so even a slow laptop draws it easily.
 const reducedMotion = (): boolean => {
-  // Light graphics keep the title screen still too.
-  if (lightGraphics()) return true;
   try {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   } catch {
