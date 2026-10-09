@@ -2,7 +2,7 @@
  * Light graphics for slow computers and phones. FULL draws everything; LIGHT
  * turns off edge smoothing (the biggest cost on a weak graphics chip) and
  * thins out decoration: fewer walkers, swimmers and butterflies, less tyre
- * smoke, a still title screen. AUTO (the default) starts in full and
+ * smoke. The title screen keeps its flashing lights. AUTO (the default) starts in full and
  * switches this device to light, for good, once a chase runs slowly for a
  * while. Gameplay and the French are identical in both.
  *
